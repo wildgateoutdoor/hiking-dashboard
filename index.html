@@ -49,32 +49,25 @@
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .app{max-width:1120px;margin:0 auto;padding:28px 24px 60px}
 
-/* Header */
 .hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
 .hdr h1{font-family:var(--font-d);font-size:26px;font-weight:700;letter-spacing:-0.01em;color:var(--text);line-height:1.2}
 .hdr-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
 .hdr-btns{display:flex;gap:8px}
 
-/* Stats */
 .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .stat{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r);font-size:13px;font-weight:500;color:var(--text-2);box-shadow:var(--shadow-sm)}
 .stat b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .stat--accent b{color:var(--accent)}.stat--warn b{color:var(--warn)}.stat--red b{color:var(--red)}.stat--amber b{color:var(--amber)}
 
-/* View tabs */
 .view-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border-sub);padding-bottom:0}
 .vtab{padding:8px 16px;font:600 14px var(--font);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.vtab:hover{color:var(--text-2)}
-.vtab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.vtab:hover{color:var(--text-2)}.vtab.on{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* Actions row */
 .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
 .chip{padding:5px 12px;border-radius:20px;font-size:13px;font-weight:500;font-family:var(--font);border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:all .15s}
-.chip:hover{background:var(--surface-hover)}
-.chip.on{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}
+.chip:hover{background:var(--surface-hover)}.chip.on{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}
 
-/* Buttons */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--r);font:600 14px var(--font);cursor:pointer;border:none;transition:all .15s}
 .btn-p{background:var(--accent);color:var(--accent-on)}.btn-p:hover{background:var(--accent-hover)}
 .btn-o{background:transparent;color:var(--text-2);border:1px solid var(--border)}.btn-o:hover{background:var(--surface-hover)}
@@ -82,7 +75,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .btn-s{background:transparent;color:var(--text-muted);border:1px solid var(--border);padding:7px 10px}.btn-s:hover{background:var(--surface-hover);color:var(--text)}
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Table */
 .tbl-wrap{overflow-x:auto;border:1px solid var(--border-sub);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow)}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 thead{background:var(--surface-alt)}
@@ -92,23 +84,19 @@ th .arr{font-size:10px;margin-left:3px;opacity:.5}th.sorted .arr{opacity:1;color
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 
-/* Stars */
 .stars{display:flex;gap:2px;cursor:pointer}
 .stars svg{width:18px;height:18px;transition:transform .12s}.stars svg:hover{transform:scale(1.2)}
 .star-on{color:var(--star)}.star-off{color:var(--star-off)}
 
-/* Capacity */
 .cap{white-space:nowrap}.cap-nums{font-weight:600;font-size:14px}.cap-full{color:var(--red)}.cap-high{color:var(--amber)}
 .cap-bar{height:4px;background:var(--border-sub);border-radius:2px;margin-top:5px;min-width:80px;overflow:hidden}
 .cap-fill{height:100%;border-radius:2px;transition:width .3s}
 
-/* Reg buttons */
 .reg-row{display:flex;align-items:center;gap:6px}
 .reg-btn{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;line-height:1;padding:0;font-family:var(--font)}
 .reg-btn:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
 .reg-btn:disabled{opacity:.3;cursor:default}.reg-btn:disabled:hover{background:var(--surface);border-color:var(--border);color:var(--text-2)}
 
-/* Pills */
 .pill{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap}
 .pill-open{background:var(--accent-bg);color:var(--accent)}.pill-soon{background:var(--warn-bg);color:var(--warn)}
 .pill-today{background:var(--red-bg);color:var(--red);animation:pulse 1.5s ease infinite}
@@ -116,17 +104,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .pill-done{background:var(--surface-alt);color:var(--text-muted)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
-/* Countdown */
 .cd{font-weight:600;font-size:14px;white-space:nowrap}
 .cd-ok{color:var(--accent)}.cd-soon{color:var(--warn)}.cd-urgent{color:var(--red)}.cd-past{color:var(--text-muted)}
 
-/* Actions cell */
 .acts{display:flex;gap:4px}
 .act-btn{width:30px;height:30px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s}
 .act-btn:hover{background:var(--surface-alt);color:var(--text)}.act-btn.del:hover{background:var(--red-bg);color:var(--red)}
 .act-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Empty */
 .empty{padding:60px 20px;text-align:center;color:var(--text-muted)}
 .empty svg{width:64px;height:64px;color:var(--border);margin-bottom:16px}.empty p{font-size:15px;margin-bottom:16px}
 
@@ -136,31 +121,26 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .cal-nav h3{font-size:16px;font-weight:700}
 .cal-nav button{width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font)}
 .cal-nav button:hover{background:var(--surface-hover)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0}
-.cal-dow{padding:8px 4px;text-align:center;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;border-bottom:1px solid var(--border-sub)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-dow{padding:8px 4px;text-align:center;font-size:11px;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border-sub)}
 .cal-day{min-height:90px;padding:6px 8px;border-bottom:1px solid var(--border-sub);border-right:1px solid var(--border-sub);cursor:pointer;transition:background .12s;position:relative}
 .cal-day:nth-child(7n){border-right:none}
-.cal-day:hover{background:var(--surface-hover)}
-.cal-day.other{opacity:.35}
-.cal-day.today{background:var(--accent-bg)}
+.cal-day:hover{background:var(--surface-hover)}.cal-day.other{opacity:.35}.cal-day.today{background:var(--accent-bg)}
 .cal-num{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;margin-bottom:4px}
 .cal-today-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-on);margin:-2px}
-.cal-ev{font-size:11px;line-height:1.4;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;cursor:pointer}
+.cal-ev{font-size:11px;line-height:1.4;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
 .cal-ev-trip{background:var(--accent-bg);color:var(--accent)}
 .cal-ev-dead{background:var(--red-bg);color:var(--red)}
 .cal-ev-promo{background:var(--purple-bg);color:var(--purple)}
 .cal-ev-apply{background:var(--amber-bg);color:var(--amber)}
-.cal-more{font-size:10px;color:var(--text-muted);padding:0 5px;cursor:pointer}
-.cal-more:hover{color:var(--accent)}
-
-/* Calendar day popup */
+.cal-more{font-size:10px;color:var(--text-muted);padding:0 5px;cursor:pointer}.cal-more:hover{color:var(--accent)}
 .cal-popup{position:fixed;z-index:90;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:12px 16px;min-width:220px;max-width:320px}
 .cal-popup h4{font-size:14px;font-weight:700;margin-bottom:8px}
 .cal-popup-item{font-size:13px;padding:4px 0;border-bottom:1px solid var(--border-sub);display:flex;gap:6px;align-items:baseline}
 .cal-popup-item:last-child{border-bottom:none}
 .cal-popup-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
 
-/* Marketing section */
+/* Marketing */
 .mktg{margin-bottom:20px}
 .mktg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .mktg-header h2{font-size:16px;font-weight:700}
@@ -174,7 +154,6 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .mktg-action-apply{background:var(--amber-bg);color:var(--amber)}
 .mktg-action-done{background:var(--accent-bg);color:var(--accent)}
 .mktg-action-urgent{background:var(--red-bg);color:var(--red)}
-.mktg-empty{text-align:center;padding:20px;color:var(--text-muted);font-size:14px;background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r)}
 
 /* Modal */
 .overlay{position:fixed;inset:0;background:rgba(37,61,51,.35);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .2s}
@@ -195,21 +174,19 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .f-row textarea{resize:vertical;min-height:60px}
 .f-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .f-triple{display:grid;grid-template-columns:1fr 1fr 2fr;gap:14px}
-.f-quad{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:14px}
 .f-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:8px}
 
 /* Settings tabs */
-.stab-row{display:flex;gap:0;border-bottom:2px solid var(--border-sub);margin-bottom:16px}
-.stab{padding:8px 16px;font:600 13px var(--font);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.stab:hover{color:var(--text-2)}
-.stab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.stab-row{display:flex;gap:0;border-bottom:2px solid var(--border-sub);margin-bottom:16px;overflow-x:auto}
+.stab{padding:8px 14px;font:600 13px var(--font);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.stab:hover{color:var(--text-2)}.stab.on{color:var(--accent);border-bottom-color:var(--accent)}
 .stab-panel{display:none}.stab-panel.on{display:block}
 
-/* Deadline hint */
 .deadline-hint{font-size:12px;margin-top:4px;padding:4px 8px;background:var(--accent-bg);color:var(--accent);border-radius:4px;display:none}
 .deadline-hint.show{display:block}
+.apply-hint{font-size:12px;margin-top:4px;padding:4px 8px;background:var(--amber-bg);color:var(--amber);border-radius:4px;display:none}
+.apply-hint.show{display:block}
 
-/* Rules list */
 .rule-list{margin-bottom:20px}
 .rule-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--border-sub);border-radius:var(--r);margin-bottom:8px;background:var(--bg)}
 .rule-info{flex:1;min-width:0}.rule-label{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
@@ -219,19 +196,17 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .rule-empty{text-align:center;padding:20px;color:var(--text-muted);font-size:14px}
 .rule-divider{border:none;border-top:1px solid var(--border-sub);margin:20px 0 16px}
 
-/* Report */
 .rpt-pre{background:var(--bg);border:1px solid var(--border-sub);border-radius:var(--r);padding:16px;margin-bottom:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:380px;overflow-y:auto;font-family:var(--font)}
 .rpt-actions{display:flex;gap:10px;flex-wrap:wrap}
 .rpt-note{margin-top:16px;padding:12px 14px;background:var(--accent-bg);border-radius:var(--r);font-size:13px;color:var(--text-2);line-height:1.6}
 
-/* Toast */
 .toast{position:fixed;bottom:24px;left:50%;z-index:200;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:24px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
 .toast.on{transform:translateX(-50%) translateY(0)}
 
 @media(max-width:700px){
   .app{padding:16px 12px 40px}.hdr{flex-direction:column}.hdr h1{font-size:22px}
   .bar{flex-direction:column;align-items:stretch}
-  .f-pair,.f-triple,.f-quad{grid-template-columns:1fr}
+  .f-pair,.f-triple{grid-template-columns:1fr}
   th,td{padding:8px 10px;font-size:13px}
   .cal-day{min-height:60px;padding:4px}.cal-ev{font-size:10px}
   .mktg-cards{grid-template-columns:1fr}
@@ -240,10 +215,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 
 <div class="app">
   <div class="hdr">
-    <div>
-      <h1>登山活動管理</h1>
-      <div class="hdr-sub" id="date-line"></div>
-    </div>
+    <div><h1>登山活動管理</h1><div class="hdr-sub" id="date-line"></div></div>
     <div class="hdr-btns">
       <button class="btn btn-s" onclick="openSettings()" title="規則設定">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -262,16 +234,13 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
     <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
   </div>
 
-  <!-- Marketing priorities -->
   <div class="mktg" id="mktg-section"></div>
 
-  <!-- View tabs -->
   <div class="view-tabs">
     <button class="vtab on" id="vtab-list" onclick="setView('list')">活動列表</button>
     <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
   </div>
 
-  <!-- List view -->
   <div id="view-list">
     <div class="bar">
       <div class="filters" id="filters"></div>
@@ -293,7 +262,6 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
     </div>
   </div>
 
-  <!-- Calendar view -->
   <div id="view-calendar" style="display:none">
     <div class="cal-wrap">
       <div class="cal-nav">
@@ -306,16 +274,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
   </div>
 </div>
 
-<!-- Day popup -->
 <div class="cal-popup" id="cal-popup" style="display:none"></div>
 
 <!-- Trip modal -->
 <div class="overlay" id="ov-trip">
   <div class="modal">
-    <div class="modal-h">
-      <h2 id="m-title">新增活動</h2>
-      <button class="close-btn" onclick="closeTrip()">&times;</button>
-    </div>
+    <div class="modal-h"><h2 id="m-title">新增活動</h2><button class="close-btn" onclick="closeTrip()">&times;</button></div>
     <div class="modal-body">
       <form id="trip-form" onsubmit="saveTrip(event)">
         <div class="f-row">
@@ -323,30 +287,20 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
           <input id="f-name" type="text" required placeholder="例：玉山主峰兩天一夜">
         </div>
         <div class="f-pair">
-          <div class="f-row">
-            <label for="f-date">出發日期</label>
-            <input id="f-date" type="date" required>
-          </div>
-          <div class="f-row">
-            <label for="f-dead">報名截止日期</label>
-            <input id="f-dead" type="date" required>
-            <div class="deadline-hint" id="deadline-hint"></div>
-          </div>
-        </div>
-        <div class="f-pair">
-          <div class="f-row">
-            <label for="f-reg">目前報名人數</label>
-            <input id="f-reg" type="number" min="0" value="0" required>
-          </div>
-          <div class="f-row">
-            <label for="f-cap">滿團人數</label>
-            <input id="f-cap" type="number" min="1" required placeholder="例：16">
-          </div>
+          <div class="f-row"><label for="f-date">出發日期</label><input id="f-date" type="date" required></div>
+          <div class="f-row"><label for="f-date-end">回程日期</label><input id="f-date-end" type="date" required></div>
         </div>
         <div class="f-row">
-          <label for="f-notes">備註（選填）</label>
-          <textarea id="f-notes" placeholder="內部備忘"></textarea>
+          <label for="f-dead">報名截止日期</label>
+          <input id="f-dead" type="date" required>
+          <div class="deadline-hint" id="deadline-hint"></div>
+          <div class="apply-hint" id="apply-hint"></div>
         </div>
+        <div class="f-pair">
+          <div class="f-row"><label for="f-reg">目前報名人數</label><input id="f-reg" type="number" min="0" value="0" required></div>
+          <div class="f-row"><label for="f-cap">滿團人數</label><input id="f-cap" type="number" min="1" required placeholder="例：16"></div>
+        </div>
+        <div class="f-row"><label for="f-notes">備註（選填）</label><textarea id="f-notes" placeholder="內部備忘"></textarea></div>
         <div class="f-actions">
           <button type="button" class="btn btn-g" onclick="closeTrip()">取消</button>
           <button type="submit" class="btn btn-p">儲存</button>
@@ -359,68 +313,50 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 <!-- Settings modal -->
 <div class="overlay" id="ov-settings">
   <div class="modal lg">
-    <div class="modal-h">
-      <h2>規則設定</h2>
-      <button class="close-btn" onclick="closeSettings()">&times;</button>
-    </div>
+    <div class="modal-h"><h2>規則設定</h2><button class="close-btn" onclick="closeSettings()">&times;</button></div>
     <div class="modal-body">
       <div class="stab-row">
-        <button class="stab on" onclick="switchSettingsTab('deadline')">截止規則</button>
-        <button class="stab" onclick="switchSettingsTab('mktg')">行銷規則</button>
+        <button class="stab on" data-tab="deadline" onclick="switchTab('deadline')">報名截止</button>
+        <button class="stab" data-tab="apply" onclick="switchTab('apply')">申請截止</button>
+        <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
       </div>
 
-      <!-- Deadline rules tab -->
       <div class="stab-panel on" id="tab-deadline">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定各路線的預設報名截止時間。新增活動時，系統會根據活動名稱自動帶入截止日期。</p>
-        <div class="rule-list" id="rule-list"></div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">消費者報名的截止時間規則。新增活動時自動帶入。</p>
+        <div class="rule-list" id="rule-list-deadline"></div>
         <hr class="rule-divider">
-        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增截止規則</h3>
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增報名截止規則</h3>
         <div class="f-triple">
-          <div class="f-row">
-            <label for="r-months">提前月數</label>
-            <select id="r-months"><option value="0">0 個月</option><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option></select>
-          </div>
-          <div class="f-row">
-            <label for="r-days">提前天數</label>
-            <input id="r-days" type="number" min="0" value="7" placeholder="天">
-          </div>
-          <div class="f-row">
-            <label for="r-names">路線名稱（逗號分隔）</label>
-            <input id="r-names" type="text" placeholder="例：合歡北峰, 石門山">
-          </div>
+          <div class="f-row"><label>提前月數</label><select id="rd-months"><option value="0">0 個月</option><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option></select></div>
+          <div class="f-row"><label>提前天數</label><input id="rd-days" type="number" min="0" value="7"></div>
+          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rd-names" type="text" placeholder="例：合歡北峰, 石門山"></div>
         </div>
-        <div class="f-actions">
-          <button type="button" class="btn btn-p" onclick="addDeadlineRule()">新增規則</button>
-        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addDeadlineRule()">新增規則</button></div>
       </div>
 
-      <!-- Marketing rules tab -->
+      <div class="stab-panel" id="tab-apply">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">入山／入園申請的截止時間規則。系統會在行銷重點中提醒申請期限。</p>
+        <div class="rule-list" id="rule-list-apply"></div>
+        <hr class="rule-divider">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增申請截止規則</h3>
+        <div class="f-triple">
+          <div class="f-row"><label>提前月數</label><select id="ra-months"><option value="-1">免申請</option><option value="0">0 個月</option><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option></select></div>
+          <div class="f-row"><label>提前天數</label><input id="ra-days" type="number" min="0" value="0"></div>
+          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="ra-names" type="text" placeholder="例：玉山, 雪山"></div>
+        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addApplyRule()">新增規則</button></div>
+      </div>
+
       <div class="stab-panel" id="tab-mktg">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定各路線的宣傳時程與入山申請期限。系統會自動計算每週行銷重點。</p>
-        <div class="rule-list" id="mktg-rule-list"></div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定各路線的宣傳起始時間。系統會自動計算本週行銷重點。</p>
+        <div class="rule-list" id="rule-list-mktg"></div>
         <hr class="rule-divider">
         <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增行銷規則</h3>
-        <div class="f-quad">
-          <div class="f-row">
-            <label for="m-promo">宣傳提前</label>
-            <select id="m-promo"><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option><option value="4">4 個月</option></select>
-          </div>
-          <div class="f-row">
-            <label for="m-apply-m">申請提前月</label>
-            <select id="m-apply-m"><option value="-1">免申請</option><option value="0">0 個月</option><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option></select>
-          </div>
-          <div class="f-row">
-            <label for="m-apply-d">申請提前天</label>
-            <input id="m-apply-d" type="number" min="0" value="0" placeholder="天">
-          </div>
-          <div class="f-row">
-            <label for="m-names">路線名稱（逗號分隔）</label>
-            <input id="m-names" type="text" placeholder="例：玉山, 雪山">
-          </div>
+        <div class="f-pair">
+          <div class="f-row"><label>提前宣傳月數</label><select id="rm-months"><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option><option value="4">4 個月</option></select></div>
+          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rm-names" type="text" placeholder="例：玉山, 雪山"></div>
         </div>
-        <div class="f-actions">
-          <button type="button" class="btn btn-p" onclick="addMktgRule()">新增規則</button>
-        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addMktgRule()">新增規則</button></div>
       </div>
     </div>
   </div>
@@ -429,21 +365,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 <!-- Report modal -->
 <div class="overlay" id="ov-rpt">
   <div class="modal lg">
-    <div class="modal-h">
-      <h2>LINE 日報預覽</h2>
-      <button class="close-btn" onclick="closeRpt()">&times;</button>
-    </div>
+    <div class="modal-h"><h2>LINE 日報預覽</h2><button class="close-btn" onclick="closeRpt()">&times;</button></div>
     <div class="modal-body">
       <div class="rpt-pre" id="rpt-text"></div>
       <div class="rpt-actions">
-        <button class="btn btn-p" onclick="copyReport()">
-          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          複製到剪貼簿
-        </button>
-        <button class="btn btn-o" onclick="downloadReport()">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          下載文字檔
-        </button>
+        <button class="btn btn-p" onclick="copyReport()"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>複製到剪貼簿</button>
+        <button class="btn btn-o" onclick="downloadReport()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下載文字檔</button>
       </div>
       <div class="rpt-note">提示：如需每天自動發送至 LINE 群組，可建立 LINE Messaging API 機器人。</div>
     </div>
@@ -453,117 +380,127 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 <div class="toast" id="toast"></div>
 
 <script>
-const DAYS = ['日','一','二','三','四','五','六'];
-const COLS = [
+const DAYS=['日','一','二','三','四','五','六'];
+const COLS=[
   {key:'promoted',label:'宣傳',sort:true},{key:'name',label:'活動名稱',sort:true},
-  {key:'date',label:'出發日期',sort:true},{key:'deadline',label:'報名截止',sort:true},
+  {key:'date',label:'日期',sort:true},{key:'deadline',label:'報名截止',sort:true},
   {key:'_cd',label:'倒數',sort:true},{key:'_cap',label:'報名狀況',sort:true},
   {key:'_status',label:'狀態',sort:false},{key:'_acts',label:'',sort:false},
 ];
-const FILTERS = [{key:'all',label:'全部'},{key:'promo',label:'重點宣傳'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'}];
+const FILTERS=[{key:'all',label:'全部'},{key:'promo',label:'重點宣傳'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'}];
 
-const DEFAULT_RULES = [
+const DEF_DEADLINE=[
   {id:'r1',months:0,days:7,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林']},
   {id:'r2',months:0,days:12,names:['郡大山']},
   {id:'r3',months:1,days:7,names:['玉山','嘉明湖','北大武','奇萊南華','眠月線']},
   {id:'r4',months:2,days:7,names:['大小霸','雪山主東']},
 ];
-
-const DEFAULT_MKTG = [
-  {id:'m1',promoMonths:1,applyMonths:-1,applyDays:0,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林']},
-  {id:'m2',promoMonths:1,applyMonths:0,applyDays:5,names:['郡大山']},
-  {id:'m3',promoMonths:2,applyMonths:1,applyDays:0,names:['玉山','嘉明湖','北大武','奇萊南華','眠月線']},
-  {id:'m4',promoMonths:3,applyMonths:2,applyDays:0,names:['大小霸','雪山主東']},
+const DEF_APPLY=[
+  {id:'a1',months:-1,days:0,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林']},
+  {id:'a2',months:0,days:5,names:['郡大山']},
+  {id:'a3',months:1,days:0,names:['玉山','嘉明湖','北大武','奇萊南華','眠月線']},
+  {id:'a4',months:2,days:0,names:['大小霸','雪山主東']},
+];
+const DEF_MKTG=[
+  {id:'m1',promoMonths:1,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林','郡大山']},
+  {id:'m2',promoMonths:2,names:['玉山','嘉明湖','北大武','奇萊南華','眠月線']},
+  {id:'m3',promoMonths:3,names:['大小霸','雪山主東']},
 ];
 
-let trips=[], rules=[], mktgRules=[];
-let db=null, dlCap=null, unsub=null, store=null;
-let editId=null, sortKey='date', sortDir='asc', filter='all';
-let viewMode='list', calYear, calMonth;
+let trips=[],deadlineRules=[],applyRules=[],mktgRules=[];
+let db=null,dlCap=null,unsub=null,store=null;
+let editId=null,sortKey='date',sortDir='asc',filter='all';
+let viewMode='list',calYear,calMonth;
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
 function parseD(s){return new Date(s+'T00:00:00')}
-function fmtDate(s){const d=parseD(s);return `${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
-function fmtShort(s){const d=parseD(s);return `${d.getMonth()+1}/${d.getDate()}`}
+function fmtDate(s){const d=parseD(s);return`${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
+function fmtShort(s){const d=parseD(s);return`${d.getMonth()+1}/${d.getDate()}`}
 function daysUntil(s){return Math.ceil((parseD(s)-today())/864e5)}
 function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
-function dateStr(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function dateStr(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function fmtRange(s,e){
+  if(!e||s===e)return fmtDate(s);
+  const ds=parseD(s),de=parseD(e);
+  if(ds.getMonth()===de.getMonth())return`${ds.getMonth()+1}/${ds.getDate()}~${de.getDate()}（${DAYS[ds.getDay()]}~${DAYS[de.getDay()]}）`;
+  return`${fmtShort(s)}~${fmtShort(e)}`;
+}
 
-// ── Deadline Rules ──
-function loadRules(){
-  try{const s=localStorage.getItem('hk-rules');if(s){rules=JSON.parse(s);return}}catch{}
-  rules=JSON.parse(JSON.stringify(DEFAULT_RULES));saveRules();
+// ── Rules: load / save / match / label ──
+function loadRulesFromLS(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}const r=JSON.parse(JSON.stringify(def));try{localStorage.setItem(key,JSON.stringify(r))}catch{}return r}
+function saveToLS(key,data){try{localStorage.setItem(key,JSON.stringify(data))}catch{}}
+
+function loadAllRules(){
+  deadlineRules=loadRulesFromLS('hk-rules',DEF_DEADLINE);
+  applyRules=loadRulesFromLS('hk-apply',DEF_APPLY);
+  mktgRules=loadRulesFromLS('hk-mktg',DEF_MKTG);
 }
-function saveRules(){try{localStorage.setItem('hk-rules',JSON.stringify(rules))}catch{}}
-function ruleLabel(r){
-  let p=[];if(r.months>0)p.push(`${r.months} 個月`);if(r.days>0)p.push(`${r.days} 天`);
-  return p.length===0?'出發當天截止':'提前 '+p.join('又 ')+' 截止';
-}
-function matchRule(name){
+
+function matchRuleIn(rules,name){
   if(!name)return null;const n=name.trim();
   for(const r of rules)for(const rn of r.names)if(n.includes(rn)||rn.includes(n))return r;
   return null;
 }
-function calcDeadline(tripDate,rule){
-  const d=parseD(tripDate);d.setMonth(d.getMonth()-rule.months);d.setDate(d.getDate()-rule.days);
-  return dateStr(d);
+
+function deadlineLabel(r){
+  let p=[];if(r.months>0)p.push(`${r.months} 個月`);if(r.days>0)p.push(`${r.days} 天`);
+  return p.length===0?'出發當天截止':'提前 '+p.join('又 ')+' 截止';
 }
-function tryAutoDeadline(){
+function applyLabel(r){
+  if(r.months<0)return'免申請';
+  let p=[];if(r.months>0)p.push(`${r.months} 個月`);if(r.days>0)p.push(`${r.days} 天`);
+  return p.length===0?'出發前申請':'提前 '+p.join('又 ')+' 申請';
+}
+function mktgLabel(r){return`提前 ${r.promoMonths} 個月宣傳`}
+
+function calcDateBefore(tripDate,months,days){
+  const d=parseD(tripDate);d.setMonth(d.getMonth()-(months||0));d.setDate(d.getDate()-(days||0));return d;
+}
+
+// ── Auto-fill in trip form ──
+function tryAutoFill(){
   const name=document.getElementById('f-name').value;
   const tripDate=document.getElementById('f-date').value;
   const deadEl=document.getElementById('f-dead');
   const hintEl=document.getElementById('deadline-hint');
-  const rule=matchRule(name);
-  if(rule&&tripDate){deadEl.value=calcDeadline(tripDate,rule);hintEl.textContent='根據規則自動設定：'+ruleLabel(rule);hintEl.classList.add('show')}
-  else{hintEl.classList.remove('show')}
+  const applyHintEl=document.getElementById('apply-hint');
+
+  const dr=matchRuleIn(deadlineRules,name);
+  if(dr&&tripDate){
+    const dl=calcDateBefore(tripDate,dr.months,dr.days);
+    deadEl.value=dateStr(dl);
+    hintEl.textContent='根據規則自動設定：'+deadlineLabel(dr);hintEl.classList.add('show');
+  }else{hintEl.classList.remove('show')}
+
+  const ar=matchRuleIn(applyRules,name);
+  if(ar&&tripDate){
+    if(ar.months<0){applyHintEl.textContent='此路線免申請';applyHintEl.classList.add('show')}
+    else{const ad=calcDateBefore(tripDate,ar.months,ar.days);applyHintEl.textContent='申請截止：'+fmtDate(dateStr(ad))+'（'+applyLabel(ar)+'）';applyHintEl.classList.add('show')}
+  }else{applyHintEl.classList.remove('show')}
 }
 
-// ── Marketing Rules ──
-function loadMktgRules(){
-  try{const s=localStorage.getItem('hk-mktg');if(s){mktgRules=JSON.parse(s);return}}catch{}
-  mktgRules=JSON.parse(JSON.stringify(DEFAULT_MKTG));saveMktgRules();
-}
-function saveMktgRules(){try{localStorage.setItem('hk-mktg',JSON.stringify(mktgRules))}catch{}}
-function mktgLabel(r){
-  let promo=`提前 ${r.promoMonths} 個月宣傳`;
-  let apply;
-  if(r.applyMonths<0){apply='免申請'}
-  else{
-    let p=[];if(r.applyMonths>0)p.push(`${r.applyMonths} 個月`);if(r.applyDays>0)p.push(`${r.applyDays} 天`);
-    apply=p.length>0?'提前 '+p.join('又 ')+' 申請':'出發前申請';
-  }
-  return promo+'，'+apply;
-}
-function matchMktgRule(name){
-  if(!name)return null;const n=name.trim();
-  for(const r of mktgRules)for(const rn of r.names)if(n.includes(rn)||rn.includes(n))return r;
-  return null;
-}
-function calcDateBefore(tripDate,months,days){
-  const d=parseD(tripDate);d.setMonth(d.getMonth()-months);d.setDate(d.getDate()-(days||0));return d;
-}
-
+// ── Marketing priorities ──
 function getMarketingItems(){
-  const now=today();
-  const items=[];
+  const now=today();const items=[];
   const future=trips.filter(t=>daysUntil(t.date)>=0);
   for(const t of future){
-    const rule=matchMktgRule(t.name);
-    if(!rule)continue;
-    const promoStart=calcDateBefore(t.date,rule.promoMonths,0);
-    const inPromoWindow=now>=promoStart&&now<=parseD(t.date);
-    let applyDeadline=null, applyDaysLeft=null;
-    if(rule.applyMonths>=0){
-      applyDeadline=calcDateBefore(t.date,rule.applyMonths,rule.applyDays);
-      applyDaysLeft=Math.ceil((applyDeadline-now)/864e5);
+    const mr=matchRuleIn(mktgRules,t.name);
+    const ar=matchRuleIn(applyRules,t.name);
+    if(!mr&&!ar)continue;
+    let inPromo=false,promoStart=null;
+    if(mr){promoStart=calcDateBefore(t.date,mr.promoMonths,0);inPromo=now>=promoStart&&now<=parseD(t.date)}
+    let applyDeadline=null,applyDaysLeft=null,noApply=false;
+    if(ar){
+      if(ar.months<0){noApply=true}
+      else{applyDeadline=calcDateBefore(t.date,ar.months,ar.days);applyDaysLeft=Math.ceil((applyDeadline-now)/864e5)}
     }
-    if(!inPromoWindow&&(!applyDeadline||applyDaysLeft<-7))continue;
-    items.push({trip:t,rule,promoStart,inPromoWindow,applyDeadline,applyDaysLeft});
+    if(!inPromo&&(!applyDeadline||applyDaysLeft<-7))continue;
+    items.push({trip:t,inPromo,applyDeadline,applyDaysLeft,noApply});
   }
   items.sort((a,b)=>{
     if(a.applyDeadline&&b.applyDeadline)return a.applyDeadline-b.applyDeadline;
-    if(a.applyDeadline)return -1;if(b.applyDeadline)return 1;
+    if(a.applyDeadline)return-1;if(b.applyDeadline)return 1;
     return parseD(a.trip.date)-parseD(b.trip.date);
   });
   return items;
@@ -575,28 +512,20 @@ function renderMktg(){
   if(items.length===0){sec.innerHTML='';return}
   let html=`<div class="mktg-header"><h2>本週行銷重點</h2></div><div class="mktg-cards">`;
   for(const it of items){
+    const dateRange=it.trip.dateEnd?`${fmtShort(it.trip.date)}~${fmtShort(it.trip.dateEnd)}`:`${fmtDate(it.trip.date)}`;
     html+=`<div class="mktg-card"><div class="mktg-card-name">${esc(it.trip.name)}</div>`;
-    html+=`<div class="mktg-card-date">${fmtDate(it.trip.date)} 出發｜${it.trip.registered}/${it.trip.capacity} 人</div>`;
+    html+=`<div class="mktg-card-date">${dateRange} 出發｜${it.trip.registered}/${it.trip.capacity} 人</div>`;
     html+=`<div class="mktg-card-actions">`;
-    if(it.inPromoWindow){
-      const promoD=Math.ceil((parseD(it.trip.date)-today())/864e5);
-      html+=`<div class="mktg-action mktg-action-promo">📣 宣傳中（出發前 ${promoD} 天）</div>`;
-    }
-    if(it.applyDeadline){
-      if(it.applyDaysLeft<0){
-        html+=`<div class="mktg-action mktg-action-done">✓ 已過申請期限</div>`;
-      }else if(it.applyDaysLeft<=7){
-        html+=`<div class="mktg-action mktg-action-urgent">⚠ 需申請（剩 ${it.applyDaysLeft} 天，${fmtShort(dateStr(it.applyDeadline))} 前）</div>`;
-      }else{
-        html+=`<div class="mktg-action mktg-action-apply">📋 ${fmtShort(dateStr(it.applyDeadline))} 前申請</div>`;
-      }
-    }else{
-      html+=`<div class="mktg-action mktg-action-done">✓ 免申請</div>`;
+    if(it.inPromo){const d=daysUntil(it.trip.date);html+=`<div class="mktg-action mktg-action-promo">📣 宣傳中（出發前 ${d} 天）</div>`}
+    if(it.noApply){html+=`<div class="mktg-action mktg-action-done">✓ 免申請</div>`}
+    else if(it.applyDeadline){
+      if(it.applyDaysLeft<0)html+=`<div class="mktg-action mktg-action-done">✓ 已過申請期限</div>`;
+      else if(it.applyDaysLeft<=7)html+=`<div class="mktg-action mktg-action-urgent">⚠ 需申請（剩 ${it.applyDaysLeft} 天，${fmtShort(dateStr(it.applyDeadline))} 前）</div>`;
+      else html+=`<div class="mktg-action mktg-action-apply">📋 ${fmtShort(dateStr(it.applyDeadline))} 前申請</div>`;
     }
     html+=`</div></div>`;
   }
-  html+=`</div>`;
-  sec.innerHTML=html;
+  sec.innerHTML=html+`</div>`;
 }
 
 // ── Calendar ──
@@ -607,19 +536,16 @@ function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCal()}
 function getEventsForDate(ds){
   const events=[];
   for(const t of trips){
-    if(t.date===ds)events.push({type:'trip',label:t.name,trip:t});
-    if(t.deadline===ds)events.push({type:'deadline',label:'截止：'+t.name,trip:t});
+    if(t.date===ds)events.push({type:'trip',label:t.name});
+    if(t.dateEnd&&t.dateEnd===ds&&t.dateEnd!==t.date)events.push({type:'trip',label:'回程：'+t.name});
+    if(t.deadline===ds)events.push({type:'deadline',label:'截止：'+t.name});
   }
   for(const t of trips){
     if(daysUntil(t.date)<0)continue;
-    const rule=matchMktgRule(t.name);
-    if(!rule)continue;
-    const promoStart=calcDateBefore(t.date,rule.promoMonths,0);
-    if(dateStr(promoStart)===ds)events.push({type:'promo',label:'開始宣傳：'+t.name,trip:t});
-    if(rule.applyMonths>=0){
-      const applyDl=calcDateBefore(t.date,rule.applyMonths,rule.applyDays);
-      if(dateStr(applyDl)===ds)events.push({type:'apply',label:'申請截止：'+t.name,trip:t});
-    }
+    const mr=matchRuleIn(mktgRules,t.name);
+    if(mr){const ps=calcDateBefore(t.date,mr.promoMonths,0);if(dateStr(ps)===ds)events.push({type:'promo',label:'開始宣傳：'+t.name})}
+    const ar=matchRuleIn(applyRules,t.name);
+    if(ar&&ar.months>=0){const ad=calcDateBefore(t.date,ar.months,ar.days);if(dateStr(ad)===ds)events.push({type:'apply',label:'申請截止：'+t.name})}
   }
   return events;
 }
@@ -629,76 +555,58 @@ function renderCal(){
   const grid=document.getElementById('cal-grid');
   const dows=['一','二','三','四','五','六','日'];
   let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
-
   const first=new Date(calYear,calMonth,1);
   let startDow=first.getDay()-1;if(startDow<0)startDow=6;
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const prevMonthDays=new Date(calYear,calMonth,0).getDate();
+  const dim=new Date(calYear,calMonth+1,0).getDate();
+  const prevDim=new Date(calYear,calMonth,0).getDate();
   const todayStr=dateStr(today());
 
   for(let i=0;i<startDow;i++){
-    const d=prevMonthDays-startDow+1+i;
-    const pm=calMonth===0?12:calMonth;
-    const py=calMonth===0?calYear-1:calYear;
+    const d=prevDim-startDow+1+i;const pm=calMonth===0?12:calMonth;const py=calMonth===0?calYear-1:calYear;
     const ds=`${py}-${String(pm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const evs=getEventsForDate(ds);
-    html+=`<div class="cal-day other" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${d}</div>${renderCalEvents(evs)}</div>`;
+    html+=`<div class="cal-day other" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${d}</div>${renderCalEvs(getEventsForDate(ds))}</div>`;
   }
-
-  for(let d=1;d<=daysInMonth;d++){
+  for(let d=1;d<=dim;d++){
     const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday=ds===todayStr;
     const evs=getEventsForDate(ds);
-    const numHtml=isToday?`<span class="cal-today-num">${d}</span>`:`${d}`;
-    html+=`<div class="cal-day${isToday?' today':''}" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${numHtml}</div>${renderCalEvents(evs)}</div>`;
+    const numH=isToday?`<span class="cal-today-num">${d}</span>`:`${d}`;
+    html+=`<div class="cal-day${isToday?' today':''}" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${numH}</div>${renderCalEvs(evs)}</div>`;
   }
-
-  const totalCells=startDow+daysInMonth;
-  const remaining=(7-totalCells%7)%7;
-  for(let i=1;i<=remaining;i++){
-    const nm=calMonth===11?1:calMonth+2;
-    const ny=calMonth===11?calYear+1:calYear;
+  const rem=(7-(startDow+dim)%7)%7;
+  for(let i=1;i<=rem;i++){
+    const nm=calMonth===11?1:calMonth+2;const ny=calMonth===11?calYear+1:calYear;
     const ds=`${ny}-${String(nm).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-    const evs=getEventsForDate(ds);
-    html+=`<div class="cal-day other" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${i}</div>${renderCalEvents(evs)}</div>`;
+    html+=`<div class="cal-day other" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${i}</div>${renderCalEvs(getEventsForDate(ds))}</div>`;
   }
-
   grid.innerHTML=html;
 }
 
-function renderCalEvents(evs){
-  const max=3;
-  let html='';
+function renderCalEvs(evs){
+  let html='';const max=3;
   for(let i=0;i<Math.min(evs.length,max);i++){
-    const e=evs[i];
-    const cls=e.type==='trip'?'cal-ev-trip':e.type==='deadline'?'cal-ev-dead':e.type==='promo'?'cal-ev-promo':'cal-ev-apply';
-    html+=`<div class="cal-ev ${cls}">${esc(e.label)}</div>`;
+    const cls=evs[i].type==='trip'?'cal-ev-trip':evs[i].type==='deadline'?'cal-ev-dead':evs[i].type==='promo'?'cal-ev-promo':'cal-ev-apply';
+    html+=`<div class="cal-ev ${cls}">${esc(evs[i].label)}</div>`;
   }
   if(evs.length>max)html+=`<div class="cal-more">+${evs.length-max} 更多</div>`;
   return html;
 }
 
 function showDayPopup(evt,ds){
-  evt.stopPropagation();
-  const evs=getEventsForDate(ds);
-  const popup=document.getElementById('cal-popup');
+  evt.stopPropagation();const evs=getEventsForDate(ds);const popup=document.getElementById('cal-popup');
   if(evs.length===0){popup.style.display='none';return}
   const d=parseD(ds);
-  const dotColors={trip:'var(--accent)',deadline:'var(--red)',promo:'var(--purple)',apply:'var(--amber)'};
+  const dotC={trip:'var(--accent)',deadline:'var(--red)',promo:'var(--purple)',apply:'var(--amber)'};
   let html=`<h4>${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）</h4>`;
-  evs.forEach(e=>{
-    html+=`<div class="cal-popup-item"><div class="cal-popup-dot" style="background:${dotColors[e.type]}"></div><span>${esc(e.label)}</span></div>`;
-  });
-  popup.innerHTML=html;
-  popup.style.display='block';
+  evs.forEach(e=>{html+=`<div class="cal-popup-item"><div class="cal-popup-dot" style="background:${dotC[e.type]}"></div><span>${esc(e.label)}</span></div>`});
+  popup.innerHTML=html;popup.style.display='block';
   const r=evt.currentTarget.getBoundingClientRect();
-  let left=r.right+8, top=r.top;
+  let left=r.right+8,top=r.top;
   if(left+320>window.innerWidth)left=r.left-328;
   if(top+200>window.innerHeight)top=window.innerHeight-220;
   if(left<0)left=8;if(top<0)top=8;
   popup.style.left=left+'px';popup.style.top=top+'px';
 }
-
 document.addEventListener('click',()=>{document.getElementById('cal-popup').style.display='none'});
 
 // ── View switching ──
@@ -712,49 +620,52 @@ function setView(mode){
 }
 
 // ── Settings modal ──
-function openSettings(){
-  renderDeadlineRules();renderMktgRules();switchSettingsTab('deadline');showOv('ov-settings');
-}
+function openSettings(){renderAllRuleLists();switchTab('deadline');showOv('ov-settings')}
 function closeSettings(){hideOv('ov-settings')}
-function switchSettingsTab(tab){
-  document.querySelectorAll('.stab').forEach((b,i)=>b.classList.toggle('on',i===(tab==='deadline'?0:1)));
-  document.getElementById('tab-deadline').classList.toggle('on',tab==='deadline');
-  document.getElementById('tab-mktg').classList.toggle('on',tab!=='deadline');
+function switchTab(tab){
+  document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  ['deadline','apply','mktg'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
 }
 
-function renderDeadlineRules(){
-  const list=document.getElementById('rule-list');
-  if(rules.length===0){list.innerHTML='<div class="rule-empty">尚無截止規則</div>';return}
-  list.innerHTML=rules.map(r=>`<div class="rule-item"><div class="rule-info"><div class="rule-label">${esc(ruleLabel(r))}</div><div class="rule-names">${r.names.map(n=>`<span class="rule-tag">${esc(n)}</span>`).join('')}</div></div><div class="rule-acts"><button class="act-btn del" onclick="deleteDeadlineRule('${r.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></div>`).join('');
+const delSvg='<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+
+function renderRuleList(containerId,rules,labelFn,deleteHandler){
+  const el=document.getElementById(containerId);
+  if(rules.length===0){el.innerHTML='<div class="rule-empty">尚無規則</div>';return}
+  el.innerHTML=rules.map(r=>`<div class="rule-item"><div class="rule-info"><div class="rule-label">${esc(labelFn(r))}</div><div class="rule-names">${r.names.map(n=>`<span class="rule-tag">${esc(n)}</span>`).join('')}</div></div><div class="rule-acts"><button class="act-btn del" onclick="${deleteHandler}('${r.id}')" title="刪除">${delSvg}</button></div></div>`).join('');
 }
+function renderAllRuleLists(){
+  renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'delDeadlineRule');
+  renderRuleList('rule-list-apply',applyRules,applyLabel,'delApplyRule');
+  renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'delMktgRule');
+}
+
 function addDeadlineRule(){
-  const months=parseInt(document.getElementById('r-months').value)||0;
-  const days=parseInt(document.getElementById('r-days').value)||0;
-  const namesStr=document.getElementById('r-names').value.trim();
-  if(!namesStr){toast('請輸入路線名稱');return}
-  if(months===0&&days===0){toast('請設定提前時間');return}
-  const names=namesStr.split(/[,，、]/).map(s=>s.trim()).filter(Boolean);
-  rules.push({id:genId(),months,days,names});saveRules();renderDeadlineRules();
-  document.getElementById('r-names').value='';toast('規則已新增');
+  const m=parseInt(document.getElementById('rd-months').value)||0,d=parseInt(document.getElementById('rd-days').value)||0;
+  const ns=document.getElementById('rd-names').value.trim();
+  if(!ns){toast('請輸入路線名稱');return}if(m===0&&d===0){toast('請設定提前時間');return}
+  deadlineRules.push({id:genId(),months:m,days:d,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
+  saveToLS('hk-rules',deadlineRules);renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'delDeadlineRule');document.getElementById('rd-names').value='';toast('規則已新增');
 }
-function deleteDeadlineRule(id){rules=rules.filter(r=>r.id!==id);saveRules();renderDeadlineRules();toast('規則已刪除')}
+function delDeadlineRule(id){deadlineRules=deadlineRules.filter(r=>r.id!==id);saveToLS('hk-rules',deadlineRules);renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'delDeadlineRule');toast('規則已刪除')}
 
-function renderMktgRules(){
-  const list=document.getElementById('mktg-rule-list');
-  if(mktgRules.length===0){list.innerHTML='<div class="rule-empty">尚無行銷規則</div>';return}
-  list.innerHTML=mktgRules.map(r=>`<div class="rule-item"><div class="rule-info"><div class="rule-label">${esc(mktgLabel(r))}</div><div class="rule-names">${r.names.map(n=>`<span class="rule-tag">${esc(n)}</span>`).join('')}</div></div><div class="rule-acts"><button class="act-btn del" onclick="deleteMktgRule('${r.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></div>`).join('');
+function addApplyRule(){
+  const m=parseInt(document.getElementById('ra-months').value),d=parseInt(document.getElementById('ra-days').value)||0;
+  const ns=document.getElementById('ra-names').value.trim();
+  if(!ns){toast('請輸入路線名稱');return}
+  applyRules.push({id:genId(),months:m,days:d,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
+  saveToLS('hk-apply',applyRules);renderRuleList('rule-list-apply',applyRules,applyLabel,'delApplyRule');document.getElementById('ra-names').value='';toast('規則已新增');
 }
+function delApplyRule(id){applyRules=applyRules.filter(r=>r.id!==id);saveToLS('hk-apply',applyRules);renderRuleList('rule-list-apply',applyRules,applyLabel,'delApplyRule');toast('規則已刪除')}
+
 function addMktgRule(){
-  const promoMonths=parseInt(document.getElementById('m-promo').value)||1;
-  const applyMonths=parseInt(document.getElementById('m-apply-m').value);
-  const applyDays=parseInt(document.getElementById('m-apply-d').value)||0;
-  const namesStr=document.getElementById('m-names').value.trim();
-  if(!namesStr){toast('請輸入路線名稱');return}
-  const names=namesStr.split(/[,，、]/).map(s=>s.trim()).filter(Boolean);
-  mktgRules.push({id:genId(),promoMonths,applyMonths,applyDays,names});saveMktgRules();renderMktgRules();
-  document.getElementById('m-names').value='';toast('規則已新增');
+  const m=parseInt(document.getElementById('rm-months').value)||1;
+  const ns=document.getElementById('rm-names').value.trim();
+  if(!ns){toast('請輸入路線名稱');return}
+  mktgRules.push({id:genId(),promoMonths:m,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
+  saveToLS('hk-mktg',mktgRules);renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'delMktgRule');document.getElementById('rm-names').value='';toast('規則已新增');
 }
-function deleteMktgRule(id){mktgRules=mktgRules.filter(r=>r.id!==id);saveMktgRules();renderMktgRules();toast('規則已刪除')}
+function delMktgRule(id){mktgRules=mktgRules.filter(r=>r.id!==id);saveToLS('hk-mktg',mktgRules);renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'delMktgRule');toast('規則已刪除')}
 
 // ── Storage layer ──
 class LocalStore{
@@ -813,19 +724,15 @@ function render(){
   renderMktg();
   if(viewMode==='calendar')renderCal();
 
-  const fc=document.getElementById('filters');
-  fc.innerHTML=FILTERS.map(f=>`<button class="chip${filter===f.key?' on':''}" onclick="setFilter('${f.key}')">${f.label}</button>`).join('');
+  document.getElementById('filters').innerHTML=FILTERS.map(f=>`<button class="chip${filter===f.key?' on':''}" onclick="setFilter('${f.key}')">${f.label}</button>`).join('');
 
-  const thr=document.getElementById('thead-row');
-  thr.innerHTML=COLS.map(c=>{
+  document.getElementById('thead-row').innerHTML=COLS.map(c=>{
     if(!c.sort)return`<th>${c.label}</th>`;
     const active=sortKey===c.key;const arr=active?(sortDir==='asc'?'▲':'▼'):'▲';
     return`<th class="sortable${active?' sorted':''}" onclick="setSort('${c.key}')">${c.label}<span class="arr">${arr}</span></th>`;
   }).join('');
 
-  const list=sorted(filtered());
-  const tb=document.getElementById('tbody');
-  const emp=document.getElementById('empty');
+  const list=sorted(filtered());const tb=document.getElementById('tbody');const emp=document.getElementById('empty');
   if(list.length===0){tb.innerHTML='';emp.hidden=false;return}
   emp.hidden=true;
 
@@ -833,23 +740,24 @@ function render(){
     const isPast=daysUntil(t.date)<0;const cd=daysUntil(t.deadline);
     const pct=t.capacity>0?Math.min(t.registered/t.capacity,1):0;
     const isFull=t.capacity>0&&t.registered>=t.capacity;
-    let starsHtml='<div class="stars">';
-    for(let i=1;i<=3;i++){const on=i<=(t.promoted||0);starsHtml+=`<svg class="${on?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}',${i})"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg>`}
-    starsHtml+='</div>';
-    let cdHtml,cdCls;
-    if(isPast){cdHtml='已結束';cdCls='cd-past'}else if(isFull){cdHtml='—';cdCls='cd-past'}
-    else if(cd<0){cdHtml='已截止';cdCls='cd-past'}else if(cd===0){cdHtml='今天截止';cdCls='cd-urgent'}
-    else if(cd<=3){cdHtml=`剩 ${cd} 天`;cdCls='cd-urgent'}else if(cd<=7){cdHtml=`剩 ${cd} 天`;cdCls='cd-soon'}
-    else{cdHtml=`剩 ${cd} 天`;cdCls='cd-ok'}
-    let barColor;if(isFull)barColor='var(--red)';else if(pct>=0.8)barColor='var(--amber)';else barColor='var(--accent)';
-    let pillHtml;
-    if(isPast)pillHtml='<span class="pill pill-done">已結束</span>';
-    else if(isFull)pillHtml='<span class="pill pill-full">已額滿</span>';
-    else if(cd<0)pillHtml='<span class="pill pill-closed">已截止</span>';
-    else if(cd===0)pillHtml='<span class="pill pill-today">今日截止</span>';
-    else if(cd<=7)pillHtml='<span class="pill pill-soon">即將截止</span>';
-    else pillHtml='<span class="pill pill-open">報名中</span>';
-    return`<tr class="${isPast?'past':''}"><td>${starsHtml}</td><td style="font-weight:600">${esc(t.name)}</td><td>${fmtDate(t.date)}</td><td>${fmtDate(t.deadline)}</td><td><span class="cd ${cdCls}">${cdHtml}</span></td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barColor}"></div></div></div></td><td>${pillHtml}</td><td><div class="acts"><button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
+    let starsH='<div class="stars">';
+    for(let i=1;i<=3;i++){const on=i<=(t.promoted||0);starsH+=`<svg class="${on?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}',${i})"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg>`}
+    starsH+='</div>';
+    let cdH,cdC;
+    if(isPast){cdH='已結束';cdC='cd-past'}else if(isFull){cdH='—';cdC='cd-past'}
+    else if(cd<0){cdH='已截止';cdC='cd-past'}else if(cd===0){cdH='今天截止';cdC='cd-urgent'}
+    else if(cd<=3){cdH=`剩 ${cd} 天`;cdC='cd-urgent'}else if(cd<=7){cdH=`剩 ${cd} 天`;cdC='cd-soon'}
+    else{cdH=`剩 ${cd} 天`;cdC='cd-ok'}
+    let barC;if(isFull)barC='var(--red)';else if(pct>=0.8)barC='var(--amber)';else barC='var(--accent)';
+    let pillH;
+    if(isPast)pillH='<span class="pill pill-done">已結束</span>';
+    else if(isFull)pillH='<span class="pill pill-full">已額滿</span>';
+    else if(cd<0)pillH='<span class="pill pill-closed">已截止</span>';
+    else if(cd===0)pillH='<span class="pill pill-today">今日截止</span>';
+    else if(cd<=7)pillH='<span class="pill pill-soon">即將截止</span>';
+    else pillH='<span class="pill pill-open">報名中</span>';
+    const dateCol=fmtRange(t.date,t.dateEnd);
+    return`<tr class="${isPast?'past':''}"><td>${starsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${fmtDate(t.deadline)}</td><td><span class="cd ${cdC}">${cdH}</span></td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${pillH}</td><td><div class="acts"><button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
   }).join('');
 }
 
@@ -859,19 +767,32 @@ function setSort(k){if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sor
 function toggleStar(id,level){const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{promoted:(t.promoted||0)===level?0:level});if(!db)render()}
 function adjReg(id,delta){const t=trips.find(x=>x.id===id);if(!t)return;const next=Math.max(0,(t.registered||0)+delta);if(t.capacity>0&&next>t.capacity)return;store.upd(id,{registered:next});if(!db)render()}
 
-function openAdd(){editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('deadline-hint').classList.remove('show');showOv('ov-trip')}
-function openEdit(id){const t=trips.find(x=>x.id===id);if(!t)return;editId=id;document.getElementById('m-title').textContent='編輯活動';document.getElementById('f-name').value=t.name;document.getElementById('f-date').value=t.date;document.getElementById('f-dead').value=t.deadline;document.getElementById('f-reg').value=t.registered;document.getElementById('f-cap').value=t.capacity;document.getElementById('f-notes').value=t.notes||'';document.getElementById('deadline-hint').classList.remove('show');showOv('ov-trip')}
+function openAdd(){editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');showOv('ov-trip')}
+function openEdit(id){
+  const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
+  document.getElementById('m-title').textContent='編輯活動';
+  document.getElementById('f-name').value=t.name;document.getElementById('f-date').value=t.date;
+  document.getElementById('f-date-end').value=t.dateEnd||t.date;
+  document.getElementById('f-dead').value=t.deadline;document.getElementById('f-reg').value=t.registered;
+  document.getElementById('f-cap').value=t.capacity;document.getElementById('f-notes').value=t.notes||'';
+  document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');
+  showOv('ov-trip');
+}
 function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
-  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim()};
+  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim()};
   if(editId){store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.createdAt=Date.now();store.add(data);toast('已新增')}
   if(!db)render();closeTrip();
 }
 function delTrip(id){const t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`確定要刪除「${t.name}」嗎？`))return;store.del(id);if(!db)render();toast('已刪除')}
 
-document.getElementById('f-name').addEventListener('input',tryAutoDeadline);
-document.getElementById('f-date').addEventListener('change',tryAutoDeadline);
+document.getElementById('f-name').addEventListener('input',tryAutoFill);
+document.getElementById('f-date').addEventListener('change',()=>{
+  tryAutoFill();
+  const dateEl=document.getElementById('f-date');const endEl=document.getElementById('f-date-end');
+  if(dateEl.value&&(!endEl.value||endEl.value<dateEl.value))endEl.value=dateEl.value;
+});
 
 // ── LINE Report ──
 function buildReport(){
@@ -882,40 +803,39 @@ function buildReport(){
   if(promoted.length>0){
     lines.push('⭐ 重點宣傳','───────────');
     promoted.forEach(t=>{const cd=daysUntil(t.deadline);const cdTxt=cd<0?'已截止':cd===0?'今天截止':`剩${cd}天`;
-      lines.push(`🏔 ${t.name} ${'⭐'.repeat(t.promoted)}`);lines.push(`   出發：${fmtShort(t.date)}（${DAYS[parseD(t.date).getDay()]}）｜截止：${fmtShort(t.deadline)}（${cdTxt}）`);lines.push(`   報名：${t.registered} / ${t.capacity} 人`,'')});
+      const dr=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:`${fmtShort(t.date)}（${DAYS[parseD(t.date).getDay()]}）`;
+      lines.push(`🏔 ${t.name} ${'⭐'.repeat(t.promoted)}`);lines.push(`   日期：${dr}｜截止：${fmtShort(t.deadline)}（${cdTxt}）`);lines.push(`   報名：${t.registered} / ${t.capacity} 人`,'')});
   }
   lines.push('📊 全部活動','───────────');
   if(future.length===0)lines.push('（目前無活動）');
-  else future.forEach(t=>{const cd=daysUntil(t.deadline);const cdTxt=cd<0?'已截止':cd===0?'今天截止':`剩${cd}天`;const isFull=t.capacity>0&&t.registered>=t.capacity;lines.push(`🏔 ${t.name}${isFull?'【滿】':''}｜${fmtShort(t.date)}出發｜${t.registered}/${t.capacity}人｜截止${fmtShort(t.deadline)}（${cdTxt}）`)});
+  else future.forEach(t=>{const cd=daysUntil(t.deadline);const cdTxt=cd<0?'已截止':cd===0?'今天截止':`剩${cd}天`;const isFull=t.capacity>0&&t.registered>=t.capacity;
+    const dr=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:`${fmtShort(t.date)}`;
+    lines.push(`🏔 ${t.name}${isFull?'【滿】':''}｜${dr}｜${t.registered}/${t.capacity}人｜截止${fmtShort(t.deadline)}（${cdTxt}）`)});
   const warnings=[];
   future.forEach(t=>{if(t.capacity>0&&t.registered>=t.capacity)return;if(t.capacity>0&&t.registered/t.capacity>=0.8)warnings.push(`❗ ${t.name} 即將額滿（剩${t.capacity-t.registered}名額）`);const cd=daysUntil(t.deadline);if(cd>=0&&cd<=3)warnings.push(`⏰ ${t.name} 報名即將截止（${cd===0?'今天':`剩${cd}天`}）`)});
   if(warnings.length>0){lines.push('','⚠️ 提醒','───────────');warnings.forEach(w=>lines.push(w))}
-
   const mktgItems=getMarketingItems();
   if(mktgItems.length>0){
     lines.push('','📣 本週行銷重點','───────────');
     mktgItems.forEach(it=>{
-      let action='宣傳中';
-      if(it.applyDeadline&&it.applyDaysLeft>=0&&it.applyDaysLeft<=7)action=`需申請（剩${it.applyDaysLeft}天）`;
-      lines.push(`📢 ${it.trip.name}｜${fmtShort(it.trip.date)}出發｜${action}`);
+      let acts=[];
+      if(it.inPromo)acts.push('宣傳中');
+      if(it.noApply)acts.push('免申請');
+      else if(it.applyDeadline){if(it.applyDaysLeft>=0&&it.applyDaysLeft<=7)acts.push(`需申請（剩${it.applyDaysLeft}天）`);else if(it.applyDaysLeft>=0)acts.push(`${fmtShort(dateStr(it.applyDeadline))}前申請`)}
+      lines.push(`📢 ${it.trip.name}｜${fmtShort(it.trip.date)}出發｜${acts.join('，')}`);
     });
   }
   return lines.join('\n');
 }
 function showReport(){document.getElementById('rpt-text').textContent=buildReport();showOv('ov-rpt')}
 function closeRpt(){hideOv('ov-rpt')}
-async function copyReport(){
-  const txt=buildReport();
-  try{await navigator.clipboard.writeText(txt);toast('已複製到剪貼簿')}
-  catch{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('已複製到剪貼簿')}
-}
+async function copyReport(){const txt=buildReport();try{await navigator.clipboard.writeText(txt);toast('已複製到剪貼簿')}catch{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('已複製到剪貼簿')}}
 async function downloadReport(){
   const txt=buildReport();
   if(dlCap){try{const now=new Date();await dlCap.save({filename:`登山日報_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.txt`,data:txt});toast('已下載')}catch(e){if(e.code==='declined')return;toast('下載失敗')}}
   else toast('此環境不支援下載，請使用複製功能');
 }
 
-// ── Modal helpers ──
 function showOv(id){document.getElementById(id).classList.add('show')}
 function hideOv(id){document.getElementById(id).classList.remove('show')}
 document.querySelectorAll('.overlay').forEach(ov=>{ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('show')})});
@@ -923,6 +843,5 @@ document.querySelectorAll('.overlay').forEach(ov=>{ov.addEventListener('click',e
 let toastTimer;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('on'),2200)}
 
-// ── Init ──
-loadRules();loadMktgRules();initCal();initDB();
+loadAllRules();initCal();initDB();
 </script>
