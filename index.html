@@ -1,0 +1,885 @@
+<meta charset="UTF-8">
+<title>登山活動管理</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@700&family=Barlow:wght@400;500;600;700&display=swap">
+
+<style>
+/* ── Tokens ── */
+:root {
+  --bg: #F2EEE5;
+  --surface: #FFFFFF;
+  --surface-hover: #EDE9E0;
+  --surface-alt: #E8E4DA;
+  --text: #253D33;
+  --text-2: #4E6358;
+  --text-muted: #8A9990;
+  --border: #D4CFC4;
+  --border-sub: #E2DED5;
+  --accent: #3D8B66;
+  --accent-hover: #357A59;
+  --accent-bg: #E4F2EB;
+  --accent-on: #FFF;
+  --amber: #D4873A;
+  --amber-bg: #FFF3E6;
+  --amber-on: #7A4E1E;
+  --red: #C24740;
+  --red-bg: #FDECEA;
+  --red-on: #7A2520;
+  --warn: #C4960F;
+  --warn-bg: #FFF8E0;
+  --star: #D4873A;
+  --star-off: #D0CABD;
+  --shadow-sm: 0 1px 2px rgba(37,61,51,.06);
+  --shadow: 0 1px 4px rgba(37,61,51,.09);
+  --shadow-lg: 0 4px 16px rgba(37,61,51,.12);
+  --r: 6px;
+  --r-lg: 10px;
+  --font-d: 'Bitter', Georgia, serif;
+  --font: 'Barlow', -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+}
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141F1A;
+    --surface: #1C2C24;
+    --surface-hover: #24382D;
+    --surface-alt: #182720;
+    --text: #DEE4DF;
+    --text-2: #9FAFA6;
+    --text-muted: #637069;
+    --border: #2B3D34;
+    --border-sub: #223029;
+    --accent: #52B07E;
+    --accent-hover: #45A06F;
+    --accent-bg: #1A3328;
+    --accent-on: #FFF;
+    --amber: #E49B50;
+    --amber-bg: #32281A;
+    --amber-on: #E49B50;
+    --red: #E0605A;
+    --red-bg: #321C1A;
+    --red-on: #E0605A;
+    --warn: #DAA820;
+    --warn-bg: #322A14;
+    --star: #E49B50;
+    --star-off: #3A4A42;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.2);
+    --shadow: 0 1px 4px rgba(0,0,0,.28);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141F1A;
+  --surface: #1C2C24;
+  --surface-hover: #24382D;
+  --surface-alt: #182720;
+  --text: #DEE4DF;
+  --text-2: #9FAFA6;
+  --text-muted: #637069;
+  --border: #2B3D34;
+  --border-sub: #223029;
+  --accent: #52B07E;
+  --accent-hover: #45A06F;
+  --accent-bg: #1A3328;
+  --accent-on: #FFF;
+  --amber: #E49B50;
+  --amber-bg: #32281A;
+  --amber-on: #E49B50;
+  --red: #E0605A;
+  --red-bg: #321C1A;
+  --red-on: #E0605A;
+  --warn: #DAA820;
+  --warn-bg: #322A14;
+  --star: #E49B50;
+  --star-off: #3A4A42;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.2);
+  --shadow: 0 1px 4px rgba(0,0,0,.28);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,.35);
+}
+
+/* ── Base ── */
+*,*::before,*::after { box-sizing: border-box; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── App Shell ── */
+.app { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
+
+/* ── Header ── */
+.hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.hdr h1 { font-family: var(--font-d); font-size: 26px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); line-height: 1.2; }
+.hdr-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Stats ── */
+.stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.stat {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-sub);
+  border-radius: var(--r);
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  box-shadow: var(--shadow-sm);
+}
+.stat b { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.stat--accent b { color: var(--accent); }
+.stat--warn b { color: var(--warn); }
+.stat--red b { color: var(--red); }
+.stat--amber b { color: var(--amber); }
+
+/* ── Actions row ── */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 13px; font-weight: 500; font-family: var(--font);
+  border: 1px solid var(--border);
+  background: transparent; color: var(--text-2);
+  cursor: pointer; transition: all .15s;
+}
+.chip:hover { background: var(--surface-hover); }
+.chip.on { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: var(--r);
+  font: 600 14px var(--font);
+  cursor: pointer; border: none; transition: all .15s;
+}
+.btn-p { background: var(--accent); color: var(--accent-on); }
+.btn-p:hover { background: var(--accent-hover); }
+.btn-o { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+.btn-o:hover { background: var(--surface-hover); }
+.btn-g { background: transparent; color: var(--text-muted); border: none; padding: 7px 12px; }
+.btn-g:hover { color: var(--text); }
+.btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Table ── */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--border-sub); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+thead { background: var(--surface-alt); }
+th {
+  padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted);
+  text-align: left; text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border-sub); white-space: nowrap; user-select: none;
+}
+th.sortable { cursor: pointer; }
+th.sortable:hover { color: var(--text-2); }
+th .arr { font-size: 10px; margin-left: 3px; opacity: .5; }
+th.sorted .arr { opacity: 1; color: var(--accent); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border-sub); vertical-align: middle; font-size: 14px; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-hover); }
+tr.past td { opacity: .45; }
+
+/* ── Stars ── */
+.stars { display: flex; gap: 2px; cursor: pointer; }
+.stars svg { width: 18px; height: 18px; transition: transform .12s; }
+.stars svg:hover { transform: scale(1.2); }
+.star-on { color: var(--star); }
+.star-off { color: var(--star-off); }
+
+/* ── Capacity ── */
+.cap { white-space: nowrap; }
+.cap-nums { font-weight: 600; font-size: 14px; }
+.cap-full { color: var(--red); }
+.cap-high { color: var(--amber); }
+.cap-bar { height: 4px; background: var(--border-sub); border-radius: 2px; margin-top: 5px; min-width: 80px; overflow: hidden; }
+.cap-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+
+/* ── Registration buttons ── */
+.reg-row { display: flex; align-items: center; gap: 6px; }
+.reg-btn {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-2); font-size: 16px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .12s; line-height: 1; padding: 0;
+  font-family: var(--font);
+}
+.reg-btn:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+.reg-btn:disabled { opacity: .3; cursor: default; }
+.reg-btn:disabled:hover { background: var(--surface); border-color: var(--border); color: var(--text-2); }
+
+/* ── Status pill ── */
+.pill {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.pill-open { background: var(--accent-bg); color: var(--accent); }
+.pill-soon { background: var(--warn-bg); color: var(--warn); }
+.pill-today { background: var(--red-bg); color: var(--red); animation: pulse 1.5s ease infinite; }
+.pill-closed { background: var(--surface-alt); color: var(--text-muted); }
+.pill-full { background: var(--red-bg); color: var(--red); }
+.pill-done { background: var(--surface-alt); color: var(--text-muted); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+/* ── Countdown ── */
+.cd { font-weight: 600; font-size: 14px; white-space: nowrap; }
+.cd-ok { color: var(--accent); }
+.cd-soon { color: var(--warn); }
+.cd-urgent { color: var(--red); }
+.cd-past { color: var(--text-muted); }
+
+/* ── Actions cell ── */
+.acts { display: flex; gap: 4px; }
+.act-btn {
+  width: 30px; height: 30px; border-radius: var(--r);
+  border: none; background: transparent; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .12s;
+}
+.act-btn:hover { background: var(--surface-alt); color: var(--text); }
+.act-btn.del:hover { background: var(--red-bg); color: var(--red); }
+.act-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Empty state ── */
+.empty { padding: 60px 20px; text-align: center; color: var(--text-muted); }
+.empty svg { width: 64px; height: 64px; color: var(--border); margin-bottom: 16px; }
+.empty p { font-size: 15px; margin-bottom: 16px; }
+
+/* ── Modal ── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(37,61,51,.35); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; visibility: hidden; transition: all .2s;
+}
+.overlay.show { opacity: 1; visibility: visible; }
+.modal {
+  background: var(--surface); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg); width: 100%; max-width: 480px;
+  max-height: 90vh; overflow-y: auto;
+  transform: translateY(12px); transition: transform .2s;
+}
+.overlay.show .modal { transform: translateY(0); }
+.modal.lg { max-width: 580px; }
+.modal-h { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border-sub); }
+.modal-h h2 { font-size: 17px; font-weight: 700; }
+.close-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: transparent; color: var(--text-muted); font-size: 20px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font);
+}
+.close-btn:hover { background: var(--surface-alt); color: var(--text); }
+.modal-body { padding: 22px; }
+.f-row { margin-bottom: 16px; }
+.f-row label { display: block; font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+.f-row input, .f-row textarea {
+  width: 100%; padding: 8px 12px; border-radius: var(--r);
+  border: 1px solid var(--border); background: var(--bg);
+  font: 400 14px var(--font); color: var(--text);
+  transition: border-color .15s;
+}
+.f-row input:focus, .f-row textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+.f-row textarea { resize: vertical; min-height: 60px; }
+.f-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.f-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
+
+/* ── Report preview ── */
+.rpt-pre {
+  background: var(--bg); border: 1px solid var(--border-sub);
+  border-radius: var(--r); padding: 16px; margin-bottom: 16px;
+  font-size: 13px; line-height: 1.7; white-space: pre-wrap;
+  word-break: break-all; max-height: 380px; overflow-y: auto;
+  font-family: var(--font);
+}
+.rpt-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.rpt-note { margin-top: 16px; padding: 12px 14px; background: var(--accent-bg); border-radius: var(--r); font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; z-index: 200;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: var(--bg);
+  padding: 10px 22px; border-radius: 24px;
+  font-size: 14px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+}
+.toast.on { transform: translateX(-50%) translateY(0); }
+
+@media(max-width:700px) {
+  .app { padding: 16px 12px 40px; }
+  .hdr { flex-direction: column; }
+  .hdr h1 { font-size: 22px; }
+  .bar { flex-direction: column; align-items: stretch; }
+  .f-pair { grid-template-columns: 1fr; }
+  th, td { padding: 8px 10px; font-size: 13px; }
+}
+</style>
+
+<div class="app">
+  <div class="hdr">
+    <div>
+      <h1>登山活動管理</h1>
+      <div class="hdr-sub" id="date-line"></div>
+    </div>
+    <button class="btn btn-p" onclick="openAdd()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新增活動
+    </button>
+  </div>
+
+  <div class="stats">
+    <div class="stat stat--accent"><b id="s-total">0</b> 活動總數</div>
+    <div class="stat stat--warn"><b id="s-soon">0</b> 即將截止</div>
+    <div class="stat stat--red"><b id="s-full">0</b> 即將額滿</div>
+    <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
+  </div>
+
+  <div class="bar">
+    <div class="filters" id="filters"></div>
+    <button class="btn btn-o" onclick="showReport()">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      產生 LINE 日報
+    </button>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr id="thead-row"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden>
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 56L24 24l12 18 8-10 12 24H8z"/>
+        <circle cx="48" cy="14" r="6"/>
+      </svg>
+      <p>尚無登山活動</p>
+      <button class="btn btn-p" onclick="openAdd()">新增第一個活動</button>
+    </div>
+  </div>
+</div>
+
+<!-- Trip modal -->
+<div class="overlay" id="ov-trip">
+  <div class="modal">
+    <div class="modal-h">
+      <h2 id="m-title">新增活動</h2>
+      <button class="close-btn" onclick="closeTrip()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="trip-form" onsubmit="saveTrip(event)">
+        <div class="f-row">
+          <label for="f-name">活動名稱</label>
+          <input id="f-name" type="text" required placeholder="例：玉山主峰兩天一夜">
+        </div>
+        <div class="f-pair">
+          <div class="f-row">
+            <label for="f-date">出發日期</label>
+            <input id="f-date" type="date" required>
+          </div>
+          <div class="f-row">
+            <label for="f-dead">報名截止日期</label>
+            <input id="f-dead" type="date" required>
+          </div>
+        </div>
+        <div class="f-pair">
+          <div class="f-row">
+            <label for="f-reg">目前報名人數</label>
+            <input id="f-reg" type="number" min="0" value="0" required>
+          </div>
+          <div class="f-row">
+            <label for="f-cap">滿團人數</label>
+            <input id="f-cap" type="number" min="1" required placeholder="例：16">
+          </div>
+        </div>
+        <div class="f-row">
+          <label for="f-notes">備註（選填）</label>
+          <textarea id="f-notes" placeholder="內部備忘"></textarea>
+        </div>
+        <div class="f-actions">
+          <button type="button" class="btn btn-g" onclick="closeTrip()">取消</button>
+          <button type="submit" class="btn btn-p">儲存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Report modal -->
+<div class="overlay" id="ov-rpt">
+  <div class="modal lg">
+    <div class="modal-h">
+      <h2>LINE 日報預覽</h2>
+      <button class="close-btn" onclick="closeRpt()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="rpt-pre" id="rpt-text"></div>
+      <div class="rpt-actions">
+        <button class="btn btn-p" onclick="copyReport()">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          複製到剪貼簿
+        </button>
+        <button class="btn btn-o" onclick="downloadReport()">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          下載文字檔
+        </button>
+      </div>
+      <div class="rpt-note">
+        提示：如需每天自動發送至 LINE 群組，可建立 LINE Messaging API 機器人，搭配排程服務（如 cron job）讀取此儀表板資料並定時推送訊息。歡迎洽詢技術團隊協助設置。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DAYS = ['日','一','二','三','四','五','六'];
+const COLS = [
+  { key: 'promoted', label: '宣傳', sort: true },
+  { key: 'name', label: '活動名稱', sort: true },
+  { key: 'date', label: '出發日期', sort: true },
+  { key: 'deadline', label: '報名截止', sort: true },
+  { key: '_cd', label: '倒數', sort: true },
+  { key: '_cap', label: '報名狀況', sort: true },
+  { key: '_status', label: '狀態', sort: false },
+  { key: '_acts', label: '', sort: false },
+];
+const FILTERS = [
+  { key: 'all', label: '全部' },
+  { key: 'promo', label: '重點宣傳' },
+  { key: 'soon', label: '即將截止' },
+  { key: 'almost', label: '即將額滿' },
+];
+
+let trips = [];
+let db = null;
+let dlCap = null;
+let unsub = null;
+let editId = null;
+let sortKey = 'date';
+let sortDir = 'asc';
+let filter = 'all';
+
+function today() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function parseD(s) { const d = new Date(s + 'T00:00:00'); return d; }
+function fmtDate(s) {
+  const d = parseD(s);
+  return `${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`;
+}
+function fmtShort(s) {
+  const d = parseD(s);
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function daysUntil(s) {
+  return Math.ceil((parseD(s) - today()) / 864e5);
+}
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// ── Storage layer ──
+class LocalStore {
+  constructor() { this.load(); }
+  load() { try { trips = JSON.parse(localStorage.getItem('hk-trips') || '[]'); } catch { trips = []; } }
+  save() { try { localStorage.setItem('hk-trips', JSON.stringify(trips)); } catch {} }
+  add(t) { trips.push(t); this.save(); render(); }
+  upd(id, f) { const t = trips.find(x => x.id === id); if (t) Object.assign(t, f); this.save(); render(); }
+  del(id) { trips = trips.filter(x => x.id !== id); this.save(); render(); }
+}
+
+let store = null;
+
+async function initDB() {
+  try {
+    if (window.claude) {
+      db = await window.claude.use('db');
+    }
+  } catch {}
+
+  if (db) {
+    unsub = db.collection('trips').orderBy('date', 'asc').onSnapshot(
+      snap => {
+        trips = snap.docs.filter(d => d.exists).map(d => ({ id: d.id, ...d.data() }));
+        render();
+      },
+      () => {
+        store = new LocalStore();
+        render();
+      }
+    );
+    store = {
+      add(t) { db.collection('trips').doc(t.id).set(t); },
+      upd(id, f) { db.collection('trips').doc(id).update(f); },
+      del(id) { db.collection('trips').doc(id).delete(); },
+    };
+  } else {
+    store = new LocalStore();
+    render();
+  }
+
+  try {
+    if (window.claude) dlCap = await window.claude.use('downloads');
+  } catch {}
+}
+
+// ── Render ──
+function filtered() {
+  let list = [...trips];
+  if (filter === 'promo') list = list.filter(t => t.promoted > 0);
+  else if (filter === 'soon') list = list.filter(t => { const d = daysUntil(t.deadline); return d >= 0 && d <= 7; });
+  else if (filter === 'almost') list = list.filter(t => t.capacity > 0 && t.registered / t.capacity >= 0.8);
+  return list;
+}
+
+function sorted(list) {
+  const m = sortDir === 'asc' ? 1 : -1;
+  return list.sort((a, b) => {
+    let va, vb;
+    if (sortKey === 'promoted') { va = a.promoted || 0; vb = b.promoted || 0; }
+    else if (sortKey === 'name') { va = a.name; vb = b.name; }
+    else if (sortKey === 'date') { va = a.date; vb = b.date; }
+    else if (sortKey === 'deadline') { va = a.deadline; vb = b.deadline; }
+    else if (sortKey === '_cd') { va = daysUntil(a.deadline); vb = daysUntil(b.deadline); }
+    else if (sortKey === '_cap') { va = a.capacity ? a.registered / a.capacity : 0; vb = b.capacity ? b.registered / b.capacity : 0; }
+    else { va = a.date; vb = b.date; }
+    if (va < vb) return -1 * m;
+    if (va > vb) return 1 * m;
+    return 0;
+  });
+}
+
+function render() {
+  // Date line
+  const now = new Date();
+  const y = now.getFullYear();
+  const mo = now.getMonth() + 1;
+  const da = now.getDate();
+  document.getElementById('date-line').textContent = `${y}年${mo}月${da}日（${DAYS[now.getDay()]}）`;
+
+  // Stats
+  const future = trips.filter(t => daysUntil(t.date) >= 0);
+  document.getElementById('s-total').textContent = future.length;
+  document.getElementById('s-soon').textContent = future.filter(t => { const d = daysUntil(t.deadline); return d >= 0 && d <= 7; }).length;
+  document.getElementById('s-full').textContent = future.filter(t => t.capacity > 0 && t.registered / t.capacity >= 0.8).length;
+  document.getElementById('s-promo').textContent = future.filter(t => t.promoted > 0).length;
+
+  // Filters
+  const fc = document.getElementById('filters');
+  fc.innerHTML = FILTERS.map(f =>
+    `<button class="chip${filter === f.key ? ' on' : ''}" onclick="setFilter('${f.key}')">${f.label}</button>`
+  ).join('');
+
+  // Thead
+  const thr = document.getElementById('thead-row');
+  thr.innerHTML = COLS.map(c => {
+    if (!c.sort) return `<th>${c.label}</th>`;
+    const active = sortKey === c.key;
+    const arr = active ? (sortDir === 'asc' ? '▲' : '▼') : '▲';
+    return `<th class="sortable${active ? ' sorted' : ''}" onclick="setSort('${c.key}')">
+      ${c.label}<span class="arr">${arr}</span>
+    </th>`;
+  }).join('');
+
+  // Tbody
+  const list = sorted(filtered());
+  const tb = document.getElementById('tbody');
+  const emp = document.getElementById('empty');
+
+  if (list.length === 0) {
+    tb.innerHTML = '';
+    emp.hidden = false;
+    return;
+  }
+  emp.hidden = true;
+
+  tb.innerHTML = list.map(t => {
+    const isPast = daysUntil(t.date) < 0;
+    const cd = daysUntil(t.deadline);
+    const pct = t.capacity > 0 ? Math.min(t.registered / t.capacity, 1) : 0;
+    const isFull = t.capacity > 0 && t.registered >= t.capacity;
+
+    // Stars
+    let starsHtml = '<div class="stars">';
+    for (let i = 1; i <= 3; i++) {
+      const on = i <= (t.promoted || 0);
+      starsHtml += `<svg class="${on ? 'star-on' : 'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}',${i})">
+        <path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/>
+      </svg>`;
+    }
+    starsHtml += '</div>';
+
+    // Countdown
+    let cdHtml, cdCls;
+    if (isPast) { cdHtml = '已結束'; cdCls = 'cd-past'; }
+    else if (isFull) { cdHtml = '—'; cdCls = 'cd-past'; }
+    else if (cd < 0) { cdHtml = '已截止'; cdCls = 'cd-past'; }
+    else if (cd === 0) { cdHtml = '今天截止'; cdCls = 'cd-urgent'; }
+    else if (cd <= 3) { cdHtml = `剩 ${cd} 天`; cdCls = 'cd-urgent'; }
+    else if (cd <= 7) { cdHtml = `剩 ${cd} 天`; cdCls = 'cd-soon'; }
+    else { cdHtml = `剩 ${cd} 天`; cdCls = 'cd-ok'; }
+
+    // Capacity bar color
+    let barColor;
+    if (isFull) barColor = 'var(--red)';
+    else if (pct >= 0.8) barColor = 'var(--amber)';
+    else barColor = 'var(--accent)';
+
+    // Status pill
+    let pillHtml;
+    if (isPast) pillHtml = '<span class="pill pill-done">已結束</span>';
+    else if (isFull) pillHtml = '<span class="pill pill-full">已額滿</span>';
+    else if (cd < 0) pillHtml = '<span class="pill pill-closed">已截止</span>';
+    else if (cd === 0) pillHtml = '<span class="pill pill-today">今日截止</span>';
+    else if (cd <= 7) pillHtml = '<span class="pill pill-soon">即將截止</span>';
+    else pillHtml = '<span class="pill pill-open">報名中</span>';
+
+    return `<tr class="${isPast ? 'past' : ''}">
+      <td>${starsHtml}</td>
+      <td style="font-weight:600">${esc(t.name)}</td>
+      <td>${fmtDate(t.date)}</td>
+      <td>${fmtDate(t.deadline)}</td>
+      <td><span class="cd ${cdCls}">${cdHtml}</span></td>
+      <td>
+        <div class="cap">
+          <div class="reg-row">
+            <button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered <= 0 ? 'disabled' : ''}>−</button>
+            <span class="cap-nums ${isFull ? 'cap-full' : pct >= 0.8 ? 'cap-high' : ''}">${t.registered} / ${t.capacity}</span>
+            <button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull ? 'disabled' : ''}>+</button>
+          </div>
+          <div class="cap-bar"><div class="cap-fill" style="width:${pct * 100}%;background:${barColor}"></div></div>
+        </div>
+      </td>
+      <td>${pillHtml}</td>
+      <td>
+        <div class="acts">
+          <button class="act-btn" onclick="openEdit('${t.id}')" title="編輯">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── Interactions ──
+function setFilter(f) { filter = f; render(); }
+
+function setSort(k) {
+  if (sortKey === k) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortKey = k; sortDir = k === 'promoted' ? 'desc' : 'asc'; }
+  render();
+}
+
+function toggleStar(id, level) {
+  const t = trips.find(x => x.id === id);
+  if (!t) return;
+  const next = (t.promoted || 0) === level ? 0 : level;
+  store.upd(id, { promoted: next });
+  if (!db) render();
+}
+
+function adjReg(id, delta) {
+  const t = trips.find(x => x.id === id);
+  if (!t) return;
+  const next = Math.max(0, (t.registered || 0) + delta);
+  if (t.capacity > 0 && next > t.capacity) return;
+  store.upd(id, { registered: next });
+  if (!db) render();
+}
+
+function openAdd() {
+  editId = null;
+  document.getElementById('m-title').textContent = '新增活動';
+  document.getElementById('trip-form').reset();
+  document.getElementById('f-reg').value = '0';
+  showOv('ov-trip');
+}
+
+function openEdit(id) {
+  const t = trips.find(x => x.id === id);
+  if (!t) return;
+  editId = id;
+  document.getElementById('m-title').textContent = '編輯活動';
+  document.getElementById('f-name').value = t.name;
+  document.getElementById('f-date').value = t.date;
+  document.getElementById('f-dead').value = t.deadline;
+  document.getElementById('f-reg').value = t.registered;
+  document.getElementById('f-cap').value = t.capacity;
+  document.getElementById('f-notes').value = t.notes || '';
+  showOv('ov-trip');
+}
+
+function closeTrip() { hideOv('ov-trip'); }
+
+function saveTrip(e) {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById('f-name').value.trim(),
+    date: document.getElementById('f-date').value,
+    deadline: document.getElementById('f-dead').value,
+    registered: parseInt(document.getElementById('f-reg').value) || 0,
+    capacity: parseInt(document.getElementById('f-cap').value) || 1,
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+
+  if (editId) {
+    store.upd(editId, data);
+    toast('已更新');
+  } else {
+    data.id = genId();
+    data.promoted = 0;
+    data.createdAt = Date.now();
+    store.add(data);
+    toast('已新增');
+  }
+  if (!db) render();
+  closeTrip();
+}
+
+function delTrip(id) {
+  const t = trips.find(x => x.id === id);
+  if (!t) return;
+  if (!confirm(`確定要刪除「${t.name}」嗎？`)) return;
+  store.del(id);
+  if (!db) render();
+  toast('已刪除');
+}
+
+// ── LINE Report ──
+function buildReport() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const mo = now.getMonth() + 1;
+  const da = now.getDate();
+  const dow = DAYS[now.getDay()];
+
+  const future = trips.filter(t => daysUntil(t.date) >= 0).sort((a, b) => a.date < b.date ? -1 : 1);
+  const promoted = future.filter(t => t.promoted > 0).sort((a, b) => (b.promoted || 0) - (a.promoted || 0));
+
+  let lines = [];
+  lines.push(`📋 登山活動日報`);
+  lines.push(`━━━━━━━━━━━━`);
+  lines.push(`📅 ${y}年${mo}月${da}日（${dow}）`);
+  lines.push('');
+
+  if (promoted.length > 0) {
+    lines.push('⭐ 重點宣傳');
+    lines.push('───────────');
+    promoted.forEach(t => {
+      const stars = '⭐'.repeat(t.promoted);
+      const cd = daysUntil(t.deadline);
+      const cdTxt = cd < 0 ? '已截止' : cd === 0 ? '今天截止' : `剩${cd}天`;
+      lines.push(`🏔 ${t.name} ${stars}`);
+      lines.push(`   出發：${fmtShort(t.date)}（${DAYS[parseD(t.date).getDay()]}）｜截止：${fmtShort(t.deadline)}（${cdTxt}）`);
+      lines.push(`   報名：${t.registered} / ${t.capacity} 人`);
+      lines.push('');
+    });
+  }
+
+  lines.push('📊 全部活動');
+  lines.push('───────────');
+  if (future.length === 0) {
+    lines.push('（目前無活動）');
+  } else {
+    future.forEach(t => {
+      const cd = daysUntil(t.deadline);
+      const cdTxt = cd < 0 ? '已截止' : cd === 0 ? '今天截止' : `剩${cd}天`;
+      const isFull = t.capacity > 0 && t.registered >= t.capacity;
+      const tag = isFull ? '【滿】' : '';
+      lines.push(`🏔 ${t.name}${tag}｜${fmtShort(t.date)}出發｜${t.registered}/${t.capacity}人｜截止${fmtShort(t.deadline)}（${cdTxt}）`);
+    });
+  }
+
+  // Warnings
+  const warnings = [];
+  future.forEach(t => {
+    if (t.capacity > 0 && t.registered >= t.capacity) return;
+    if (t.capacity > 0 && t.registered / t.capacity >= 0.8) {
+      warnings.push(`❗ ${t.name} 即將額滿（剩${t.capacity - t.registered}名額）`);
+    }
+    const cd = daysUntil(t.deadline);
+    if (cd >= 0 && cd <= 3) {
+      warnings.push(`⏰ ${t.name} 報名即將截止（${cd === 0 ? '今天' : `剩${cd}天`}）`);
+    }
+  });
+
+  if (warnings.length > 0) {
+    lines.push('');
+    lines.push('⚠️ 提醒');
+    lines.push('───────────');
+    warnings.forEach(w => lines.push(w));
+  }
+
+  return lines.join('\n');
+}
+
+function showReport() {
+  document.getElementById('rpt-text').textContent = buildReport();
+  showOv('ov-rpt');
+}
+
+function closeRpt() { hideOv('ov-rpt'); }
+
+async function copyReport() {
+  const txt = buildReport();
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast('已複製到剪貼簿');
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    toast('已複製到剪貼簿');
+  }
+}
+
+async function downloadReport() {
+  const txt = buildReport();
+  if (dlCap) {
+    try {
+      const now = new Date();
+      const fn = `登山日報_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.txt`;
+      await dlCap.save({ filename: fn, data: txt });
+      toast('已下載');
+    } catch (e) {
+      if (e.code === 'declined') return;
+      toast('下載失敗');
+    }
+  } else {
+    toast('此環境不支援下載，請使用複製功能');
+  }
+}
+
+// ── Modal helpers ──
+function showOv(id) { document.getElementById(id).classList.add('show'); }
+function hideOv(id) { document.getElementById(id).classList.remove('show'); }
+
+document.querySelectorAll('.overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('show'); });
+});
+
+// ── Toast ──
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('on'), 2200);
+}
+
+// ── Init ──
+initDB();
+</script>
