@@ -193,6 +193,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .rule-names{display:flex;flex-wrap:wrap;gap:4px}
 .rule-tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:var(--surface);border:1px solid var(--border-sub);color:var(--text-2)}
 .rule-acts{display:flex;gap:2px;flex-shrink:0}
+.rule-edit-form{display:flex;flex-direction:column;gap:10px;width:100%}
+.rule-edit-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.rule-edit-row .f-row{margin-bottom:0;flex:1;min-width:80px}
+.rule-edit-row .f-row label{font-size:12px}
+.rule-edit-row .f-row input,.rule-edit-row .f-row select{padding:6px 10px;font-size:13px}
+.rule-edit-btns{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
 .rule-empty{text-align:center;padding:20px;color:var(--text-muted);font-size:14px}
 .rule-divider{border:none;border-top:1px solid var(--border-sub);margin:20px 0 16px}
 
@@ -628,16 +634,67 @@ function switchTab(tab){
 }
 
 const delSvg='<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+const editSvg='<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
 
-function renderRuleList(containerId,rules,labelFn,deleteHandler){
+let editingRuleId=null;
+
+function renderRuleList(containerId,rules,labelFn,type){
   const el=document.getElementById(containerId);
   if(rules.length===0){el.innerHTML='<div class="rule-empty">尚無規則</div>';return}
-  el.innerHTML=rules.map(r=>`<div class="rule-item"><div class="rule-info"><div class="rule-label">${esc(labelFn(r))}</div><div class="rule-names">${r.names.map(n=>`<span class="rule-tag">${esc(n)}</span>`).join('')}</div></div><div class="rule-acts"><button class="act-btn del" onclick="${deleteHandler}('${r.id}')" title="刪除">${delSvg}</button></div></div>`).join('');
+  el.innerHTML=rules.map(r=>{
+    if(editingRuleId===r.id)return renderRuleEditForm(r,type);
+    return`<div class="rule-item"><div class="rule-info"><div class="rule-label">${esc(labelFn(r))}</div><div class="rule-names">${r.names.map(n=>`<span class="rule-tag">${esc(n)}</span>`).join('')}</div></div><div class="rule-acts"><button class="act-btn" onclick="startEditRule('${r.id}','${type}')" title="編輯">${editSvg}</button><button class="act-btn del" onclick="delRule('${r.id}','${type}')" title="刪除">${delSvg}</button></div></div>`;
+  }).join('');
 }
+
+function renderRuleEditForm(r,type){
+  if(type==='deadline'){
+    const mOpts=[0,1,2,3].map(v=>`<option value="${v}"${r.months===v?' selected':''}>${v} 個月</option>`).join('');
+    return`<div class="rule-item"><div class="rule-edit-form"><div class="rule-edit-row"><div class="f-row"><label>提前月數</label><select id="re-months">${mOpts}</select></div><div class="f-row"><label>提前天數</label><input id="re-days" type="number" min="0" value="${r.days}"></div><div class="f-row"><label>路線名稱</label><input id="re-names" type="text" value="${esc(r.names.join('、'))}"></div></div><div class="rule-edit-btns"><button class="btn btn-g" onclick="cancelEditRule()">取消</button><button class="btn btn-p" onclick="saveEditRule('${r.id}','deadline')">儲存</button></div></div></div>`;
+  }else if(type==='apply'){
+    const mOpts=[-1,0,1,2,3].map(v=>`<option value="${v}"${r.months===v?' selected':''}>${v===-1?'免申請':v+' 個月'}</option>`).join('');
+    return`<div class="rule-item"><div class="rule-edit-form"><div class="rule-edit-row"><div class="f-row"><label>提前月數</label><select id="re-months">${mOpts}</select></div><div class="f-row"><label>提前天數</label><input id="re-days" type="number" min="0" value="${r.days}"></div><div class="f-row"><label>路線名稱</label><input id="re-names" type="text" value="${esc(r.names.join('、'))}"></div></div><div class="rule-edit-btns"><button class="btn btn-g" onclick="cancelEditRule()">取消</button><button class="btn btn-p" onclick="saveEditRule('${r.id}','apply')">儲存</button></div></div></div>`;
+  }else{
+    const mOpts=[1,2,3,4].map(v=>`<option value="${v}"${r.promoMonths===v?' selected':''}>${v} 個月</option>`).join('');
+    return`<div class="rule-item"><div class="rule-edit-form"><div class="rule-edit-row"><div class="f-row"><label>提前宣傳月數</label><select id="re-months">${mOpts}</select></div><div class="f-row"><label>路線名稱</label><input id="re-names" type="text" value="${esc(r.names.join('、'))}"></div></div><div class="rule-edit-btns"><button class="btn btn-g" onclick="cancelEditRule()">取消</button><button class="btn btn-p" onclick="saveEditRule('${r.id}','mktg')">儲存</button></div></div></div>`;
+  }
+}
+
+function startEditRule(id,type){editingRuleId=id;renderAllRuleLists()}
+function cancelEditRule(){editingRuleId=null;renderAllRuleLists()}
+
+function saveEditRule(id,type){
+  const m=parseInt(document.getElementById('re-months').value);
+  const ns=document.getElementById('re-names').value.trim();
+  if(!ns){toast('請輸入路線名稱');return}
+  const names=ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean);
+  if(type==='deadline'){
+    const d=parseInt(document.getElementById('re-days').value)||0;
+    if(m===0&&d===0){toast('請設定提前時間');return}
+    const r=deadlineRules.find(x=>x.id===id);if(r){r.months=m;r.days=d;r.names=names}
+    saveToLS('hk-rules',deadlineRules);
+  }else if(type==='apply'){
+    const d=parseInt(document.getElementById('re-days').value)||0;
+    const r=applyRules.find(x=>x.id===id);if(r){r.months=m;r.days=d;r.names=names}
+    saveToLS('hk-apply',applyRules);
+  }else{
+    const r=mktgRules.find(x=>x.id===id);if(r){r.promoMonths=m||1;r.names=names}
+    saveToLS('hk-mktg',mktgRules);
+  }
+  editingRuleId=null;renderAllRuleLists();toast('規則已更新');
+}
+
 function renderAllRuleLists(){
-  renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'delDeadlineRule');
-  renderRuleList('rule-list-apply',applyRules,applyLabel,'delApplyRule');
-  renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'delMktgRule');
+  renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'deadline');
+  renderRuleList('rule-list-apply',applyRules,applyLabel,'apply');
+  renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'mktg');
+}
+
+function delRule(id,type){
+  if(type==='deadline'){deadlineRules=deadlineRules.filter(r=>r.id!==id);saveToLS('hk-rules',deadlineRules)}
+  else if(type==='apply'){applyRules=applyRules.filter(r=>r.id!==id);saveToLS('hk-apply',applyRules)}
+  else{mktgRules=mktgRules.filter(r=>r.id!==id);saveToLS('hk-mktg',mktgRules)}
+  renderAllRuleLists();toast('規則已刪除');
 }
 
 function addDeadlineRule(){
@@ -645,27 +702,24 @@ function addDeadlineRule(){
   const ns=document.getElementById('rd-names').value.trim();
   if(!ns){toast('請輸入路線名稱');return}if(m===0&&d===0){toast('請設定提前時間');return}
   deadlineRules.push({id:genId(),months:m,days:d,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
-  saveToLS('hk-rules',deadlineRules);renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'delDeadlineRule');document.getElementById('rd-names').value='';toast('規則已新增');
+  saveToLS('hk-rules',deadlineRules);renderAllRuleLists();document.getElementById('rd-names').value='';toast('規則已新增');
 }
-function delDeadlineRule(id){deadlineRules=deadlineRules.filter(r=>r.id!==id);saveToLS('hk-rules',deadlineRules);renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'delDeadlineRule');toast('規則已刪除')}
 
 function addApplyRule(){
   const m=parseInt(document.getElementById('ra-months').value),d=parseInt(document.getElementById('ra-days').value)||0;
   const ns=document.getElementById('ra-names').value.trim();
   if(!ns){toast('請輸入路線名稱');return}
   applyRules.push({id:genId(),months:m,days:d,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
-  saveToLS('hk-apply',applyRules);renderRuleList('rule-list-apply',applyRules,applyLabel,'delApplyRule');document.getElementById('ra-names').value='';toast('規則已新增');
+  saveToLS('hk-apply',applyRules);renderAllRuleLists();document.getElementById('ra-names').value='';toast('規則已新增');
 }
-function delApplyRule(id){applyRules=applyRules.filter(r=>r.id!==id);saveToLS('hk-apply',applyRules);renderRuleList('rule-list-apply',applyRules,applyLabel,'delApplyRule');toast('規則已刪除')}
 
 function addMktgRule(){
   const m=parseInt(document.getElementById('rm-months').value)||1;
   const ns=document.getElementById('rm-names').value.trim();
   if(!ns){toast('請輸入路線名稱');return}
   mktgRules.push({id:genId(),promoMonths:m,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
-  saveToLS('hk-mktg',mktgRules);renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'delMktgRule');document.getElementById('rm-names').value='';toast('規則已新增');
+  saveToLS('hk-mktg',mktgRules);renderAllRuleLists();document.getElementById('rm-names').value='';toast('規則已新增');
 }
-function delMktgRule(id){mktgRules=mktgRules.filter(r=>r.id!==id);saveToLS('hk-mktg',mktgRules);renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'delMktgRule');toast('規則已刪除')}
 
 // ── Storage layer ──
 class LocalStore{
