@@ -68,7 +68,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .chip{padding:5px 12px;border-radius:20px;font-size:13px;font-weight:500;font-family:var(--font);border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:all .15s}
 .chip:hover{background:var(--surface-hover)}.chip.on{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}
 
-.date-filter{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2)}
+.date-filter{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2);margin-bottom:16px}
 .date-filter input{padding:4px 8px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font:400 13px var(--font);color:var(--text)}
 .date-filter span{color:var(--text-muted)}
 .date-filter button{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;text-decoration:underline;padding:0}
@@ -90,7 +90,7 @@ th .arr{font-size:10px;margin-left:3px;opacity:.5}th.sorted .arr{opacity:1;color
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 
-.promo-flags{display:flex;align-items:center;gap:6px}
+.status-flags{display:flex;align-items:center;gap:8px}
 .stars{display:flex;gap:2px;cursor:pointer}
 .stars svg{width:18px;height:18px;transition:transform .12s}.stars svg:hover{transform:scale(1.2)}
 .star-on{color:var(--star)}.star-off{color:var(--star-off)}
@@ -271,16 +271,16 @@ tr.detail-row:hover td{background:var(--surface-alt)}
   <div id="view-list">
     <div class="bar">
       <div class="filters" id="filters"></div>
-      <div class="date-filter">
-        <input type="date" id="df-from" onchange="setDateFilter()">
-        <span>~</span>
-        <input type="date" id="df-to" onchange="setDateFilter()">
-        <button type="button" onclick="clearDateFilter()">清除</button>
-      </div>
       <button class="btn btn-o" onclick="showReport()">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         產生 LINE 日報
       </button>
+    </div>
+    <div class="date-filter">
+      <input type="date" id="df-from" onchange="setDateFilter()">
+      <span>~</span>
+      <input type="date" id="df-to" onchange="setDateFilter()">
+      <button type="button" onclick="clearDateFilter()">清除</button>
     </div>
     <div class="tbl-wrap">
       <table>
@@ -866,7 +866,7 @@ function render(){
     const isFull=t.capacity>0&&t.registered>=t.capacity;
 
     const promoOn=(t.promoted||0)>0,notFormed=!!t.notFormed;
-    const flagsH=`<div class="promo-flags"><div class="stars"><svg class="${promoOn?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}')" title="重點宣傳"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg></div><div class="xmark" onclick="event.stopPropagation();toggleX('${t.id}')" title="未成團"><svg class="${notFormed?'x-on':'x-off'}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="4" x2="16" y2="16"/><line x1="16" y1="4" x2="4" y2="16"/></svg></div></div>`;
+    const flagsH=`<div class="stars"><svg class="${promoOn?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}')" title="重點宣傳"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg></div>`;
 
     const ai=applyInfo(t);
     let applyDeadH,applyStatH;
@@ -881,23 +881,26 @@ function render(){
       applyStatH='<span class="pill pill-none">免申請</span>';
     }else{
       applyDeadH=fmtDate(ai.ds);
-      applyStatH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',-1)" ${applied<=0?'disabled':''}>−</button><span class="cap-nums">${applied} / ${t.registered}</span><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',1)" ${applied>=(t.registered||0)?'disabled':''}>+</button></div></div>`;
+      const applyPct=(t.registered||0)>0?Math.min(applied/t.registered,1):0;
+      const applyBarC=applied>=(t.registered||0)&&(t.registered||0)>0?'var(--accent)':applyPct>=0.8?'var(--amber)':'var(--accent)';
+      applyStatH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',-1)" ${applied<=0?'disabled':''}>−</button><span class="cap-nums">${applied} / ${t.registered}</span><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',1)" ${applied>=(t.registered||0)?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${applyPct*100}%;background:${applyBarC}"></div></div></div>`;
     }
 
     let barC;if(isFull)barC='var(--red)';else if(pct>=0.8)barC='var(--amber)';else barC='var(--accent)';
     const curStatus=STATUS_OPTS.find(s=>s.key===t.status)||STATUS_OPTS[0];
-    const statusH=`<select class="pill ${curStatus.cls}" onclick="event.stopPropagation()" onchange="event.stopPropagation();setStatus('${t.id}',this.value)">${STATUS_OPTS.map(s=>`<option value="${s.key}"${s.key===curStatus.key?' selected':''}>${s.label}</option>`).join('')}</select>`;
+    const statusH=`<div class="status-flags"><div class="xmark" onclick="event.stopPropagation();toggleX('${t.id}')" title="未成團"><svg class="${notFormed?'x-on':'x-off'}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="4" x2="16" y2="16"/><line x1="16" y1="4" x2="4" y2="16"/></svg></div><select class="pill ${curStatus.cls}" onclick="event.stopPropagation()" onchange="event.stopPropagation();setStatus('${t.id}',this.value)">${STATUS_OPTS.map(s=>`<option value="${s.key}"${s.key===curStatus.key?' selected':''}>${s.label}</option>`).join('')}</select></div>`;
 
     const dateCol=fmtRange(t.date,t.dateEnd);
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+    const nameH=`<div>${esc(t.name)}</div>${t.guide?`<div style="font-weight:400;font-size:12px;color:var(--text-muted);margin-top:2px">嚮導：${esc(t.guide)}</div>`:''}`;
 
-    const mainRow=`<tr class="${isPast?'past':''}"><td>${flagsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${statusH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}"><td>${flagsH}</td><td style="font-weight:600">${nameH}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${statusH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
       const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span>未設定</span>';
-      detailRow=`<tr class="detail-row"><td colspan="${COLS.length}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>嚮導</b><span>${t.guide?esc(t.guide):'未設定'}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td></tr>`;
+      detailRow=`<tr class="detail-row"><td colspan="${COLS.length}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td></tr>`;
     }
     return mainRow+detailRow;
   }).join('');
