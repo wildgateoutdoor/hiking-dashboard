@@ -1,6 +1,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>登山活動管理</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
 <style>
 :root {
@@ -276,6 +277,7 @@ tr.detail-row:hover td{background:var(--surface)}
   <div class="hdr">
     <div><h1>登山活動管理</h1><div class="hdr-sub" id="date-line"></div></div>
     <div class="hdr-btns">
+      <button class="btn btn-s" id="lock-btn" onclick="toggleEditor()" title="編輯權限"></button>
       <button class="btn btn-s" onclick="openSettings()" title="規則設定">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
@@ -499,8 +501,14 @@ const DEF_MKTG=[
   {id:'m3',promoMonths:3,names:['大小霸','雪山主東']},
 ];
 
+// ── Supabase 設定 ──
+const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
+const EDIT_PW_HASH='42583151644738616f065b4ec6dd1a839c7105a222385c921405126b25e5d393';
+
 let trips=[],deadlineRules=[],applyRules=[],mktgRules=[];
-let db=null,dlCap=null,unsub=null,store=null;
+let sb=null,dlCap=null,store=null,rulesReady=false;
+let isEditor=false;
 let editId=null,sortKey='date',sortDir='asc',filter='all';
 let viewMode='list',calYear,calMonth;
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
@@ -522,13 +530,28 @@ function fmtRange(s,e){
 }
 
 // ── Rules: load / save / match / label ──
-function loadRulesFromLS(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}const r=JSON.parse(JSON.stringify(def));try{localStorage.setItem(key,JSON.stringify(r))}catch{}return r}
-function saveToLS(key,data){try{localStorage.setItem(key,JSON.stringify(data))}catch{}}
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-mktg':'mktgRules'};
+function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
+function saveToLS(key,data){
+  try{localStorage.setItem(key,JSON.stringify(data))}catch{}
+  const sk=LS_TO_SETTINGS[key];
+  if(sk&&sb){sb.from('settings').upsert({key:sk,data}).then(({error})=>{if(error)console.error('settings save',error)})}
+}
 
-function loadAllRules(){
-  deadlineRules=loadRulesFromLS('hk-rules',DEF_DEADLINE);
-  applyRules=loadRulesFromLS('hk-apply',DEF_APPLY);
-  mktgRules=loadRulesFromLS('hk-mktg',DEF_MKTG);
+async function loadAllRules(){
+  let m={};
+  if(sb){
+    try{const{data,error}=await sb.from('settings').select('*');if(!error&&data)data.forEach(r=>m[r.key]=r.data)}catch(e){console.error(e)}
+  }
+  deadlineRules=m.deadlineRules||localGet('hk-rules',DEF_DEADLINE);
+  applyRules=m.applyRules||localGet('hk-apply',DEF_APPLY);
+  mktgRules=m.mktgRules||localGet('hk-mktg',DEF_MKTG);
+  if(sb){
+    if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
+    if(!m.applyRules)saveToLS('hk-apply',applyRules);
+    if(!m.mktgRules)saveToLS('hk-mktg',mktgRules);
+  }
+  rulesReady=true;
 }
 
 function matchRuleIn(rules,name){
@@ -795,7 +818,7 @@ function renderRuleEditForm(r,type){
   }
 }
 
-function startEditRule(id,type){editingRuleId=id;renderAllRuleLists()}
+async function startEditRule(id,type){if(!await ensureEditor())return;editingRuleId=id;renderAllRuleLists()}
 function cancelEditRule(){editingRuleId=null;renderAllRuleLists()}
 
 function saveEditRule(id,type){
@@ -825,14 +848,16 @@ function renderAllRuleLists(){
   renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'mktg');
 }
 
-function delRule(id,type){
+async function delRule(id,type){
+  if(!await ensureEditor())return;
   if(type==='deadline'){deadlineRules=deadlineRules.filter(r=>r.id!==id);saveToLS('hk-rules',deadlineRules)}
   else if(type==='apply'){applyRules=applyRules.filter(r=>r.id!==id);saveToLS('hk-apply',applyRules)}
   else{mktgRules=mktgRules.filter(r=>r.id!==id);saveToLS('hk-mktg',mktgRules)}
   renderAllRuleLists();toast('規則已刪除');
 }
 
-function addDeadlineRule(){
+async function addDeadlineRule(){
+  if(!await ensureEditor())return;
   const m=parseInt(document.getElementById('rd-months').value)||0,d=parseInt(document.getElementById('rd-days').value)||0;
   const ns=document.getElementById('rd-names').value.trim();
   if(!ns){toast('請輸入路線名稱');return}if(m===0&&d===0){toast('請設定提前時間');return}
@@ -840,7 +865,8 @@ function addDeadlineRule(){
   saveToLS('hk-rules',deadlineRules);renderAllRuleLists();document.getElementById('rd-names').value='';toast('規則已新增');
 }
 
-function addApplyRule(){
+async function addApplyRule(){
+  if(!await ensureEditor())return;
   const m=parseInt(document.getElementById('ra-months').value),d=parseInt(document.getElementById('ra-days').value)||0;
   const ns=document.getElementById('ra-names').value.trim();
   if(!ns){toast('請輸入路線名稱');return}
@@ -848,7 +874,8 @@ function addApplyRule(){
   saveToLS('hk-apply',applyRules);renderAllRuleLists();document.getElementById('ra-names').value='';toast('規則已新增');
 }
 
-function addMktgRule(){
+async function addMktgRule(){
+  if(!await ensureEditor())return;
   const m=parseInt(document.getElementById('rm-months').value)||1;
   const ns=document.getElementById('rm-names').value.trim();
   if(!ns){toast('請輸入路線名稱');return}
@@ -857,25 +884,85 @@ function addMktgRule(){
 }
 
 // ── Storage layer ──
-class LocalStore{
-  constructor(){this.load()}
-  load(){try{trips=JSON.parse(localStorage.getItem('hk-trips')||'[]')}catch{trips=[]}}
-  save(){try{localStorage.setItem('hk-trips',JSON.stringify(trips))}catch{}}
-  add(t){trips.push(t);this.save();render()}
-  upd(id,f){const t=trips.find(x=>x.id===id);if(t)Object.assign(t,f);this.save();render()}
-  del(id){trips=trips.filter(x=>x.id!==id);this.save();render()}
+// 本機備援（Supabase 無法載入時仍可用，資料只存這台電腦）
+const LocalStore={
+  add(t){trips.push(t);this._save();render()},
+  upd(id,f){const t=trips.find(x=>x.id===id);if(t)Object.assign(t,f);this._save();render()},
+  del(id){trips=trips.filter(x=>x.id!==id);this._save();render()},
+  _save(){try{localStorage.setItem('hk-trips',JSON.stringify(trips))}catch{}}
+};
+
+// Supabase 共用資料庫
+const SupaStore={
+  add(t){trips.push(t);render();sb.from('trips').insert({id:t.id,data:t}).then(({error})=>{if(error)toast('儲存失敗：'+error.message)})},
+  upd(id,f){const t=trips.find(x=>x.id===id);if(!t)return;Object.assign(t,f);render();sb.from('trips').update({data:t,updated_at:new Date().toISOString()}).eq('id',id).then(({error})=>{if(error)toast('儲存失敗：'+error.message)})},
+  del(id){trips=trips.filter(x=>x.id!==id);render();sb.from('trips').delete().eq('id',id).then(({error})=>{if(error)toast('刪除失敗：'+error.message)})}
+};
+
+async function loadTrips(){
+  if(!sb)return;
+  const{data,error}=await sb.from('trips').select('*');
+  if(error){console.error('load trips',error);toast('讀取資料失敗');return}
+  trips=(data||[]).map(r=>({id:r.id,...r.data}));
+  render();
 }
 
 async function initDB(){
-  try{if(window.claude)db=await window.claude.use('db')}catch{}
-  if(db){
-    unsub=db.collection('trips').orderBy('date','asc').onSnapshot(
-      snap=>{trips=snap.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));render()},
-      ()=>{store=new LocalStore();render()}
-    );
-    store={add(t){db.collection('trips').doc(t.id).set(t)},upd(id,f){db.collection('trips').doc(id).update(f)},del(id){db.collection('trips').doc(id).delete()}};
-  }else{store=new LocalStore();render()}
-  try{if(window.claude)dlCap=await window.claude.use('downloads')}catch{}
+  // 建立 Supabase 連線
+  try{if(window.supabase)sb=window.supabase.createClient(SB_URL,SB_KEY)}catch(e){console.error(e)}
+  if(sb){
+    store=SupaStore;
+    await loadAllRules();
+    await loadTrips();
+    // 即時同步：任何人改動 → 重新讀取
+    sb.channel('trips-rt')
+      .on('postgres_changes',{event:'*',schema:'public',table:'trips'},()=>loadTrips())
+      .on('postgres_changes',{event:'*',schema:'public',table:'settings'},()=>loadAllRules().then(render))
+      .subscribe();
+    maybeMigrateLocal();
+  }else{
+    // 連不上 Supabase → 退回本機模式
+    store=LocalStore;
+    trips=localGet('hk-trips',[]);
+    await loadAllRules();
+    render();
+    toast('雲端連線失敗，暫時使用本機資料');
+  }
+}
+
+// 首次接上雲端時，把這台電腦 localStorage 的舊活動搬上去
+async function maybeMigrateLocal(){
+  let local=[];try{local=JSON.parse(localStorage.getItem('hk-trips')||'[]')}catch{}
+  if(trips.length>0||local.length===0)return;
+  if(!isEditor){
+    if(!confirm(`偵測到這台電腦有 ${local.length} 筆本機舊資料，雲端目前是空的。\n要輸入密碼並上傳到雲端，讓大家都看得到嗎？`))return;
+    const ok=await promptEditor();if(!ok)return;
+  }
+  for(const t of local){await sb.from('trips').insert({id:t.id,data:t})}
+  toast(`已上傳 ${local.length} 筆資料到雲端`);
+  loadTrips();
+}
+
+// ── 編輯權限（密碼） ──
+async function sha256hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function refreshLockBtn(){
+  const b=document.getElementById('lock-btn');if(!b)return;
+  b.innerHTML=isEditor
+    ?'<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>編輯中'
+    :'<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>檢視';
+  b.classList.toggle('btn-p',isEditor);b.classList.toggle('btn-s',!isEditor);
+}
+async function promptEditor(){
+  const pw=window.prompt('請輸入編輯密碼：');
+  if(pw==null)return false;
+  const h=await sha256hex(pw);
+  if(h===EDIT_PW_HASH){isEditor=true;try{localStorage.setItem('hk-editor','1')}catch{}refreshLockBtn();toast('已解鎖，可以編輯了');return true}
+  toast('密碼錯誤');return false;
+}
+async function ensureEditor(){if(isEditor)return true;return await promptEditor()}
+function toggleEditor(){
+  if(isEditor){isEditor=false;try{localStorage.removeItem('hk-editor')}catch{}refreshLockBtn();toast('已鎖定（檢視模式）')}
+  else{promptEditor()}
 }
 
 // ── Render ──
@@ -992,21 +1079,23 @@ function render(){
 // ── Interactions ──
 function setFilter(f){filter=f;render()}
 function setSort(k){if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir=k==='promoted'?'desc':'asc'}render()}
-function toggleStar(id){const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{promoted:(t.promoted||0)>0?0:1});if(!db)render()}
-function adjReg(id,delta){
+async function toggleStar(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{promoted:(t.promoted||0)>0?0:1})}
+async function adjReg(id,delta){
+  if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;
   const next=Math.max(0,(t.registered||0)+delta);
   if(t.capacity>0&&next>t.capacity)return;
   const patch={registered:next};
   if((t.applied||0)>next)patch.applied=next;
-  store.upd(id,patch);if(!db)render();
+  store.upd(id,patch);
 }
-function adjApplied(id,delta){const t=trips.find(x=>x.id===id);if(!t)return;const max=t.registered||0;const next=Math.max(0,Math.min(max,(t.applied||0)+delta));store.upd(id,{applied:next});if(!db)render()}
-function setStatus(id,val){store.upd(id,{status:val});if(!db)render()}
+async function adjApplied(id,delta){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const max=t.registered||0;const next=Math.max(0,Math.min(max,(t.applied||0)+delta));store.upd(id,{applied:next})}
+async function setStatus(id,val){if(!await ensureEditor()){render();return}store.upd(id,{status:val})}
 function toggleExpand(id){if(expandedIds.has(id))expandedIds.delete(id);else expandedIds.add(id);render()}
 
-function openAdd(){editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');showOv('ov-trip')}
-function openEdit(id){
+async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');showOv('ov-trip')}
+async function openEdit(id){
+  if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
   document.getElementById('m-title').textContent='編輯活動';
   document.getElementById('f-name').value=t.name;document.getElementById('f-date').value=t.date;
@@ -1023,9 +1112,9 @@ function saveTrip(e){
   e.preventDefault();
   const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
   if(editId){store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.applied=0;data.createdAt=Date.now();store.add(data);toast('已新增')}
-  if(!db)render();closeTrip();
+  closeTrip();
 }
-function delTrip(id){const t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`確定要刪除「${t.name}」嗎？`))return;store.del(id);if(!db)render();toast('已刪除')}
+async function delTrip(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`確定要刪除「${t.name}」嗎？`))return;store.del(id);toast('已刪除')}
 
 document.getElementById('f-name').addEventListener('input',tryAutoFill);
 document.getElementById('f-date').addEventListener('change',()=>{
@@ -1072,8 +1161,15 @@ function closeRpt(){hideOv('ov-rpt')}
 async function copyReport(){const txt=buildReport();try{await navigator.clipboard.writeText(txt);toast('已複製到剪貼簿')}catch{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('已複製到剪貼簿')}}
 async function downloadReport(){
   const txt=buildReport();
-  if(dlCap){try{const now=new Date();await dlCap.save({filename:`登山日報_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.txt`,data:txt});toast('已下載')}catch(e){if(e.code==='declined')return;toast('下載失敗')}}
-  else toast('此環境不支援下載，請使用複製功能');
+  const now=new Date();
+  const fn=`登山日報_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.txt`;
+  if(dlCap){try{await dlCap.save({filename:fn,data:txt});toast('已下載')}catch(e){if(e.code==='declined')return;toast('下載失敗')}return}
+  try{
+    const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    toast('已下載');
+  }catch{toast('下載失敗，請改用複製')}
 }
 
 function showOv(id){document.getElementById(id).classList.add('show')}
@@ -1083,5 +1179,9 @@ document.querySelectorAll('.overlay').forEach(ov=>{ov.addEventListener('click',e
 let toastTimer;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('on'),2200)}
 
-loadAllRules();initCal();initDB();
+try{isEditor=localStorage.getItem('hk-editor')==='1'}catch{}
+refreshLockBtn();
+initCal();
+render();
+initDB();
 </script>
