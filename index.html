@@ -973,7 +973,9 @@ async function tryLogin(){
   const el=document.getElementById('login-pw');const err=document.getElementById('login-err');
   const pw=el.value;
   if(!pw){err.textContent='請輸入密碼';return}
-  const h=await sha256hex(pw);
+  let h;
+  try{h=await sha256hex(pw)}
+  catch(e){err.textContent='此瀏覽器無法驗證，請用 Chrome/Safari 並確認網址是 https';return}
   if(h===EDIT_PW_HASH){try{localStorage.setItem('hk-auth','1')}catch{}enterApp()}
   else{err.textContent='密碼錯誤';el.select()}
 }
