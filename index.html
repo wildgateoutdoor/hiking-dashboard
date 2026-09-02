@@ -114,10 +114,10 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .pill-closed{background:var(--surface-alt);color:var(--text-muted)}.pill-full{background:var(--red-bg);color:var(--red)}
 .pill-done{background:var(--surface-alt);color:var(--text-muted)}
 .pill-none{background:var(--accent-bg);color:var(--accent)}.pill-apply{background:var(--amber-bg);color:var(--amber)}
+.pill-waiting{background:var(--purple-bg);color:var(--purple)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
-.cd{font-weight:600;font-size:14px;white-space:nowrap}
-.cd-ok{color:var(--accent)}.cd-soon{color:var(--warn)}.cd-urgent{color:var(--red)}.cd-past{color:var(--text-muted)}
+select.pill{border:none;outline:none;cursor:pointer;font:600 12px var(--font);appearance:auto}
 
 .acts{display:flex;gap:4px}
 .act-btn{width:30px;height:30px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s}
@@ -337,6 +337,13 @@ tr.detail-row:hover td{background:var(--surface-alt)}
           <div class="f-row"><label for="f-guide">嚮導（選填）</label><input id="f-guide" type="text" placeholder="例：王小明"></div>
           <div class="f-row"><label for="f-excel">Excel 名單連結（選填）</label><input id="f-excel" type="url" placeholder="https://..."></div>
         </div>
+        <div class="f-row"><label for="f-status">狀態</label><select id="f-status">
+          <option value="reg">報名中</option>
+          <option value="apply">申請中</option>
+          <option value="notFormed">未成團</option>
+          <option value="waiting">等待出團</option>
+          <option value="done">已結束</option>
+        </select></div>
         <div class="f-row"><label for="f-notes">備註（選填）</label><textarea id="f-notes" placeholder="內部備忘"></textarea></div>
         <div class="f-actions">
           <button type="button" class="btn btn-g" onclick="closeTrip()">取消</button>
@@ -421,11 +428,18 @@ const DAYS=['日','一','二','三','四','五','六'];
 const COLS=[
   {key:'promoted',label:'宣傳',sort:true},{key:'name',label:'活動名稱',sort:true},
   {key:'date',label:'日期',sort:true},{key:'_applyDead',label:'申請截止',sort:true},
-  {key:'_cd',label:'申請倒數',sort:true},{key:'_cap',label:'報名狀況',sort:true},
+  {key:'_cap',label:'報名狀況',sort:true},
   {key:'_applyStat',label:'申請狀況',sort:false},
   {key:'_status',label:'狀態',sort:false},{key:'_acts',label:'',sort:false},
 ];
 const FILTERS=[{key:'all',label:'全部'},{key:'promo',label:'重點宣傳'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'}];
+const STATUS_OPTS=[
+  {key:'reg',label:'報名中',cls:'pill-open'},
+  {key:'apply',label:'申請中',cls:'pill-apply'},
+  {key:'notFormed',label:'未成團',cls:'pill-full'},
+  {key:'waiting',label:'等待出團',cls:'pill-waiting'},
+  {key:'done',label:'已結束',cls:'pill-done'},
+];
 
 const DEF_DEADLINE=[
   {id:'r1',months:0,days:7,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林']},
@@ -592,7 +606,10 @@ function getEventsForDate(ds){
   for(const t of trips){
     if(daysUntil(t.date)<0)continue;
     const mr=matchRuleIn(mktgRules,t.name);
-    if(mr){const ps=calcDateBefore(t.date,mr.promoMonths,0);if(dateStr(ps)===ds)events.push({type:'promo',label:'開始宣傳：'+t.name})}
+    if(mr){
+      const psStr=dateStr(calcDateBefore(t.date,mr.promoMonths,0));
+      if(ds>=psStr&&ds<=t.deadline)events.push({type:'promo',label:(ds===psStr?'開始宣傳：':'宣傳中：')+t.name});
+    }
     const ar=matchRuleIn(applyRules,t.name);
     if(ar&&ar.months>=0){const ad=calcDateBefore(t.date,ar.months,ar.days);if(dateStr(ad)===ds)events.push({type:'apply',label:'申請截止：'+t.name})}
   }
@@ -813,7 +830,6 @@ function sorted(list){
     else if(sortKey==='name'){va=a.name;vb=b.name}
     else if(sortKey==='date'){va=a.date;vb=b.date}
     else if(sortKey==='_applyDead'){const ia=applyInfo(a),ib=applyInfo(b);va=ia.state==='dated'?ia.date.getTime():ia.state==='none'?-Infinity:Infinity;vb=ib.state==='dated'?ib.date.getTime():ib.state==='none'?-Infinity:Infinity}
-    else if(sortKey==='_cd'){const ia=applyInfo(a),ib=applyInfo(b);va=ia.state==='dated'?ia.days:ia.state==='none'?-Infinity:Infinity;vb=ib.state==='dated'?ib.days:ib.state==='none'?-Infinity:Infinity}
     else if(sortKey==='_cap'){va=a.capacity?a.registered/a.capacity:0;vb=b.capacity?b.registered/b.capacity:0}
     else{va=a.date;vb=b.date}
     return va<vb?-1*m:va>vb?1*m:0;
@@ -853,39 +869,30 @@ function render(){
     const flagsH=`<div class="promo-flags"><div class="stars"><svg class="${promoOn?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}')" title="重點宣傳"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg></div><div class="xmark" onclick="event.stopPropagation();toggleX('${t.id}')" title="未成團"><svg class="${notFormed?'x-on':'x-off'}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="4" x2="16" y2="16"/><line x1="16" y1="4" x2="4" y2="16"/></svg></div></div>`;
 
     const ai=applyInfo(t);
-    let applyDeadH,applyCdH,applyCdC,applyStatH;
+    let applyDeadH,applyStatH;
+    const applied=Math.min(t.applied||0,t.registered||0);
     if(isPast){
-      applyDeadH='—';applyCdH='已結束';applyCdC='cd-past';applyStatH='<span class="pill pill-done">已結束</span>';
+      applyDeadH='—';applyStatH='<span class="pill pill-done">已結束</span>';
     }else if(ai.state==='unset'){
-      applyDeadH='<span style="color:var(--text-muted)">未設定</span>';applyCdH='—';applyCdC='cd-past';
+      applyDeadH='<span style="color:var(--text-muted)">未設定</span>';
       applyStatH='<span class="pill pill-closed">未設定</span>';
     }else if(ai.state==='none'){
-      applyDeadH='<span style="color:var(--text-muted)">免申請</span>';applyCdH='免申請';applyCdC='cd-ok';
+      applyDeadH='<span style="color:var(--text-muted)">免申請</span>';
       applyStatH='<span class="pill pill-none">免申請</span>';
     }else{
-      applyDeadH=fmtDate(ai.ds);const d=ai.days;
-      if(d<0){applyCdH='已截止';applyCdC='cd-past';applyStatH='<span class="pill pill-closed">已截止</span>'}
-      else if(d===0){applyCdH='今天截止';applyCdC='cd-urgent';applyStatH='<span class="pill pill-today">今日截止</span>'}
-      else if(d<=3){applyCdH=`剩 ${d} 天`;applyCdC='cd-urgent';applyStatH='<span class="pill pill-today">即將截止</span>'}
-      else if(d<=7){applyCdH=`剩 ${d} 天`;applyCdC='cd-soon';applyStatH='<span class="pill pill-soon">即將截止</span>'}
-      else{applyCdH=`剩 ${d} 天`;applyCdC='cd-ok';applyStatH='<span class="pill pill-apply">需申請</span>'}
+      applyDeadH=fmtDate(ai.ds);
+      applyStatH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',-1)" ${applied<=0?'disabled':''}>−</button><span class="cap-nums">${applied} / ${t.registered}</span><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',1)" ${applied>=(t.registered||0)?'disabled':''}>+</button></div></div>`;
     }
 
-    const regCd=daysUntil(t.deadline);
     let barC;if(isFull)barC='var(--red)';else if(pct>=0.8)barC='var(--amber)';else barC='var(--accent)';
-    let pillH;
-    if(isPast)pillH='<span class="pill pill-done">已結束</span>';
-    else if(isFull)pillH='<span class="pill pill-full">已額滿</span>';
-    else if(regCd<0)pillH='<span class="pill pill-closed">已截止</span>';
-    else if(regCd===0)pillH='<span class="pill pill-today">今日截止</span>';
-    else if(regCd<=7)pillH='<span class="pill pill-soon">即將截止</span>';
-    else pillH='<span class="pill pill-open">報名中</span>';
+    const curStatus=STATUS_OPTS.find(s=>s.key===t.status)||STATUS_OPTS[0];
+    const statusH=`<select class="pill ${curStatus.cls}" onclick="event.stopPropagation()" onchange="event.stopPropagation();setStatus('${t.id}',this.value)">${STATUS_OPTS.map(s=>`<option value="${s.key}"${s.key===curStatus.key?' selected':''}>${s.label}</option>`).join('')}</select>`;
 
     const dateCol=fmtRange(t.date,t.dateEnd);
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
 
-    const mainRow=`<tr class="${isPast?'past':''}"><td>${flagsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><span class="cd ${applyCdC}">${applyCdH}</span></td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${pillH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}"><td>${flagsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${statusH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -901,10 +908,19 @@ function setFilter(f){filter=f;render()}
 function setSort(k){if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir=k==='promoted'?'desc':'asc'}render()}
 function toggleStar(id){const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{promoted:(t.promoted||0)>0?0:1});if(!db)render()}
 function toggleX(id){const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{notFormed:t.notFormed?0:1});if(!db)render()}
-function adjReg(id,delta){const t=trips.find(x=>x.id===id);if(!t)return;const next=Math.max(0,(t.registered||0)+delta);if(t.capacity>0&&next>t.capacity)return;store.upd(id,{registered:next});if(!db)render()}
+function adjReg(id,delta){
+  const t=trips.find(x=>x.id===id);if(!t)return;
+  const next=Math.max(0,(t.registered||0)+delta);
+  if(t.capacity>0&&next>t.capacity)return;
+  const patch={registered:next};
+  if((t.applied||0)>next)patch.applied=next;
+  store.upd(id,patch);if(!db)render();
+}
+function adjApplied(id,delta){const t=trips.find(x=>x.id===id);if(!t)return;const max=t.registered||0;const next=Math.max(0,Math.min(max,(t.applied||0)+delta));store.upd(id,{applied:next});if(!db)render()}
+function setStatus(id,val){store.upd(id,{status:val});if(!db)render()}
 function toggleExpand(id){if(expandedIds.has(id))expandedIds.delete(id);else expandedIds.add(id);render()}
 
-function openAdd(){editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');showOv('ov-trip')}
+function openAdd(){editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');showOv('ov-trip')}
 function openEdit(id){
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
   document.getElementById('m-title').textContent='編輯活動';
@@ -913,14 +929,15 @@ function openEdit(id){
   document.getElementById('f-dead').value=t.deadline;document.getElementById('f-reg').value=t.registered;
   document.getElementById('f-cap').value=t.capacity;document.getElementById('f-notes').value=t.notes||'';
   document.getElementById('f-guide').value=t.guide||'';document.getElementById('f-excel').value=t.excelLink||'';
+  document.getElementById('f-status').value=t.status||'reg';
   document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');
   showOv('ov-trip');
 }
 function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
-  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim()};
-  if(editId){store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.notFormed=0;data.createdAt=Date.now();store.add(data);toast('已新增')}
+  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
+  if(editId){store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.notFormed=0;data.applied=0;data.createdAt=Date.now();store.add(data);toast('已新增')}
   if(!db)render();closeTrip();
 }
 function delTrip(id){const t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`確定要刪除「${t.name}」嗎？`))return;store.del(id);if(!db)render();toast('已刪除')}
