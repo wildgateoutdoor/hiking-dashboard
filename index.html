@@ -62,6 +62,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .stat{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r);font-size:13px;font-weight:500;color:var(--text-2);box-shadow:var(--shadow-sm)}
 .stat b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .stat--accent b{color:var(--accent)}.stat--warn b{color:var(--warn)}.stat--red b{color:var(--red)}.stat--amber b{color:var(--amber)}
+.info-ic{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--text-muted);color:var(--text-muted);font-size:10px;font-weight:700;font-style:italic;font-family:Georgia,serif;cursor:pointer;background:transparent;padding:0;line-height:1;flex-shrink:0}
+.info-ic:hover{border-color:var(--text-2);color:var(--text-2);background:var(--surface-hover)}
+.info-pop{position:fixed;z-index:150;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:12px 14px;max-width:280px;font-size:13px;line-height:1.7;color:var(--text-2)}
+.info-pop b{display:block;color:var(--text);font-weight:700;margin-bottom:4px}
 
 .view-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border-sub);padding-bottom:0}
 .vtab{padding:8px 16px;font:600 14px var(--font);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);cursor:pointer;transition:all .15s}
@@ -319,8 +323,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
   <div class="stats">
     <div class="stat stat--accent"><b id="s-total">0</b> 活動總數</div>
-    <div class="stat stat--warn"><b id="s-soon">0</b> 即將截止</div>
-    <div class="stat stat--red"><b id="s-full">0</b> 即將額滿</div>
+    <div class="stat stat--warn"><b id="s-soon">0</b> 即將截止 <button class="info-ic" onclick="showInfo(event,'soon')" title="判斷標準">i</button></div>
+    <div class="stat stat--red"><b id="s-full">0</b> 即將額滿 <button class="info-ic" onclick="showInfo(event,'full')" title="判斷標準">i</button></div>
     <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
   </div>
 
@@ -1203,6 +1207,29 @@ document.querySelectorAll('.overlay').forEach(ov=>{ov.addEventListener('click',e
 
 let toastTimer;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('on'),2200)}
+
+// 統計數字的判斷標準說明
+const INFO_TEXT={
+  soon:'<b>即將截止</b>報名截止日距今 0～7 天內（含今天）、且尚未過期的活動。',
+  full:'<b>即將額滿</b>報名人數 ÷ 滿團人數 ≥ 80% 的活動。<br>例：滿團 8 人、已報名 7 人（87.5%）即列入。'
+};
+let infoPopEl=null;
+function closeInfo(){if(infoPopEl){infoPopEl.remove();infoPopEl=null}}
+function showInfo(evt,type){
+  evt.stopPropagation();
+  if(infoPopEl){closeInfo();return}
+  const pop=document.createElement('div');
+  pop.className='info-pop';pop.innerHTML=INFO_TEXT[type];
+  document.body.appendChild(pop);infoPopEl=pop;
+  const r=evt.currentTarget.getBoundingClientRect();
+  let left=r.left,top=r.bottom+6;
+  const pw=pop.offsetWidth,ph=pop.offsetHeight;
+  if(left+pw>window.innerWidth-8)left=window.innerWidth-pw-8;
+  if(top+ph>window.innerHeight-8)top=r.top-ph-6;
+  if(left<8)left=8;if(top<8)top=8;
+  pop.style.left=left+'px';pop.style.top=top+'px';
+}
+document.addEventListener('click',closeInfo);
 
 // 登入流程：進站先驗證密碼，登入後才載入內容
 document.getElementById('login-btn').addEventListener('click',tryLogin);
