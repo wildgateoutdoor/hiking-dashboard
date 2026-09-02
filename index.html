@@ -133,9 +133,10 @@ select.pill.pill-done{color:var(--text-muted)}
 .act-btn.expand svg{transition:transform .15s}
 .act-btn.expand.open svg{transform:rotate(90deg)}
 
-tr.detail-row td{background:var(--surface);padding:14px 18px;border-top:1px dashed var(--border-sub)}
+tr.detail-row td{background:var(--surface);padding:0;border:none}
 tr.detail-row:hover td{background:var(--surface)}
-.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 24px;font-size:13px}
+tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px dashed var(--border-sub)}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 24px;font-size:13px}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .detail-item a{color:var(--accent)}
 .detail-item span{color:var(--text-2)}
@@ -1070,7 +1071,7 @@ function render(){
     let detailRow='';
     if(isOpen){
       const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span>未設定</span>';
-      detailRow=`<tr class="detail-row"><td colspan="${COLS.length}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td></tr>`;
+      detailRow=`<tr class="detail-row"><td></td><td></td><td class="dr-body" colspan="${COLS.length-2}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td></tr>`;
     }
     return mainRow+detailRow;
   }).join('');
