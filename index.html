@@ -90,14 +90,9 @@ th .arr{font-size:10px;margin-left:3px;opacity:.5}th.sorted .arr{opacity:1;color
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 
-.status-flags{display:flex;align-items:center;gap:8px}
 .stars{display:flex;gap:2px;cursor:pointer}
 .stars svg{width:18px;height:18px;transition:transform .12s}.stars svg:hover{transform:scale(1.2)}
 .star-on{color:var(--star)}.star-off{color:var(--star-off)}
-.xmark{cursor:pointer;display:flex;transition:transform .12s}
-.xmark:hover{transform:scale(1.2)}
-.xmark svg{width:18px;height:18px}
-.x-on{color:var(--red)}.x-off{color:var(--star-off)}
 
 .cap{white-space:nowrap}.cap-nums{font-weight:600;font-size:14px}.cap-full{color:var(--red)}.cap-high{color:var(--amber)}
 .cap-bar{height:4px;background:var(--border-sub);border-radius:2px;margin-top:5px;min-width:80px;overflow:hidden}
@@ -117,7 +112,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .pill-waiting{background:var(--purple-bg);color:var(--purple)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
-select.pill{border:none;outline:none;cursor:pointer;font:600 12px var(--font);appearance:auto}
+select.pill{border:none;outline:none;cursor:pointer;font:600 12px var(--font);appearance:auto;padding:3px 20px 3px 14px}
+select.pill.pill-open{background:color-mix(in srgb,var(--accent-bg),var(--surface) 45%)}
+select.pill.pill-apply{background:color-mix(in srgb,var(--amber-bg),var(--surface) 45%)}
+select.pill.pill-full{background:color-mix(in srgb,var(--red-bg),var(--surface) 45%)}
+select.pill.pill-waiting{background:color-mix(in srgb,var(--purple-bg),var(--surface) 45%)}
+select.pill.pill-done{background:color-mix(in srgb,var(--surface-alt),var(--surface) 45%)}
 
 .acts{display:flex;gap:4px}
 .act-btn{width:30px;height:30px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s}
@@ -160,6 +160,15 @@ tr.detail-row:hover td{background:var(--surface-alt)}
 .cal-popup-item{font-size:13px;padding:4px 0;border-bottom:1px solid var(--border-sub);display:flex;gap:6px;align-items:baseline}
 .cal-popup-item:last-child{border-bottom:none}
 .cal-popup-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+
+/* Marketing overview (list view) */
+.mktgview-month{margin-bottom:22px}
+.mktgview-month h3{font-family:var(--font-d);font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px}
+.mktgview-list{list-style:none}
+.mktgview-list li{display:flex;align-items:baseline;gap:10px;padding:10px 14px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm);margin-bottom:8px;flex-wrap:wrap}
+.mktgview-list li::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0;margin-top:6px}
+.mktgview-list li b{font-size:14px;font-weight:600;color:var(--text)}
+.mktgview-list li span{font-size:13px;color:var(--text-2)}
 
 /* Marketing */
 .mktg{margin-bottom:20px}
@@ -266,6 +275,7 @@ tr.detail-row:hover td{background:var(--surface-alt)}
   <div class="view-tabs">
     <button class="vtab on" id="vtab-list" onclick="setView('list')">活動列表</button>
     <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
+    <button class="vtab" id="vtab-mktg" onclick="setView('mktgview')">行銷總覽</button>
   </div>
 
   <div id="view-list">
@@ -304,6 +314,10 @@ tr.detail-row:hover td{background:var(--surface-alt)}
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
+  </div>
+
+  <div id="view-mktgview" style="display:none">
+    <div id="mktgview-body"></div>
   </div>
 </div>
 
@@ -426,11 +440,13 @@ tr.detail-row:hover td{background:var(--surface-alt)}
 <script>
 const DAYS=['日','一','二','三','四','五','六'];
 const COLS=[
+  {key:'_status',label:'狀態',sort:false},
   {key:'promoted',label:'宣傳',sort:true},{key:'name',label:'活動名稱',sort:true},
-  {key:'date',label:'日期',sort:true},{key:'_applyDead',label:'申請截止',sort:true},
+  {key:'date',label:'日期',sort:true},{key:'_applyDead',label:'申請日期',sort:true},
   {key:'_cap',label:'報名狀況',sort:true},
   {key:'_applyStat',label:'申請狀況',sort:false},
-  {key:'_status',label:'狀態',sort:false},{key:'_acts',label:'',sort:false},
+  {key:'_guide',label:'嚮導',sort:false},
+  {key:'_acts',label:'',sort:false},
 ];
 const FILTERS=[{key:'all',label:'全部'},{key:'promo',label:'重點宣傳'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'}];
 const STATUS_OPTS=[
@@ -591,6 +607,41 @@ function renderMktg(){
   sec.innerHTML=html+`</div>`;
 }
 
+// ── Marketing overview (list view) ──
+function getAllMktgPeriods(){
+  const items=[];
+  for(const t of trips){
+    if(daysUntil(t.date)<0)continue;
+    const mr=matchRuleIn(mktgRules,t.name);
+    if(!mr)continue;
+    const start=calcDateBefore(t.date,mr.promoMonths,0);
+    items.push({trip:t,start,end:parseD(t.deadline)});
+  }
+  items.sort((a,b)=>a.start-b.start);
+  return items;
+}
+function renderMktgView(){
+  const el=document.getElementById('mktgview-body');
+  const items=getAllMktgPeriods();
+  if(items.length===0){el.innerHTML='<div class="empty"><p>目前沒有排定宣傳的活動</p></div>';return}
+  const groups=[];
+  for(const it of items){
+    const key=`${it.start.getFullYear()}年${it.start.getMonth()+1}月`;
+    let g=groups.find(x=>x.key===key);
+    if(!g){g={key,items:[]};groups.push(g)}
+    g.items.push(it);
+  }
+  let html='';
+  for(const g of groups){
+    html+=`<div class="mktgview-month"><h3>${g.key}</h3><ul class="mktgview-list">`;
+    for(const it of g.items){
+      html+=`<li><b>${esc(it.trip.name)}</b><span>${fmtShort(dateStr(it.start))}（開始宣傳）～${fmtShort(it.trip.deadline)}（報名截止）</span></li>`;
+    }
+    html+='</ul></div>';
+  }
+  el.innerHTML=html;
+}
+
 // ── Calendar ──
 function initCal(){const n=today();calYear=n.getFullYear();calMonth=n.getMonth()}
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCal()}
@@ -606,10 +657,7 @@ function getEventsForDate(ds){
   for(const t of trips){
     if(daysUntil(t.date)<0)continue;
     const mr=matchRuleIn(mktgRules,t.name);
-    if(mr){
-      const psStr=dateStr(calcDateBefore(t.date,mr.promoMonths,0));
-      if(ds>=psStr&&ds<=t.deadline)events.push({type:'promo',label:(ds===psStr?'開始宣傳：':'宣傳中：')+t.name});
-    }
+    if(mr){const ps=calcDateBefore(t.date,mr.promoMonths,0);if(dateStr(ps)===ds)events.push({type:'promo',label:'開始宣傳：'+t.name})}
     const ar=matchRuleIn(applyRules,t.name);
     if(ar&&ar.months>=0){const ad=calcDateBefore(t.date,ar.months,ar.days);if(dateStr(ad)===ds)events.push({type:'apply',label:'申請截止：'+t.name})}
   }
@@ -680,9 +728,12 @@ function setView(mode){
   viewMode=mode;
   document.getElementById('vtab-list').classList.toggle('on',mode==='list');
   document.getElementById('vtab-cal').classList.toggle('on',mode==='calendar');
+  document.getElementById('vtab-mktg').classList.toggle('on',mode==='mktgview');
   document.getElementById('view-list').style.display=mode==='list'?'block':'none';
   document.getElementById('view-calendar').style.display=mode==='calendar'?'block':'none';
+  document.getElementById('view-mktgview').style.display=mode==='mktgview'?'block':'none';
   if(mode==='calendar')renderCal();
+  if(mode==='mktgview')renderMktgView();
 }
 
 // ── Settings modal ──
@@ -847,6 +898,7 @@ function render(){
 
   renderMktg();
   if(viewMode==='calendar')renderCal();
+  if(viewMode==='mktgview')renderMktgView();
 
   document.getElementById('filters').innerHTML=FILTERS.map(f=>`<button class="chip${filter===f.key?' on':''}" onclick="setFilter('${f.key}')">${f.label}</button>`).join('');
 
@@ -865,7 +917,7 @@ function render(){
     const pct=t.capacity>0?Math.min(t.registered/t.capacity,1):0;
     const isFull=t.capacity>0&&t.registered>=t.capacity;
 
-    const promoOn=(t.promoted||0)>0,notFormed=!!t.notFormed;
+    const promoOn=(t.promoted||0)>0;
     const flagsH=`<div class="stars"><svg class="${promoOn?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}')" title="重點宣傳"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg></div>`;
 
     const ai=applyInfo(t);
@@ -888,14 +940,14 @@ function render(){
 
     let barC;if(isFull)barC='var(--red)';else if(pct>=0.8)barC='var(--amber)';else barC='var(--accent)';
     const curStatus=STATUS_OPTS.find(s=>s.key===t.status)||STATUS_OPTS[0];
-    const statusH=`<div class="status-flags"><div class="xmark" onclick="event.stopPropagation();toggleX('${t.id}')" title="未成團"><svg class="${notFormed?'x-on':'x-off'}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="4" x2="16" y2="16"/><line x1="16" y1="4" x2="4" y2="16"/></svg></div><select class="pill ${curStatus.cls}" onclick="event.stopPropagation()" onchange="event.stopPropagation();setStatus('${t.id}',this.value)">${STATUS_OPTS.map(s=>`<option value="${s.key}"${s.key===curStatus.key?' selected':''}>${s.label}</option>`).join('')}</select></div>`;
+    const statusH=`<select class="pill ${curStatus.cls}" onclick="event.stopPropagation()" onchange="event.stopPropagation();setStatus('${t.id}',this.value)">${STATUS_OPTS.map(s=>`<option value="${s.key}"${s.key===curStatus.key?' selected':''}>${s.label}</option>`).join('')}</select>`;
 
     const dateCol=fmtRange(t.date,t.dateEnd);
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
-    const nameH=`<div>${esc(t.name)}</div>${t.guide?`<div style="font-weight:400;font-size:12px;color:var(--text-muted);margin-top:2px">嚮導：${esc(t.guide)}</div>`:''}`;
+    const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
 
-    const mainRow=`<tr class="${isPast?'past':''}"><td>${flagsH}</td><td style="font-weight:600">${nameH}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${statusH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}"><td>${statusH}</td><td>${flagsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${guideH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -910,7 +962,6 @@ function render(){
 function setFilter(f){filter=f;render()}
 function setSort(k){if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir=k==='promoted'?'desc':'asc'}render()}
 function toggleStar(id){const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{promoted:(t.promoted||0)>0?0:1});if(!db)render()}
-function toggleX(id){const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{notFormed:t.notFormed?0:1});if(!db)render()}
 function adjReg(id,delta){
   const t=trips.find(x=>x.id===id);if(!t)return;
   const next=Math.max(0,(t.registered||0)+delta);
@@ -940,7 +991,7 @@ function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
   const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
-  if(editId){store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.notFormed=0;data.applied=0;data.createdAt=Date.now();store.add(data);toast('已新增')}
+  if(editId){store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.applied=0;data.createdAt=Date.now();store.add(data);toast('已新增')}
   if(!db)render();closeTrip();
 }
 function delTrip(id){const t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`確定要刪除「${t.name}」嗎？`))return;store.del(id);if(!db)render();toast('已刪除')}
