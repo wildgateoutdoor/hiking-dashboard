@@ -1,6 +1,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>登山活動管理</title>
+<title>入野門活動管理</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
 <style>
@@ -119,12 +120,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .status-select-wrap{position:relative;display:inline-flex}
 .status-select-wrap::before{content:'';position:absolute;right:22px;top:50%;transform:translateY(-50%);width:1px;height:12px;background:var(--border)}
 .status-select-wrap::after{content:'';position:absolute;right:9px;top:50%;transform:translateY(-30%);width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-top:4.5px solid var(--text-muted);pointer-events:none}
-select.pill{appearance:none;-webkit-appearance:none;-moz-appearance:none;outline:none;cursor:pointer;font:600 12px var(--font);padding:2px 32px 2px 12px;background:var(--surface);border:1px solid var(--border);line-height:1.5}
-select.pill.pill-open{color:var(--accent)}
-select.pill.pill-apply{color:var(--amber)}
-select.pill.pill-full{color:var(--red)}
-select.pill.pill-waiting{color:var(--purple)}
-select.pill.pill-done{color:var(--text-muted)}
+select.pill{appearance:none;-webkit-appearance:none;-moz-appearance:none;outline:none;cursor:pointer;font:600 12px var(--font);padding:3px 30px 3px 12px;border:none;line-height:1.5}
+select.pill.pill-open{background:var(--accent-bg);color:var(--accent)}
+select.pill.pill-apply{background:var(--amber-bg);color:var(--amber)}
+select.pill.pill-full{background:var(--red-bg);color:var(--red)}
+select.pill.pill-waiting{background:var(--purple-bg);color:var(--purple)}
+select.pill.pill-done{background:var(--surface-alt);color:var(--text-muted)}
 
 .acts{display:flex;gap:4px}
 .act-btn{width:30px;height:30px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s}
@@ -135,6 +136,7 @@ select.pill.pill-done{color:var(--text-muted)}
 
 tr.detail-row td{background:var(--surface);padding:0;border:none}
 tr.detail-row:hover td{background:var(--surface)}
+tr.detail-row td.dr-line{border-top:1px dashed var(--border-sub)}
 tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px dashed var(--border-sub)}
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 24px;font-size:13px}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
@@ -249,6 +251,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px dashed var(--bord
 
 /* Login gate */
 .login-gate{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-gate[hidden]{display:none}
 .login-box{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:34px 28px;width:100%;max-width:360px;text-align:center}
 .login-box h1{font-family:var(--font-d);font-size:22px;font-weight:700;margin-bottom:6px;color:var(--text)}
 .login-box p{font-size:14px;color:var(--text-muted);margin-bottom:20px}
@@ -286,7 +289,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px dashed var(--bord
 
 <div class="login-gate" id="login-gate">
   <div class="login-box">
-    <h1>登山活動管理</h1>
+    <h1>入野門活動管理</h1>
     <p>請輸入密碼登入</p>
     <input type="password" id="login-pw" placeholder="密碼" autocomplete="current-password">
     <button class="btn btn-p" id="login-btn">登入</button>
@@ -296,7 +299,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px dashed var(--bord
 
 <div class="app">
   <div class="hdr">
-    <div><h1>登山活動管理</h1><div class="hdr-sub" id="date-line"></div></div>
+    <div><h1>入野門活動管理</h1><div class="hdr-sub" id="date-line"></div></div>
     <div class="hdr-btns">
       <button class="btn btn-s" onclick="logout()" title="登出">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -1087,7 +1090,7 @@ function render(){
     let detailRow='';
     if(isOpen){
       const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span>未設定</span>';
-      detailRow=`<tr class="detail-row"><td></td><td></td><td class="dr-body" colspan="${COLS.length-2}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td></tr>`;
+      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-3}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td><td></td></tr>`;
     }
     return mainRow+detailRow;
   }).join('');
