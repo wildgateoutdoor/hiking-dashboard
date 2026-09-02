@@ -1,6 +1,6 @@
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>登山活動管理</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@700&family=Barlow:wght@400;500;600;700&display=swap">
 
 <style>
 :root {
@@ -15,8 +15,8 @@
   --star: #D4873A; --star-off: #D0CABD;
   --shadow-sm: 0 1px 2px rgba(37,61,51,.06); --shadow: 0 1px 4px rgba(37,61,51,.09); --shadow-lg: 0 4px 16px rgba(37,61,51,.12);
   --r: 6px; --r-lg: 10px;
-  --font-d: 'Bitter', Georgia, serif;
-  --font: 'Barlow', -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --font: 'PingFang TC', 'Microsoft JhengHei', 'Microsoft JhengHei UI', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-d: var(--font);
 }
 @media (prefers-color-scheme:dark) {
   :root:not([data-theme="light"]) {
@@ -112,12 +112,18 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}
 .pill-waiting{background:var(--purple-bg);color:var(--purple)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
-select.pill{border:none;outline:none;cursor:pointer;font:600 12px var(--font);appearance:auto;padding:3px 20px 3px 14px}
-select.pill.pill-open{background:color-mix(in srgb,var(--accent-bg),var(--surface) 45%)}
-select.pill.pill-apply{background:color-mix(in srgb,var(--amber-bg),var(--surface) 45%)}
-select.pill.pill-full{background:color-mix(in srgb,var(--red-bg),var(--surface) 45%)}
-select.pill.pill-waiting{background:color-mix(in srgb,var(--purple-bg),var(--surface) 45%)}
-select.pill.pill-done{background:color-mix(in srgb,var(--surface-alt),var(--surface) 45%)}
+.cd{font-weight:600;font-size:14px;white-space:nowrap}
+.cd-ok{color:var(--accent)}.cd-soon{color:var(--warn)}.cd-urgent{color:var(--red)}.cd-past{color:var(--text-muted)}
+
+.status-select-wrap{position:relative;display:inline-flex}
+.status-select-wrap::before{content:'';position:absolute;right:26px;top:50%;transform:translateY(-50%);width:1px;height:14px;background:var(--border)}
+.status-select-wrap::after{content:'';position:absolute;right:11px;top:50%;transform:translateY(-35%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--text-muted);pointer-events:none}
+select.pill{appearance:none;-webkit-appearance:none;-moz-appearance:none;outline:none;cursor:pointer;font:600 12px var(--font);padding:4px 40px 4px 12px;background:var(--surface);border:1px solid var(--border)}
+select.pill.pill-open{color:var(--accent)}
+select.pill.pill-apply{color:var(--amber)}
+select.pill.pill-full{color:var(--red)}
+select.pill.pill-waiting{color:var(--purple)}
+select.pill.pill-done{color:var(--text-muted)}
 
 .acts{display:flex;gap:4px}
 .act-btn{width:30px;height:30px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s}
@@ -240,12 +246,29 @@ tr.detail-row:hover td{background:var(--surface-alt)}
 .toast.on{transform:translateX(-50%) translateY(0)}
 
 @media(max-width:700px){
-  .app{padding:16px 12px 40px}.hdr{flex-direction:column}.hdr h1{font-size:22px}
+  .app{padding:16px 12px 40px}
+  .hdr{flex-direction:row;align-items:center}.hdr h1{font-size:20px}
+  .hdr-btns{flex-shrink:0}
+  .stats{gap:8px}.stat{padding:6px 10px;font-size:12px;flex:1 1 calc(50% - 4px);min-width:0}.stat b{font-size:17px}
+  .view-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .vtab{padding:8px 12px;font-size:13px;white-space:nowrap}
   .bar{flex-direction:column;align-items:stretch}
+  .bar .btn-o{justify-content:center}
+  .filters{gap:5px}.chip{padding:5px 11px}
+  .date-filter{flex-wrap:wrap}.date-filter input{flex:1;min-width:0}
   .f-pair,.f-triple{grid-template-columns:1fr}
   th,td{padding:8px 10px;font-size:13px}
-  .cal-day{min-height:60px;padding:4px}.cal-ev{font-size:10px}
+  .cal-day{min-height:56px;padding:3px 4px}.cal-ev{font-size:9px;padding:1px 3px}
+  .cal-num{font-size:12px}
   .mktg-cards{grid-template-columns:1fr}
+  .modal{max-width:100%}.modal-body{padding:18px}
+  .mktgview-list li{padding:10px 12px}
+  .reg-btn{width:26px;height:26px}
+}
+@media(max-width:480px){
+  .stat{flex:1 1 100%}
+  .cal-dow{font-size:10px}
+  .cal-ev{white-space:normal;line-height:1.2}
 }
 </style>
 
@@ -443,6 +466,7 @@ const COLS=[
   {key:'_status',label:'狀態',sort:false},
   {key:'promoted',label:'宣傳',sort:true},{key:'name',label:'活動名稱',sort:true},
   {key:'date',label:'日期',sort:true},{key:'_applyDead',label:'申請日期',sort:true},
+  {key:'_cd',label:'申請倒數',sort:true},
   {key:'_cap',label:'報名狀況',sort:true},
   {key:'_applyStat',label:'申請狀況',sort:false},
   {key:'_guide',label:'嚮導',sort:false},
@@ -881,6 +905,7 @@ function sorted(list){
     else if(sortKey==='name'){va=a.name;vb=b.name}
     else if(sortKey==='date'){va=a.date;vb=b.date}
     else if(sortKey==='_applyDead'){const ia=applyInfo(a),ib=applyInfo(b);va=ia.state==='dated'?ia.date.getTime():ia.state==='none'?-Infinity:Infinity;vb=ib.state==='dated'?ib.date.getTime():ib.state==='none'?-Infinity:Infinity}
+    else if(sortKey==='_cd'){const ia=applyInfo(a),ib=applyInfo(b);va=ia.state==='dated'?ia.days:ia.state==='none'?-Infinity:Infinity;vb=ib.state==='dated'?ib.days:ib.state==='none'?-Infinity:Infinity}
     else if(sortKey==='_cap'){va=a.capacity?a.registered/a.capacity:0;vb=b.capacity?b.registered/b.capacity:0}
     else{va=a.date;vb=b.date}
     return va<vb?-1*m:va>vb?1*m:0;
@@ -921,18 +946,24 @@ function render(){
     const flagsH=`<div class="stars"><svg class="${promoOn?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}')" title="重點宣傳"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg></div>`;
 
     const ai=applyInfo(t);
-    let applyDeadH,applyStatH;
+    let applyDeadH,applyCdH,applyCdC,applyStatH;
     const applied=Math.min(t.applied||0,t.registered||0);
     if(isPast){
-      applyDeadH='—';applyStatH='<span class="pill pill-done">已結束</span>';
+      applyDeadH='—';applyCdH='已結束';applyCdC='cd-past';applyStatH='<span class="pill pill-done">已結束</span>';
     }else if(ai.state==='unset'){
-      applyDeadH='<span style="color:var(--text-muted)">未設定</span>';
+      applyDeadH='<span style="color:var(--text-muted)">未設定</span>';applyCdH='—';applyCdC='cd-past';
       applyStatH='<span class="pill pill-closed">未設定</span>';
     }else if(ai.state==='none'){
-      applyDeadH='<span style="color:var(--text-muted)">免申請</span>';
+      applyDeadH='<span style="color:var(--text-muted)">免申請</span>';applyCdH='免申請';applyCdC='cd-ok';
       applyStatH='<span class="pill pill-none">免申請</span>';
     }else{
       applyDeadH=fmtDate(ai.ds);
+      const d=ai.days;
+      if(d<0){applyCdH='已截止';applyCdC='cd-past'}
+      else if(d===0){applyCdH='今天截止';applyCdC='cd-urgent'}
+      else if(d<=3){applyCdH=`剩 ${d} 天`;applyCdC='cd-urgent'}
+      else if(d<=7){applyCdH=`剩 ${d} 天`;applyCdC='cd-soon'}
+      else{applyCdH=`剩 ${d} 天`;applyCdC='cd-ok'}
       const applyPct=(t.registered||0)>0?Math.min(applied/t.registered,1):0;
       const applyBarC=applied>=(t.registered||0)&&(t.registered||0)>0?'var(--accent)':applyPct>=0.8?'var(--amber)':'var(--accent)';
       applyStatH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',-1)" ${applied<=0?'disabled':''}>−</button><span class="cap-nums">${applied} / ${t.registered}</span><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',1)" ${applied>=(t.registered||0)?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${applyPct*100}%;background:${applyBarC}"></div></div></div>`;
@@ -940,14 +971,14 @@ function render(){
 
     let barC;if(isFull)barC='var(--red)';else if(pct>=0.8)barC='var(--amber)';else barC='var(--accent)';
     const curStatus=STATUS_OPTS.find(s=>s.key===t.status)||STATUS_OPTS[0];
-    const statusH=`<select class="pill ${curStatus.cls}" onclick="event.stopPropagation()" onchange="event.stopPropagation();setStatus('${t.id}',this.value)">${STATUS_OPTS.map(s=>`<option value="${s.key}"${s.key===curStatus.key?' selected':''}>${s.label}</option>`).join('')}</select>`;
+    const statusH=`<span class="status-select-wrap"><select class="pill ${curStatus.cls}" onclick="event.stopPropagation()" onchange="event.stopPropagation();setStatus('${t.id}',this.value)">${STATUS_OPTS.map(s=>`<option value="${s.key}"${s.key===curStatus.key?' selected':''}>${s.label}</option>`).join('')}</select></span>`;
 
     const dateCol=fmtRange(t.date,t.dateEnd);
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
 
-    const mainRow=`<tr class="${isPast?'past':''}"><td>${statusH}</td><td>${flagsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${guideH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}"><td>${statusH}</td><td>${flagsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><span class="cd ${applyCdC}">${applyCdH}</span></td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${guideH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
