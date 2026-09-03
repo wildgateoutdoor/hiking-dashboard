@@ -192,7 +192,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mv-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .mv-main b{font-size:14px;font-weight:600;color:var(--text)}
 .mv-main span{font-size:13px;color:var(--text-2)}
-.mv-tag{display:inline-block;padding:1px 9px;border-radius:11px;font-size:12px;font-weight:600}
+.mv-tag{display:inline-block;padding:1px 9px;border-radius:11px;font-size:12px;font-weight:600;background:var(--surface);border:1px solid currentColor}
 .mv-edit{flex-shrink:0;width:28px;height:28px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);cursor:pointer;font-size:14px;line-height:1}
 .mv-edit:hover{background:var(--surface-alt);color:var(--text)}
 .swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .1s}
@@ -307,7 +307,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .mc-name{font-size:17px;font-weight:700;min-width:0;word-break:break-word}
 .mc-flags{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.mc-line{display:flex;gap:10px;margin-bottom:12px}
+.mc-line{display:flex;gap:10px;margin-bottom:24px}
 .mc-line>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .mc-line b{font-size:11px;color:var(--text-muted);font-weight:600}
 .mc-line .v{font-size:13px;color:var(--text);word-break:break-word}
@@ -388,8 +388,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
   </div>
 
-  <div class="mktg" id="mktg-section"></div>
   <div class="mktg" id="apply-section"></div>
+  <div class="mktg" id="mktg-section"></div>
 
   <div class="view-tabs">
     <button class="vtab on" id="vtab-list" onclick="setView('list')">活動列表</button>
@@ -840,30 +840,40 @@ function getAllMktgPeriods(){
 }
 function renderMktgView(){
   const el=document.getElementById('mktgview-body');
-  const acts=getAllMktgPeriods().map(it=>({sort:it.start,kind:'act',it}));
-  const evs=mktgEvents.map(e=>({sort:parseD(e.date),kind:'event',ev:e}));
-  const all=[...acts,...evs].sort((a,b)=>a.sort-b.sort);
+  // 以「發文」為單位：每筆發文一列，發文日期在最前面
+  const rows=[];
+  for(const it of getAllMktgPeriods()){
+    const t=it.trip;
+    const tripDates=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtShort(t.date);
+    const promoRange=`${fmtShort(dateStr(it.start))}~${fmtShort(t.deadline)}`;
+    const posts=(t.posts||[]).slice().sort((a,b)=>a.date<b.date?-1:1);
+    if(posts.length){
+      posts.forEach(p=>rows.push({sort:parseD(p.date),kind:'post',t,post:p,tripDates,promoRange}));
+    }else{
+      rows.push({sort:it.start,kind:'nopost',t,tripDates,promoRange});
+    }
+  }
+  for(const e of mktgEvents)rows.push({sort:parseD(e.date),kind:'event',ev:e});
+  rows.sort((a,b)=>a.sort-b.sort);
+
   let html=`<div class="mktgview-head"><button class="btn btn-p" onclick="openMktgEvent()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行銷時程</button></div>`;
-  if(all.length===0){el.innerHTML=html+'<div class="empty"><p>目前沒有行銷時程</p></div>';return}
+  if(rows.length===0){el.innerHTML=html+'<div class="empty"><p>目前沒有行銷時程</p></div>';return}
   const groups=[];
-  for(const item of all){
-    const d=item.sort;const key=`${d.getFullYear()}年${d.getMonth()+1}月`;
+  for(const r of rows){
+    const d=r.sort;const key=`${d.getFullYear()}年${d.getMonth()+1}月`;
     let g=groups.find(x=>x.key===key);if(!g){g={key,items:[]};groups.push(g)}
-    g.items.push(item);
+    g.items.push(r);
   }
   for(const g of groups){
     html+=`<div class="mktgview-month"><h3>${g.key}</h3><ul class="mktgview-list">`;
-    for(const item of g.items){
-      if(item.kind==='act'){
-        const it=item.it;
-        const tripDates=it.trip.dateEnd&&it.trip.dateEnd!==it.trip.date?`${fmtShort(it.trip.date)}-${fmtShort(it.trip.dateEnd)}`:fmtShort(it.trip.date);
-        const promoRange=`${fmtShort(dateStr(it.start))}~${fmtShort(it.trip.deadline)}`;
-        const posts=(it.trip.posts||[]).slice().sort((a,b)=>a.date<b.date?-1:1);
-        const postsStr=posts.length?posts.map(p=>`${fmtShort(p.date)} ${esc(p.label||'發文')}`).join('、'):'<span style="color:var(--text-muted)">未排定</span>';
-        html+=`<li><span class="mv-dot" style="background:var(--purple)"></span><div class="mv-main"><b>${tripDates}　${esc(it.trip.name)}</b><span>宣傳期：${promoRange}</span><span>發文時間：${postsStr}</span></div><button class="mv-edit" onclick="openPosts('${it.trip.id}')" title="編輯發文時間">✎</button></li>`;
+    for(const r of g.items){
+      if(r.kind==='post'){
+        html+=`<li><span class="mv-dot" style="background:var(--purple)"></span><div class="mv-main"><b>發文日期：${fmtShort(r.post.date)}　主題：${esc(r.t.name)} ${r.tripDates}</b><span>宣傳期：${r.promoRange}${r.post.label?`｜${esc(r.post.label)}`:''}</span></div><button class="mv-edit" onclick="openPosts('${r.t.id}')" title="編輯發文">✎</button></li>`;
+      }else if(r.kind==='nopost'){
+        html+=`<li><span class="mv-dot" style="background:var(--star-off)"></span><div class="mv-main"><b>主題：${esc(r.t.name)} ${r.tripDates}</b><span>宣傳期：${r.promoRange}｜發文：<span style="color:var(--text-muted)">未排定</span></span></div><button class="mv-edit" onclick="openPosts('${r.t.id}')" title="安排發文">✎</button></li>`;
       }else{
-        const e=item.ev;const tc=tagColor(e.color);
-        html+=`<li><span class="mv-dot" style="background:${tc.c}"></span><div class="mv-main"><b>${fmtShort(e.date)}　<span class="mv-tag" style="background:${tc.bg};color:${tc.c}">${esc(e.title)}</span></b></div><button class="mv-edit" onclick="openMktgEvent('${e.id}')" title="編輯">✎</button><button class="mv-edit" onclick="delMktgEvent('${e.id}')" title="刪除">🗑</button></li>`;
+        const e=r.ev;const tc=tagColor(e.color);
+        html+=`<li><span class="mv-dot" style="background:${tc.c}"></span><div class="mv-main"><b>發文日期：${fmtShort(e.date)}　主題：<span class="mv-tag" style="color:${tc.c};border-color:${tc.c}">${esc(e.title)}</span></b></div><button class="mv-edit" onclick="openMktgEvent('${e.id}')" title="編輯">✎</button><button class="mv-edit" onclick="delMktgEvent('${e.id}')" title="刪除">🗑</button></li>`;
       }
     }
     html+='</ul></div>';
