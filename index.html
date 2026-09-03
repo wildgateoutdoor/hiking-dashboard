@@ -300,6 +300,22 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   }
 }
 
+/* 手機活動卡片 */
+.mcards{margin-top:4px}
+.mcard{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:12px 14px;margin-bottom:12px}
+.mcard.past{opacity:.55}
+.mc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.mc-name{font-size:17px;font-weight:700;min-width:0;word-break:break-word}
+.mc-flags{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.mc-line{display:flex;gap:10px;margin-bottom:12px}
+.mc-line>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.mc-line b{font-size:11px;color:var(--text-muted);font-weight:600}
+.mc-line .v{font-size:13px;color:var(--text);word-break:break-word}
+.mc-line a{font-size:13px;color:var(--accent)}
+.mc-line4{gap:6px}.mc-line4 .v{font-size:12px}.mc-line4 .cd{font-size:12px}
+.mcard .cap-bar{min-width:0}
+.mc-acts{display:flex;justify-content:flex-end;gap:4px}
+
 @media(max-width:700px){
   .app{padding:16px 12px 40px}
   .hdr{flex-direction:row;align-items:center}.hdr h1{font-size:20px}
@@ -315,30 +331,19 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .f-pair,.f-triple{grid-template-columns:1fr}
   .cal-day{min-height:56px;padding:3px 4px}.cal-ev{font-size:9px;padding:1px 3px}
   .cal-num{font-size:12px}
-  .mktg-cards{grid-template-columns:1fr}
+  .mktg-cards{grid-template-columns:1fr 1fr;gap:8px}
+  .mktg-card{padding:10px 12px}.mktg-card-name{font-size:13px}.mktg-card-date{font-size:11px}.mktg-action{font-size:11px}
   .modal{max-width:100%}.modal-body{padding:18px}
   .mktgview-list li{padding:10px 12px}
   .reg-btn{width:28px;height:28px}
+  .cal-bar{flex-direction:column;align-items:stretch}.cal-add-btns .btn{flex:1;justify-content:center}
 
-  /* 活動列表改為卡片式 */
-  .tbl-wrap{border:none;background:transparent;box-shadow:none;overflow:visible}
-  table,tbody,tr,td{display:block;width:100%}
-  thead{display:none}
-  tbody tr:not(.detail-row){background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);margin-bottom:12px;padding:4px 14px 8px}
-  tbody tr:not(.detail-row):hover td{background:transparent}
-  tbody tr td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0;border:none;border-bottom:1px solid var(--border-sub);font-size:14px;white-space:normal}
-  tbody tr td:last-child{border-bottom:none}
-  tbody tr td::before{content:attr(data-label);font-size:12px;color:var(--text-muted);font-weight:600;flex-shrink:0}
-  td.td-name{display:block;font-size:17px;font-weight:700;padding:8px 0 6px;border-bottom:1px solid var(--border-sub)}
-  td.td-name::before{display:none}
-  td.td-acts{justify-content:flex-end}td.td-acts::before{content:'操作';margin-right:auto}
-  .cap,.reg-row{width:auto}.cap-bar{display:none}
-  /* 展開列（詳情）貼在卡片下方 */
-  tbody tr.expanded-main{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none}
-  tr.detail-row td:empty,tr.detail-row td.dr-line{display:none}
-  tr.detail-row td.dr-body{display:block;padding:12px 14px;border:1px solid var(--border-sub);border-top:1px dashed var(--border);border-radius:0 0 var(--r-lg) var(--r-lg);background:var(--surface-alt);margin-bottom:12px}
-  tr.detail-row .detail-grid{grid-template-columns:1fr}
+  /* 活動列表：手機改用專屬卡片，隱藏表格 */
+  .tbl-wrap,.date-filter{ }
+  #view-list .tbl-wrap{display:none}
+  .mcards{display:block}
 }
+@media(min-width:701px){ .mcards{display:none} }
 @media(max-width:480px){
   .stat b{font-size:16px}.stat{font-size:10px}
   .cal-dow{font-size:10px}
@@ -413,6 +418,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <button class="btn btn-p" onclick="openAdd()">新增第一個活動</button>
       </div>
     </div>
+    <div class="mcards" id="mcards"></div>
   </div>
 
   <div id="view-calendar" style="display:none">
@@ -1284,9 +1290,10 @@ function render(){
     return`<th class="sortable${active?' sorted':''}" onclick="setSort('${c.key}')">${c.label}<span class="arr">${arr}</span>${expandBtn}</th>`;
   }).join('');
 
-  if(list.length===0){tb.innerHTML='';emp.hidden=false;return}
+  if(list.length===0){tb.innerHTML='';document.getElementById('mcards').innerHTML='';emp.hidden=false;return}
   emp.hidden=true;
 
+  const cards=[];
   tb.innerHTML=list.map(t=>{
     const isPast=daysUntil(t.date)<0;
     const pct=t.capacity>0?Math.min(t.registered/t.capacity,1):0;
@@ -1327,16 +1334,32 @@ function render(){
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
+    const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
+    const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td data-label="宣傳">${flagsH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名狀況"><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td data-label="申請狀況">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td data-label="宣傳">${flagsH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名狀況">${regCapH}</td><td data-label="申請狀況">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
       const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span>未設定</span>';
       detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-3}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td><td></td></tr>`;
     }
+
+    // 手機卡片
+    const mExcelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span class="v" style="color:var(--text-muted)">未設定</span>';
+    const mNotesH=t.notes?`<div class="mc-line"><div><b>備註</b><span class="v">${esc(t.notes)}</span></div></div>`:'';
+    cards.push(`<div class="mcard${isPast?' past':''}">`
+      +`<div class="mc-top"><span class="mc-name">${esc(t.name)}</span><div class="mc-flags">${flagsH}${statusH}</div></div>`
+      +`<div class="mc-line mc-line4"><div><b>活動日期</b><span class="v">${dateCol}</span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
+      +`<div class="mc-line"><div><b>報名狀況</b>${regCapH}</div><div><b>申請狀況</b>${applyStatH}</div></div>`
+      +`<div class="mc-line"><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div><div><b>Excel 名單</b>${mExcelH}</div></div>`
+      +mNotesH
+      +`<div class="mc-acts">${editDelH}</div>`
+      +`</div>`);
+
     return mainRow+detailRow;
   }).join('');
+  document.getElementById('mcards').innerHTML=cards.join('');
 }
 
 // ── Interactions ──
