@@ -156,6 +156,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .empty svg{width:64px;height:64px;color:var(--border);margin-bottom:16px}.empty p{font-size:15px;margin-bottom:16px}
 
 /* Calendar */
+.cal-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.cal-add-btns{display:flex;gap:8px;flex-wrap:wrap}
 .cal-wrap{border:1px solid var(--border-sub);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface-alt);border-bottom:1px solid var(--border-sub)}
 .cal-nav h3{font-size:16px;font-weight:700}
@@ -382,10 +384,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 
   <div class="mktg" id="mktg-section"></div>
+  <div class="mktg" id="apply-section"></div>
 
   <div class="view-tabs">
     <button class="vtab on" id="vtab-list" onclick="setView('list')">活動列表</button>
-    <button class="vtab" id="vtab-mktg" onclick="setView('mktgview')">行銷總覽</button>
+    <button class="vtab" id="vtab-mktg" onclick="setView('mktgview')">行銷列表</button>
     <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
   </div>
 
@@ -413,6 +416,13 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 
   <div id="view-calendar" style="display:none">
+    <div class="cal-bar">
+      <div class="filters" id="cal-filters"></div>
+      <div class="cal-add-btns">
+        <button class="btn btn-o" onclick="openAdd()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增活動</button>
+        <button class="btn btn-o" onclick="openMktgEvent()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行銷時程</button>
+      </div>
+    </div>
     <div class="cal-wrap">
       <div class="cal-nav">
         <button onclick="calPrev()">&lsaquo;</button>
@@ -637,7 +647,9 @@ const TAG_COLORS=[
 ];
 function tagColor(key){return TAG_COLORS.find(x=>x.key===key)||TAG_COLORS[0]}
 let editId=null,sortKey='date',sortDir='asc',filter='all';
-let viewMode='list',calYear,calMonth;
+let viewMode='list',calYear,calMonth,calFilter='all';
+const CAL_FILTERS=[{key:'all',label:'全部'},{key:'act',label:'只顯示活動'},{key:'mktg',label:'只顯示行銷'}];
+const CAL_GROUP={trip:'act',deadline:'act',apply:'act',promo:'mktg',post:'mktg',mktgevent:'mktg'};
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
@@ -778,6 +790,31 @@ function renderMktg(){
       else html+=`<div class="mktg-action mktg-action-apply">📋 ${fmtShort(dateStr(it.applyDeadline))} 前申請</div>`;
     }
     html+=`</div></div>`;
+  }
+  sec.innerHTML=html+`</div>`;
+}
+
+// 本週申請項目：申請截止日在 0~7 天內、尚未出發的活動
+function getApplyWeekItems(){
+  const items=[];
+  for(const t of trips){
+    if(daysUntil(t.date)<0)continue;
+    const ai=applyInfo(t);
+    if(ai.state!=='dated')continue;
+    if(ai.days>=0&&ai.days<=7)items.push({trip:t,ai});
+  }
+  items.sort((a,b)=>a.ai.days-b.ai.days);
+  return items;
+}
+function renderApplyWeek(){
+  const sec=document.getElementById('apply-section');
+  const items=getApplyWeekItems();
+  if(items.length===0){sec.innerHTML='';return}
+  let html=`<div class="mktg-header"><h2>本週申請項目</h2></div><div class="mktg-cards">`;
+  for(const it of items){
+    const dateRange=it.trip.dateEnd&&it.trip.dateEnd!==it.trip.date?`${fmtShort(it.trip.date)}~${fmtShort(it.trip.dateEnd)}`:fmtDate(it.trip.date);
+    const dl=it.ai.days===0?'今天截止':`剩 ${it.ai.days} 天`;
+    html+=`<div class="mktg-card"><div class="mktg-card-name">${esc(it.trip.name)}</div><div class="mktg-card-date">${dateRange} 出發｜${it.trip.registered}/${it.trip.capacity} 人</div><div class="mktg-card-actions"><div class="mktg-action mktg-action-urgent">📋 申請截止 ${fmtShort(it.ai.ds)}（${dl}）</div></div></div>`;
   }
   sec.innerHTML=html+`</div>`;
 }
@@ -927,11 +964,14 @@ function getEventsForDate(ds){
   for(const e of mktgEvents){
     if(e.date===ds)events.push({type:'mktgevent',label:e.title,color:tagColor(e.color).c});
   }
-  return events;
+  return calFilter==='all'?events:events.filter(e=>CAL_GROUP[e.type]===calFilter);
 }
+function setCalFilter(f){calFilter=f;renderCal()}
 
 function renderCal(){
   document.getElementById('cal-title').textContent=`${calYear}年${calMonth+1}月`;
+  const cf=document.getElementById('cal-filters');
+  if(cf)cf.innerHTML=CAL_FILTERS.map(f=>`<button class="chip${calFilter===f.key?' on':''}" onclick="setCalFilter('${f.key}')">${f.label}</button>`).join('');
   const grid=document.getElementById('cal-grid');
   const dows=['一','二','三','四','五','六','日'];
   let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
@@ -1228,6 +1268,7 @@ function render(){
   document.getElementById('s-promo').textContent=future.filter(t=>t.promoted>0).length;
 
   renderMktg();
+  renderApplyWeek();
   if(viewMode==='calendar')renderCal();
   if(viewMode==='mktgview')renderMktgView();
 
