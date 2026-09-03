@@ -891,6 +891,9 @@ function addPost(){
 }
 function removePost(idx){editPostsDraft.splice(idx,1);renderPostsDraft()}
 function savePosts(){
+  // 若使用者填了輸入框但沒按「新增發文」，儲存時一併收進來
+  const pd=document.getElementById('post-date').value;
+  if(pd){const pl=document.getElementById('post-label').value.trim()||'發文';editPostsDraft.push({date:pd,label:pl})}
   store.upd(editPostsTripId,{posts:editPostsDraft.slice()});
   renderMktgView();if(viewMode==='calendar')renderCal();
   hideOv('ov-posts');toast('已儲存發文排程');
