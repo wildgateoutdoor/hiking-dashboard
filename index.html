@@ -91,10 +91,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 
 .tbl-wrap{overflow-x:auto;border:1px solid var(--border-sub);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow)}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-thead{background:var(--surface-alt)}
-th{padding:10px 14px;font-size:12px;font-weight:600;color:var(--text-muted);text-align:left;text-transform:uppercase;letter-spacing:0.04em;border-bottom:1px solid var(--border-sub);white-space:nowrap;user-select:none}
-th.sortable{cursor:pointer}th.sortable:hover{color:var(--text-2)}
-th .arr{font-size:10px;margin-left:3px;opacity:.5}th.sorted .arr{opacity:1;color:var(--accent)}
+thead{background:var(--accent)}
+th{padding:10px 14px;font-size:12px;font-weight:600;color:var(--accent-on);text-align:left;text-transform:uppercase;letter-spacing:0.04em;border-bottom:1px solid var(--accent);white-space:nowrap;user-select:none}
+th.sortable{cursor:pointer}th.sortable:hover{color:rgba(255,255,255,.75)}
+th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;color:#fff}
+.expand-all-btn{margin-left:8px;padding:2px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font:600 11px var(--font);cursor:pointer;text-transform:none;letter-spacing:0;vertical-align:middle}
+.expand-all-btn:hover{background:rgba(255,255,255,.28)}
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 
@@ -267,28 +269,63 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .login-box .btn{width:100%;justify-content:center;padding:11px}
 .login-err{color:var(--red);font-size:13px;margin-top:12px;min-height:18px}
 
+/* 手機一律使用淺色模式（覆蓋深色） */
+@media (max-width:700px) and (prefers-color-scheme:dark){
+  :root:not([data-theme="dark"]){
+    --bg:#F2EEE5;--surface:#FFFFFF;--surface-hover:#EDE9E0;--surface-alt:#E8E4DA;
+    --text:#253D33;--text-2:#4E6358;--text-muted:#8A9990;
+    --border:#D4CFC4;--border-sub:#E2DED5;
+    --accent:#3D8B66;--accent-hover:#357A59;--accent-bg:#E4F2EB;--accent-on:#FFF;
+    --amber:#D4873A;--amber-bg:#FFF3E6;--amber-on:#7A4E1E;
+    --red:#C24740;--red-bg:#FDECEA;--red-on:#7A2520;
+    --warn:#C4960F;--warn-bg:#FFF8E0;
+    --purple:#7B61A6;--purple-bg:#F0EBF7;
+    --star:#D4873A;--star-off:#D0CABD;
+    --shadow-sm:0 1px 2px rgba(37,61,51,.06);--shadow:0 1px 4px rgba(37,61,51,.09);--shadow-lg:0 4px 16px rgba(37,61,51,.12);
+  }
+}
+
 @media(max-width:700px){
   .app{padding:16px 12px 40px}
   .hdr{flex-direction:row;align-items:center}.hdr h1{font-size:20px}
   .hdr-btns{flex-shrink:0}
-  .stats{gap:8px}.stat{padding:6px 10px;font-size:12px;flex:1 1 calc(50% - 4px);min-width:0}.stat b{font-size:17px}
+  /* 四個統計排成一列 */
+  .stats{gap:6px;flex-wrap:nowrap}
+  .stat{flex:1 1 0;min-width:0;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:11px;text-align:center;line-height:1.2}
+  .stat b{font-size:18px}.info-ic{display:none}
   .view-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .vtab{padding:8px 12px;font-size:13px;white-space:nowrap}
-  .bar{flex-direction:column;align-items:stretch}
-  .bar .btn-o{justify-content:center}
   .filters{gap:5px}.chip{padding:5px 11px}
   .date-filter{flex-wrap:wrap}.date-filter input{flex:1;min-width:0}
   .f-pair,.f-triple{grid-template-columns:1fr}
-  th,td{padding:8px 10px;font-size:13px}
   .cal-day{min-height:56px;padding:3px 4px}.cal-ev{font-size:9px;padding:1px 3px}
   .cal-num{font-size:12px}
   .mktg-cards{grid-template-columns:1fr}
   .modal{max-width:100%}.modal-body{padding:18px}
   .mktgview-list li{padding:10px 12px}
-  .reg-btn{width:26px;height:26px}
+  .reg-btn{width:28px;height:28px}
+
+  /* 活動列表改為卡片式 */
+  .tbl-wrap{border:none;background:transparent;box-shadow:none;overflow:visible}
+  table,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tbody tr:not(.detail-row){background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);margin-bottom:12px;padding:4px 14px 8px}
+  tbody tr:not(.detail-row):hover td{background:transparent}
+  tbody tr td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0;border:none;border-bottom:1px solid var(--border-sub);font-size:14px;white-space:normal}
+  tbody tr td:last-child{border-bottom:none}
+  tbody tr td::before{content:attr(data-label);font-size:12px;color:var(--text-muted);font-weight:600;flex-shrink:0}
+  td.td-name{display:block;font-size:17px;font-weight:700;padding:8px 0 6px;border-bottom:1px solid var(--border-sub)}
+  td.td-name::before{display:none}
+  td.td-acts{justify-content:flex-end}td.td-acts::before{content:'操作';margin-right:auto}
+  .cap,.reg-row{width:auto}.cap-bar{display:none}
+  /* 展開列（詳情）貼在卡片下方 */
+  tbody tr.expanded-main{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none}
+  tr.detail-row td:empty,tr.detail-row td.dr-line{display:none}
+  tr.detail-row td.dr-body{display:block;padding:12px 14px;border:1px solid var(--border-sub);border-top:1px dashed var(--border);border-radius:0 0 var(--r-lg) var(--r-lg);background:var(--surface-alt);margin-bottom:12px}
+  tr.detail-row .detail-grid{grid-template-columns:1fr}
 }
 @media(max-width:480px){
-  .stat{flex:1 1 100%}
+  .stat b{font-size:16px}.stat{font-size:10px}
   .cal-dow{font-size:10px}
   .cal-ev{white-space:normal;line-height:1.2}
 }
@@ -310,6 +347,9 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <div class="hdr-btns">
       <button class="btn btn-s" onclick="logout()" title="登出">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+      <button class="btn btn-s" onclick="showReport()" title="產生 LINE 日報">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </button>
       <button class="btn btn-s" onclick="openSettings()" title="規則設定">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -339,10 +379,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <div id="view-list">
     <div class="bar">
       <div class="filters" id="filters"></div>
-      <button class="btn btn-o" onclick="showReport()">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        產生 LINE 日報
-      </button>
     </div>
     <div class="date-filter">
       <input type="date" id="df-from" onchange="setDateFilter()">
@@ -714,7 +750,9 @@ function renderMktgView(){
   for(const g of groups){
     html+=`<div class="mktgview-month"><h3>${g.key}</h3><ul class="mktgview-list">`;
     for(const it of g.items){
-      html+=`<li><b>${esc(it.trip.name)}</b><span>${fmtShort(dateStr(it.start))}（開始宣傳）～${fmtShort(it.trip.deadline)}（報名截止）</span></li>`;
+      const tripDates=it.trip.dateEnd&&it.trip.dateEnd!==it.trip.date?`${fmtShort(it.trip.date)}-${fmtShort(it.trip.dateEnd)}`:fmtShort(it.trip.date);
+      const promoRange=`${fmtShort(dateStr(it.start))}~${fmtShort(it.trip.deadline)}`;
+      html+=`<li><b>${tripDates}　${esc(it.trip.name)}</b><span>宣傳期：${promoRange}</span></li>`;
     }
     html+='</ul></div>';
   }
@@ -1043,13 +1081,16 @@ function render(){
 
   document.getElementById('filters').innerHTML=FILTERS.map(f=>`<button class="chip${filter===f.key?' on':''}" onclick="setFilter('${f.key}')">${f.label}</button>`).join('');
 
+  const list=sorted(filtered());const tb=document.getElementById('tbody');const emp=document.getElementById('empty');
+  const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
+
   document.getElementById('thead-row').innerHTML=COLS.map(c=>{
-    if(!c.sort)return`<th>${c.label}</th>`;
+    const expandBtn=c.key==='_guide'?` <button class="expand-all-btn" onclick="event.stopPropagation();toggleExpandAll()">${allOpen?'全部收合':'全部展開'}</button>`:'';
+    if(!c.sort)return`<th>${c.label}${expandBtn}</th>`;
     const active=sortKey===c.key;const arr=active?(sortDir==='asc'?'▲':'▼'):'▲';
-    return`<th class="sortable${active?' sorted':''}" onclick="setSort('${c.key}')">${c.label}<span class="arr">${arr}</span></th>`;
+    return`<th class="sortable${active?' sorted':''}" onclick="setSort('${c.key}')">${c.label}<span class="arr">${arr}</span>${expandBtn}</th>`;
   }).join('');
 
-  const list=sorted(filtered());const tb=document.getElementById('tbody');const emp=document.getElementById('empty');
   if(list.length===0){tb.innerHTML='';emp.hidden=false;return}
   emp.hidden=true;
 
@@ -1094,7 +1135,7 @@ function render(){
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td>${statusH}</td><td>${flagsH}</td><td style="font-weight:600">${esc(t.name)}</td><td>${dateCol}</td><td>${applyDeadH}</td><td><span class="cd ${applyCdC}">${applyCdH}</span></td><td><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td>${applyStatH}</td><td>${guideH}</td><td><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td data-label="宣傳">${flagsH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名狀況"><div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div></td><td data-label="申請狀況">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -1121,6 +1162,13 @@ async function adjReg(id,delta){
 async function adjApplied(id,delta){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const max=t.registered||0;const next=Math.max(0,Math.min(max,(t.applied||0)+delta));store.upd(id,{applied:next})}
 async function setStatus(id,val){if(!await ensureEditor()){render();return}store.upd(id,{status:val})}
 function toggleExpand(id){if(expandedIds.has(id))expandedIds.delete(id);else expandedIds.add(id);render()}
+function toggleExpandAll(){
+  const list=sorted(filtered());
+  const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
+  if(allOpen)expandedIds.clear();
+  else list.forEach(t=>expandedIds.add(t.id));
+  render();
+}
 
 async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');showOv('ov-trip')}
 async function openEdit(id){
