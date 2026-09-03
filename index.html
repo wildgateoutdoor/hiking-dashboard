@@ -181,13 +181,26 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .cal-popup-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
 
 /* Marketing overview (list view) */
+.mktgview-head{margin-bottom:16px}
 .mktgview-month{margin-bottom:22px}
 .mktgview-month h3{font-family:var(--font-d);font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px}
 .mktgview-list{list-style:none}
-.mktgview-list li{display:flex;align-items:baseline;gap:10px;padding:10px 14px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm);margin-bottom:8px;flex-wrap:wrap}
-.mktgview-list li::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0;margin-top:6px}
-.mktgview-list li b{font-size:14px;font-weight:600;color:var(--text)}
-.mktgview-list li span{font-size:13px;color:var(--text-2)}
+.mktgview-list li{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm);margin-bottom:8px}
+.mv-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.mv-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mv-main b{font-size:14px;font-weight:600;color:var(--text)}
+.mv-main span{font-size:13px;color:var(--text-2)}
+.mv-tag{display:inline-block;padding:1px 9px;border-radius:11px;font-size:12px;font-weight:600}
+.mv-edit{flex-shrink:0;width:28px;height:28px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);cursor:pointer;font-size:14px;line-height:1}
+.mv-edit:hover{background:var(--surface-alt);color:var(--text)}
+.swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .1s}
+.swatch:hover{transform:scale(1.1)}
+.swatch.on{border-color:var(--text);box-shadow:0 0 0 2px var(--surface) inset}
+.color-picker{display:flex;gap:10px;flex-wrap:wrap}
+.post-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px solid var(--border-sub);border-radius:var(--r);margin-bottom:6px;font-size:14px;background:var(--bg)}
+.post-item .act-btn{width:26px;height:26px}
+.cal-ev-post{background:var(--accent-bg);color:var(--accent)}
+.cal-ev-mktg{background:var(--purple-bg);color:var(--purple)}
 
 /* Marketing */
 .mktg{margin-bottom:20px}
@@ -372,8 +385,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
   <div class="view-tabs">
     <button class="vtab on" id="vtab-list" onclick="setView('list')">活動列表</button>
-    <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
     <button class="vtab" id="vtab-mktg" onclick="setView('mktgview')">行銷總覽</button>
+    <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
   </div>
 
   <div id="view-list">
@@ -529,6 +542,42 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 </div>
 
+<!-- Marketing event modal -->
+<div class="overlay" id="ov-mktgevent">
+  <div class="modal">
+    <div class="modal-h"><h2 id="me-modal-title">加入行銷時程</h2><button class="close-btn" onclick="closeMktgEvent()">&times;</button></div>
+    <div class="modal-body">
+      <div class="f-row"><label for="me-date">日期</label><input id="me-date" type="date" required></div>
+      <div class="f-row"><label for="me-title">主題名稱</label><input id="me-title" type="text" placeholder="例：夏季優惠貼文"></div>
+      <div class="f-row"><label>標籤顏色</label><div class="color-picker" id="me-colors"></div></div>
+      <div class="f-actions">
+        <button type="button" class="btn btn-g" onclick="closeMktgEvent()">取消</button>
+        <button type="button" class="btn btn-p" onclick="saveMktgEvent()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Posts (發文排程) modal -->
+<div class="overlay" id="ov-posts">
+  <div class="modal">
+    <div class="modal-h"><h2>發文排程</h2><button class="close-btn" onclick="closePosts()">&times;</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px"><b id="posts-trip-name" style="color:var(--text-2)"></b> 的發文時間安排</p>
+      <div id="posts-list" style="margin-bottom:14px"></div>
+      <div class="f-pair" style="align-items:end">
+        <div class="f-row" style="margin-bottom:0"><label for="post-date">發文日期</label><input id="post-date" type="date"></div>
+        <div class="f-row" style="margin-bottom:0"><label for="post-label">說明（選填）</label><input id="post-label" type="text" placeholder="例：宣傳文"></div>
+      </div>
+      <div style="margin-top:10px"><button type="button" class="btn btn-o" onclick="addPost()">＋ 新增發文</button></div>
+      <div class="f-actions" style="margin-top:16px">
+        <button type="button" class="btn btn-g" onclick="closePosts()">取消</button>
+        <button type="button" class="btn btn-p" onclick="savePosts()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -575,8 +624,18 @@ const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
 const EDIT_PW_HASH='42583151644738616f065b4ec6dd1a839c7105a222385c921405126b25e5d393';
 
-let trips=[],deadlineRules=[],applyRules=[],mktgRules=[];
+let trips=[],deadlineRules=[],applyRules=[],mktgRules=[],mktgEvents=[];
 let sb=null,dlCap=null,store=null,rulesReady=false;
+// 標籤顏色選項
+const TAG_COLORS=[
+  {key:'purple',c:'#7B61A6',bg:'#F0EBF7'},
+  {key:'green',c:'#3D8B66',bg:'#E4F2EB'},
+  {key:'amber',c:'#D4873A',bg:'#FFF3E6'},
+  {key:'red',c:'#C24740',bg:'#FDECEA'},
+  {key:'blue',c:'#3A6BA5',bg:'#E7F0FA'},
+  {key:'pink',c:'#B5548A',bg:'#FBEAF3'}
+];
+function tagColor(key){return TAG_COLORS.find(x=>x.key===key)||TAG_COLORS[0]}
 let editId=null,sortKey='date',sortDir='asc',filter='all';
 let viewMode='list',calYear,calMonth;
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
@@ -598,7 +657,7 @@ function fmtRange(s,e){
 }
 
 // ── Rules: load / save / match / label ──
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-mktg':'mktgRules'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-mktg':'mktgRules','hk-mktgevents':'mktgEvents'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -614,6 +673,7 @@ async function loadAllRules(){
   deadlineRules=m.deadlineRules||localGet('hk-rules',DEF_DEADLINE);
   applyRules=m.applyRules||localGet('hk-apply',DEF_APPLY);
   mktgRules=m.mktgRules||localGet('hk-mktg',DEF_MKTG);
+  mktgEvents=m.mktgEvents||localGet('hk-mktgevents',[]);
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
@@ -737,27 +797,105 @@ function getAllMktgPeriods(){
 }
 function renderMktgView(){
   const el=document.getElementById('mktgview-body');
-  const items=getAllMktgPeriods();
-  if(items.length===0){el.innerHTML='<div class="empty"><p>目前沒有排定宣傳的活動</p></div>';return}
+  const acts=getAllMktgPeriods().map(it=>({sort:it.start,kind:'act',it}));
+  const evs=mktgEvents.map(e=>({sort:parseD(e.date),kind:'event',ev:e}));
+  const all=[...acts,...evs].sort((a,b)=>a.sort-b.sort);
+  let html=`<div class="mktgview-head"><button class="btn btn-p" onclick="openMktgEvent()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行銷時程</button></div>`;
+  if(all.length===0){el.innerHTML=html+'<div class="empty"><p>目前沒有行銷時程</p></div>';return}
   const groups=[];
-  for(const it of items){
-    const key=`${it.start.getFullYear()}年${it.start.getMonth()+1}月`;
-    let g=groups.find(x=>x.key===key);
-    if(!g){g={key,items:[]};groups.push(g)}
-    g.items.push(it);
+  for(const item of all){
+    const d=item.sort;const key=`${d.getFullYear()}年${d.getMonth()+1}月`;
+    let g=groups.find(x=>x.key===key);if(!g){g={key,items:[]};groups.push(g)}
+    g.items.push(item);
   }
-  let html='';
   for(const g of groups){
     html+=`<div class="mktgview-month"><h3>${g.key}</h3><ul class="mktgview-list">`;
-    for(const it of g.items){
-      const tripDates=it.trip.dateEnd&&it.trip.dateEnd!==it.trip.date?`${fmtShort(it.trip.date)}-${fmtShort(it.trip.dateEnd)}`:fmtShort(it.trip.date);
-      const promoRange=`${fmtShort(dateStr(it.start))}~${fmtShort(it.trip.deadline)}`;
-      html+=`<li><b>${tripDates}　${esc(it.trip.name)}</b><span>宣傳期：${promoRange}</span></li>`;
+    for(const item of g.items){
+      if(item.kind==='act'){
+        const it=item.it;
+        const tripDates=it.trip.dateEnd&&it.trip.dateEnd!==it.trip.date?`${fmtShort(it.trip.date)}-${fmtShort(it.trip.dateEnd)}`:fmtShort(it.trip.date);
+        const promoRange=`${fmtShort(dateStr(it.start))}~${fmtShort(it.trip.deadline)}`;
+        const posts=(it.trip.posts||[]).slice().sort((a,b)=>a.date<b.date?-1:1);
+        const postsStr=posts.length?posts.map(p=>`${fmtShort(p.date)} ${esc(p.label||'發文')}`).join('、'):'<span style="color:var(--text-muted)">未排定</span>';
+        html+=`<li><span class="mv-dot" style="background:var(--purple)"></span><div class="mv-main"><b>${tripDates}　${esc(it.trip.name)}</b><span>宣傳期：${promoRange}</span><span>發文時間：${postsStr}</span></div><button class="mv-edit" onclick="openPosts('${it.trip.id}')" title="編輯發文時間">✎</button></li>`;
+      }else{
+        const e=item.ev;const tc=tagColor(e.color);
+        html+=`<li><span class="mv-dot" style="background:${tc.c}"></span><div class="mv-main"><b>${fmtShort(e.date)}　<span class="mv-tag" style="background:${tc.bg};color:${tc.c}">${esc(e.title)}</span></b></div><button class="mv-edit" onclick="openMktgEvent('${e.id}')" title="編輯">✎</button><button class="mv-edit" onclick="delMktgEvent('${e.id}')" title="刪除">🗑</button></li>`;
+      }
     }
     html+='</ul></div>';
   }
   el.innerHTML=html;
 }
+
+// 獨立行銷時程：新增/編輯/刪除
+let editMktgEventId=null;
+async function openMktgEvent(id){
+  if(!await ensureEditor())return;
+  editMktgEventId=id||null;
+  const ev=id?mktgEvents.find(x=>x.id===id):null;
+  document.getElementById('me-modal-title').textContent=id?'編輯行銷時程':'加入行銷時程';
+  document.getElementById('me-date').value=ev?ev.date:'';
+  document.getElementById('me-title').value=ev?ev.title:'';
+  const cur=ev?ev.color:'purple';
+  document.getElementById('me-colors').innerHTML=TAG_COLORS.map(c=>`<button type="button" class="swatch${c.key===cur?' on':''}" data-color="${c.key}" style="background:${c.c}" onclick="pickColor('${c.key}')"></button>`).join('');
+  showOv('ov-mktgevent');
+}
+function pickColor(key){document.querySelectorAll('#me-colors .swatch').forEach(b=>b.classList.toggle('on',b.dataset.color===key))}
+function closeMktgEvent(){hideOv('ov-mktgevent')}
+function saveMktgEvent(){
+  const date=document.getElementById('me-date').value;
+  const title=document.getElementById('me-title').value.trim();
+  const sel=document.querySelector('#me-colors .swatch.on');
+  const color=sel?sel.dataset.color:'purple';
+  if(!date){toast('請選擇日期');return}
+  if(!title){toast('請輸入主題名稱');return}
+  if(editMktgEventId){const e=mktgEvents.find(x=>x.id===editMktgEventId);if(e){e.date=date;e.title=title;e.color=color}}
+  else{mktgEvents.push({id:genId(),date,title,color})}
+  saveToLS('hk-mktgevents',mktgEvents);renderMktgView();if(viewMode==='calendar')renderCal();closeMktgEvent();toast('已儲存');
+}
+async function delMktgEvent(id){
+  if(!await ensureEditor())return;
+  if(!confirm('確定刪除這個行銷時程嗎？'))return;
+  mktgEvents=mktgEvents.filter(x=>x.id!==id);
+  saveToLS('hk-mktgevents',mktgEvents);renderMktgView();if(viewMode==='calendar')renderCal();toast('已刪除');
+}
+
+// 活動發文排程：編輯
+let editPostsTripId=null,editPostsDraft=[];
+async function openPosts(tripId){
+  if(!await ensureEditor())return;
+  const t=trips.find(x=>x.id===tripId);if(!t)return;
+  editPostsTripId=tripId;
+  editPostsDraft=(t.posts||[]).map(p=>({date:p.date,label:p.label||''}));
+  document.getElementById('posts-trip-name').textContent=t.name;
+  renderPostsDraft();
+  document.getElementById('post-date').value='';document.getElementById('post-label').value='';
+  showOv('ov-posts');
+}
+function renderPostsDraft(){
+  const el=document.getElementById('posts-list');
+  if(editPostsDraft.length===0){el.innerHTML='<div class="rule-empty">尚無發文排程</div>';return}
+  el.innerHTML=editPostsDraft.slice().sort((a,b)=>a.date<b.date?-1:1).map(p=>{
+    const idx=editPostsDraft.indexOf(p);
+    return`<div class="post-item"><span>${fmtDate(p.date)}　${esc(p.label||'發文')}</span><button class="act-btn del" onclick="removePost(${idx})">✕</button></div>`;
+  }).join('');
+}
+function addPost(){
+  const date=document.getElementById('post-date').value;
+  const label=document.getElementById('post-label').value.trim()||'發文';
+  if(!date){toast('請選擇發文日期');return}
+  editPostsDraft.push({date,label});
+  document.getElementById('post-date').value='';document.getElementById('post-label').value='';
+  renderPostsDraft();
+}
+function removePost(idx){editPostsDraft.splice(idx,1);renderPostsDraft()}
+function savePosts(){
+  store.upd(editPostsTripId,{posts:editPostsDraft.slice()});
+  renderMktgView();if(viewMode==='calendar')renderCal();
+  hideOv('ov-posts');toast('已儲存發文排程');
+}
+function closePosts(){hideOv('ov-posts')}
 
 // ── Calendar ──
 function initCal(){const n=today();calYear=n.getFullYear();calMonth=n.getMonth()}
@@ -777,6 +915,14 @@ function getEventsForDate(ds){
     if(mr){const ps=calcDateBefore(t.date,mr.promoMonths,0);if(dateStr(ps)===ds)events.push({type:'promo',label:'開始宣傳：'+t.name})}
     const ar=matchRuleIn(applyRules,t.name);
     if(ar&&ar.months>=0){const ad=calcDateBefore(t.date,ar.months,ar.days);if(dateStr(ad)===ds)events.push({type:'apply',label:'申請截止：'+t.name})}
+  }
+  // 活動發文排程
+  for(const t of trips){
+    (t.posts||[]).forEach(p=>{if(p.date===ds)events.push({type:'post',label:(p.label||'發文')+'：'+t.name})});
+  }
+  // 獨立行銷時程
+  for(const e of mktgEvents){
+    if(e.date===ds)events.push({type:'mktgevent',label:e.title,color:tagColor(e.color).c});
   }
   return events;
 }
@@ -816,8 +962,11 @@ function renderCal(){
 function renderCalEvs(evs){
   let html='';const max=3;
   for(let i=0;i<Math.min(evs.length,max);i++){
-    const cls=evs[i].type==='trip'?'cal-ev-trip':evs[i].type==='deadline'?'cal-ev-dead':evs[i].type==='promo'?'cal-ev-promo':'cal-ev-apply';
-    html+=`<div class="cal-ev ${cls}">${esc(evs[i].label)}</div>`;
+    const e=evs[i];
+    const clsMap={trip:'cal-ev-trip',deadline:'cal-ev-dead',promo:'cal-ev-promo',apply:'cal-ev-apply',post:'cal-ev-post',mktgevent:'cal-ev-mktg'};
+    const cls=clsMap[e.type]||'cal-ev-trip';
+    const style=e.type==='mktgevent'?` style="background:${e.color}22;color:${e.color}"`:'';
+    html+=`<div class="cal-ev ${cls}"${style}>${esc(e.label)}</div>`;
   }
   if(evs.length>max)html+=`<div class="cal-more">+${evs.length-max} 更多</div>`;
   return html;
@@ -827,9 +976,9 @@ function showDayPopup(evt,ds){
   evt.stopPropagation();const evs=getEventsForDate(ds);const popup=document.getElementById('cal-popup');
   if(evs.length===0){popup.style.display='none';return}
   const d=parseD(ds);
-  const dotC={trip:'var(--accent)',deadline:'var(--red)',promo:'var(--purple)',apply:'var(--amber)'};
+  const dotC={trip:'var(--accent)',deadline:'var(--red)',promo:'var(--purple)',apply:'var(--amber)',post:'var(--accent)'};
   let html=`<h4>${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）</h4>`;
-  evs.forEach(e=>{html+=`<div class="cal-popup-item"><div class="cal-popup-dot" style="background:${dotC[e.type]}"></div><span>${esc(e.label)}</span></div>`});
+  evs.forEach(e=>{const dc=e.type==='mktgevent'?e.color:dotC[e.type];html+=`<div class="cal-popup-item"><div class="cal-popup-dot" style="background:${dc}"></div><span>${esc(e.label)}</span></div>`});
   popup.innerHTML=html;popup.style.display='block';
   const r=evt.currentTarget.getBoundingClientRect();
   let left=r.right+8,top=r.top;
