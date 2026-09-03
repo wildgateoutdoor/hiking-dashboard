@@ -870,10 +870,10 @@ function renderMktgView(){
       if(r.kind==='post'){
         html+=`<li><span class="mv-dot" style="background:var(--purple)"></span><div class="mv-main"><b>發文日期：${fmtShort(r.post.date)}　主題：${esc(r.t.name)} ${r.tripDates}</b><span>宣傳期：${r.promoRange}${r.post.label?`｜${esc(r.post.label)}`:''}</span></div><button class="mv-edit" onclick="openPosts('${r.t.id}')" title="編輯發文">✎</button></li>`;
       }else if(r.kind==='nopost'){
-        html+=`<li><span class="mv-dot" style="background:var(--star-off)"></span><div class="mv-main"><b>主題：${esc(r.t.name)} ${r.tripDates}</b><span>宣傳期：${r.promoRange}｜發文：<span style="color:var(--text-muted)">未排定</span></span></div><button class="mv-edit" onclick="openPosts('${r.t.id}')" title="安排發文">✎</button></li>`;
+        html+=`<li><span class="mv-dot" style="background:var(--star-off)"></span><div class="mv-main"><b>發文日期：<span style="color:var(--text-muted)">未排定</span>　主題：${esc(r.t.name)} ${r.tripDates}</b><span>宣傳期：${r.promoRange}</span></div><button class="mv-edit" onclick="openPosts('${r.t.id}')" title="安排發文">✎</button></li>`;
       }else{
         const e=r.ev;const tc=tagColor(e.color);
-        html+=`<li><span class="mv-dot" style="background:${tc.c}"></span><div class="mv-main"><b>發文日期：${fmtShort(e.date)}　主題：<span class="mv-tag" style="color:${tc.c};border-color:${tc.c}">${esc(e.title)}</span></b></div><button class="mv-edit" onclick="openMktgEvent('${e.id}')" title="編輯">✎</button><button class="mv-edit" onclick="delMktgEvent('${e.id}')" title="刪除">🗑</button></li>`;
+        html+=`<li><span class="mv-dot" style="background:${tc.c}"></span><div class="mv-main"><b>發文日期：${fmtShort(e.date)}　主題：${esc(e.title)}</b></div><button class="mv-edit" onclick="openMktgEvent('${e.id}')" title="編輯">✎</button><button class="mv-edit" onclick="delMktgEvent('${e.id}')" title="刪除">🗑</button></li>`;
       }
     }
     html+='</ul></div>';
