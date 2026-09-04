@@ -155,6 +155,15 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .detail-item a{color:var(--accent)}
 .detail-item span{color:var(--text-2)}
+/* 住宿／餐食狀態 */
+.lm-item .lm-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.lm-item .lm-row:last-child{margin-bottom:0}
+.lm-lab{font-size:12px;color:var(--text-2);min-width:52px}
+.stbtn{padding:2px 9px;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.st-yes{background:var(--accent-bg);color:var(--accent)}
+.st-nob{background:var(--amber-bg);color:var(--amber)}
+.st-nop{background:var(--red-bg);color:var(--red)}
+.st-na{background:var(--surface-alt);color:var(--text-muted)}
 
 .empty{padding:60px 20px;text-align:center;color:var(--text-muted)}
 .empty svg{width:64px;height:64px;color:var(--border);margin-bottom:16px}.empty p{font-size:15px;margin-bottom:16px}
@@ -1356,17 +1365,21 @@ function render(){
     let detailRow='';
     if(isOpen){
       const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span>未設定</span>';
-      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-3}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td><td></td></tr>`;
+      const lm=lodgeMealH(t);
+      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-3}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td><td></td></tr>`;
     }
 
     // 手機卡片
     const mExcelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span class="v" style="color:var(--text-muted)">未設定</span>';
     const mNotesH=t.notes?`<div class="mc-line"><div><b>備註</b><span class="v">${esc(t.notes)}</span></div></div>`:'';
+    const mlm=lodgeMealH(t);
+    const mLodgeMealH=`<div class="mc-line"><div class="lm-item"><b>住宿</b>${mlm.lodge}</div><div class="lm-item"><b>餐食</b>${mlm.meal}</div></div>`;
     cards.push(`<div class="mcard${isPast?' past':''}">`
       +`<div class="mc-top"><span class="mc-name">${esc(t.name)}</span><div class="mc-flags">${flagsH}${statusH}</div></div>`
       +`<div class="mc-line mc-line4"><div><b>活動日期</b><span class="v">${dateCol}</span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
       +`<div class="mc-line"><div><b>報名狀況</b>${regCapH}</div><div><b>申請狀況</b>${applyStatH}</div></div>`
       +`<div class="mc-line"><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div><div><b>Excel 名單</b>${mExcelH}</div></div>`
+      +mLodgeMealH
       +mNotesH
       +`<div class="mc-acts">${editDelH}</div>`
       +`</div>`);
@@ -1392,6 +1405,30 @@ async function adjReg(id,delta){
 async function adjApplied(id,delta){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const max=t.registered||0;const next=Math.max(0,Math.min(max,(t.applied||0)+delta));store.upd(id,{applied:next})}
 async function setStatus(id,val){if(!await ensureEditor()){render();return}store.upd(id,{status:val})}
 function toggleExpand(id){if(expandedIds.has(id))expandedIds.delete(id);else expandedIds.add(id);render()}
+
+// 住宿／餐食狀態
+function dayDiff(a,b){return Math.round((parseD(b)-parseD(a))/864e5)}
+function nightsOf(t){if(!t.dateEnd||t.dateEnd===t.date)return 0;return Math.max(0,dayDiff(t.date,t.dateEnd))}
+function resizeLodging(existing,nights){const L=[];for(let i=0;i<nights;i++){const e=existing&&existing[i];L.push({book:e&&e.book?e.book:'no',pay:e&&e.pay?e.pay:'no'})}return L}
+function nextBook(s){return s==='no'?'yes':s==='yes'?'na':'no'}
+function bookInfo(s){return s==='yes'?{label:'已訂',cls:'st-yes'}:s==='na'?{label:'不需要',cls:'st-na'}:{label:'未訂',cls:'st-nob'}}
+function payInfo(s){return s==='yes'?{label:'已付款',cls:'st-yes'}:s==='na'?{label:'不需要',cls:'st-na'}:{label:'未付款',cls:'st-nop'}}
+async function cycleLodgeBook(id,i){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const L=(t.lodging||[]).slice();while(L.length<=i)L.push({book:'no',pay:'no'});L[i]={...L[i],book:nextBook(L[i].book)};store.upd(id,{lodging:L})}
+async function cycleLodgePay(id,i){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const L=(t.lodging||[]).slice();while(L.length<=i)L.push({book:'no',pay:'no'});L[i]={...L[i],pay:nextBook(L[i].pay)};store.upd(id,{lodging:L})}
+async function cycleMealBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.book=nextBook(m.book);store.upd(id,{meal:m})}
+async function cycleMealPay(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.pay=nextBook(m.pay);store.upd(id,{meal:m})}
+function lodgeMealH(t){
+  const nights=nightsOf(t);const L=t.lodging||[];
+  let lodge='';
+  if(nights>0){
+    for(let i=0;i<nights;i++){const e=L[i]||{book:'no',pay:'no'};const bi=bookInfo(e.book),pi=payInfo(e.pay);
+      lodge+=`<div class="lm-row"><span class="lm-lab">第${i+1}晚</span><button class="stbtn ${bi.cls}" onclick="cycleLodgeBook('${t.id}',${i})">${bi.label}</button><button class="stbtn ${pi.cls}" onclick="cycleLodgePay('${t.id}',${i})">${pi.label}</button></div>`;
+    }
+  }else lodge=`<div class="lm-row"><span style="color:var(--text-muted);font-size:12px">單日行程</span></div>`;
+  const m=t.meal||{book:'no',pay:'no'};const mbi=bookInfo(m.book),mpi=payInfo(m.pay);
+  const meal=`<div class="lm-row"><button class="stbtn ${mbi.cls}" onclick="cycleMealBook('${t.id}')">${mbi.label}</button><button class="stbtn ${mpi.cls}" onclick="cycleMealPay('${t.id}')">${mpi.label}</button></div>`;
+  return{lodge,meal};
+}
 function toggleExpandAll(){
   const list=sorted(filtered());
   const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
@@ -1418,7 +1455,8 @@ function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
   const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
-  if(editId){store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.applied=0;data.createdAt=Date.now();store.add(data);toast('已新增')}
+  const nights=nightsOf(data);
+  if(editId){const cur=trips.find(x=>x.id===editId);data.lodging=resizeLodging(cur&&cur.lodging,nights);data.meal=(cur&&cur.meal)||{book:'no',pay:'no'};store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.applied=0;data.lodging=resizeLodging(null,nights);data.meal={book:'no',pay:'no'};data.createdAt=Date.now();store.add(data);toast('已新增')}
   closeTrip();
 }
 async function delTrip(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;if(!confirm(`確定要刪除「${t.name}」嗎？`))return;store.del(id);toast('已刪除')}
