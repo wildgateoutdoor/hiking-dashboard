@@ -99,9 +99,8 @@ th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;colo
 .expand-all-btn:hover{background:rgba(255,255,255,.28)}
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
-/* 日期欄加寬、不換行；活動名稱欄也給多一點空間，其餘欄位自然往右 */
-thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:130px}
-thead th:nth-child(4),tbody tr:not(.detail-row) td:nth-child(4){white-space:nowrap;min-width:160px}
+thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:100px}
+thead th:nth-child(4),tbody tr:not(.detail-row) td:nth-child(4){white-space:nowrap;min-width:100px;font-weight:700}
 tbody tr:not(.detail-row) td:nth-child(9){white-space:nowrap}
 
 .stars{display:flex;gap:2px;cursor:pointer}
@@ -167,19 +166,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .st-nob{background:var(--amber-bg);color:var(--amber)}
 .st-nop{background:var(--red-bg);color:var(--red)}
 .st-na{background:var(--surface-alt);color:var(--text-muted)}
-
-/* 團務列表 */
-#view-team{margin-top:4px}
-.tm-card{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:14px 16px;margin-bottom:12px}
-.tm-card.past{opacity:.55}
-.tm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.tm-name{font-size:16px;font-weight:700;color:var(--text)}
-.tm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 24px}
-.tm-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
-.tm-item>span{font-size:14px;color:var(--text-2)}
-.tm-item .lm-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
-.tm-item .lm-row:last-child{margin-bottom:0}
-.tm-note{font-size:12px;color:var(--text-muted);margin-top:5px}
 
 .empty{padding:60px 20px;text-align:center;color:var(--text-muted)}
 .empty svg{width:64px;height:64px;color:var(--border);margin-bottom:16px}.empty p{font-size:15px;margin-bottom:16px}
@@ -361,6 +347,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mc-line3{gap:8px}.mc-line3 .v{font-size:12px}.mc-line3 .cd{font-size:12px}
 .mcard .cap-bar{min-width:0}
 .mc-acts{display:flex;justify-content:flex-end;gap:4px}
+.mcard .mc-r1{margin-bottom:8px}
+.mcard .mc-line{margin-bottom:8px}
+.mcard .mc-line:last-of-type{margin-bottom:4px}
+.mcard .mc-r1+.mc-line::before,.mcard .mc-line+.mc-line::before{content:'';display:block;border-top:1px dashed var(--border);margin:0 6px 10px}
 
 /* 條列／方格模式切換 */
 .layout-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0}
@@ -449,11 +439,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 
   <div class="mktg" id="apply-section"></div>
+  <div class="mktg" id="month-section"></div>
   <div class="mktg" id="mktg-section"></div>
 
   <div class="view-tabs">
-    <button class="vtab on" id="vtab-list" onclick="setView('list')">活動列表</button>
-    <button class="vtab" id="vtab-team" onclick="setView('team')">團務列表</button>
+    <button class="vtab on" id="vtab-list" onclick="setView('list')">團務列表</button>
     <button class="vtab" id="vtab-mktg" onclick="setView('mktgview')">行銷列表</button>
     <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
   </div>
@@ -502,10 +492,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
-  </div>
-
-  <div id="view-team" style="display:none">
-    <div id="team-body"></div>
   </div>
 
   <div id="view-mktgview" style="display:none">
@@ -676,8 +662,8 @@ const COLS=[
   {key:'promoted',label:'宣傳',sort:true},{key:'name',label:'活動名稱',sort:true},
   {key:'date',label:'日期',sort:true},{key:'_applyDead',label:'申請日期',sort:true},
   {key:'_cd',label:'申請倒數',sort:true},
-  {key:'_cap',label:'報名狀況',sort:true},
-  {key:'_applyStat',label:'申請狀況',sort:false},
+  {key:'_cap',label:'報名人數',sort:true},
+  {key:'_applyStat',label:'申請人數',sort:false},
   {key:'_guide',label:'嚮導',sort:false},
   {key:'_acts',label:'',sort:false},
 ];
@@ -883,27 +869,60 @@ function renderMktg(){
   sec.innerHTML=html+`</div>`;
 }
 
-// 本週申請項目：申請截止日在 0~7 天內、尚未出發的活動
-function getApplyWeekItems(){
+function getLodgeUnbooked(t){
+  const nights=nightsOf(t);if(nights===0)return false;
+  const L=t.lodging||[];
+  for(let i=0;i<nights;i++){const e=L[i];if(!e||e.book==='no')return true}
+  return false;
+}
+function getMealUnbooked(t){const m=t.meal||{book:'no',pay:'no'};return m.book==='no'}
+function lodgeSummary(t){
+  const nights=nightsOf(t);if(nights===0)return'單日行程';
+  const L=t.lodging||[];let booked=0,na=0;
+  for(let i=0;i<nights;i++){const e=L[i];if(e&&e.book==='yes')booked++;else if(e&&e.book==='na')na++}
+  if(na===nights)return'N/A';if(booked+na===nights)return'已訂';if(booked===0&&na===0)return'未訂';return'部分已訂';
+}
+function mealSummary(t){const m=t.meal||{book:'no',pay:'no'};return m.book==='yes'?'已訂':m.book==='na'?'N/A':'未訂'}
+function getReminderItems(minDays,maxDays){
   const items=[];
   for(const t of trips){
     if(daysUntil(t.date)<0)continue;
-    const ai=applyInfo(t);
-    if(ai.state!=='dated')continue;
-    if(ai.days>=0&&ai.days<=7)items.push({trip:t,ai});
+    const reasons=[],ai=applyInfo(t),tripDays=daysUntil(t.date);
+    if(ai.state==='dated'&&ai.days>=minDays&&ai.days<=maxDays)reasons.push('apply');
+    if(tripDays>=minDays&&tripDays<=maxDays){
+      if(getLodgeUnbooked(t))reasons.push('lodge');
+      if(getMealUnbooked(t))reasons.push('meal');
+    }
+    if(reasons.length>0)items.push({trip:t,ai,reasons,tripDays});
   }
-  items.sort((a,b)=>a.ai.days-b.ai.days);
+  items.sort((a,b)=>{
+    const ea=Math.min(a.ai.state==='dated'?a.ai.days:Infinity,a.tripDays);
+    const eb=Math.min(b.ai.state==='dated'?b.ai.days:Infinity,b.tripDays);
+    return ea-eb;
+  });
   return items;
 }
-function renderApplyWeek(){
-  const sec=document.getElementById('apply-section');
-  const items=getApplyWeekItems();
+function renderReminders(){
+  renderReminderSection('apply-section','14天內團務提醒',getReminderItems(0,14));
+  renderReminderSection('month-section','一個月內團務提醒',getReminderItems(15,30));
+}
+function renderReminderSection(elId,title,items){
+  const sec=document.getElementById(elId);
   if(items.length===0){sec.innerHTML='';return}
-  let html=`<div class="mktg-header"><h2>本週申請項目</h2></div><div class="mktg-cards">`;
+  let html=`<div class="mktg-header"><h2>${title}</h2></div><div class="mktg-cards">`;
   for(const it of items){
-    const dateRange=it.trip.dateEnd&&it.trip.dateEnd!==it.trip.date?`${fmtShort(it.trip.date)}~${fmtShort(it.trip.dateEnd)}`:fmtDate(it.trip.date);
-    const dl=it.ai.days===0?'今天截止':`剩 ${it.ai.days} 天`;
-    html+=`<div class="mktg-card"><div class="mktg-card-name">${esc(it.trip.name)}</div><div class="mktg-card-date">${dateRange} 出發｜${it.trip.registered}/${it.trip.capacity} 人</div><div class="mktg-card-actions"><div class="mktg-action mktg-action-urgent">📋 申請截止 ${fmtShort(it.ai.ds)}（${dl}）</div></div></div>`;
+    const t=it.trip,ai=it.ai;
+    const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtDate(t.date);
+    const applyText=ai.state==='dated'?fmtDate(ai.ds):ai.state==='none'?'免申請':'未設定';
+    html+=`<div class="mktg-card"><div class="mktg-card-name">${esc(t.name)}</div>`;
+    html+=`<div class="mktg-card-date">${dateRange}｜${t.registered}/${t.capacity} 人</div>`;
+    html+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">申請截止：${applyText}</div>`;
+    html+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">住宿：${lodgeSummary(t)}　餐食：${mealSummary(t)}</div>`;
+    html+=`<div class="mktg-card-actions">`;
+    if(it.reasons.includes('apply')){const dl=ai.days===0?'今天截止':`剩 ${ai.days} 天`;html+=`<div class="mktg-action mktg-action-urgent">📋 申請截止 ${fmtShort(ai.ds)}（${dl}）</div>`}
+    if(it.reasons.includes('lodge'))html+=`<div class="mktg-action mktg-action-apply">🏨 住宿尚未預訂</div>`;
+    if(it.reasons.includes('meal'))html+=`<div class="mktg-action mktg-action-apply">🍽 餐食尚未預訂</div>`;
+    html+=`</div></div>`;
   }
   sec.innerHTML=html+`</div>`;
 }
@@ -1214,45 +1233,13 @@ document.addEventListener('click',()=>{document.getElementById('cal-popup').styl
 function setView(mode){
   viewMode=mode;
   document.getElementById('vtab-list').classList.toggle('on',mode==='list');
-  document.getElementById('vtab-team').classList.toggle('on',mode==='team');
   document.getElementById('vtab-cal').classList.toggle('on',mode==='calendar');
   document.getElementById('vtab-mktg').classList.toggle('on',mode==='mktgview');
   document.getElementById('view-list').style.display=mode==='list'?'block':'none';
-  document.getElementById('view-team').style.display=mode==='team'?'block':'none';
   document.getElementById('view-calendar').style.display=mode==='calendar'?'block':'none';
   document.getElementById('view-mktgview').style.display=mode==='mktgview'?'block':'none';
   if(mode==='calendar')renderCal();
   if(mode==='mktgview')renderMktgView();
-  if(mode==='team')renderTeam();
-}
-
-// ── 團務列表 ──
-function applyStatText(t){
-  if(daysUntil(t.date)<0)return{txt:'已結束',cls:'pill-done'};
-  const ai=applyInfo(t);
-  if(ai.state==='unset')return{txt:'未設定',cls:'pill-closed'};
-  if(ai.state==='none')return{txt:'免申請',cls:'pill-none'};
-  const applied=Math.min(t.applied||0,t.registered||0);
-  return{txt:`${applied} / ${t.registered||0}`,cls:'pill-apply'};
-}
-function renderTeam(){
-  const body=document.getElementById('team-body');
-  const list=sorted(trips.slice());
-  if(list.length===0){body.innerHTML='<div class="rule-empty">尚無活動</div>';return}
-  body.innerHTML=list.map(t=>{
-    const isPast=daysUntil(t.date)<0;
-    const as=applyStatText(t);
-    const lm=lodgeMealH(t);
-    const lodgeNote=t.lodgeNotes?`<div class="tm-note">${esc(t.lodgeNotes)}</div>`:'';
-    const mealNote=t.mealNotes?`<div class="tm-note">${esc(t.mealNotes)}</div>`:'';
-    return`<div class="tm-card${isPast?' past':''}">`
-      +`<div class="tm-head"><span class="tm-name">${esc(t.name)}</span><span class="pill ${as.cls}">申請 ${as.txt}</span></div>`
-      +`<div class="tm-grid">`
-      +`<div class="tm-item"><b>活動時間</b><span>${fmtRange(t.date,t.dateEnd)}</span></div>`
-      +`<div class="tm-item"><b>住宿</b>${lm.lodge}${lodgeNote}</div>`
-      +`<div class="tm-item"><b>餐食</b>${lm.meal}${mealNote}</div>`
-      +`</div></div>`;
-  }).join('');
 }
 
 // ── Settings modal ──
@@ -1479,10 +1466,9 @@ function render(){
   document.getElementById('s-promo').textContent=future.filter(t=>t.promoted>0).length;
 
   renderMktg();
-  renderApplyWeek();
+  renderReminders();
   if(viewMode==='calendar')renderCal();
   if(viewMode==='mktgview')renderMktgView();
-  if(viewMode==='team')renderTeam();
 
   document.getElementById('filters').innerHTML=FILTERS.map(f=>`<button class="chip${filter===f.key?' on':''}" onclick="setFilter('${f.key}')">${f.label}</button>`).join('');
 
@@ -1543,7 +1529,7 @@ function render(){
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td data-label="宣傳">${flagsH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名狀況">${regCapH}</td><td data-label="申請狀況">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td data-label="宣傳">${flagsH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -1563,7 +1549,8 @@ function render(){
     const mlm=lodgeMealH(t);
     const dp=fmtRangeParts(t.date,t.dateEnd);
     cards.push(`<div class="mcard${isPast?' past':''}">`
-      +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-date">${dp.num}<span class="mc-dow">${dp.dow}</span></span><span class="mc-name2">${esc(t.name)}</span></div><div class="mc-r1r">${flagsH}<div class="mc-applystat">${applyStatH}</div></div></div>`
+      +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-date">${dp.num}<span class="mc-dow">${dp.dow}</span></span><span class="mc-name2">${esc(t.name)}</span></div><div class="mc-r1r">${flagsH}${statusH}</div></div>`
+      +`<div class="mc-line"><div><b>報名人數</b>${regCapH}</div><div><b>申請人數</b>${applyStatH}</div></div>`
       +`<div class="mc-line mc-line3"><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
       +`<div class="mc-line"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}</div><div><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div>`
       +`<div class="mc-line"><div class="lm-item"><b>餐食狀況</b>${mlm.meal}</div><div><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div>`
