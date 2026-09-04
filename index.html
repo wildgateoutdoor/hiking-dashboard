@@ -176,10 +176,17 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .cal-nav h3{font-size:16px;font-weight:700}
 .cal-nav button{width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font)}
 .cal-nav button:hover{background:var(--surface-hover)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);overflow:hidden}
 .cal-dow{padding:8px 4px;text-align:center;font-size:11px;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border-sub)}
-.cal-day{min-height:90px;padding:6px 8px;border-bottom:1px solid var(--border-sub);border-right:1px solid var(--border-sub);cursor:pointer;transition:background .12s;position:relative}
+.cal-day{min-height:90px;padding:6px 8px;border-bottom:1px solid var(--border-sub);border-right:1px solid var(--border-sub);transition:background .12s;position:relative}
 .cal-day:nth-child(7n){border-right:none}
+/* 跨日活動連續橫條 */
+.cspan-bars{margin:0 -9px 3px -8px}
+.cspan-bar,.cspan-sp{height:16px;line-height:16px;margin-bottom:2px}
+.cspan-sp{background:transparent}
+.cspan-bar{background:var(--accent);color:var(--accent-on);font-size:10px;font-weight:600;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.cspan-bar.bar-rl{border-top-left-radius:8px;border-bottom-left-radius:8px}
+.cspan-bar.bar-rr{border-top-right-radius:8px;border-bottom-right-radius:8px}
 .cal-day:hover{background:var(--surface-hover)}.cal-day.other{opacity:.35}.cal-day.today{background:var(--accent-bg)}
 .cal-num{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;margin-bottom:4px}
 .cal-today-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-on);margin:-2px}
@@ -193,6 +200,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .cal-popup h4{font-size:14px;font-weight:700;margin-bottom:8px}
 .cal-popup-item{font-size:13px;padding:4px 0;border-bottom:1px solid var(--border-sub);display:flex;gap:6px;align-items:baseline}
 .cal-popup-item:last-child{border-bottom:none}
+.cal-popup-item b{color:var(--text-2);font-weight:600;min-width:60px;flex-shrink:0}
 .cal-popup-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
 
 /* Marketing overview (list view) */
@@ -971,31 +979,65 @@ function initCal(){const n=today();calYear=n.getFullYear();calMonth=n.getMonth()
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCal()}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCal()}
 
+function isMultiDay(t){return t.dateEnd&&t.dateEnd!==t.date&&parseD(t.dateEnd)>parseD(t.date)}
+function multiDayTrips(){
+  if(calFilter==='mktg')return[];
+  return trips.filter(isMultiDay);
+}
 function getEventsForDate(ds){
   const events=[];
   for(const t of trips){
-    if(t.date===ds)events.push({type:'trip',label:t.name});
-    if(t.dateEnd&&t.dateEnd===ds&&t.dateEnd!==t.date)events.push({type:'trip',label:'回程：'+t.name});
-    if(t.deadline===ds)events.push({type:'deadline',label:'截止：'+t.name});
+    // 跨日活動改以連續橫條顯示，不再放單日文字標籤
+    if(t.date===ds&&!isMultiDay(t))events.push({type:'trip',label:t.name,id:t.id});
+    if(t.deadline===ds)events.push({type:'deadline',label:'截止：'+t.name,id:t.id});
   }
   for(const t of trips){
     if(daysUntil(t.date)<0)continue;
     const mr=matchRuleIn(mktgRules,t.name);
-    if(mr){const ps=calcDateBefore(t.date,mr.promoMonths,0);if(dateStr(ps)===ds)events.push({type:'promo',label:'開始宣傳：'+t.name})}
+    if(mr){const ps=calcDateBefore(t.date,mr.promoMonths,0);if(dateStr(ps)===ds)events.push({type:'promo',label:'開始宣傳：'+t.name,id:t.id})}
     const ar=matchRuleIn(applyRules,t.name);
-    if(ar&&ar.months>=0){const ad=calcDateBefore(t.date,ar.months,ar.days);if(dateStr(ad)===ds)events.push({type:'apply',label:'申請截止：'+t.name})}
+    if(ar&&ar.months>=0){const ad=calcDateBefore(t.date,ar.months,ar.days);if(dateStr(ad)===ds)events.push({type:'apply',label:'申請截止：'+t.name,id:t.id})}
   }
   // 活動發文排程
   for(const t of trips){
-    (t.posts||[]).forEach(p=>{if(p.date===ds)events.push({type:'post',label:(p.label||'發文')+'：'+t.name})});
+    (t.posts||[]).forEach(p=>{if(p.date===ds)events.push({type:'post',label:(p.label||'發文')+'：'+t.name,id:t.id})});
   }
   // 獨立行銷時程
   for(const e of mktgEvents){
-    if(e.date===ds)events.push({type:'mktgevent',label:e.title,color:tagColor(e.color).c});
+    if(e.date===ds)events.push({type:'mktgevent',label:e.title,color:tagColor(e.color).c,id:e.id});
   }
   return calFilter==='all'?events:events.filter(e=>CAL_GROUP[e.type]===calFilter);
 }
 function setCalFilter(f){calFilter=f;renderCal()}
+
+// 依週計算跨日活動橫條的軌道（lane）配置
+function weekBars(weekDates){
+  const wStart=parseD(weekDates[0]),wEnd=parseD(weekDates[6]);
+  const segs=[];
+  for(const t of multiDayTrips()){
+    const ts=parseD(t.date),te=parseD(t.dateEnd);
+    if(te<wStart||ts>wEnd)continue;
+    let s=dayDiff(weekDates[0],t.date);if(s<0)s=0;
+    let e=dayDiff(weekDates[0],t.dateEnd);if(e>6)e=6;
+    segs.push({t,s,e,realStart:ts>=wStart,realEnd:te<=wEnd,sortKey:ts.getTime()});
+  }
+  segs.sort((a,b)=>a.s-b.s||a.sortKey-b.sortKey);
+  const lanes=[];
+  segs.forEach(seg=>{
+    let placed=false;
+    for(let li=0;li<lanes.length;li++){
+      if(lanes[li].every(o=>seg.s>o.e||seg.e<o.s)){lanes[li].push(seg);seg.lane=li;placed=true;break}
+    }
+    if(!placed){seg.lane=lanes.length;lanes.push([seg])}
+  });
+  return{segs,laneCount:lanes.length};
+}
+function barSegHTML(seg,col){
+  const isS=col===seg.s,isE=col===seg.e;
+  const cls='cspan-bar'+(isS&&seg.realStart?' bar-rl':'')+(isE&&seg.realEnd?' bar-rr':'');
+  const label=isS?esc(seg.t.name):'&nbsp;';
+  return`<div class="${cls}" onclick="showItemPopup(event,'trip','${seg.t.id}')" title="${escAttr(seg.t.name)}">${label}</div>`;
+}
 
 function renderCal(){
   document.getElementById('cal-title').textContent=`${calYear}年${calMonth+1}月`;
@@ -1009,39 +1051,89 @@ function renderCal(){
   const dim=new Date(calYear,calMonth+1,0).getDate();
   const prevDim=new Date(calYear,calMonth,0).getDate();
   const todayStr=dateStr(today());
-
+  // 先把所有格子攤平成陣列
+  const cells=[];
   for(let i=0;i<startDow;i++){
     const d=prevDim-startDow+1+i;const pm=calMonth===0?12:calMonth;const py=calMonth===0?calYear-1:calYear;
-    const ds=`${py}-${String(pm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    html+=`<div class="cal-day other" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${d}</div>${renderCalEvs(getEventsForDate(ds))}</div>`;
+    cells.push({ds:`${py}-${String(pm).padStart(2,'0')}-${String(d).padStart(2,'0')}`,d,other:true});
   }
-  for(let d=1;d<=dim;d++){
-    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday=ds===todayStr;
-    const evs=getEventsForDate(ds);
-    const numH=isToday?`<span class="cal-today-num">${d}</span>`:`${d}`;
-    html+=`<div class="cal-day${isToday?' today':''}" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${numH}</div>${renderCalEvs(evs)}</div>`;
-  }
-  const rem=(7-(startDow+dim)%7)%7;
+  for(let d=1;d<=dim;d++)cells.push({ds:`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,d,other:false});
+  const rem=(7-cells.length%7)%7;
   for(let i=1;i<=rem;i++){
     const nm=calMonth===11?1:calMonth+2;const ny=calMonth===11?calYear+1:calYear;
-    const ds=`${ny}-${String(nm).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-    html+=`<div class="cal-day other" onclick="showDayPopup(event,'${ds}')"><div class="cal-num">${i}</div>${renderCalEvs(getEventsForDate(ds))}</div>`;
+    cells.push({ds:`${ny}-${String(nm).padStart(2,'0')}-${String(i).padStart(2,'0')}`,d:i,other:true});
+  }
+  // 逐週渲染，跨日橫條依 lane 對齊
+  for(let w=0;w<cells.length;w+=7){
+    const week=cells.slice(w,w+7);
+    const {segs,laneCount}=weekBars(week.map(c=>c.ds));
+    week.forEach((c,col)=>{
+      const isToday=c.ds===todayStr;
+      const numH=isToday?`<span class="cal-today-num">${c.d}</span>`:`${c.d}`;
+      let barsH='';
+      if(laneCount>0){
+        barsH='<div class="cspan-bars">';
+        for(let li=0;li<laneCount;li++){
+          const seg=segs.find(s=>s.lane===li&&col>=s.s&&col<=s.e);
+          barsH+=seg?barSegHTML(seg,col):'<div class="cspan-sp"></div>';
+        }
+        barsH+='</div>';
+      }
+      html+=`<div class="cal-day${c.other?' other':''}${isToday?' today':''}"><div class="cal-num">${numH}</div>${barsH}${renderCalEvs(getEventsForDate(c.ds),c.ds)}</div>`;
+    });
   }
   grid.innerHTML=html;
 }
 
-function renderCalEvs(evs){
+function renderCalEvs(evs,ds){
   let html='';const max=3;
   for(let i=0;i<Math.min(evs.length,max);i++){
     const e=evs[i];
     const clsMap={trip:'cal-ev-trip',deadline:'cal-ev-dead',promo:'cal-ev-promo',apply:'cal-ev-apply',post:'cal-ev-post',mktgevent:'cal-ev-mktg'};
     const cls=clsMap[e.type]||'cal-ev-trip';
     const style=e.type==='mktgevent'?` style="background:${e.color}22;color:${e.color}"`:'';
-    html+=`<div class="cal-ev ${cls}"${style}>${esc(e.label)}</div>`;
+    html+=`<div class="cal-ev ${cls}"${style} onclick="showItemPopup(event,'${e.type}','${e.id}')">${esc(e.label)}</div>`;
   }
-  if(evs.length>max)html+=`<div class="cal-more">+${evs.length-max} 更多</div>`;
+  if(evs.length>max)html+=`<div class="cal-more" onclick="showDayPopup(event,'${ds}')">+${evs.length-max} 更多</div>`;
   return html;
+}
+
+function positionPopup(evt,popup){
+  const r=evt.currentTarget.getBoundingClientRect();
+  let left=r.right+8,top=r.top;
+  if(left+320>window.innerWidth)left=r.left-328;
+  if(left<0)left=8;
+  const ph=popup.offsetHeight||200;
+  if(top+ph>window.innerHeight)top=window.innerHeight-ph-12;
+  if(top<8)top=8;
+  popup.style.left=left+'px';popup.style.top=top+'px';
+}
+
+// 點選單一項目 → 顯示該活動／該行銷內容的基本資料
+function showItemPopup(evt,kind,id){
+  evt.stopPropagation();
+  const popup=document.getElementById('cal-popup');
+  let html='';
+  if(kind==='mktgevent'){
+    const e=mktgEvents.find(x=>x.id===id);if(!e){popup.style.display='none';return}
+    const c=tagColor(e.color).c;
+    html=`<h4><span class="cal-popup-dot" style="display:inline-block;vertical-align:middle;margin-right:6px;background:${c}"></span>${esc(e.title)}</h4>`
+      +`<div class="cal-popup-item"><b>類型</b><span>行銷時程</span></div>`
+      +`<div class="cal-popup-item"><b>日期</b><span>${fmtDate(e.date)}</span></div>`;
+  }else{
+    const t=trips.find(x=>x.id===id);if(!t){popup.style.display='none';return}
+    const dr=t.dateEnd&&t.dateEnd!==t.date?`${fmtDate(t.date)} ～ ${fmtDate(t.dateEnd)}`:fmtDate(t.date);
+    const milestone={trip:'活動出發',deadline:'報名截止',promo:'開始宣傳',apply:'申請截止',post:'發文排程'}[kind]||'';
+    html=`<h4>${esc(t.name)}</h4>`;
+    if(milestone)html+=`<div class="cal-popup-item"><b>此標記</b><span>${milestone}</span></div>`;
+    html+=`<div class="cal-popup-item"><b>活動日期</b><span>${dr}</span></div>`
+      +`<div class="cal-popup-item"><b>報名截止</b><span>${fmtDate(t.deadline)}</span></div>`
+      +`<div class="cal-popup-item"><b>報名狀況</b><span>${t.registered||0} / ${t.capacity||0} 人</span></div>`
+      +`<div class="cal-popup-item"><b>嚮導</b><span>${t.guide?esc(t.guide):'—'}</span></div>`;
+    if(t.notes)html+=`<div class="cal-popup-item"><b>備註</b><span>${esc(t.notes)}</span></div>`;
+  }
+  popup.innerHTML=html;popup.style.display='block';
+  positionPopup(evt,popup);
 }
 
 function showDayPopup(evt,ds){
@@ -1050,14 +1142,9 @@ function showDayPopup(evt,ds){
   const d=parseD(ds);
   const dotC={trip:'var(--accent)',deadline:'var(--red)',promo:'var(--purple)',apply:'var(--amber)',post:'var(--accent)'};
   let html=`<h4>${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）</h4>`;
-  evs.forEach(e=>{const dc=e.type==='mktgevent'?e.color:dotC[e.type];html+=`<div class="cal-popup-item"><div class="cal-popup-dot" style="background:${dc}"></div><span>${esc(e.label)}</span></div>`});
+  evs.forEach(e=>{const dc=e.type==='mktgevent'?e.color:dotC[e.type];html+=`<div class="cal-popup-item" style="cursor:pointer" onclick="showItemPopup(event,'${e.type}','${e.id}')"><div class="cal-popup-dot" style="background:${dc}"></div><span>${esc(e.label)}</span></div>`});
   popup.innerHTML=html;popup.style.display='block';
-  const r=evt.currentTarget.getBoundingClientRect();
-  let left=r.right+8,top=r.top;
-  if(left+320>window.innerWidth)left=r.left-328;
-  if(top+200>window.innerHeight)top=window.innerHeight-220;
-  if(left<0)left=8;if(top<0)top=8;
-  popup.style.left=left+'px';popup.style.top=top+'px';
+  positionPopup(evt,popup);
 }
 document.addEventListener('click',()=>{document.getElementById('cal-popup').style.display='none'});
 
