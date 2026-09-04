@@ -99,6 +99,10 @@ th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;colo
 .expand-all-btn:hover{background:rgba(255,255,255,.28)}
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
+/* 日期欄加寬、不換行；活動名稱欄也給多一點空間，其餘欄位自然往右 */
+thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:130px}
+thead th:nth-child(4),tbody tr:not(.detail-row) td:nth-child(4){white-space:nowrap;min-width:160px}
+tbody tr:not(.detail-row) td:nth-child(9){white-space:nowrap}
 
 .stars{display:flex;gap:2px;cursor:pointer}
 .stars svg{width:18px;height:18px;transition:transform .12s}.stars svg:hover{transform:scale(1.2)}
@@ -1294,7 +1298,7 @@ function render(){
   const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
 
   document.getElementById('thead-row').innerHTML=COLS.map(c=>{
-    const expandBtn=c.key==='_guide'?` <button class="expand-all-btn" onclick="event.stopPropagation();toggleExpandAll()">${allOpen?'全部收合':'全部展開'}</button>`:'';
+    const expandBtn=c.key==='_acts'?`<button class="expand-all-btn" onclick="event.stopPropagation();toggleExpandAll()">${allOpen?'全部收合':'全部展開'}</button>`:'';
     if(!c.sort)return`<th>${c.label}${expandBtn}</th>`;
     const active=sortKey===c.key;const arr=active?(sortDir==='asc'?'▲':'▼'):'▲';
     return`<th class="sortable${active?' sorted':''}" onclick="setSort('${c.key}')">${c.label}<span class="arr">${arr}</span>${expandBtn}</th>`;
