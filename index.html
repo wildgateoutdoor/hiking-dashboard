@@ -147,11 +147,14 @@ select.pill.pill-done{background:var(--surface-alt);color:var(--text-muted)}
 .act-btn.expand.open svg{transform:rotate(90deg)}
 
 tr.expanded-main td{border-bottom:none}
-tr.detail-row td{background:var(--surface);padding:0;border:none}
+tr.detail-row td{background:var(--surface);padding:0;border:none;border-bottom:2px solid var(--border)}
 tr.detail-row:hover td{background:var(--surface)}
 tr.detail-row td.dr-line{border-top:1px solid var(--border-sub)}
 tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--border-sub)}
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 24px;font-size:13px}
+.detail-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 28px;font-size:13px}
+.detail-grid3 .dcol{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .detail-item a{color:var(--accent)}
 .detail-item span{color:var(--text-2)}
@@ -164,6 +167,19 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .st-nob{background:var(--amber-bg);color:var(--amber)}
 .st-nop{background:var(--red-bg);color:var(--red)}
 .st-na{background:var(--surface-alt);color:var(--text-muted)}
+
+/* 團務列表 */
+#view-team{margin-top:4px}
+.tm-card{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:14px 16px;margin-bottom:12px}
+.tm-card.past{opacity:.55}
+.tm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.tm-name{font-size:16px;font-weight:700;color:var(--text)}
+.tm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 24px}
+.tm-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.tm-item>span{font-size:14px;color:var(--text-2)}
+.tm-item .lm-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.tm-item .lm-row:last-child{margin-bottom:0}
+.tm-note{font-size:12px;color:var(--text-muted);margin-top:5px}
 
 .empty{padding:60px 20px;text-align:center;color:var(--text-muted)}
 .empty svg{width:64px;height:64px;color:var(--border);margin-bottom:16px}.empty p{font-size:15px;margin-bottom:16px}
@@ -328,14 +344,38 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .mc-name{font-size:17px;font-weight:700;min-width:0;word-break:break-word}
 .mc-flags{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.mc-line{display:flex;gap:10px;margin-bottom:24px}
-.mc-line>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+/* 第一行：日期＋活動名稱 | 星星＋申請狀況 */
+.mc-r1{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.mc-titleline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0;flex:1}
+.mc-date{font-size:16px;font-weight:700;color:var(--text);white-space:nowrap}
+.mc-dow{font-size:11px;font-weight:600;color:var(--text-muted);margin-left:1px}
+.mc-name2{font-size:16px;font-weight:700;color:var(--text);word-break:break-word}
+.mc-r1r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.mc-applystat{min-width:110px}
+.mc-line{display:flex;gap:10px;margin-bottom:16px}
+.mc-line:last-of-type{margin-bottom:14px}
+.mc-line>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .mc-line b{font-size:11px;color:var(--text-muted);font-weight:600}
 .mc-line .v{font-size:13px;color:var(--text);word-break:break-word}
 .mc-line a{font-size:13px;color:var(--accent)}
-.mc-line4{gap:6px}.mc-line4 .v{font-size:12px}.mc-line4 .cd{font-size:12px}
+.mc-line3{gap:8px}.mc-line3 .v{font-size:12px}.mc-line3 .cd{font-size:12px}
 .mcard .cap-bar{min-width:0}
 .mc-acts{display:flex;justify-content:flex-end;gap:4px}
+
+/* 條列／方格模式切換 */
+.layout-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0}
+.lay-btn{display:flex;align-items:center;justify-content:center;width:40px;height:32px;background:var(--surface);border:none;cursor:pointer;color:var(--text-muted);padding:0}
+.lay-btn+.lay-btn{border-left:1px solid var(--border)}
+.lay-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.lay-btn.on{background:var(--accent-bg);color:var(--accent)}
+.lay-btn.on svg rect{fill:currentColor;stroke:none}
+/* 桌機：依模式切換表格／方格 */
+@media(min-width:701px){
+  #view-list.lay-list .tbl-wrap{display:block}
+  #view-list.lay-list .mcards{display:none}
+  #view-list.lay-grid .tbl-wrap{display:none}
+  #view-list.lay-grid .mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+}
 
 @media(max-width:700px){
   .app{padding:16px 12px 40px}
@@ -360,11 +400,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .cal-bar{flex-direction:column;align-items:stretch}.cal-add-btns .btn{flex:1;justify-content:center}
 
   /* 活動列表：手機改用專屬卡片，隱藏表格 */
-  .tbl-wrap,.date-filter{ }
-  #view-list .tbl-wrap{display:none}
-  .mcards{display:block}
+  #view-list .tbl-wrap{display:none!important}
+  #view-list .mcards{display:block}
+  .layout-toggle{display:none}
 }
-@media(min-width:701px){ .mcards{display:none} }
 @media(max-width:480px){
   .stat b{font-size:16px}.stat{font-size:10px}
   .cal-dow{font-size:10px}
@@ -414,13 +453,18 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
   <div class="view-tabs">
     <button class="vtab on" id="vtab-list" onclick="setView('list')">活動列表</button>
+    <button class="vtab" id="vtab-team" onclick="setView('team')">團務列表</button>
     <button class="vtab" id="vtab-mktg" onclick="setView('mktgview')">行銷列表</button>
     <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
   </div>
 
-  <div id="view-list">
+  <div id="view-list" class="lay-list">
     <div class="bar">
       <div class="filters" id="filters"></div>
+      <div class="layout-toggle" id="layout-toggle">
+        <button class="lay-btn on" id="lay-list-btn" onclick="setListLayout('list')" title="條列模式" aria-label="條列模式"><svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
+        <button class="lay-btn" id="lay-grid-btn" onclick="setListLayout('grid')" title="方格模式" aria-label="方格模式"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></button>
+      </div>
     </div>
     <div class="date-filter">
       <input type="date" id="df-from" onchange="setDateFilter()">
@@ -458,6 +502,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
+  </div>
+
+  <div id="view-team" style="display:none">
+    <div id="team-body"></div>
   </div>
 
   <div id="view-mktgview" style="display:none">
@@ -502,6 +550,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <option value="waiting">等待出團</option>
           <option value="done">已結束</option>
         </select></div>
+        <div class="f-pair">
+          <div class="f-row"><label for="f-lodge-notes">住宿備註（選填）</label><input id="f-lodge-notes" type="text" placeholder="例：山屋、營地名稱"></div>
+          <div class="f-row"><label for="f-meal-notes">餐食備註（選填）</label><input id="f-meal-notes" type="text" placeholder="例：早餐自理"></div>
+        </div>
         <div class="f-row"><label for="f-notes">備註（選填）</label><textarea id="f-notes" placeholder="內部備忘"></textarea></div>
         <div class="f-actions">
           <button type="button" class="btn btn-g" onclick="closeTrip()">取消</button>
@@ -678,6 +730,7 @@ let viewMode='list',calYear,calMonth,calFilter='all';
 const CAL_FILTERS=[{key:'all',label:'全部'},{key:'act',label:'只顯示活動'},{key:'mktg',label:'只顯示行銷'}];
 const CAL_GROUP={trip:'act',deadline:'act',apply:'act',promo:'mktg',post:'mktg',mktgevent:'mktg'};
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
+let listLayout='list';try{const _l=localStorage.getItem('hk-list-layout');if(_l==='grid'||_l==='list')listLayout=_l}catch{}
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
 function parseD(s){return new Date(s+'T00:00:00')}
@@ -693,6 +746,14 @@ function fmtRange(s,e){
   const ds=parseD(s),de=parseD(e);
   if(ds.getMonth()===de.getMonth())return`${ds.getMonth()+1}/${ds.getDate()}~${de.getDate()}（${DAYS[ds.getDay()]}~${DAYS[de.getDay()]}）`;
   return`${fmtShort(s)}~${fmtShort(e)}`;
+}
+// 拆成 數字日期 與 星期 兩段，方便星期用較小字級
+function fmtRangeParts(s,e){
+  const ds=parseD(s);
+  if(!e||s===e)return{num:`${ds.getMonth()+1}/${ds.getDate()}`,dow:`（${DAYS[ds.getDay()]}）`};
+  const de=parseD(e);
+  const num=ds.getMonth()===de.getMonth()?`${ds.getMonth()+1}/${ds.getDate()}~${de.getDate()}`:`${ds.getMonth()+1}/${ds.getDate()}~${de.getMonth()+1}/${de.getDate()}`;
+  return{num,dow:`（${DAYS[ds.getDay()]}~${DAYS[de.getDay()]}）`};
 }
 
 // ── Rules: load / save / match / label ──
@@ -723,8 +784,15 @@ async function loadAllRules(){
 
 function matchRuleIn(rules,name){
   if(!name)return null;const n=name.trim();
-  for(const r of rules)for(const rn of r.names)if(n.includes(rn)||rn.includes(n))return r;
-  return null;
+  // 優先：活動名稱「包含」規則關鍵字，取最長(最精確)的關鍵字
+  // 例：活動「嘉明湖」→ 命中「嘉明湖」而非「戒茂斯上嘉明湖」；活動「戒茂斯上嘉明湖」→ 命中較長者
+  let best=null,bestLen=-1;
+  for(const r of rules)for(const rn of r.names){if(rn&&n.includes(rn)&&rn.length>bestLen){best=r;bestLen=rn.length}}
+  if(best)return best;
+  // 後備：規則關鍵字「包含」活動名稱，取最短(最接近)的關鍵字
+  let fb=null,fbLen=Infinity;
+  for(const r of rules)for(const rn of r.names){if(rn&&rn.includes(n)&&rn.length<fbLen){fb=r;fbLen=rn.length}}
+  return fb;
 }
 
 function deadlineLabel(r){
@@ -810,12 +878,6 @@ function renderMktg(){
     html+=`<div class="mktg-card-date">${dateRange} 出發｜${it.trip.registered}/${it.trip.capacity} 人</div>`;
     html+=`<div class="mktg-card-actions">`;
     if(it.inPromo){const d=daysUntil(it.trip.date);html+=`<div class="mktg-action mktg-action-promo">📣 宣傳中（出發前 ${d} 天）</div>`}
-    if(it.noApply){html+=`<div class="mktg-action mktg-action-done">✓ 免申請</div>`}
-    else if(it.applyDeadline){
-      if(it.applyDaysLeft<0)html+=`<div class="mktg-action mktg-action-done">✓ 已過申請期限</div>`;
-      else if(it.applyDaysLeft<=7)html+=`<div class="mktg-action mktg-action-urgent">⚠ 需申請（剩 ${it.applyDaysLeft} 天，${fmtShort(dateStr(it.applyDeadline))} 前）</div>`;
-      else html+=`<div class="mktg-action mktg-action-apply">📋 ${fmtShort(dateStr(it.applyDeadline))} 前申請</div>`;
-    }
     html+=`</div></div>`;
   }
   sec.innerHTML=html+`</div>`;
@@ -989,7 +1051,7 @@ function getEventsForDate(ds){
   for(const t of trips){
     // 跨日活動改以連續橫條顯示，不再放單日文字標籤
     if(t.date===ds&&!isMultiDay(t))events.push({type:'trip',label:t.name,id:t.id});
-    if(t.deadline===ds)events.push({type:'deadline',label:'截止：'+t.name,id:t.id});
+    if(t.deadline===ds)events.push({type:'deadline',label:'報名截止：'+t.name,id:t.id});
   }
   for(const t of trips){
     if(daysUntil(t.date)<0)continue;
@@ -1152,13 +1214,45 @@ document.addEventListener('click',()=>{document.getElementById('cal-popup').styl
 function setView(mode){
   viewMode=mode;
   document.getElementById('vtab-list').classList.toggle('on',mode==='list');
+  document.getElementById('vtab-team').classList.toggle('on',mode==='team');
   document.getElementById('vtab-cal').classList.toggle('on',mode==='calendar');
   document.getElementById('vtab-mktg').classList.toggle('on',mode==='mktgview');
   document.getElementById('view-list').style.display=mode==='list'?'block':'none';
+  document.getElementById('view-team').style.display=mode==='team'?'block':'none';
   document.getElementById('view-calendar').style.display=mode==='calendar'?'block':'none';
   document.getElementById('view-mktgview').style.display=mode==='mktgview'?'block':'none';
   if(mode==='calendar')renderCal();
   if(mode==='mktgview')renderMktgView();
+  if(mode==='team')renderTeam();
+}
+
+// ── 團務列表 ──
+function applyStatText(t){
+  if(daysUntil(t.date)<0)return{txt:'已結束',cls:'pill-done'};
+  const ai=applyInfo(t);
+  if(ai.state==='unset')return{txt:'未設定',cls:'pill-closed'};
+  if(ai.state==='none')return{txt:'免申請',cls:'pill-none'};
+  const applied=Math.min(t.applied||0,t.registered||0);
+  return{txt:`${applied} / ${t.registered||0}`,cls:'pill-apply'};
+}
+function renderTeam(){
+  const body=document.getElementById('team-body');
+  const list=sorted(trips.slice());
+  if(list.length===0){body.innerHTML='<div class="rule-empty">尚無活動</div>';return}
+  body.innerHTML=list.map(t=>{
+    const isPast=daysUntil(t.date)<0;
+    const as=applyStatText(t);
+    const lm=lodgeMealH(t);
+    const lodgeNote=t.lodgeNotes?`<div class="tm-note">${esc(t.lodgeNotes)}</div>`:'';
+    const mealNote=t.mealNotes?`<div class="tm-note">${esc(t.mealNotes)}</div>`:'';
+    return`<div class="tm-card${isPast?' past':''}">`
+      +`<div class="tm-head"><span class="tm-name">${esc(t.name)}</span><span class="pill ${as.cls}">申請 ${as.txt}</span></div>`
+      +`<div class="tm-grid">`
+      +`<div class="tm-item"><b>活動時間</b><span>${fmtRange(t.date,t.dateEnd)}</span></div>`
+      +`<div class="tm-item"><b>住宿</b>${lm.lodge}${lodgeNote}</div>`
+      +`<div class="tm-item"><b>餐食</b>${lm.meal}${mealNote}</div>`
+      +`</div></div>`;
+  }).join('');
 }
 
 // ── Settings modal ──
@@ -1375,6 +1469,7 @@ function sorted(list){
 }
 
 function render(){
+  applyListLayout();
   const now=new Date();
   document.getElementById('date-line').textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${DAYS[now.getDay()]}）`;
   const future=trips.filter(t=>daysUntil(t.date)>=0);
@@ -1387,6 +1482,7 @@ function render(){
   renderApplyWeek();
   if(viewMode==='calendar')renderCal();
   if(viewMode==='mktgview')renderMktgView();
+  if(viewMode==='team')renderTeam();
 
   document.getElementById('filters').innerHTML=FILTERS.map(f=>`<button class="chip${filter===f.key?' on':''}" onclick="setFilter('${f.key}')">${f.label}</button>`).join('');
 
@@ -1453,21 +1549,25 @@ function render(){
     if(isOpen){
       const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span>未設定</span>';
       const lm=lodgeMealH(t);
-      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-3}"><div class="detail-grid"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>備註</b><span>${t.notes?esc(t.notes):'—'}</span></div></div></td><td></td></tr>`;
+      const lodgeNoteH=t.lodgeNotes?esc(t.lodgeNotes):'—';
+      const mealNoteH=t.mealNotes?esc(t.mealNotes):'—';
+      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-3}"><div class="detail-grid3">`
+        +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
+        +`<div class="dcol"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>餐食備註</b><span>${mealNoteH}</span></div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div></div>`
+        +`</div></td><td></td></tr>`;
     }
 
-    // 手機卡片
+    // 方格模式卡片（手機＋桌機方格）
     const mExcelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span class="v" style="color:var(--text-muted)">未設定</span>';
-    const mNotesH=t.notes?`<div class="mc-line"><div><b>備註</b><span class="v">${esc(t.notes)}</span></div></div>`:'';
     const mlm=lodgeMealH(t);
-    const mLodgeMealH=`<div class="mc-line"><div class="lm-item"><b>住宿</b>${mlm.lodge}</div><div class="lm-item"><b>餐食</b>${mlm.meal}</div></div>`;
+    const dp=fmtRangeParts(t.date,t.dateEnd);
     cards.push(`<div class="mcard${isPast?' past':''}">`
-      +`<div class="mc-top"><span class="mc-name">${esc(t.name)}</span><div class="mc-flags">${flagsH}${statusH}</div></div>`
-      +`<div class="mc-line mc-line4"><div><b>活動日期</b><span class="v">${dateCol}</span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
-      +`<div class="mc-line"><div><b>報名狀況</b>${regCapH}</div><div><b>申請狀況</b>${applyStatH}</div></div>`
+      +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-date">${dp.num}<span class="mc-dow">${dp.dow}</span></span><span class="mc-name2">${esc(t.name)}</span></div><div class="mc-r1r">${flagsH}<div class="mc-applystat">${applyStatH}</div></div></div>`
+      +`<div class="mc-line mc-line3"><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
+      +`<div class="mc-line"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}</div><div><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div>`
+      +`<div class="mc-line"><div class="lm-item"><b>餐食狀況</b>${mlm.meal}</div><div><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div>`
       +`<div class="mc-line"><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div><div><b>Excel 名單</b>${mExcelH}</div></div>`
-      +mLodgeMealH
-      +mNotesH
       +`<div class="mc-acts">${editDelH}</div>`
       +`</div>`);
 
@@ -1477,6 +1577,17 @@ function render(){
 }
 
 // ── Interactions ──
+function setListLayout(mode){
+  listLayout=mode;try{localStorage.setItem('hk-list-layout',mode)}catch{}
+  applyListLayout();
+}
+function applyListLayout(){
+  const v=document.getElementById('view-list');
+  if(v){v.classList.toggle('lay-grid',listLayout==='grid');v.classList.toggle('lay-list',listLayout!=='grid')}
+  const lb=document.getElementById('lay-list-btn'),gb=document.getElementById('lay-grid-btn');
+  if(lb)lb.classList.toggle('on',listLayout!=='grid');
+  if(gb)gb.classList.toggle('on',listLayout==='grid');
+}
 function setFilter(f){filter=f;render()}
 function setSort(k){if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir=k==='promoted'?'desc':'asc'}render()}
 async function toggleStar(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{promoted:(t.promoted||0)>0?0:1})}
@@ -1498,8 +1609,8 @@ function dayDiff(a,b){return Math.round((parseD(b)-parseD(a))/864e5)}
 function nightsOf(t){if(!t.dateEnd||t.dateEnd===t.date)return 0;return Math.max(0,dayDiff(t.date,t.dateEnd))}
 function resizeLodging(existing,nights){const L=[];for(let i=0;i<nights;i++){const e=existing&&existing[i];L.push({book:e&&e.book?e.book:'no',pay:e&&e.pay?e.pay:'no'})}return L}
 function nextBook(s){return s==='no'?'yes':s==='yes'?'na':'no'}
-function bookInfo(s){return s==='yes'?{label:'已訂',cls:'st-yes'}:s==='na'?{label:'不需要',cls:'st-na'}:{label:'未訂',cls:'st-nob'}}
-function payInfo(s){return s==='yes'?{label:'已付款',cls:'st-yes'}:s==='na'?{label:'不需要',cls:'st-na'}:{label:'未付款',cls:'st-nop'}}
+function bookInfo(s){return s==='yes'?{label:'已訂',cls:'st-yes'}:s==='na'?{label:'N/A',cls:'st-na'}:{label:'未訂',cls:'st-nob'}}
+function payInfo(s){return s==='yes'?{label:'已付款',cls:'st-yes'}:s==='na'?{label:'N/A',cls:'st-na'}:{label:'未付款',cls:'st-nop'}}
 async function cycleLodgeBook(id,i){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const L=(t.lodging||[]).slice();while(L.length<=i)L.push({book:'no',pay:'no'});L[i]={...L[i],book:nextBook(L[i].book)};store.upd(id,{lodging:L})}
 async function cycleLodgePay(id,i){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const L=(t.lodging||[]).slice();while(L.length<=i)L.push({book:'no',pay:'no'});L[i]={...L[i],pay:nextBook(L[i].pay)};store.upd(id,{lodging:L})}
 async function cycleMealBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.book=nextBook(m.book);store.upd(id,{meal:m})}
@@ -1533,6 +1644,7 @@ async function openEdit(id){
   document.getElementById('f-date-end').value=t.dateEnd||t.date;
   document.getElementById('f-dead').value=t.deadline;document.getElementById('f-reg').value=t.registered;
   document.getElementById('f-cap').value=t.capacity;document.getElementById('f-notes').value=t.notes||'';
+  document.getElementById('f-lodge-notes').value=t.lodgeNotes||'';document.getElementById('f-meal-notes').value=t.mealNotes||'';
   document.getElementById('f-guide').value=t.guide||'';document.getElementById('f-excel').value=t.excelLink||'';
   document.getElementById('f-status').value=t.status||'reg';
   document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');
@@ -1541,7 +1653,7 @@ async function openEdit(id){
 function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
-  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
+  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
   const nights=nightsOf(data);
   if(editId){const cur=trips.find(x=>x.id===editId);data.lodging=resizeLodging(cur&&cur.lodging,nights);data.meal=(cur&&cur.meal)||{book:'no',pay:'no'};store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.applied=0;data.lodging=resizeLodging(null,nights);data.meal={book:'no',pay:'no'};data.createdAt=Date.now();store.add(data);toast('已新增')}
   closeTrip();
