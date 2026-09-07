@@ -197,10 +197,13 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 24px;font-size:13px}
 .detail-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 28px;font-size:13px}
 .detail-grid3 .dcol{display:flex;flex-direction:column;gap:14px;min-width:0}
-.detail-grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:14px 20px;font-size:13px}
-.detail-grid6 .dcol{display:flex;flex-direction:column;gap:14px;min-width:0}
-@media(max-width:1200px){.detail-grid6{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}.detail-grid6{grid-template-columns:1fr 1fr}}
+.detail-grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:14px 0;font-size:13px}
+.detail-grid6 .dcol{display:flex;flex-direction:column;gap:14px;min-width:0;padding:0 14px;border-right:1px dashed var(--border)}
+.detail-grid6 .dcol:first-child{padding-left:0}
+.detail-grid6 .dcol:last-child{border-right:none;padding-right:0}
+.detail-grid6 .lm-row{flex-wrap:nowrap}
+@media(max-width:1200px){.detail-grid6{grid-template-columns:repeat(3,1fr)}.detail-grid6 .dcol:nth-child(3){border-right:none}}
+@media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}.detail-grid6{grid-template-columns:1fr 1fr}.detail-grid6 .dcol:nth-child(2n){border-right:none}}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .detail-item a{color:var(--accent)}
 .detail-item span{color:var(--text-2)}
@@ -279,7 +282,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mktg{margin-bottom:20px}
 .mktg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .mktg-header h2{font-size:16px;font-weight:700}
-.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.rc-card .lm-row{flex-wrap:nowrap}
 .mktg-card{padding:14px 16px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm)}
 .mktg-card-name{font-weight:600;font-size:14px;margin-bottom:4px}
 .mktg-card-date{font-size:12px;color:var(--text-2);margin-bottom:8px}
@@ -1705,7 +1709,7 @@ function openSettings(){renderAllRuleLists();switchTab('deadline');showOv('ov-se
 function closeSettings(){hideOv('ov-settings')}
 function switchTab(tab){
   document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  ['deadline','apply','mktg','taskrem'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  ['deadline','apply','lodge','meal','mktg','taskrem'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
   if(tab==='taskrem')renderTaskReminderList();
 }
 
