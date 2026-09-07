@@ -208,9 +208,9 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .detail-item a{color:var(--accent)}
 .detail-item span{color:var(--text-2)}
 /* 住宿／餐食狀態 */
-.lm-item .lm-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.lm-item .lm-row{display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin-bottom:5px}
 .lm-item .lm-row:last-child{margin-bottom:0}
-.lm-lab{font-size:12px;color:var(--text-2);min-width:52px}
+.lm-lab{font-size:12px;color:var(--text-2);min-width:30px}
 .stbtn{padding:2px 9px;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;white-space:nowrap}
 .st-yes{background:var(--accent-bg);color:var(--accent)}
 .st-nob{background:var(--amber-bg);color:var(--amber)}
@@ -282,7 +282,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mktg{margin-bottom:20px}
 .mktg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .mktg-header h2{font-size:16px;font-weight:700}
-.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,320px));gap:10px}
 .rc-card .lm-row{flex-wrap:nowrap}
 .mktg-card{padding:14px 16px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm)}
 .mktg-card-name{font-weight:600;font-size:14px;margin-bottom:4px}
@@ -887,6 +887,7 @@ let expandedIds=new Set(),dateFrom=null,dateTo=null;
 let listLayout='list';try{const _l=localStorage.getItem('hk-list-layout');if(_l==='grid'||_l==='list')listLayout=_l}catch{}
 let reminderMode='time';try{const _rm=localStorage.getItem('hk-reminder-mode');if(_rm==='time'||_rm==='task'||_rm==='mktg')reminderMode=_rm}catch{}
 let scheduleSubFilter='all';
+let timeWindowFilter='14';try{const _tw=localStorage.getItem('hk-time-window');if(_tw==='7'||_tw==='14'||_tw==='all')timeWindowFilter=_tw}catch{}
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
 function parseD(s){return new Date(s+'T00:00:00')}
@@ -1125,6 +1126,7 @@ function setReminderMode(mode){
   renderReminders();
 }
 function setScheduleSubFilter(f){scheduleSubFilter=f;renderReminders()}
+function setTimeWindow(w){timeWindowFilter=w;try{localStorage.setItem('hk-time-window',w)}catch{};renderReminders()}
 function jumpToCard(tripId){
   setView('list');
   listLayout='grid';
@@ -1140,7 +1142,8 @@ function renderReminders(){
   if(btns[2])btns[2].classList.toggle('on',reminderMode==='mktg');
   const sfEl=document.getElementById('sched-subfilter');
   if(reminderMode==='time'){
-    sfEl.innerHTML='';
+    const twOpts=[{key:'7',label:'7天'},{key:'14',label:'14天'},{key:'all',label:'全部'}];
+    sfEl.innerHTML=twOpts.map(o=>`<button class="chip${timeWindowFilter===o.key?' on':''}" onclick="setTimeWindow('${o.key}')">${o.label}</button>`).join('');
     renderTimeReminders();
   }else if(reminderMode==='task'){
     const opts=[{key:'apply',label:'申請入園'},{key:'lodge',label:'住宿、餐食'},{key:'charter',label:'訂包車'},{key:'prenotice',label:'行前手冊發放'},{key:'weather',label:'天氣提醒'},{key:'insurance',label:'保險'},{key:'all',label:'全部'}];
@@ -1159,15 +1162,16 @@ function taskDueDate(t,tr){
 function renderTimeReminders(){
   const container=document.getElementById('reminder-container');
   const now=today();
-  const winEnd=new Date(now);winEnd.setDate(winEnd.getDate()+6);
+  const useAll=timeWindowFilter==='all';
+  const winDays=timeWindowFilter==='7'?6:13;
+  const winEnd=new Date(now);winEnd.setDate(winEnd.getDate()+winDays);
   const futureTrips=trips.filter(t=>daysUntil(t.date)>=0);
-  const cards=[];
-  for(const t of futureTrips){
+  function collectReasons(t,endDate){
     const ai=applyInfo(t);
     const reasons=[];
     if(ai.state==='dated'){
       const dd=parseD(ai.ds);
-      if(dd<=winEnd||dd<now){
+      if(useAll||dd<=endDate||dd<now){
         const dLeft=ai.days;
         const txt=dLeft<0?`入園申請已逾期（${fmtShort(ai.ds)}）`:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${dLeft} 天）`;
         reasons.push({icon:'📋',text:txt,cls:dLeft<=3?'mktg-action-urgent':'mktg-action-apply',cat:'apply'});
@@ -1176,7 +1180,7 @@ function renderTimeReminders(){
     const li=lodgeInfo(t);
     if(getLodgeUnbooked(t)){
       let dlTxt;
-      if(li.state==='dated'){const ldd=parseD(li.ds);if(ldd<=winEnd||ldd<now){dlTxt=li.days>=0?`需於 ${fmtShort(li.ds)} 前完成`:'已逾期'}}
+      if(li.state==='dated'){const ldd=parseD(li.ds);if(useAll||ldd<=endDate||ldd<now){dlTxt=li.days>=0?`需於 ${fmtShort(li.ds)} 前完成`:'已逾期'}}
       else if(ai.state==='dated'){dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期'}
       else{dlTxt=`出發日 ${fmtShort(t.date)}`}
       if(dlTxt)reasons.push({icon:'🏨',text:`住宿尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'lodge'});
@@ -1184,7 +1188,7 @@ function renderTimeReminders(){
     const mi=mealInfo(t);
     if(getMealUnbooked(t)){
       let dlTxt;
-      if(mi.state==='dated'){const mdd=parseD(mi.ds);if(mdd<=winEnd||mdd<now){dlTxt=mi.days>=0?`需於 ${fmtShort(mi.ds)} 前完成`:'已逾期'}}
+      if(mi.state==='dated'){const mdd=parseD(mi.ds);if(useAll||mdd<=endDate||mdd<now){dlTxt=mi.days>=0?`需於 ${fmtShort(mi.ds)} 前完成`:'已逾期'}}
       else if(ai.state==='dated'){dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期'}
       else{dlTxt=`出發日 ${fmtShort(t.date)}`}
       if(dlTxt)reasons.push({icon:'🍽',text:`餐食尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'meal'});
@@ -1194,21 +1198,27 @@ function renderTimeReminders(){
       const trDays=daysUntil(t.date);
       const isDone=(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes')||(tr.name==='保險處理'&&(t.insurance||{}).done==='yes')||(tr.name==='天氣提醒'&&t.weatherDone==='yes')||(tr.name==='行前手冊發放'&&t.preNoticeDone==='yes');
       if(isDone)continue;
-      if(dd<=winEnd||dd<now){
+      if(useAll||dd<=endDate||dd<now){
         const dueDateStr=fmtShort(dateStr(dd));
         reasons.push({icon:'⚡',text:`${tr.name}（需於 ${dueDateStr} 前完成）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
       }
     }
-    if(reasons.length>0)cards.push({t,ai,reasons,tripDays:daysUntil(t.date)});
+    return reasons;
   }
+  const cards=[];
+  for(const t of futureTrips){
+    const reasons=collectReasons(t,winEnd);
+    if(reasons.length>0)cards.push({t,ai:applyInfo(t),reasons,tripDays:daysUntil(t.date)});
+  }
+  const winLabel=useAll?'所有':timeWindowFilter+'天內';
   let html='';
   if(cards.length>0){
     cards.sort((a,b)=>a.tripDays-b.tripDays);
-    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>7天內待辦事項</h2></div><div class="mktg-cards">`;
+    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${winLabel}待辦事項</h2></div><div class="mktg-cards">`;
     for(const c of cards)html+=renderReminderCard(c.t,c.ai,c.reasons);
     html+=`</div></div>`;
   }
-  if(!html)html='<div class="empty" style="padding:40px"><p>7天內沒有待辦事項</p></div>';
+  if(!html)html=`<div class="empty" style="padding:40px"><p>${winLabel}沒有待辦事項</p></div>`;
   container.innerHTML=html;
 }
 
@@ -2037,7 +2047,7 @@ function render(){
       const charterNoteH=t.charterNotes?esc(t.charterNotes):'—';
       const insNoteH=t.insuranceNotes?esc(t.insuranceNotes):'—';
       const applyStatusNoteH=t.applyStatusNotes?esc(t.applyStatusNotes):'—';
-      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-2}"><div class="detail-grid6">`
+      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}"><div class="detail-grid6">`
         +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row"><button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button></div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>餐食備註</b><span>${mealNoteH}</span></div></div>`
