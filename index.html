@@ -51,9 +51,9 @@
 
 *,*::before,*::after{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-.app{max-width:1120px;margin:0 auto;padding:20px 24px 60px}
+.app{max-width:1100px;margin:0 auto;padding:20px 60px 60px}
 
-.navbar{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border-sub);box-shadow:var(--shadow-sm);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;height:54px}
+.navbar{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border-sub);box-shadow:var(--shadow-sm);padding:0 60px;display:flex;align-items:center;justify-content:space-between;gap:12px;height:54px}
 .nav-brand{font-family:var(--font-d);font-size:18px;font-weight:800;letter-spacing:-0.01em;color:var(--text);white-space:nowrap;flex-shrink:0}
 .nav-right{display:flex;align-items:center;gap:4px}
 .nav-main{display:flex;align-items:center;gap:2px}
@@ -80,14 +80,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .nav-mob-sep{height:1px;background:var(--border-sub);margin:8px 16px}
 .hdr-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
 
-.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-.stat{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r);font-size:13px;font-weight:500;color:var(--text-2);box-shadow:var(--shadow-sm)}
-.stat b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
-.stat--accent b{color:var(--accent)}.stat--warn b{color:var(--warn)}.stat--red b{color:var(--red)}.stat--amber b{color:var(--amber)}
-.info-ic{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--text-muted);color:var(--text-muted);font-size:10px;font-weight:700;font-style:italic;font-family:Georgia,serif;cursor:pointer;background:transparent;padding:0;line-height:1;flex-shrink:0}
-.info-ic:hover{border-color:var(--text-2);color:var(--text-2);background:var(--surface-hover)}
+.stats-star-wrap{position:relative;display:inline-flex;align-self:flex-end;margin-left:auto}
+.stats-star{width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--amber);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.stats-star:hover{background:var(--amber-bg);transform:scale(1.1)}
+.stats-star svg{width:22px;height:22px;fill:currentColor;stroke:currentColor;stroke-width:1}
+.stats-popup{display:none;position:absolute;top:100%;right:0;z-index:60;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:16px 18px;min-width:200px;margin-top:6px}
+.stats-star-wrap:hover .stats-popup{display:block}
+.stats-popup-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 0;font-size:13px;color:var(--text-2)}
+.stats-popup-row:not(:last-child){border-bottom:1px solid var(--border-sub)}
+.stats-popup-row b{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.spr-accent b{color:var(--accent)}.spr-warn b{color:var(--warn)}.spr-red b{color:var(--red)}.spr-amber b{color:var(--amber)}
 .info-pop{position:fixed;z-index:150;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:12px 14px;max-width:280px;font-size:13px;line-height:1.7;color:var(--text-2)}
 .info-pop b{display:block;color:var(--text);font-weight:700;margin-bottom:4px}
+.rc-card{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:14px 16px;display:flex;flex-direction:column;gap:0}
+.rc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.rc-name{font-size:15px;font-weight:700;color:var(--text)}
+.rc-date{font-size:13px;color:var(--text-2)}
+.rc-row{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;padding:10px 0;border-top:1px dashed var(--border)}
+.rc-row3{grid-template-columns:1fr 1fr 1fr}
+.rc-field{display:flex;flex-direction:column;gap:3px}
+.rc-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em}
+.rc-val{font-size:13px;color:var(--text);display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.rc-stbtn{padding:2px 9px;border-radius:11px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.rc-st-yes{background:var(--accent-bg);color:var(--accent)}
+.rc-st-no{background:var(--red-bg);color:var(--red)}
+.rc-st-na{background:var(--surface-alt);color:var(--text-muted)}
+.rc-st-done{background:var(--accent-bg);color:var(--accent)}
+.rc-st-notdone{background:var(--amber-bg);color:var(--amber)}
+.rc-st-paid{background:var(--accent-bg);color:var(--accent)}
+.rc-st-unpaid{background:var(--red-bg);color:var(--red)}
 
 .page-title-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .page-title-bar h2{font-size:18px;font-weight:700;color:var(--text)}
@@ -265,7 +286,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mktg-action-urgent{background:var(--red-bg);color:var(--red)}
 .mktg-action-info{background:var(--accent-bg);color:var(--accent)}
 
-.reminder-toggle{display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;align-self:flex-start}
+.reminder-toggle{display:flex;gap:0;margin:0 auto 16px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;width:fit-content}
 .reminder-toggle button{padding:6px 14px;font:600 12px var(--font);border:none;background:var(--surface);color:var(--text-muted);cursor:pointer;transition:all .12s;white-space:nowrap}
 .reminder-toggle button:not(:last-child){border-right:1px solid var(--border)}
 .reminder-toggle button.on{background:var(--accent);color:var(--accent-on)}
@@ -494,27 +515,26 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 </div>
 
 <div class="app">
-  <div id="view-schedule">
-    <div class="page-title-bar">
-      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
-        <h2>時程提醒</h2>
-        <div class="hdr-sub" id="date-line"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div class="hdr-sub" id="date-line"></div>
+    <div class="stats-star-wrap" id="stats-star-wrap">
+      <button class="stats-star" title="活動統計"><svg viewBox="0 0 20 20"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z"/></svg></button>
+      <div class="stats-popup" id="stats-popup">
+        <div class="stats-popup-row spr-accent"><span>活動總數</span><b id="s-total">0</b></div>
+        <div class="stats-popup-row spr-warn"><span>即將截止</span><b id="s-soon">0</b></div>
+        <div class="stats-popup-row spr-red"><span>即將額滿</span><b id="s-full">0</b></div>
+        <div class="stats-popup-row spr-amber"><span>重點宣傳</span><b id="s-promo">0</b></div>
       </div>
     </div>
+  </div>
 
-    <div class="stats">
-      <div class="stat stat--accent"><b id="s-total">0</b> 活動總數</div>
-      <div class="stat stat--warn"><b id="s-soon">0</b> 即將截止 <button class="info-ic" onclick="showInfo(event,'soon')" title="判斷標準">i</button></div>
-      <div class="stat stat--red"><b id="s-full">0</b> 即將額滿 <button class="info-ic" onclick="showInfo(event,'full')" title="判斷標準">i</button></div>
-      <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
-    </div>
-
+  <div id="view-schedule">
     <div class="reminder-toggle" id="reminder-toggle">
       <button class="on" onclick="setReminderMode('time')">時間分類</button>
       <button onclick="setReminderMode('task')">團務分類</button>
+      <button onclick="setReminderMode('mktg')">行銷重點</button>
     </div>
     <div id="reminder-container"></div>
-    <div class="mktg" id="mktg-section"></div>
   </div>
 
   <div id="view-list" class="lay-list" style="display:none">
@@ -741,7 +761,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 const DAYS=['日','一','二','三','四','五','六'];
 const COLS=[
   {key:'_status',label:'狀態',sort:false},
-  {key:'promoted',label:'宣傳',sort:true},{key:'name',label:'活動名稱',sort:true},
+  {key:'name',label:'活動名稱',sort:true},
   {key:'date',label:'日期',sort:true},{key:'_applyDead',label:'申請日期',sort:true},
   {key:'_cd',label:'申請倒數',sort:true},
   {key:'_cap',label:'報名人數',sort:true},
@@ -749,7 +769,7 @@ const COLS=[
   {key:'_guide',label:'嚮導',sort:false},
   {key:'_acts',label:'',sort:false},
 ];
-const FILTERS=[{key:'all',label:'全部'},{key:'promo',label:'重點宣傳'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'}];
+const FILTERS=[{key:'all',label:'全部'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'}];
 const STATUS_OPTS=[
   {key:'reg',label:'報名中',cls:'pill-open'},
   {key:'apply',label:'申請中',cls:'pill-apply'},
@@ -805,7 +825,7 @@ const CAL_FILTERS=[{key:'all',label:'全部'},{key:'act',label:'只顯示活動'
 const CAL_GROUP={trip:'act',deadline:'act',apply:'act',promo:'mktg',post:'mktg',mktgevent:'mktg'};
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
 let listLayout='list';try{const _l=localStorage.getItem('hk-list-layout');if(_l==='grid'||_l==='list')listLayout=_l}catch{}
-let reminderMode='time';try{const _rm=localStorage.getItem('hk-reminder-mode');if(_rm==='time'||_rm==='task')reminderMode=_rm}catch{}
+let reminderMode='time';try{const _rm=localStorage.getItem('hk-reminder-mode');if(_rm==='time'||_rm==='task'||_rm==='mktg')reminderMode=_rm}catch{}
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
 function parseD(s){return new Date(s+'T00:00:00')}
@@ -1010,9 +1030,6 @@ function delTaskReminder(id){
 function setReminderMode(mode){
   reminderMode=mode;
   try{localStorage.setItem('hk-reminder-mode',mode)}catch{}
-  const btns=document.querySelectorAll('#reminder-toggle button');
-  btns[0].classList.toggle('on',mode==='time');
-  btns[1].classList.toggle('on',mode==='task');
   renderReminders();
 }
 
@@ -1020,8 +1037,10 @@ function renderReminders(){
   const btns=document.querySelectorAll('#reminder-toggle button');
   btns[0].classList.toggle('on',reminderMode==='time');
   btns[1].classList.toggle('on',reminderMode==='task');
+  if(btns[2])btns[2].classList.toggle('on',reminderMode==='mktg');
   if(reminderMode==='time')renderTimeReminders();
-  else renderTaskReminders();
+  else if(reminderMode==='task')renderTaskReminders();
+  else renderMktgReminders();
 }
 
 function renderTimeReminders(){
@@ -1135,16 +1154,61 @@ function renderTaskReminders(){
   container.innerHTML=html;
 }
 
+function renderMktgReminders(){
+  const container=document.getElementById('reminder-container');
+  const items=getMarketingItems();
+  let html='';
+  if(items.length>0){
+    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>本週行銷重點</h2></div><div class="mktg-cards">`;
+    for(const it of items){
+      const dateRange=it.trip.dateEnd?`${fmtShort(it.trip.date)}~${fmtShort(it.trip.dateEnd)}`:`${fmtDate(it.trip.date)}`;
+      html+=`<div class="mktg-card"><div class="mktg-card-name">${esc(it.trip.name)}</div>`;
+      html+=`<div class="mktg-card-date">${dateRange} 出發｜${it.trip.registered}/${it.trip.capacity} 人</div>`;
+      html+=`<div class="mktg-card-actions">`;
+      if(it.inPromo){const d=daysUntil(it.trip.date);html+=`<div class="mktg-action mktg-action-promo">📣 宣傳中（出發前 ${d} 天）</div>`}
+      html+=`</div></div>`;
+    }
+    html+=`</div></div>`;
+  }else{
+    html+=`<div class="empty" style="padding:40px"><p>目前沒有行銷重點</p></div>`;
+  }
+  container.innerHTML=html;
+}
+
 function renderReminderCard(t,ai,reasons){
   const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtDate(t.date);
   const applyText=ai.state==='dated'?fmtDate(ai.ds):ai.state==='none'?'免申請':'未設定';
-  let h=`<div class="mktg-card"><div class="mktg-card-name">${esc(t.name)}</div>`;
-  h+=`<div class="mktg-card-date">${dateRange}｜${t.registered}/${t.capacity} 人</div>`;
-  h+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">申請截止：${applyText}</div>`;
-  h+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">住宿：${lodgeSummary(t)}　餐食：${mealSummary(t)}</div>`;
-  h+=`<div class="mktg-card-actions">`;
-  for(const r of reasons)h+=`<div class="mktg-action ${r.cls}">${r.icon} ${esc(r.text)}</div>`;
-  h+=`</div></div>`;
+  const nights=nightsOf(t);const L=t.lodging||[];
+  const ch=t.charter||{book:'no',pay:'no'};
+  const ins=t.insurance||{done:'no',pay:'no'};
+  const chB=bookInfo(ch.book),chP=payInfo(ch.pay);
+  const insD=doneInfo(ins.done),insP=paidInfo(ins.pay);
+  const wD=doneInfo(t.weatherDone==='yes'?'yes':'no');
+  const pnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
+
+  let lodgeH='';
+  if(nights>0){for(let i=0;i<nights;i++){const e=L[i]||{book:'no',pay:'no'};const bi=bookInfo(e.book),pi=payInfo(e.pay);
+    lodgeH+=`<div class="lm-row"><span class="lm-lab">第${i+1}晚</span><button class="stbtn ${bi.cls}" onclick="cycleLodgeBook('${t.id}',${i})">${bi.label}</button><button class="stbtn ${pi.cls}" onclick="cycleLodgePay('${t.id}',${i})">${pi.label}</button></div>`;
+  }}else lodgeH=`<span style="color:var(--text-muted);font-size:12px">單日行程</span>`;
+  const m=t.meal||{book:'no',pay:'no'};const mbi=bookInfo(m.book),mpi=payInfo(m.pay);
+  const mealH=`<button class="stbtn ${mbi.cls}" onclick="cycleMealBook('${t.id}')">${mbi.label}</button><button class="stbtn ${mpi.cls}" onclick="cycleMealPay('${t.id}')">${mpi.label}</button>`;
+
+  let h=`<div class="rc-card">`;
+  h+=`<div class="rc-head"><div><div class="rc-name">${esc(t.name)}</div><div class="rc-date">${dateRange}｜${t.registered}/${t.capacity} 人</div></div></div>`;
+  h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">入園申請</div><div class="rc-val">${applyText}</div></div>`;
+  h+=`<div class="rc-field"><div class="rc-label">報名人數</div><div class="rc-val">${t.registered} / ${t.capacity}</div></div></div>`;
+  h+=`<div class="rc-row"><div class="rc-field lm-item"><div class="rc-label">住宿</div>${lodgeH}</div>`;
+  h+=`<div class="rc-field"><div class="rc-label">餐食</div><div class="rc-val">${mealH}</div></div></div>`;
+  h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">租包車</div><div class="rc-val"><button class="stbtn ${chB.cls}" onclick="cycleCharterBook('${t.id}')">${chB.label}</button><button class="stbtn ${chP.cls}" onclick="cycleCharterPay('${t.id}')">${chP.label}</button></div></div>`;
+  h+=`<div class="rc-field"><div class="rc-label">保險</div><div class="rc-val"><button class="stbtn ${insD.cls}" onclick="cycleInsBook('${t.id}')">${insD.label}</button><button class="stbtn ${insP.cls}" onclick="cycleInsPay('${t.id}')">${insP.label}</button></div></div></div>`;
+  h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">天氣預報</div><div class="rc-val"><button class="stbtn ${wD.cls}" onclick="cycleWeather('${t.id}')">${wD.label}</button></div></div>`;
+  h+=`<div class="rc-field"><div class="rc-label">行前通知</div><div class="rc-val"><button class="stbtn ${pnD.cls}" onclick="cyclePreNotice('${t.id}')">${pnD.label}</button></div></div></div>`;
+  if(reasons&&reasons.length>0){
+    h+=`<div style="padding-top:8px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:4px">`;
+    for(const r of reasons)h+=`<div class="mktg-action ${r.cls}" style="font-size:11px">${r.icon} ${esc(r.text)}</div>`;
+    h+=`</div>`;
+  }
+  h+=`</div>`;
   return h;
 }
 
@@ -1163,6 +1227,39 @@ function getAllMktgPeriods(){
 }
 function renderMktgView(){
   const el=document.getElementById('mktgview-body');
+
+  // 本週/本月行銷重點
+  const mktgItems=getMarketingItems();
+  const now=today();
+  const weekEnd=new Date(now);weekEnd.setDate(weekEnd.getDate()+7);
+  const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0);monthEnd.setHours(23,59,59);
+  const weekItems=[],monthItems=[];
+  for(const it of mktgItems){
+    const tripD=parseD(it.trip.date);
+    const dlD=it.applyDeadline;
+    const inWeek=(dlD&&dlD<=weekEnd)||(tripD<=weekEnd&&tripD>=now);
+    const inMonth=(dlD&&dlD<=monthEnd)||(tripD<=monthEnd&&tripD>=now);
+    if(inWeek)weekItems.push(it);
+    else if(inMonth)monthItems.push(it);
+  }
+  function mktgHighlightCards(items){
+    let h='<div class="mktg-cards">';
+    if(items.length===0){h+='<div style="color:var(--text-muted);font-size:13px;padding:8px 0">目前無項目</div>'}
+    for(const it of items){
+      const dateRange=it.trip.dateEnd?`${fmtShort(it.trip.date)}~${fmtShort(it.trip.dateEnd)}`:`${fmtDate(it.trip.date)}`;
+      h+=`<div class="mktg-card"><div class="mktg-card-name">${esc(it.trip.name)}</div>`;
+      h+=`<div class="mktg-card-date">${dateRange} 出發｜${it.trip.registered}/${it.trip.capacity} 人</div>`;
+      h+=`<div class="mktg-card-actions">`;
+      if(it.inPromo){const d=daysUntil(it.trip.date);h+=`<div class="mktg-action mktg-action-promo">📣 宣傳中（出發前 ${d} 天）</div>`}
+      if(it.applyDeadline&&!it.noApply){h+=`<div class="mktg-action${it.applyDaysLeft<=3?' mktg-action-urgent':''}">📝 入園申請${it.applyDaysLeft>=0?`倒數 ${it.applyDaysLeft} 天`:'已截止'}</div>`}
+      h+=`</div></div>`;
+    }
+    return h+'</div>';
+  }
+  let highlightHtml='';
+  highlightHtml+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>本週行銷重點</h2></div>${mktgHighlightCards(weekItems)}</div>`;
+  highlightHtml+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>本月行銷重點</h2></div>${mktgHighlightCards(monthItems)}</div>`;
+
   // 以「發文」為單位：每筆發文一列，發文日期在最前面
   const rows=[];
   for(const it of getAllMktgPeriods()){
@@ -1179,7 +1276,7 @@ function renderMktgView(){
   for(const e of mktgEvents)rows.push({sort:parseD(e.date),kind:'event',ev:e});
   rows.sort((a,b)=>a.sort-b.sort);
 
-  let html=`<div class="mktgview-head"><button class="btn btn-p" onclick="openMktgEvent()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行銷時程</button></div>`;
+  let html=highlightHtml+`<div class="mktgview-head"><button class="btn btn-p" onclick="openMktgEvent()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行銷時程</button></div>`;
   if(rows.length===0){el.innerHTML=html+'<div class="empty"><p>目前沒有行銷時程</p></div>';return}
   const groups=[];
   for(const r of rows){
@@ -1691,7 +1788,6 @@ function render(){
   document.getElementById('s-full').textContent=future.filter(t=>t.capacity>0&&t.registered/t.capacity>=0.8).length;
   document.getElementById('s-promo').textContent=future.filter(t=>t.promoted>0).length;
 
-  renderMktg();
   renderReminders();
   if(viewMode==='calendar')renderCal();
   if(viewMode==='mktgview')renderMktgView();
@@ -1716,9 +1812,6 @@ function render(){
     const isPast=daysUntil(t.date)<0;
     const pct=t.capacity>0?Math.min(t.registered/t.capacity,1):0;
     const isFull=t.capacity>0&&t.registered>=t.capacity;
-
-    const promoOn=(t.promoted||0)>0;
-    const flagsH=`<div class="stars"><svg class="${promoOn?'star-on':'star-off'}" viewBox="0 0 20 20" onclick="event.stopPropagation();toggleStar('${t.id}')" title="重點宣傳"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z" fill="currentColor"/></svg></div>`;
 
     const ai=applyInfo(t);
     let applyDeadH,applyCdH,applyCdC,applyStatH;
@@ -1755,7 +1848,7 @@ function render(){
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td data-label="宣傳">${flagsH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -1763,24 +1856,29 @@ function render(){
       const lm=lodgeMealH(t);
       const lodgeNoteH=t.lodgeNotes?esc(t.lodgeNotes):'—';
       const mealNoteH=t.mealNotes?esc(t.mealNotes):'—';
-      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-3}"><div class="detail-grid3">`
+      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-2}"><div class="detail-grid3">`
         +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>餐食備註</b><span>${mealNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div></div>`
-        +`</div></td><td></td></tr>`;
+        +`</div></td></tr>`;
     }
 
     // 方格模式卡片（手機＋桌機方格）
     const mExcelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span class="v" style="color:var(--text-muted)">未設定</span>';
     const mlm=lodgeMealH(t);
     const dp=fmtRangeParts(t.date,t.dateEnd);
+    const mch=t.charter||{book:'no',pay:'no'};const mchB=bookInfo(mch.book),mchP=payInfo(mch.pay);
+    const mins=t.insurance||{done:'no',pay:'no'};const minsD=doneInfo(mins.done),minsP=paidInfo(mins.pay);
+    const mwD=doneInfo(t.weatherDone==='yes'?'yes':'no');
+    const mpnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
     cards.push(`<div class="mcard${isPast?' past':''}">`
-      +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-date">${dp.num}<span class="mc-dow">${dp.dow}</span></span><span class="mc-name2">${esc(t.name)}</span></div><div class="mc-r1r">${flagsH}${statusH}</div></div>`
+      +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-date">${dp.num}<span class="mc-dow">${dp.dow}</span></span><span class="mc-name2">${esc(t.name)}</span></div><div class="mc-r1r">${statusH}</div></div>`
       +`<div class="mc-line"><div><b>報名人數</b>${regCapH}</div><div><b>申請人數</b>${applyStatH}</div></div>`
       +`<div class="mc-line mc-line3"><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
-      +`<div class="mc-line"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}</div><div><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div>`
-      +`<div class="mc-line"><div class="lm-item"><b>餐食狀況</b>${mlm.meal}</div><div><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div>`
-      +`<div class="mc-line"><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div><div><b>Excel 名單</b>${mExcelH}</div></div>`
+      +`<div class="mc-line"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}<div style="margin-top:4px"><b style="font-size:11px;color:var(--text-muted)">住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div><div class="lm-item"><b>餐食狀況</b>${mlm.meal}<div style="margin-top:4px"><b style="font-size:11px;color:var(--text-muted)">餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div></div>`
+      +`<div class="mc-line"><div><b>包租車狀況</b><div class="lm-row"><button class="stbtn ${mchB.cls}" onclick="cycleCharterBook('${t.id}')">${mchB.label}</button><button class="stbtn ${mchP.cls}" onclick="cycleCharterPay('${t.id}')">${mchP.label}</button></div></div><div><b>保險處理狀況</b><div class="lm-row"><button class="stbtn ${minsD.cls}" onclick="cycleInsBook('${t.id}')">${minsD.label}</button><button class="stbtn ${minsP.cls}" onclick="cycleInsPay('${t.id}')">${minsP.label}</button></div></div></div>`
+      +`<div class="mc-line"><div><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${mpnD.cls}" onclick="cyclePreNotice('${t.id}')">${mpnD.label}</button></div></div><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div></div>`
+      +`<div class="mc-line"><div><b>Excel 名單</b>${mExcelH}</div><div></div></div>`
       +`<div class="mc-acts">${editDelH}</div>`
       +`</div>`);
 
@@ -1828,6 +1926,16 @@ async function cycleLodgeBook(id,i){if(!await ensureEditor())return;const t=trip
 async function cycleLodgePay(id,i){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const L=(t.lodging||[]).slice();while(L.length<=i)L.push({book:'no',pay:'no'});L[i]={...L[i],pay:nextBook(L[i].pay)};store.upd(id,{lodging:L})}
 async function cycleMealBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.book=nextBook(m.book);store.upd(id,{meal:m})}
 async function cycleMealPay(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.pay=nextBook(m.pay);store.upd(id,{meal:m})}
+async function cycleCharterBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const c={...(t.charter||{book:'no',pay:'no'})};c.book=nextBookNa(c.book);store.upd(id,{charter:c})}
+async function cycleCharterPay(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const c={...(t.charter||{book:'no',pay:'no'})};c.pay=nextBookNa(c.pay);store.upd(id,{charter:c})}
+async function cycleInsBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const c={...(t.insurance||{done:'no',pay:'no'})};c.done=nextDone(c.done);store.upd(id,{insurance:c})}
+async function cycleInsPay(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const c={...(t.insurance||{done:'no',pay:'no'})};c.pay=nextBookNa(c.pay);store.upd(id,{insurance:c})}
+async function cycleWeather(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{weatherDone:t.weatherDone==='yes'?'no':'yes'})}
+async function cyclePreNotice(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{preNoticeDone:t.preNoticeDone==='yes'?'no':'yes'})}
+function nextBookNa(s){return s==='no'?'yes':s==='yes'?'no':'no'}
+function nextDone(s){return s==='yes'?'no':'yes'}
+function doneInfo(s){return s==='yes'?{label:'已處理',cls:'rc-st-done'}:{label:'未處理',cls:'rc-st-notdone'}}
+function paidInfo(s){return s==='yes'?{label:'已付款',cls:'rc-st-paid'}:{label:'未付款',cls:'rc-st-unpaid'}}
 function lodgeMealH(t){
   const nights=nightsOf(t);const L=t.lodging||[];
   let lodge='';
