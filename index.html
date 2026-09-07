@@ -93,7 +93,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .info-pop{position:fixed;z-index:150;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:12px 14px;max-width:280px;font-size:13px;line-height:1.7;color:var(--text-2)}
 .info-pop b{display:block;color:var(--text);font-weight:700;margin-bottom:4px}
 .rc-card{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:14px 16px;display:flex;flex-direction:column;gap:0}
-.rc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.rc-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;padding-right:36px}
 .rc-name{font-size:15px;font-weight:700;color:var(--text)}
 .rc-date{font-size:13px;color:var(--text-2)}
 .rc-row{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;padding:10px 0;border-top:1px dashed var(--border)}
@@ -144,7 +144,7 @@ td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:mi
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:100px}
 thead th:nth-child(4),tbody tr:not(.detail-row) td:nth-child(4){white-space:nowrap;min-width:100px;font-weight:700}
-tbody tr:not(.detail-row) td:nth-child(12){white-space:nowrap}
+tbody tr:not(.detail-row) td:nth-child(11){white-space:nowrap}
 
 .stars{display:flex;gap:2px;cursor:pointer}
 .stars svg{width:18px;height:18px;transition:transform .12s}.stars svg:hover{transform:scale(1.2)}
@@ -209,6 +209,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .st-yes{background:var(--accent-bg);color:var(--accent)}
 .st-nob{background:var(--amber-bg);color:var(--amber)}
 .st-nop{background:var(--red-bg);color:var(--red)}
+.st-warn{background:var(--purple-bg);color:var(--purple)}
 .st-na{background:var(--surface-alt);color:var(--text-muted)}
 
 .empty{padding:60px 20px;text-align:center;color:var(--text-muted)}
@@ -642,6 +643,14 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label for="f-charter-notes">包租車備註（選填）</label><input id="f-charter-notes" type="text" placeholder="例：九人座、接駁點"></div>
           <div class="f-row"><label for="f-insurance-notes">保險備註（選填）</label><input id="f-insurance-notes" type="text" placeholder="例：保險公司名稱"></div>
         </div>
+        <div class="f-pair">
+          <div class="f-row"><label for="f-apply-status">申請狀態</label><select id="f-apply-status">
+            <option value="notApplied">未申請</option>
+            <option value="applied">已申請</option>
+            <option value="waitlist">候補中</option>
+          </select></div>
+          <div class="f-row"><label for="f-apply-status-notes">申請備註（選填）</label><input id="f-apply-status-notes" type="text" placeholder="例：申請狀態說明"></div>
+        </div>
         <div class="f-row"><label for="f-notes">備註（選填）</label><textarea id="f-notes" placeholder="內部備忘"></textarea></div>
         <div class="f-actions">
           <button type="button" class="btn btn-g" onclick="closeTrip()">取消</button>
@@ -779,9 +788,8 @@ const COLS=[
   {key:'_cd',label:'申請倒數',sort:true},
   {key:'_cap',label:'報名人數',sort:true},
   {key:'_applyStat',label:'申請人數',sort:false},
-  {key:'_charter',label:'訂包車',sort:false},
-  {key:'_prenotice',label:'行前手冊',sort:false},
-  {key:'_insurance',label:'保險',sort:false},
+  {key:'_deadline',label:'報名截止',sort:true},
+  {key:'_excel',label:'Excel 名單',sort:false},
   {key:'_guide',label:'嚮導',sort:false},
   {key:'_acts',label:'',sort:false},
 ];
@@ -1066,8 +1074,7 @@ function renderReminders(){
   if(btns[2])btns[2].classList.toggle('on',reminderMode==='mktg');
   const sfEl=document.getElementById('sched-subfilter');
   if(reminderMode==='time'){
-    const opts=[{key:'7d',label:'7天內待辦'},{key:'14d',label:'14天內待辦'},{key:'all',label:'全部'}];
-    sfEl.innerHTML=opts.map(o=>`<button class="chip${scheduleSubFilter===o.key?' on':''}" onclick="setScheduleSubFilter('${o.key}')">${o.label}</button>`).join('');
+    sfEl.innerHTML='';
     renderTimeReminders();
   }else if(reminderMode==='task'){
     const opts=[{key:'apply',label:'申請入園'},{key:'lodge',label:'住宿、餐食'},{key:'charter',label:'訂包車'},{key:'prenotice',label:'行前手冊發放'},{key:'weather',label:'天氣提醒'},{key:'insurance',label:'保險'},{key:'all',label:'全部'}];
@@ -1086,49 +1093,42 @@ function taskDueDate(t,tr){
 function renderTimeReminders(){
   const container=document.getElementById('reminder-container');
   const now=today();
-  const windows=[];
-  if(scheduleSubFilter==='7d'||scheduleSubFilter==='all')windows.push({key:'7d',title:'7天內待辦事項',max:7});
-  if(scheduleSubFilter==='14d'||scheduleSubFilter==='all')windows.push({key:'14d',title:'14天內待辦事項',max:14});
-
+  const winEnd=new Date(now);winEnd.setDate(winEnd.getDate()+6);
   const futureTrips=trips.filter(t=>daysUntil(t.date)>=0);
-  let html='';
-
-  for(const win of windows){
-    const winEnd=new Date(now);winEnd.setDate(winEnd.getDate()+win.max-1);
-    const winStart=win.key==='14d'&&scheduleSubFilter==='all'?new Date(now.getTime()+7*864e5):now;
-    const cards=[];
-    for(const t of futureTrips){
-      const ai=applyInfo(t);
-      const reasons=[];
-      if(ai.state==='dated'){
-        const dd=parseD(ai.ds);
-        if((dd<=winEnd&&dd>=winStart)||dd<now){
-          const dLeft=ai.days;
-          const txt=dLeft<0?`入園申請已逾期（${fmtShort(ai.ds)}）`:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${dLeft} 天）`;
-          reasons.push({icon:'📋',text:txt,cls:dLeft<=3?'mktg-action-urgent':'mktg-action-apply',cat:'apply'});
-          if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply',cat:'lodge'});
-          if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply',cat:'meal'});
-        }
+  const cards=[];
+  for(const t of futureTrips){
+    const ai=applyInfo(t);
+    const reasons=[];
+    if(ai.state==='dated'){
+      const dd=parseD(ai.ds);
+      if(dd<=winEnd||dd<now){
+        const dLeft=ai.days;
+        const txt=dLeft<0?`入園申請已逾期（${fmtShort(ai.ds)}）`:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${dLeft} 天）`;
+        reasons.push({icon:'📋',text:txt,cls:dLeft<=3?'mktg-action-urgent':'mktg-action-apply',cat:'apply'});
+        if(getLodgeUnbooked(t)){const dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期';reasons.push({icon:'🏨',text:`住宿尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'lodge'})}
+        if(getMealUnbooked(t)){const dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期';reasons.push({icon:'🍽',text:`餐食尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'meal'})}
       }
-      for(const tr of taskReminders){
-        const dd=taskDueDate(t,tr);
-        const trDays=daysUntil(t.date);
-        const isDone=(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes')||(tr.name==='保險處理'&&(t.insurance||{}).done==='yes')||(tr.name==='天氣提醒'&&t.weatherDone==='yes')||(tr.name==='行前手冊發放'&&t.preNoticeDone==='yes');
-        if(isDone)continue;
-        if((dd<=winEnd&&dd>=winStart)||dd<now){
-          const dl=trDays===0?'今天出發':`出發前 ${trDays} 天`;
-          reasons.push({icon:'⚡',text:`${tr.name}（${dl}）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
-        }
-      }
-      if(reasons.length>0)cards.push({t,ai,reasons,tripDays:daysUntil(t.date)});
     }
-    if(cards.length===0)continue;
+    for(const tr of taskReminders){
+      const dd=taskDueDate(t,tr);
+      const trDays=daysUntil(t.date);
+      const isDone=(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes')||(tr.name==='保險處理'&&(t.insurance||{}).done==='yes')||(tr.name==='天氣提醒'&&t.weatherDone==='yes')||(tr.name==='行前手冊發放'&&t.preNoticeDone==='yes');
+      if(isDone)continue;
+      if(dd<=winEnd||dd<now){
+        const dueDateStr=fmtShort(dateStr(dd));
+        reasons.push({icon:'⚡',text:`${tr.name}（需於 ${dueDateStr} 前完成）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
+      }
+    }
+    if(reasons.length>0)cards.push({t,ai,reasons,tripDays:daysUntil(t.date)});
+  }
+  let html='';
+  if(cards.length>0){
     cards.sort((a,b)=>a.tripDays-b.tripDays);
-    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${win.title}</h2></div><div class="mktg-cards">`;
+    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>7天內待辦事項</h2></div><div class="mktg-cards">`;
     for(const c of cards)html+=renderReminderCard(c.t,c.ai,c.reasons);
     html+=`</div></div>`;
   }
-  if(!html)html='<div class="empty" style="padding:40px"><p>目前沒有待辦事項</p></div>';
+  if(!html)html='<div class="empty" style="padding:40px"><p>7天內沒有待辦事項</p></div>';
   container.innerHTML=html;
 }
 
@@ -1152,8 +1152,10 @@ function renderTaskReminders(){
     const cards=[];
     for(const t of futureTrips){
       const reasons=[];
-      if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
-      if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
+      const ai2=applyInfo(t);
+      const dlTxt=ai2.state==='dated'&&ai2.days>=0?`需於 ${fmtShort(ai2.ds)} 前完成`:`出發日 ${fmtShort(t.date)}`;
+      if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:`住宿尚未預訂（${dlTxt}）`,cls:'mktg-action-apply'});
+      if(getMealUnbooked(t))reasons.push({icon:'🍽',text:`餐食尚未預訂（${dlTxt}）`,cls:'mktg-action-apply'});
       if(reasons.length)cards.push({t,reasons,tripDays:daysUntil(t.date)});
     }
     if(cards.length)sections.push({title:'住宿、餐食',cards});
@@ -1170,9 +1172,10 @@ function renderTaskReminders(){
       const tripDays=daysUntil(t.date);
       if(tripDays>maxDay)continue;
       if(tm&&tm.check(t))continue;
-      const dl=tripDays===0?'今天出發':`出發前 ${tripDays} 天`;
+      const dd2=taskDueDate(t,tr);
+      const dueDateStr=fmtShort(dateStr(dd2));
       const overdue=tripDays<Math.min(...tr.daysBefore);
-      cards.push({t,reasons:[{icon:'⚡',text:`${tr.name}（${dl}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
+      cards.push({t,reasons:[{icon:'⚡',text:`${tr.name}（需於 ${dueDateStr} 前完成）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
     }
     if(cards.length)sections.push({title:tr.name,cards});
   }
@@ -1232,10 +1235,6 @@ function renderReminderCard(t,ai,reasons){
   }
   h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">報名人數</div><div class="rc-val">${t.registered} / ${t.capacity}</div></div></div>`;
   const cats=new Set((reasons||[]).map(r=>r.cat).filter(Boolean));
-  if(cats.has('apply')){
-    const applyText=ai.state==='dated'?fmtDate(ai.ds):ai.state==='none'?'免申請':'未設定';
-    h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">入園申請</div><div class="rc-val">${applyText}</div></div></div>`;
-  }
   if(cats.has('lodge')||cats.has('meal')){
     const nights=nightsOf(t);const L=t.lodging||[];
     let lodgeH='';
@@ -1904,16 +1903,12 @@ function render(){
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
-    const _ch=t.charter||{book:'no',pay:'no'};const _chB=bookInfo(_ch.book),_chP=payInfo(_ch.pay);
-    const charterH=`<button class="stbtn ${_chB.cls}" onclick="event.stopPropagation();cycleCharterBook('${t.id}')">${_chB.label}</button> <button class="stbtn ${_chP.cls}" onclick="event.stopPropagation();cycleCharterPay('${t.id}')">${_chP.label}</button>`;
-    const _pnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
-    const prenoticeH=`<button class="stbtn ${_pnD.cls}" onclick="event.stopPropagation();cyclePreNotice('${t.id}')">${_pnD.label}</button>`;
-    const _ins=t.insurance||{done:'no',pay:'no'};const _insD=doneInfo(_ins.done),_insP=paidInfo(_ins.pay);
-    const insuranceH=`<button class="stbtn ${_insD.cls}" onclick="event.stopPropagation();cycleInsBook('${t.id}')">${_insD.label}</button> <button class="stbtn ${_insP.cls}" onclick="event.stopPropagation();cycleInsPay('${t.id}')">${_insP.label}</button>`;
+    const deadlineH=fmtShort(t.deadline);
+    const excelMainH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟 ↗</a>`:'<span style="color:var(--text-muted)">未設定</span>';
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="訂包車">${charterH}</td><td data-label="行前手冊">${prenoticeH}</td><td data-label="保險">${insuranceH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="報名截止">${deadlineH}</td><td data-label="Excel 名單">${excelMainH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -1921,10 +1916,21 @@ function render(){
       const lm=lodgeMealH(t);
       const lodgeNoteH=t.lodgeNotes?esc(t.lodgeNotes):'—';
       const mealNoteH=t.mealNotes?esc(t.mealNotes):'—';
+      const _dCh=t.charter||{book:'no',pay:'no'};const _dChB=bookInfo(_dCh.book),_dChP=payInfo(_dCh.pay);
+      const _dIns=t.insurance||{done:'no',pay:'no'};const _dInsD=doneInfo(_dIns.done),_dInsP=paidInfo(_dIns.pay);
+      const _dPnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
+      const _dApSt=applyStatusInfo(t.applyStatus);
+      const charterNoteH=t.charterNotes?esc(t.charterNotes):'—';
+      const insNoteH=t.insuranceNotes?esc(t.insuranceNotes):'—';
+      const applyStatusNoteH=t.applyStatusNotes?esc(t.applyStatusNotes):'—';
       detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-2}"><div class="detail-grid3">`
         +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>餐食備註</b><span>${mealNoteH}</span></div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>報名截止日</b><span>${fmtDate(t.deadline)}</span></div><div class="detail-item"><b>Excel 名單連結</b>${excelH}</div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row"><button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button></div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
+        +`</div><div class="detail-grid3" style="margin-top:14px">`
+        +`<div class="dcol"><div class="detail-item"><b>訂包車</b><div class="lm-row"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div></div><div class="detail-item"><b>包租車備註</b><span>${charterNoteH}</span></div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>保險</b><div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div><div class="detail-item"><b>保險備註</b><span>${insNoteH}</span></div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div>`
         +`</div></td></tr>`;
     }
 
@@ -1942,6 +1948,7 @@ function render(){
       +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-name2">${esc(t.name)} ${dp.num} <span class="mc-dow">${dp.dow}</span></span></div><div class="mc-r1r">${starBtn}${statusH}</div></div>`
       +`<div class="mc-line"><div><b>報名人數</b>${regCapH}</div><div><b>申請人數</b>${applyStatH}</div></div>`
       +`<div class="mc-line mc-line3"><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
+      +`<div class="mc-line"><div><b>申請狀態</b><div class="lm-row"><button class="stbtn ${applyStatusInfo(t.applyStatus).cls}" onclick="cycleApplyStatus('${t.id}')">${applyStatusInfo(t.applyStatus).label}</button></div></div><div><b>申請備註</b><span class="v">${t.applyStatusNotes?esc(t.applyStatusNotes):'—'}</span></div></div>`
       +`<div class="mc-line mc-vdiv"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}<div class="mc-note"><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div><div class="lm-item"><b>餐食狀況</b>${mlm.meal}<div class="mc-note"><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div></div>`
       +`<div class="mc-line mc-vdiv"><div><b>包租車狀況</b><div class="lm-row"><button class="stbtn ${mchB.cls}" onclick="cycleCharterBook('${t.id}')">${mchB.label}</button><button class="stbtn ${mchP.cls}" onclick="cycleCharterPay('${t.id}')">${mchP.label}</button></div><div class="mc-note"><b>包租車備註</b><span class="v">${t.charterNotes?esc(t.charterNotes):'—'}</span></div></div><div><b>保險處理狀況</b><div class="lm-row"><button class="stbtn ${minsD.cls}" onclick="cycleInsBook('${t.id}')">${minsD.label}</button><button class="stbtn ${minsP.cls}" onclick="cycleInsPay('${t.id}')">${minsP.label}</button></div><div class="mc-note"><b>保險備註</b><span class="v">${t.insuranceNotes?esc(t.insuranceNotes):'—'}</span></div></div></div>`
       +`<div class="mc-line"><div><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${mpnD.cls}" onclick="cyclePreNotice('${t.id}')">${mpnD.label}</button></div></div><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div></div>`
@@ -2002,6 +2009,14 @@ function nextBookNa(s){return s==='no'?'yes':s==='yes'?'no':'no'}
 function nextDone(s){return s==='yes'?'no':'yes'}
 function doneInfo(s){return s==='yes'?{label:'已處理',cls:'rc-st-done'}:{label:'未處理',cls:'rc-st-notdone'}}
 function paidInfo(s){return s==='yes'?{label:'已付款',cls:'rc-st-paid'}:{label:'未付款',cls:'rc-st-unpaid'}}
+const APPLY_STATUS_OPTS=[{key:'notApplied',label:'未申請',cls:'st-nob'},{key:'applied',label:'已申請',cls:'st-yes'},{key:'waitlist',label:'候補中',cls:'st-warn'}];
+function applyStatusInfo(s){const o=APPLY_STATUS_OPTS.find(x=>x.key===s);return o||APPLY_STATUS_OPTS[0]}
+async function cycleApplyStatus(id){
+  if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;
+  const cur=t.applyStatus||'notApplied';
+  const next=cur==='notApplied'?'applied':cur==='applied'?'waitlist':'notApplied';
+  store.upd(id,{applyStatus:next});
+}
 function lodgeMealH(t){
   const nights=nightsOf(t);const L=t.lodging||[];
   let lodge='';
@@ -2033,6 +2048,7 @@ async function openEdit(id){
   document.getElementById('f-cap').value=t.capacity;document.getElementById('f-notes').value=t.notes||'';
   document.getElementById('f-lodge-notes').value=t.lodgeNotes||'';document.getElementById('f-meal-notes').value=t.mealNotes||'';
   document.getElementById('f-charter-notes').value=t.charterNotes||'';document.getElementById('f-insurance-notes').value=t.insuranceNotes||'';
+  document.getElementById('f-apply-status').value=t.applyStatus||'notApplied';document.getElementById('f-apply-status-notes').value=t.applyStatusNotes||'';
   document.getElementById('f-guide').value=t.guide||'';document.getElementById('f-excel').value=t.excelLink||'';
   document.getElementById('f-status').value=t.status||'reg';
   document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');
@@ -2041,7 +2057,7 @@ async function openEdit(id){
 function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
-  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),charterNotes:document.getElementById('f-charter-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
+  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),charterNotes:document.getElementById('f-charter-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value};
   const nights=nightsOf(data);
   if(editId){const cur=trips.find(x=>x.id===editId);data.lodging=resizeLodging(cur&&cur.lodging,nights);data.meal=(cur&&cur.meal)||{book:'no',pay:'no'};store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.applied=0;data.lodging=resizeLodging(null,nights);data.meal={book:'no',pay:'no'};data.createdAt=Date.now();store.add(data);toast('已新增')}
   closeTrip();
