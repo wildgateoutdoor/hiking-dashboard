@@ -51,12 +51,34 @@
 
 *,*::before,*::after{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-.app{max-width:1120px;margin:0 auto;padding:28px 24px 60px}
+.app{max-width:1120px;margin:0 auto;padding:20px 24px 60px}
 
-.hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-.hdr h1{font-family:var(--font-d);font-size:26px;font-weight:700;letter-spacing:-0.01em;color:var(--text);line-height:1.2}
+.navbar{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border-sub);box-shadow:var(--shadow-sm);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;height:54px}
+.nav-brand{font-family:var(--font-d);font-size:18px;font-weight:800;letter-spacing:-0.01em;color:var(--text);white-space:nowrap;flex-shrink:0}
+.nav-right{display:flex;align-items:center;gap:4px}
+.nav-main{display:flex;align-items:center;gap:2px}
+.nav-link{padding:6px 14px;border-radius:var(--r);font:600 14px var(--font);background:none;border:none;color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.nav-link:hover{color:var(--text);background:var(--surface-hover)}
+.nav-link.on{color:var(--accent);background:var(--accent-bg)}
+.nav-sep{width:1px;height:24px;background:var(--border);margin:0 6px;flex-shrink:0}
+.nav-util{display:flex;align-items:center;gap:4px}
+.nav-btn{width:34px;height:34px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;flex-shrink:0}
+.nav-btn:hover{background:var(--surface-hover);color:var(--text)}
+.nav-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-add{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:var(--r);font:600 13px var(--font);cursor:pointer;border:none;background:var(--accent);color:var(--accent-on);transition:all .15s;white-space:nowrap}
+.nav-add:hover{background:var(--accent-hover)}
+.nav-add svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.nav-hamburger{display:none;width:34px;height:34px;border-radius:var(--r);border:none;background:transparent;color:var(--text);cursor:pointer;align-items:center;justify-content:center}
+.nav-hamburger svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.nav-mobile-menu{display:none;position:fixed;inset:0;z-index:49;background:rgba(37,61,51,.35)}
+.nav-mobile-panel{position:fixed;top:0;right:0;bottom:0;width:260px;background:var(--surface);z-index:49;box-shadow:var(--shadow-lg);padding:16px 0;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
+.nav-mobile-menu.open .nav-mobile-panel{transform:translateX(0)}
+.nav-mobile-menu.open{display:block}
+.nav-mob-link{display:block;padding:12px 24px;font:600 15px var(--font);color:var(--text-muted);background:none;border:none;cursor:pointer;text-align:left;width:100%;transition:all .12s}
+.nav-mob-link:hover{background:var(--surface-hover);color:var(--text)}
+.nav-mob-link.on{color:var(--accent);background:var(--accent-bg)}
+.nav-mob-sep{height:1px;background:var(--border-sub);margin:8px 16px}
 .hdr-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
-.hdr-btns{display:flex;gap:8px}
 
 .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .stat{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r);font-size:13px;font-weight:500;color:var(--text-2);box-shadow:var(--shadow-sm)}
@@ -67,9 +89,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .info-pop{position:fixed;z-index:150;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:12px 14px;max-width:280px;font-size:13px;line-height:1.7;color:var(--text-2)}
 .info-pop b{display:block;color:var(--text);font-weight:700;margin-bottom:4px}
 
-.view-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border-sub);padding-bottom:0}
-.vtab{padding:8px 16px;font:600 14px var(--font);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.vtab:hover{color:var(--text-2)}.vtab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.page-title-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.page-title-bar h2{font-size:18px;font-weight:700;color:var(--text)}
+.page-title-bar .hdr-sub{margin-top:0;margin-left:10px}
 
 .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
@@ -381,15 +403,17 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 }
 
 @media(max-width:700px){
-  .app{padding:16px 12px 40px}
-  .hdr{flex-direction:row;align-items:center}.hdr h1{font-size:20px}
-  .hdr-btns{flex-shrink:0}
+  .app{padding:12px 12px 40px}
+  .navbar{padding:0 12px;height:48px}
+  .nav-brand{font-size:15px}
+  .nav-main,.nav-sep,.nav-util .nav-btn,.nav-add span{display:none}
+  .nav-hamburger{display:flex}
+  .nav-add{padding:5px 10px;font-size:12px}
+  .nav-add span{display:none}
   /* 四個統計排成一列 */
   .stats{gap:6px;flex-wrap:nowrap}
   .stat{flex:1 1 0;min-width:0;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:11px;text-align:center;line-height:1.2}
   .stat b{font-size:18px}.info-ic{display:none}
-  .view-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .vtab{padding:8px 12px;font-size:13px;white-space:nowrap}
   .filters{gap:5px}.chip{padding:5px 11px}
   .date-filter{flex-wrap:wrap}.date-filter input{flex:1;min-width:0}
   .f-pair,.f-triple{grid-template-columns:1fr}
@@ -425,47 +449,75 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 </div>
 
-<div class="app">
-  <div class="hdr">
-    <div><h1>入野門活動管理</h1><div class="hdr-sub" id="date-line"></div></div>
-    <div class="hdr-btns">
-      <button class="btn btn-s" onclick="logout()" title="登出">
+<nav class="navbar" id="navbar">
+  <div class="nav-brand">入野門活動管理</div>
+  <div class="nav-right">
+    <div class="nav-main">
+      <button class="nav-link on" id="nav-schedule" onclick="setView('schedule')">時程提醒</button>
+      <button class="nav-link" id="nav-list" onclick="setView('list')">團務列表</button>
+      <button class="nav-link" id="nav-mktg" onclick="setView('mktgview')">行銷列表</button>
+      <button class="nav-link" id="nav-cal" onclick="setView('calendar')">日曆總覽</button>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-util">
+      <button class="nav-btn" onclick="logout()" title="登出">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
-      <button class="btn btn-s" onclick="showReport()" title="產生 LINE 日報">
+      <button class="nav-btn" onclick="showReport()" title="產生 LINE 日報">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </button>
-      <button class="btn btn-s" onclick="openSettings()" title="規則設定">
+      <button class="nav-btn" onclick="openSettings()" title="規則設定">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
-      <button class="btn btn-p" onclick="openAdd()">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        新增活動
-      </button>
     </div>
+    <button class="nav-add" onclick="openAdd()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>新增活動</span>
+    </button>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div class="nav-mobile-menu" id="nav-mobile-menu" onclick="closeMobileMenu()">
+  <div class="nav-mobile-panel" onclick="event.stopPropagation()">
+    <button class="nav-mob-link on" id="mob-schedule" onclick="setView('schedule');closeMobileMenu()">時程提醒</button>
+    <button class="nav-mob-link" id="mob-list" onclick="setView('list');closeMobileMenu()">團務列表</button>
+    <button class="nav-mob-link" id="mob-mktg" onclick="setView('mktgview');closeMobileMenu()">行銷列表</button>
+    <button class="nav-mob-link" id="mob-cal" onclick="setView('calendar');closeMobileMenu()">日曆總覽</button>
+    <div class="nav-mob-sep"></div>
+    <button class="nav-mob-link" onclick="logout();closeMobileMenu()">登出</button>
+    <button class="nav-mob-link" onclick="showReport();closeMobileMenu()">產生 LINE 日報</button>
+    <button class="nav-mob-link" onclick="openSettings();closeMobileMenu()">規則設定</button>
+  </div>
+</div>
+
+<div class="app">
+  <div id="view-schedule">
+    <div class="page-title-bar">
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <h2>時程提醒</h2>
+        <div class="hdr-sub" id="date-line"></div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat stat--accent"><b id="s-total">0</b> 活動總數</div>
+      <div class="stat stat--warn"><b id="s-soon">0</b> 即將截止 <button class="info-ic" onclick="showInfo(event,'soon')" title="判斷標準">i</button></div>
+      <div class="stat stat--red"><b id="s-full">0</b> 即將額滿 <button class="info-ic" onclick="showInfo(event,'full')" title="判斷標準">i</button></div>
+      <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
+    </div>
+
+    <div class="reminder-toggle" id="reminder-toggle">
+      <button class="on" onclick="setReminderMode('time')">時間分類</button>
+      <button onclick="setReminderMode('task')">團務分類</button>
+    </div>
+    <div id="reminder-container"></div>
+    <div class="mktg" id="mktg-section"></div>
   </div>
 
-  <div class="stats">
-    <div class="stat stat--accent"><b id="s-total">0</b> 活動總數</div>
-    <div class="stat stat--warn"><b id="s-soon">0</b> 即將截止 <button class="info-ic" onclick="showInfo(event,'soon')" title="判斷標準">i</button></div>
-    <div class="stat stat--red"><b id="s-full">0</b> 即將額滿 <button class="info-ic" onclick="showInfo(event,'full')" title="判斷標準">i</button></div>
-    <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
-  </div>
-
-  <div class="reminder-toggle" id="reminder-toggle">
-    <button class="on" onclick="setReminderMode('time')">時間分類</button>
-    <button onclick="setReminderMode('task')">團務分類</button>
-  </div>
-  <div id="reminder-container"></div>
-  <div class="mktg" id="mktg-section"></div>
-
-  <div class="view-tabs">
-    <button class="vtab on" id="vtab-list" onclick="setView('list')">團務列表</button>
-    <button class="vtab" id="vtab-mktg" onclick="setView('mktgview')">行銷列表</button>
-    <button class="vtab" id="vtab-cal" onclick="setView('calendar')">日曆總覽</button>
-  </div>
-
-  <div id="view-list" class="lay-list">
+  <div id="view-list" class="lay-list" style="display:none">
     <div class="bar">
       <div class="filters" id="filters"></div>
       <div class="layout-toggle" id="layout-toggle">
@@ -748,7 +800,7 @@ const TAG_COLORS=[
 ];
 function tagColor(key){return TAG_COLORS.find(x=>x.key===key)||TAG_COLORS[0]}
 let editId=null,sortKey='date',sortDir='asc',filter='all';
-let viewMode='list',calYear,calMonth,calFilter='all';
+let viewMode='schedule',calYear,calMonth,calFilter='all';
 const CAL_FILTERS=[{key:'all',label:'全部'},{key:'act',label:'只顯示活動'},{key:'mktg',label:'只顯示行銷'}];
 const CAL_GROUP={trip:'act',deadline:'act',apply:'act',promo:'mktg',post:'mktg',mktgevent:'mktg'};
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
@@ -1399,17 +1451,21 @@ function showDayPopup(evt,ds){
 document.addEventListener('click',()=>{document.getElementById('cal-popup').style.display='none'});
 
 // ── View switching ──
+const VIEW_IDS=['schedule','list','calendar','mktgview'];
+const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg'};
+const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg'};
 function setView(mode){
   viewMode=mode;
-  document.getElementById('vtab-list').classList.toggle('on',mode==='list');
-  document.getElementById('vtab-cal').classList.toggle('on',mode==='calendar');
-  document.getElementById('vtab-mktg').classList.toggle('on',mode==='mktgview');
-  document.getElementById('view-list').style.display=mode==='list'?'block':'none';
-  document.getElementById('view-calendar').style.display=mode==='calendar'?'block':'none';
-  document.getElementById('view-mktgview').style.display=mode==='mktgview'?'block':'none';
+  VIEW_IDS.forEach(v=>{
+    const el=document.getElementById('view-'+v);if(el)el.style.display=v===mode?'block':'none';
+  });
+  Object.entries(NAV_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
+  Object.entries(MOB_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
   if(mode==='calendar')renderCal();
   if(mode==='mktgview')renderMktgView();
 }
+function toggleMobileMenu(){document.getElementById('nav-mobile-menu').classList.add('open')}
+function closeMobileMenu(){document.getElementById('nav-mobile-menu').classList.remove('open')}
 
 // ── Settings modal ──
 function openSettings(){renderAllRuleLists();switchTab('deadline');showOv('ov-settings')}
