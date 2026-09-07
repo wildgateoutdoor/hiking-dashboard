@@ -241,6 +241,19 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mktg-action-apply{background:var(--amber-bg);color:var(--amber)}
 .mktg-action-done{background:var(--accent-bg);color:var(--accent)}
 .mktg-action-urgent{background:var(--red-bg);color:var(--red)}
+.mktg-action-info{background:var(--accent-bg);color:var(--accent)}
+
+.reminder-toggle{display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;align-self:flex-start}
+.reminder-toggle button{padding:6px 14px;font:600 12px var(--font);border:none;background:var(--surface);color:var(--text-muted);cursor:pointer;transition:all .12s;white-space:nowrap}
+.reminder-toggle button:not(:last-child){border-right:1px solid var(--border)}
+.reminder-toggle button.on{background:var(--accent);color:var(--accent-on)}
+
+.tr-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.tr-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--bg)}
+.tr-item-info{flex:1;min-width:0}
+.tr-item-name{font-weight:600;font-size:14px}
+.tr-item-days{font-size:12px;color:var(--text-2);margin-top:2px}
+.tr-item .rule-acts{flex-shrink:0}
 
 /* Modal */
 .overlay{position:fixed;inset:0;background:rgba(37,61,51,.35);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:all .2s}
@@ -384,6 +397,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .cal-num{font-size:12px}
   .mktg-cards{grid-template-columns:1fr 1fr;gap:8px}
   .mktg-card{padding:10px 12px}.mktg-card-name{font-size:13px}.mktg-card-date{font-size:11px}.mktg-action{font-size:11px}
+  .reminder-toggle button{padding:5px 10px;font-size:11px}
   .modal{max-width:100%}.modal-body{padding:18px}
   .mktgview-list li{padding:10px 12px}
   .reg-btn{width:28px;height:28px}
@@ -438,8 +452,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <div class="stat stat--amber"><b id="s-promo">0</b> 重點宣傳</div>
   </div>
 
-  <div class="mktg" id="apply-section"></div>
-  <div class="mktg" id="month-section"></div>
+  <div class="reminder-toggle" id="reminder-toggle">
+    <button class="on" onclick="setReminderMode('time')">時間分類</button>
+    <button onclick="setReminderMode('task')">團務分類</button>
+  </div>
+  <div id="reminder-container"></div>
   <div class="mktg" id="mktg-section"></div>
 
   <div class="view-tabs">
@@ -559,6 +576,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <button class="stab on" data-tab="deadline" onclick="switchTab('deadline')">報名截止</button>
         <button class="stab" data-tab="apply" onclick="switchTab('apply')">申請截止</button>
         <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
+        <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
       </div>
 
       <div class="stab-panel on" id="tab-deadline">
@@ -597,6 +615,18 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rm-names" type="text" placeholder="例：玉山, 雪山"></div>
         </div>
         <div class="f-actions"><button type="button" class="btn btn-p" onclick="addMktgRule()">新增規則</button></div>
+      </div>
+
+      <div class="stab-panel" id="tab-taskrem">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定活動日前幾天需要執行的團務項目。系統會在團務提醒中自動顯示。</p>
+        <div class="tr-list" id="tr-list"></div>
+        <hr class="rule-divider">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增團務提醒</h3>
+        <div class="f-pair">
+          <div class="f-row"><label>團務名稱</label><input id="tr-name" type="text" placeholder="例：訂包車時間"></div>
+          <div class="f-row"><label>活動日前幾天提醒</label><input id="tr-days" type="text" placeholder="例：14 或 7,3,1" style="font-variant-numeric:tabular-nums"></div>
+        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addTaskReminder()">新增</button></div>
       </div>
     </div>
   </div>
@@ -699,7 +729,13 @@ const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
 const EDIT_PW_HASH='42583151644738616f065b4ec6dd1a839c7105a222385c921405126b25e5d393';
 
-let trips=[],deadlineRules=[],applyRules=[],mktgRules=[],mktgEvents=[];
+const DEF_TASK_REMINDERS=[
+  {id:'tr1',name:'訂包車時間',daysBefore:[14]},
+  {id:'tr2',name:'保險處理',daysBefore:[2]},
+  {id:'tr3',name:'天氣提醒',daysBefore:[7,3,1]},
+  {id:'tr4',name:'行前手冊發放',daysBefore:[14]},
+];
+let trips=[],deadlineRules=[],applyRules=[],mktgRules=[],mktgEvents=[],taskReminders=[];
 let sb=null,dlCap=null,store=null,rulesReady=false;
 // 標籤顏色選項
 const TAG_COLORS=[
@@ -717,6 +753,7 @@ const CAL_FILTERS=[{key:'all',label:'全部'},{key:'act',label:'只顯示活動'
 const CAL_GROUP={trip:'act',deadline:'act',apply:'act',promo:'mktg',post:'mktg',mktgevent:'mktg'};
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
 let listLayout='list';try{const _l=localStorage.getItem('hk-list-layout');if(_l==='grid'||_l==='list')listLayout=_l}catch{}
+let reminderMode='time';try{const _rm=localStorage.getItem('hk-reminder-mode');if(_rm==='time'||_rm==='task')reminderMode=_rm}catch{}
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
 function parseD(s){return new Date(s+'T00:00:00')}
@@ -743,7 +780,7 @@ function fmtRangeParts(s,e){
 }
 
 // ── Rules: load / save / match / label ──
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-mktg':'mktgRules','hk-mktgevents':'mktgEvents'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-mktg':'mktgRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -760,10 +797,13 @@ async function loadAllRules(){
   applyRules=m.applyRules||localGet('hk-apply',DEF_APPLY);
   mktgRules=m.mktgRules||localGet('hk-mktg',DEF_MKTG);
   mktgEvents=m.mktgEvents||localGet('hk-mktgevents',[]);
+  taskReminders=m.taskReminders||localGet('hk-task-reminders',null);
+  if(!taskReminders)taskReminders=JSON.parse(JSON.stringify(DEF_TASK_REMINDERS));
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
     if(!m.mktgRules)saveToLS('hk-mktg',mktgRules);
+    if(!m.taskReminders)saveToLS('hk-task-reminders',taskReminders);
   }
   rulesReady=true;
 }
@@ -883,48 +923,177 @@ function lodgeSummary(t){
   if(na===nights)return'N/A';if(booked+na===nights)return'已訂';if(booked===0&&na===0)return'未訂';return'部分已訂';
 }
 function mealSummary(t){const m=t.meal||{book:'no',pay:'no'};return m.book==='yes'?'已訂':m.book==='na'?'N/A':'未訂'}
-function getReminderItems(minDays,maxDays){
-  const items=[];
-  for(const t of trips){
-    if(daysUntil(t.date)<0)continue;
-    const reasons=[],ai=applyInfo(t),tripDays=daysUntil(t.date);
-    if(ai.state==='dated'&&ai.days>=minDays&&ai.days<=maxDays)reasons.push('apply');
-    if(tripDays>=minDays&&tripDays<=maxDays){
-      if(getLodgeUnbooked(t))reasons.push('lodge');
-      if(getMealUnbooked(t))reasons.push('meal');
-    }
-    if(reasons.length>0)items.push({trip:t,ai,reasons,tripDays});
-  }
-  items.sort((a,b)=>{
-    const ea=Math.min(a.ai.state==='dated'?a.ai.days:Infinity,a.tripDays);
-    const eb=Math.min(b.ai.state==='dated'?b.ai.days:Infinity,b.tripDays);
-    return ea-eb;
-  });
-  return items;
+
+function loadTaskReminders(){
+  try{const s=localStorage.getItem('hk-task-reminders');if(s){taskReminders=JSON.parse(s);return}}catch{}
+  if(!taskReminders||taskReminders.length===0)taskReminders=JSON.parse(JSON.stringify(DEF_TASK_REMINDERS));
 }
+function saveTaskReminders(){saveToLS('hk-task-reminders',taskReminders)}
+function renderTaskReminderList(){
+  const el=document.getElementById('tr-list');
+  if(taskReminders.length===0){el.innerHTML='<div class="rule-empty">尚無團務提醒</div>';return}
+  el.innerHTML=taskReminders.map(r=>{
+    const daysText=r.daysBefore.join('、');
+    return`<div class="tr-item"><div class="tr-item-info"><div class="tr-item-name">${esc(r.name)}</div><div class="tr-item-days">活動日前 ${daysText} 天</div></div><div class="rule-acts"><button class="act-btn del" onclick="delTaskReminder('${r.id}')" title="刪除">${delSvg}</button></div></div>`;
+  }).join('');
+}
+function addTaskReminder(){
+  const nameEl=document.getElementById('tr-name'),daysEl=document.getElementById('tr-days');
+  const name=nameEl.value.trim();
+  const daysRaw=daysEl.value.trim();
+  if(!name){toast('請輸入團務名稱');return}
+  if(!daysRaw){toast('請輸入提醒天數');return}
+  const daysBefore=daysRaw.split(/[,，、\s]+/).map(Number).filter(n=>n>0&&Number.isFinite(n));
+  if(daysBefore.length===0){toast('提醒天數格式錯誤');return}
+  daysBefore.sort((a,b)=>b-a);
+  taskReminders.push({id:genId(),name,daysBefore});
+  saveTaskReminders();renderTaskReminderList();renderReminders();
+  nameEl.value='';daysEl.value='';toast('已新增');
+}
+function delTaskReminder(id){
+  taskReminders=taskReminders.filter(r=>r.id!==id);
+  saveTaskReminders();renderTaskReminderList();renderReminders();toast('已刪除');
+}
+
+function setReminderMode(mode){
+  reminderMode=mode;
+  try{localStorage.setItem('hk-reminder-mode',mode)}catch{}
+  const btns=document.querySelectorAll('#reminder-toggle button');
+  btns[0].classList.toggle('on',mode==='time');
+  btns[1].classList.toggle('on',mode==='task');
+  renderReminders();
+}
+
 function renderReminders(){
-  renderReminderSection('apply-section','14天內團務提醒',getReminderItems(0,14));
-  renderReminderSection('month-section','一個月內團務提醒',getReminderItems(15,30));
+  const btns=document.querySelectorAll('#reminder-toggle button');
+  btns[0].classList.toggle('on',reminderMode==='time');
+  btns[1].classList.toggle('on',reminderMode==='task');
+  if(reminderMode==='time')renderTimeReminders();
+  else renderTaskReminders();
 }
-function renderReminderSection(elId,title,items){
-  const sec=document.getElementById(elId);
-  if(items.length===0){sec.innerHTML='';return}
-  let html=`<div class="mktg-header"><h2>${title}</h2></div><div class="mktg-cards">`;
-  for(const it of items){
-    const t=it.trip,ai=it.ai;
-    const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtDate(t.date);
-    const applyText=ai.state==='dated'?fmtDate(ai.ds):ai.state==='none'?'免申請':'未設定';
-    html+=`<div class="mktg-card"><div class="mktg-card-name">${esc(t.name)}</div>`;
-    html+=`<div class="mktg-card-date">${dateRange}｜${t.registered}/${t.capacity} 人</div>`;
-    html+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">申請截止：${applyText}</div>`;
-    html+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">住宿：${lodgeSummary(t)}　餐食：${mealSummary(t)}</div>`;
-    html+=`<div class="mktg-card-actions">`;
-    if(it.reasons.includes('apply')){const dl=ai.days===0?'今天截止':`剩 ${ai.days} 天`;html+=`<div class="mktg-action mktg-action-urgent">📋 申請截止 ${fmtShort(ai.ds)}（${dl}）</div>`}
-    if(it.reasons.includes('lodge'))html+=`<div class="mktg-action mktg-action-apply">🏨 住宿尚未預訂</div>`;
-    if(it.reasons.includes('meal'))html+=`<div class="mktg-action mktg-action-apply">🍽 餐食尚未預訂</div>`;
+
+function renderTimeReminders(){
+  const container=document.getElementById('reminder-container');
+  const timeSections=[
+    {title:'兩個月內團務提醒',min:31,max:60,type:'apply'},
+    {title:'一個月內團務提醒',min:15,max:30,type:'apply'},
+  ];
+  const daySet=new Map();
+  for(const tr of taskReminders){
+    for(const d of tr.daysBefore){
+      if(!daySet.has(d))daySet.set(d,[]);
+      daySet.get(d).push(tr.name);
+    }
+  }
+  const sortedDays=[...daySet.keys()].sort((a,b)=>b-a);
+  for(let i=0;i<sortedDays.length;i++){
+    const d=sortedDays[i];
+    const nextSmaller=i+1<sortedDays.length?sortedDays[i+1]+1:0;
+    const tasks=daySet.get(d);
+    const label=d===1?'1天前團務提醒':`${d}天內團務提醒`;
+    timeSections.push({title:label,min:nextSmaller,max:d,type:'task',taskNames:tasks,dayKey:d});
+  }
+
+  let html='';
+  const futureTrips=trips.filter(t=>daysUntil(t.date)>=0);
+
+  for(const sec of timeSections){
+    const cards=[];
+    for(const t of futureTrips){
+      const tripDays=daysUntil(t.date);
+      const ai=applyInfo(t);
+      const reasons=[];
+
+      if(sec.type==='apply'){
+        if(ai.state==='dated'&&ai.days>=sec.min&&ai.days<=sec.max)reasons.push({icon:'📋',text:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${ai.days} 天）`,cls:'mktg-action-urgent'});
+        if(tripDays>=sec.min&&tripDays<=sec.max){
+          if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
+          if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
+        }
+      }else{
+        if(tripDays>=sec.min&&tripDays<=sec.max){
+          if(ai.state==='dated'&&ai.days>=0&&ai.days<=sec.max)reasons.push({icon:'📋',text:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${ai.days} 天）`,cls:ai.days<=7?'mktg-action-urgent':'mktg-action-apply'});
+          if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
+          if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
+          for(const tn of sec.taskNames){
+            const dl=tripDays===0?'今天出發':`出發前 ${tripDays} 天`;
+            reasons.push({icon:'⚡',text:`${tn}（${dl}）`,cls:tripDays<=3?'mktg-action-urgent':'mktg-action-info'});
+          }
+        }
+      }
+      if(reasons.length>0)cards.push({t,ai,reasons,tripDays});
+    }
+    if(cards.length===0)continue;
+    cards.sort((a,b)=>a.tripDays-b.tripDays);
+    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${sec.title}</h2></div><div class="mktg-cards">`;
+    for(const c of cards){
+      html+=renderReminderCard(c.t,c.ai,c.reasons);
+    }
     html+=`</div></div>`;
   }
-  sec.innerHTML=html+`</div>`;
+  container.innerHTML=html;
+}
+
+function renderTaskReminders(){
+  const container=document.getElementById('reminder-container');
+  const futureTrips=trips.filter(t=>daysUntil(t.date)>=0);
+  const sections=[];
+
+  // 入園申請
+  const applyCards=[];
+  for(const t of futureTrips){
+    const ai=applyInfo(t);
+    if(ai.state!=='dated'||ai.days<0)continue;
+    const dl=ai.days===0?'今天截止':`剩 ${ai.days} 天`;
+    applyCards.push({t,ai,reasons:[{icon:'📋',text:`申請截止 ${fmtShort(ai.ds)}（${dl}）`,cls:ai.days<=7?'mktg-action-urgent':'mktg-action-apply'}],tripDays:daysUntil(t.date)});
+  }
+  if(applyCards.length)sections.push({title:'入園申請',cards:applyCards});
+
+  // 住宿、餐食
+  const lmCards=[];
+  for(const t of futureTrips){
+    const reasons=[];
+    if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
+    if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
+    if(reasons.length)lmCards.push({t,ai:applyInfo(t),reasons,tripDays:daysUntil(t.date)});
+  }
+  if(lmCards.length)sections.push({title:'住宿、餐食',cards:lmCards});
+
+  // custom task reminders
+  for(const tr of taskReminders){
+    const maxDay=Math.max(...tr.daysBefore);
+    const tCards=[];
+    for(const t of futureTrips){
+      const tripDays=daysUntil(t.date);
+      if(tripDays>maxDay)continue;
+      const dl=tripDays===0?'今天出發':`出發前 ${tripDays} 天`;
+      const overdue=tripDays<Math.min(...tr.daysBefore);
+      tCards.push({t,ai:applyInfo(t),reasons:[{icon:'⚡',text:`${tr.name}（${dl}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
+    }
+    if(tCards.length)sections.push({title:tr.name,cards:tCards});
+  }
+
+  let html='';
+  for(const sec of sections){
+    sec.cards.sort((a,b)=>a.tripDays-b.tripDays);
+    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${esc(sec.title)}</h2></div><div class="mktg-cards">`;
+    for(const c of sec.cards)html+=renderReminderCard(c.t,c.ai,c.reasons);
+    html+=`</div></div>`;
+  }
+  container.innerHTML=html;
+}
+
+function renderReminderCard(t,ai,reasons){
+  const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtDate(t.date);
+  const applyText=ai.state==='dated'?fmtDate(ai.ds):ai.state==='none'?'免申請':'未設定';
+  let h=`<div class="mktg-card"><div class="mktg-card-name">${esc(t.name)}</div>`;
+  h+=`<div class="mktg-card-date">${dateRange}｜${t.registered}/${t.capacity} 人</div>`;
+  h+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">申請截止：${applyText}</div>`;
+  h+=`<div style="font-size:12px;color:var(--text-2);margin-top:2px">住宿：${lodgeSummary(t)}　餐食：${mealSummary(t)}</div>`;
+  h+=`<div class="mktg-card-actions">`;
+  for(const r of reasons)h+=`<div class="mktg-action ${r.cls}">${r.icon} ${esc(r.text)}</div>`;
+  h+=`</div></div>`;
+  return h;
 }
 
 // ── Marketing overview (list view) ──
@@ -1247,7 +1416,8 @@ function openSettings(){renderAllRuleLists();switchTab('deadline');showOv('ov-se
 function closeSettings(){hideOv('ov-settings')}
 function switchTab(tab){
   document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  ['deadline','apply','mktg'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  ['deadline','apply','mktg','taskrem'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  if(tab==='taskrem')renderTaskReminderList();
 }
 
 const delSvg='<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
@@ -1417,7 +1587,7 @@ let appStarted=false;
 function enterApp(){
   const g=document.getElementById('login-gate');if(g)g.hidden=true;
   if(appStarted)return;appStarted=true;
-  initCal();render();initDB();
+  loadTaskReminders();initCal();render();initDB();
 }
 function logout(){try{localStorage.removeItem('hk-auth')}catch{}location.reload()}
 
