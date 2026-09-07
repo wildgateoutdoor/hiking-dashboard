@@ -143,7 +143,7 @@ th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;colo
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:100px}
-thead th:nth-child(4),tbody tr:not(.detail-row) td:nth-child(4){white-space:nowrap;min-width:100px;font-weight:700}
+thead th:nth-child(5),tbody tr:not(.detail-row) td:nth-child(5){white-space:nowrap;min-width:100px;font-weight:700}
 tbody tr:not(.detail-row) td:nth-child(11){white-space:nowrap}
 
 .stars{display:flex;gap:2px;cursor:pointer}
@@ -197,7 +197,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 24px;font-size:13px}
 .detail-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 28px;font-size:13px}
 .detail-grid3 .dcol{display:flex;flex-direction:column;gap:14px;min-width:0}
-@media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}}
+.detail-grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:14px 20px;font-size:13px}
+.detail-grid6 .dcol{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media(max-width:1200px){.detail-grid6{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}.detail-grid6{grid-template-columns:1fr 1fr}}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .detail-item a{color:var(--accent)}
 .detail-item span{color:var(--text-2)}
@@ -276,7 +279,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mktg{margin-bottom:20px}
 .mktg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .mktg-header h2{font-size:16px;font-weight:700}
-.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
 .mktg-card{padding:14px 16px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm)}
 .mktg-card-name{font-weight:600;font-size:14px;margin-bottom:4px}
 .mktg-card-date{font-size:12px;color:var(--text-2);margin-bottom:8px}
@@ -669,6 +672,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <div class="stab-row">
         <button class="stab on" data-tab="deadline" onclick="switchTab('deadline')">報名截止</button>
         <button class="stab" data-tab="apply" onclick="switchTab('apply')">申請截止</button>
+        <button class="stab" data-tab="lodge" onclick="switchTab('lodge')">住宿預訂</button>
+        <button class="stab" data-tab="meal" onclick="switchTab('meal')">餐食預定</button>
         <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
         <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
       </div>
@@ -687,7 +692,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       </div>
 
       <div class="stab-panel" id="tab-apply">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">入山／入園申請的截止時間規則。系統會在行銷重點中提醒申請期限。<br><b style="color:var(--amber)">備註：申請入園的時間規則 ＝ 住宿申請的時間規則 ＝ 餐食處理的時間規則</b></p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">入山／入園申請的截止時間規則。系統會在行銷重點中提醒申請期限。</p>
         <div class="rule-list" id="rule-list-apply"></div>
         <hr class="rule-divider">
         <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增申請截止規則</h3>
@@ -697,6 +702,32 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="ra-names" type="text" placeholder="例：玉山, 雪山"></div>
         </div>
         <div class="f-actions"><button type="button" class="btn btn-p" onclick="addApplyRule()">新增規則</button></div>
+      </div>
+
+      <div class="stab-panel" id="tab-lodge">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">住宿預訂的截止時間規則。系統會在時程提醒中自動顯示住宿預訂期限。</p>
+        <div class="rule-list" id="rule-list-lodge"></div>
+        <hr class="rule-divider">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增住宿預訂規則</h3>
+        <div class="f-triple">
+          <div class="f-row"><label>提前月數</label><select id="rl-months"><option value="-1">免預訂</option><option value="0">0 個月</option><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option></select></div>
+          <div class="f-row"><label>提前天數</label><input id="rl-days" type="number" min="0" value="0"></div>
+          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rl-names" type="text" placeholder="例：玉山, 雪山"></div>
+        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addLodgeRule()">新增規則</button></div>
+      </div>
+
+      <div class="stab-panel" id="tab-meal">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">餐食預定的截止時間規則。系統會在時程提醒中自動顯示餐食預定期限。</p>
+        <div class="rule-list" id="rule-list-meal"></div>
+        <hr class="rule-divider">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增餐食預定規則</h3>
+        <div class="f-triple">
+          <div class="f-row"><label>提前月數</label><select id="rme-months"><option value="-1">免預定</option><option value="0">0 個月</option><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option></select></div>
+          <div class="f-row"><label>提前天數</label><input id="rme-days" type="number" min="0" value="0"></div>
+          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rme-names" type="text" placeholder="例：玉山, 雪山"></div>
+        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addMealRule()">新增規則</button></div>
       </div>
 
       <div class="stab-panel" id="tab-mktg">
@@ -784,11 +815,12 @@ const DAYS=['日','一','二','三','四','五','六'];
 const COLS=[
   {key:'_status',label:'狀態',sort:false},
   {key:'name',label:'活動名稱',sort:true},
-  {key:'date',label:'日期',sort:true},{key:'_applyDead',label:'申請日期',sort:true},
+  {key:'date',label:'日期',sort:true},
+  {key:'_deadline',label:'報名截止',sort:true},
+  {key:'_applyDead',label:'申請日期',sort:true},
   {key:'_cd',label:'申請倒數',sort:true},
   {key:'_cap',label:'報名人數',sort:true},
   {key:'_applyStat',label:'申請人數',sort:false},
-  {key:'_deadline',label:'報名截止',sort:true},
   {key:'_excel',label:'Excel 名單',sort:false},
   {key:'_guide',label:'嚮導',sort:false},
   {key:'_acts',label:'',sort:false},
@@ -831,7 +863,7 @@ const DEF_TASK_REMINDERS=[
   {id:'tr3',name:'天氣提醒',daysBefore:[7,3,1]},
   {id:'tr4',name:'行前手冊發放',daysBefore:[14]},
 ];
-let trips=[],deadlineRules=[],applyRules=[],mktgRules=[],mktgEvents=[],taskReminders=[];
+let trips=[],deadlineRules=[],applyRules=[],lodgeRules=[],mealRules=[],mktgRules=[],mktgEvents=[],taskReminders=[];
 let sb=null,dlCap=null,store=null,rulesReady=false;
 // 標籤顏色選項
 const TAG_COLORS=[
@@ -877,7 +909,9 @@ function fmtRangeParts(s,e){
 }
 
 // ── Rules: load / save / match / label ──
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-mktg':'mktgRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders'};
+const DEF_LODGE=[];
+const DEF_MEAL=[];
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -892,6 +926,8 @@ async function loadAllRules(){
   }
   deadlineRules=m.deadlineRules||localGet('hk-rules',DEF_DEADLINE);
   applyRules=m.applyRules||localGet('hk-apply',DEF_APPLY);
+  lodgeRules=m.lodgeRules||localGet('hk-lodge',DEF_LODGE);
+  mealRules=m.mealRules||localGet('hk-meal',DEF_MEAL);
   mktgRules=m.mktgRules||localGet('hk-mktg',DEF_MKTG);
   mktgEvents=m.mktgEvents||localGet('hk-mktgevents',[]);
   taskReminders=m.taskReminders||localGet('hk-task-reminders',null);
@@ -899,6 +935,8 @@ async function loadAllRules(){
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
+    if(!m.lodgeRules)saveToLS('hk-lodge',lodgeRules);
+    if(!m.mealRules)saveToLS('hk-meal',mealRules);
     if(!m.mktgRules)saveToLS('hk-mktg',mktgRules);
     if(!m.taskReminders)saveToLS('hk-task-reminders',taskReminders);
   }
@@ -926,6 +964,30 @@ function applyLabel(r){
   if(r.months<0)return'免申請';
   let p=[];if(r.months>0)p.push(`${r.months} 個月`);if(r.days>0)p.push(`${r.days} 天`);
   return p.length===0?'出發前申請':'提前 '+p.join('又 ')+' 申請';
+}
+function lodgeLabel(r){
+  if(r.months<0)return'免預訂';
+  let p=[];if(r.months>0)p.push(`${r.months} 個月`);if(r.days>0)p.push(`${r.days} 天`);
+  return p.length===0?'出發前預訂':'提前 '+p.join('又 ')+' 預訂';
+}
+function mealLabel(r){
+  if(r.months<0)return'免預定';
+  let p=[];if(r.months>0)p.push(`${r.months} 個月`);if(r.days>0)p.push(`${r.days} 天`);
+  return p.length===0?'出發前預定':'提前 '+p.join('又 ')+' 預定';
+}
+function lodgeInfo(t){
+  const lr=matchRuleIn(lodgeRules,t.name);
+  if(!lr)return{state:'unset'};
+  if(lr.months<0)return{state:'none'};
+  const d=calcDateBefore(t.date,lr.months,lr.days);
+  return{state:'dated',date:d,ds:dateStr(d),days:Math.ceil((d-today())/864e5)};
+}
+function mealInfo(t){
+  const mr=matchRuleIn(mealRules,t.name);
+  if(!mr)return{state:'unset'};
+  if(mr.months<0)return{state:'none'};
+  const d=calcDateBefore(t.date,mr.months,mr.days);
+  return{state:'dated',date:d,ds:dateStr(d),days:Math.ceil((d-today())/864e5)};
 }
 function mktgLabel(r){return`提前 ${r.promoMonths} 個月宣傳`}
 
@@ -1105,9 +1167,23 @@ function renderTimeReminders(){
         const dLeft=ai.days;
         const txt=dLeft<0?`入園申請已逾期（${fmtShort(ai.ds)}）`:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${dLeft} 天）`;
         reasons.push({icon:'📋',text:txt,cls:dLeft<=3?'mktg-action-urgent':'mktg-action-apply',cat:'apply'});
-        if(getLodgeUnbooked(t)){const dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期';reasons.push({icon:'🏨',text:`住宿尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'lodge'})}
-        if(getMealUnbooked(t)){const dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期';reasons.push({icon:'🍽',text:`餐食尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'meal'})}
       }
+    }
+    const li=lodgeInfo(t);
+    if(getLodgeUnbooked(t)){
+      let dlTxt;
+      if(li.state==='dated'){const ldd=parseD(li.ds);if(ldd<=winEnd||ldd<now){dlTxt=li.days>=0?`需於 ${fmtShort(li.ds)} 前完成`:'已逾期'}}
+      else if(ai.state==='dated'){dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期'}
+      else{dlTxt=`出發日 ${fmtShort(t.date)}`}
+      if(dlTxt)reasons.push({icon:'🏨',text:`住宿尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'lodge'});
+    }
+    const mi=mealInfo(t);
+    if(getMealUnbooked(t)){
+      let dlTxt;
+      if(mi.state==='dated'){const mdd=parseD(mi.ds);if(mdd<=winEnd||mdd<now){dlTxt=mi.days>=0?`需於 ${fmtShort(mi.ds)} 前完成`:'已逾期'}}
+      else if(ai.state==='dated'){dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期'}
+      else{dlTxt=`出發日 ${fmtShort(t.date)}`}
+      if(dlTxt)reasons.push({icon:'🍽',text:`餐食尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'meal'});
     }
     for(const tr of taskReminders){
       const dd=taskDueDate(t,tr);
@@ -1152,10 +1228,12 @@ function renderTaskReminders(){
     const cards=[];
     for(const t of futureTrips){
       const reasons=[];
-      const ai2=applyInfo(t);
-      const dlTxt=ai2.state==='dated'&&ai2.days>=0?`需於 ${fmtShort(ai2.ds)} 前完成`:`出發日 ${fmtShort(t.date)}`;
-      if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:`住宿尚未預訂（${dlTxt}）`,cls:'mktg-action-apply'});
-      if(getMealUnbooked(t))reasons.push({icon:'🍽',text:`餐食尚未預訂（${dlTxt}）`,cls:'mktg-action-apply'});
+      const li2=lodgeInfo(t);const ai2=applyInfo(t);
+      const lodgeDlTxt=li2.state==='dated'&&li2.days>=0?`需於 ${fmtShort(li2.ds)} 前完成`:ai2.state==='dated'&&ai2.days>=0?`需於 ${fmtShort(ai2.ds)} 前完成`:`出發日 ${fmtShort(t.date)}`;
+      if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:`住宿尚未預訂（${lodgeDlTxt}）`,cls:'mktg-action-apply'});
+      const mi2=mealInfo(t);
+      const mealDlTxt=mi2.state==='dated'&&mi2.days>=0?`需於 ${fmtShort(mi2.ds)} 前完成`:ai2.state==='dated'&&ai2.days>=0?`需於 ${fmtShort(ai2.ds)} 前完成`:`出發日 ${fmtShort(t.date)}`;
+      if(getMealUnbooked(t))reasons.push({icon:'🍽',text:`餐食尚未預訂（${mealDlTxt}）`,cls:'mktg-action-apply'});
       if(reasons.length)cards.push({t,reasons,tripDays:daysUntil(t.date)});
     }
     if(cards.length)sections.push({title:'住宿、餐食',cards});
@@ -1649,9 +1727,10 @@ function renderRuleEditForm(r,type){
   if(type==='deadline'){
     const mOpts=[0,1,2,3].map(v=>`<option value="${v}"${r.months===v?' selected':''}>${v} 個月</option>`).join('');
     return`<div class="rule-item"><div class="rule-edit-form"><div class="rule-edit-row"><div class="f-row"><label>提前月數</label><select id="re-months">${mOpts}</select></div><div class="f-row"><label>提前天數</label><input id="re-days" type="number" min="0" value="${r.days}"></div><div class="f-row"><label>路線名稱</label><input id="re-names" type="text" value="${esc(r.names.join('、'))}"></div></div><div class="rule-edit-btns"><button class="btn btn-g" onclick="cancelEditRule()">取消</button><button class="btn btn-p" onclick="saveEditRule('${r.id}','deadline')">儲存</button></div></div></div>`;
-  }else if(type==='apply'){
-    const mOpts=[-1,0,1,2,3].map(v=>`<option value="${v}"${r.months===v?' selected':''}>${v===-1?'免申請':v+' 個月'}</option>`).join('');
-    return`<div class="rule-item"><div class="rule-edit-form"><div class="rule-edit-row"><div class="f-row"><label>提前月數</label><select id="re-months">${mOpts}</select></div><div class="f-row"><label>提前天數</label><input id="re-days" type="number" min="0" value="${r.days}"></div><div class="f-row"><label>路線名稱</label><input id="re-names" type="text" value="${esc(r.names.join('、'))}"></div></div><div class="rule-edit-btns"><button class="btn btn-g" onclick="cancelEditRule()">取消</button><button class="btn btn-p" onclick="saveEditRule('${r.id}','apply')">儲存</button></div></div></div>`;
+  }else if(type==='apply'||type==='lodge'||type==='meal'){
+    const noLabel=type==='lodge'?'免預訂':type==='meal'?'免預定':'免申請';
+    const mOpts=[-1,0,1,2,3].map(v=>`<option value="${v}"${r.months===v?' selected':''}>${v===-1?noLabel:v+' 個月'}</option>`).join('');
+    return`<div class="rule-item"><div class="rule-edit-form"><div class="rule-edit-row"><div class="f-row"><label>提前月數</label><select id="re-months">${mOpts}</select></div><div class="f-row"><label>提前天數</label><input id="re-days" type="number" min="0" value="${r.days}"></div><div class="f-row"><label>路線名稱</label><input id="re-names" type="text" value="${esc(r.names.join('、'))}"></div></div><div class="rule-edit-btns"><button class="btn btn-g" onclick="cancelEditRule()">取消</button><button class="btn btn-p" onclick="saveEditRule('${r.id}','${type}')">儲存</button></div></div></div>`;
   }else{
     const mOpts=[1,2,3,4].map(v=>`<option value="${v}"${r.promoMonths===v?' selected':''}>${v} 個月</option>`).join('');
     return`<div class="rule-item"><div class="rule-edit-form"><div class="rule-edit-row"><div class="f-row"><label>提前宣傳月數</label><select id="re-months">${mOpts}</select></div><div class="f-row"><label>路線名稱</label><input id="re-names" type="text" value="${esc(r.names.join('、'))}"></div></div><div class="rule-edit-btns"><button class="btn btn-g" onclick="cancelEditRule()">取消</button><button class="btn btn-p" onclick="saveEditRule('${r.id}','mktg')">儲存</button></div></div></div>`;
@@ -1675,6 +1754,14 @@ function saveEditRule(id,type){
     const d=parseInt(document.getElementById('re-days').value)||0;
     const r=applyRules.find(x=>x.id===id);if(r){r.months=m;r.days=d;r.names=names}
     saveToLS('hk-apply',applyRules);
+  }else if(type==='lodge'){
+    const d=parseInt(document.getElementById('re-days').value)||0;
+    const r=lodgeRules.find(x=>x.id===id);if(r){r.months=m;r.days=d;r.names=names}
+    saveToLS('hk-lodge',lodgeRules);
+  }else if(type==='meal'){
+    const d=parseInt(document.getElementById('re-days').value)||0;
+    const r=mealRules.find(x=>x.id===id);if(r){r.months=m;r.days=d;r.names=names}
+    saveToLS('hk-meal',mealRules);
   }else{
     const r=mktgRules.find(x=>x.id===id);if(r){r.promoMonths=m||1;r.names=names}
     saveToLS('hk-mktg',mktgRules);
@@ -1685,6 +1772,8 @@ function saveEditRule(id,type){
 function renderAllRuleLists(){
   renderRuleList('rule-list-deadline',deadlineRules,deadlineLabel,'deadline');
   renderRuleList('rule-list-apply',applyRules,applyLabel,'apply');
+  renderRuleList('rule-list-lodge',lodgeRules,lodgeLabel,'lodge');
+  renderRuleList('rule-list-meal',mealRules,mealLabel,'meal');
   renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'mktg');
 }
 
@@ -1692,6 +1781,8 @@ async function delRule(id,type){
   if(!await ensureEditor())return;
   if(type==='deadline'){deadlineRules=deadlineRules.filter(r=>r.id!==id);saveToLS('hk-rules',deadlineRules)}
   else if(type==='apply'){applyRules=applyRules.filter(r=>r.id!==id);saveToLS('hk-apply',applyRules)}
+  else if(type==='lodge'){lodgeRules=lodgeRules.filter(r=>r.id!==id);saveToLS('hk-lodge',lodgeRules)}
+  else if(type==='meal'){mealRules=mealRules.filter(r=>r.id!==id);saveToLS('hk-meal',mealRules)}
   else{mktgRules=mktgRules.filter(r=>r.id!==id);saveToLS('hk-mktg',mktgRules)}
   renderAllRuleLists();toast('規則已刪除');
 }
@@ -1712,6 +1803,24 @@ async function addApplyRule(){
   if(!ns){toast('請輸入路線名稱');return}
   applyRules.push({id:genId(),months:m,days:d,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
   saveToLS('hk-apply',applyRules);renderAllRuleLists();document.getElementById('ra-names').value='';toast('規則已新增');
+}
+
+async function addLodgeRule(){
+  if(!await ensureEditor())return;
+  const m=parseInt(document.getElementById('rl-months').value),d=parseInt(document.getElementById('rl-days').value)||0;
+  const ns=document.getElementById('rl-names').value.trim();
+  if(!ns){toast('請輸入路線名稱');return}
+  lodgeRules.push({id:genId(),months:m,days:d,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
+  saveToLS('hk-lodge',lodgeRules);renderAllRuleLists();document.getElementById('rl-names').value='';toast('規則已新增');
+}
+
+async function addMealRule(){
+  if(!await ensureEditor())return;
+  const m=parseInt(document.getElementById('rme-months').value),d=parseInt(document.getElementById('rme-days').value)||0;
+  const ns=document.getElementById('rme-names').value.trim();
+  if(!ns){toast('請輸入路線名稱');return}
+  mealRules.push({id:genId(),months:m,days:d,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
+  saveToLS('hk-meal',mealRules);renderAllRuleLists();document.getElementById('rme-names').value='';toast('規則已新增');
 }
 
 async function addMktgRule(){
@@ -1831,6 +1940,7 @@ function sorted(list){
     else if(sortKey==='_applyDead'){const ia=applyInfo(a),ib=applyInfo(b);va=ia.state==='dated'?ia.date.getTime():ia.state==='none'?-Infinity:Infinity;vb=ib.state==='dated'?ib.date.getTime():ib.state==='none'?-Infinity:Infinity}
     else if(sortKey==='_cd'){const ia=applyInfo(a),ib=applyInfo(b);va=ia.state==='dated'?ia.days:ia.state==='none'?-Infinity:Infinity;vb=ib.state==='dated'?ib.days:ib.state==='none'?-Infinity:Infinity}
     else if(sortKey==='_cap'){va=a.capacity?a.registered/a.capacity:0;vb=b.capacity?b.registered/b.capacity:0}
+    else if(sortKey==='_deadline'){va=a.deadline||'';vb=b.deadline||''}
     else{va=a.date;vb=b.date}
     return va<vb?-1*m:va>vb?1*m:0;
   });
@@ -1908,7 +2018,7 @@ function render(){
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="報名截止">${deadlineH}</td><td data-label="Excel 名單">${excelMainH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="Excel 名單">${excelMainH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -1923,14 +2033,13 @@ function render(){
       const charterNoteH=t.charterNotes?esc(t.charterNotes):'—';
       const insNoteH=t.insuranceNotes?esc(t.insuranceNotes):'—';
       const applyStatusNoteH=t.applyStatusNotes?esc(t.applyStatusNotes):'—';
-      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-2}"><div class="detail-grid3">`
+      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-2}"><div class="detail-grid6">`
+        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row"><button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button></div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>餐食備註</b><span>${mealNoteH}</span></div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row"><button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button></div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
-        +`</div><div class="detail-grid3" style="margin-top:14px">`
         +`<div class="dcol"><div class="detail-item"><b>訂包車</b><div class="lm-row"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div></div><div class="detail-item"><b>包租車備註</b><span>${charterNoteH}</span></div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>保險</b><div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div><div class="detail-item"><b>保險備註</b><span>${insNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>保險</b><div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div><div class="detail-item"><b>保險備註</b><span>${insNoteH}</span></div></div>`
         +`</div></td></tr>`;
     }
 
