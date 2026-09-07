@@ -80,11 +80,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .nav-mob-sep{height:1px;background:var(--border-sub);margin:8px 16px}
 .hdr-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
 
-.stats-star-wrap{position:relative;display:inline-flex;align-self:flex-end;margin-left:auto}
+.stats-star-wrap{position:relative;display:inline-flex}
 .stats-star{width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--amber);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .stats-star:hover{background:var(--amber-bg);transform:scale(1.1)}
 .stats-star svg{width:22px;height:22px;fill:currentColor;stroke:currentColor;stroke-width:1}
-.stats-popup{display:none;position:absolute;top:100%;right:0;z-index:60;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:16px 18px;min-width:200px;margin-top:6px}
+.stats-popup{display:none;position:absolute;top:100%;left:0;z-index:60;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:16px 18px;min-width:200px;margin-top:6px}
 .stats-star-wrap:hover .stats-popup{display:block}
 .stats-popup-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 0;font-size:13px;color:var(--text-2)}
 .stats-popup-row:not(:last-child){border-bottom:1px solid var(--border-sub)}
@@ -144,7 +144,7 @@ td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:mi
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:100px}
 thead th:nth-child(4),tbody tr:not(.detail-row) td:nth-child(4){white-space:nowrap;min-width:100px;font-weight:700}
-tbody tr:not(.detail-row) td:nth-child(9){white-space:nowrap}
+tbody tr:not(.detail-row) td:nth-child(12){white-space:nowrap}
 
 .stars{display:flex;gap:2px;cursor:pointer}
 .stars svg{width:18px;height:18px;transition:transform .12s}.stars svg:hover{transform:scale(1.2)}
@@ -409,7 +409,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mc-note{margin-top:8px}.mc-note b{display:block;font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:2px}
 .mcard .mc-r1{margin-bottom:0}
 .mcard .mc-line+.mc-line{border-top:1px dashed var(--border)}
-.mcard .mc-r1+.mc-line{border-top:1px dashed var(--border)}
+.mc-vdiv>div+div{border-left:1px dashed var(--border);padding-left:18px}
+.rc-card{position:relative}
+.rc-jump{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;font-size:14px;line-height:1}
+.rc-jump:hover{background:var(--surface-hover);color:var(--accent)}
+.sched-subfilter{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
 
 /* 條列／方格模式切換 */
 .layout-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0}
@@ -519,8 +523,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
 <div class="app">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <div class="hdr-sub" id="date-line"></div>
     <div class="stats-star-wrap" id="stats-star-wrap">
+
       <button class="stats-star" title="活動統計"><svg viewBox="0 0 20 20"><path d="M10 1.5l2.18 4.41 4.87.71-3.52 3.44.83 4.85L10 12.67 5.64 14.91l.83-4.85L2.95 6.62l4.87-.71z"/></svg></button>
       <div class="stats-popup" id="stats-popup">
         <div class="stats-popup-row spr-accent"><span>活動總數</span><b id="s-total">0</b></div>
@@ -529,6 +533,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <div class="stats-popup-row spr-amber"><span>重點宣傳</span><b id="s-promo">0</b></div>
       </div>
     </div>
+    <div class="hdr-sub" id="date-line"></div>
   </div>
 
   <div id="view-schedule">
@@ -537,6 +542,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <button onclick="setReminderMode('task')">團務分類</button>
       <button onclick="setReminderMode('mktg')">行銷重點</button>
     </div>
+    <div class="sched-subfilter" id="sched-subfilter"></div>
     <div id="reminder-container"></div>
   </div>
 
@@ -672,7 +678,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       </div>
 
       <div class="stab-panel" id="tab-apply">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">入山／入園申請的截止時間規則。系統會在行銷重點中提醒申請期限。</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">入山／入園申請的截止時間規則。系統會在行銷重點中提醒申請期限。<br><b style="color:var(--amber)">備註：申請入園的時間規則 ＝ 住宿申請的時間規則 ＝ 餐食處理的時間規則</b></p>
         <div class="rule-list" id="rule-list-apply"></div>
         <hr class="rule-divider">
         <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增申請截止規則</h3>
@@ -773,6 +779,9 @@ const COLS=[
   {key:'_cd',label:'申請倒數',sort:true},
   {key:'_cap',label:'報名人數',sort:true},
   {key:'_applyStat',label:'申請人數',sort:false},
+  {key:'_charter',label:'訂包車',sort:false},
+  {key:'_prenotice',label:'行前手冊',sort:false},
+  {key:'_insurance',label:'保險',sort:false},
   {key:'_guide',label:'嚮導',sort:false},
   {key:'_acts',label:'',sort:false},
 ];
@@ -833,6 +842,7 @@ const CAL_GROUP={trip:'act',deadline:'act',apply:'act',promo:'mktg',post:'mktg',
 let expandedIds=new Set(),dateFrom=null,dateTo=null;
 let listLayout='list';try{const _l=localStorage.getItem('hk-list-layout');if(_l==='grid'||_l==='list')listLayout=_l}catch{}
 let reminderMode='time';try{const _rm=localStorage.getItem('hk-reminder-mode');if(_rm==='time'||_rm==='task'||_rm==='mktg')reminderMode=_rm}catch{}
+let scheduleSubFilter='all';
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
 function parseD(s){return new Date(s+'T00:00:00')}
@@ -1036,8 +1046,17 @@ function delTaskReminder(id){
 
 function setReminderMode(mode){
   reminderMode=mode;
+  scheduleSubFilter='all';
   try{localStorage.setItem('hk-reminder-mode',mode)}catch{}
   renderReminders();
+}
+function setScheduleSubFilter(f){scheduleSubFilter=f;renderReminders()}
+function jumpToCard(tripId){
+  setView('list');
+  listLayout='grid';
+  try{localStorage.setItem('hk-list-layout','grid')}catch{}
+  render();
+  setTimeout(()=>{const el=document.querySelector(`.mcard[data-id="${tripId}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},60);
 }
 
 function renderReminders(){
@@ -1045,120 +1064,140 @@ function renderReminders(){
   btns[0].classList.toggle('on',reminderMode==='time');
   btns[1].classList.toggle('on',reminderMode==='task');
   if(btns[2])btns[2].classList.toggle('on',reminderMode==='mktg');
-  if(reminderMode==='time')renderTimeReminders();
-  else if(reminderMode==='task')renderTaskReminders();
-  else renderMktgReminders();
+  const sfEl=document.getElementById('sched-subfilter');
+  if(reminderMode==='time'){
+    const opts=[{key:'7d',label:'7天內待辦'},{key:'14d',label:'14天內待辦'},{key:'all',label:'全部'}];
+    sfEl.innerHTML=opts.map(o=>`<button class="chip${scheduleSubFilter===o.key?' on':''}" onclick="setScheduleSubFilter('${o.key}')">${o.label}</button>`).join('');
+    renderTimeReminders();
+  }else if(reminderMode==='task'){
+    const opts=[{key:'apply',label:'申請入園'},{key:'lodge',label:'住宿、餐食'},{key:'charter',label:'訂包車'},{key:'prenotice',label:'行前手冊發放'},{key:'weather',label:'天氣提醒'},{key:'insurance',label:'保險'},{key:'all',label:'全部'}];
+    sfEl.innerHTML=opts.map(o=>`<button class="chip${scheduleSubFilter===o.key?' on':''}" onclick="setScheduleSubFilter('${o.key}')">${o.label}</button>`).join('');
+    renderTaskReminders();
+  }else{
+    sfEl.innerHTML='';
+    renderMktgReminders();
+  }
 }
 
+function taskDueDate(t,tr){
+  const maxD=Math.max(...tr.daysBefore);
+  const d=new Date(parseD(t.date));d.setDate(d.getDate()-maxD);return d;
+}
 function renderTimeReminders(){
   const container=document.getElementById('reminder-container');
-  const timeSections=[
-    {title:'兩個月內團務提醒',min:31,max:60,type:'apply'},
-    {title:'一個月內團務提醒',min:15,max:30,type:'apply'},
-  ];
-  const daySet=new Map();
-  for(const tr of taskReminders){
-    for(const d of tr.daysBefore){
-      if(!daySet.has(d))daySet.set(d,[]);
-      daySet.get(d).push(tr.name);
-    }
-  }
-  const sortedDays=[...daySet.keys()].sort((a,b)=>b-a);
-  for(let i=0;i<sortedDays.length;i++){
-    const d=sortedDays[i];
-    const nextSmaller=i+1<sortedDays.length?sortedDays[i+1]+1:0;
-    const tasks=daySet.get(d);
-    const label=d===1?'1天前團務提醒':`${d}天內團務提醒`;
-    timeSections.push({title:label,min:nextSmaller,max:d,type:'task',taskNames:tasks,dayKey:d});
-  }
+  const now=today();
+  const windows=[];
+  if(scheduleSubFilter==='7d'||scheduleSubFilter==='all')windows.push({key:'7d',title:'7天內待辦事項',max:7});
+  if(scheduleSubFilter==='14d'||scheduleSubFilter==='all')windows.push({key:'14d',title:'14天內待辦事項',max:14});
 
-  let html='';
   const futureTrips=trips.filter(t=>daysUntil(t.date)>=0);
+  let html='';
 
-  for(const sec of timeSections){
+  for(const win of windows){
+    const winEnd=new Date(now);winEnd.setDate(winEnd.getDate()+win.max-1);
+    const winStart=win.key==='14d'&&scheduleSubFilter==='all'?new Date(now.getTime()+7*864e5):now;
     const cards=[];
     for(const t of futureTrips){
-      const tripDays=daysUntil(t.date);
       const ai=applyInfo(t);
       const reasons=[];
-
-      if(sec.type==='apply'){
-        if(ai.state==='dated'&&ai.days>=sec.min&&ai.days<=sec.max)reasons.push({icon:'📋',text:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${ai.days} 天）`,cls:'mktg-action-urgent'});
-        if(tripDays>=sec.min&&tripDays<=sec.max){
-          if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
-          if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
-        }
-      }else{
-        if(tripDays>=sec.min&&tripDays<=sec.max){
-          if(ai.state==='dated'&&ai.days>=0&&ai.days<=sec.max)reasons.push({icon:'📋',text:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${ai.days} 天）`,cls:ai.days<=7?'mktg-action-urgent':'mktg-action-apply'});
-          if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
-          if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
-          for(const tn of sec.taskNames){
-            const dl=tripDays===0?'今天出發':`出發前 ${tripDays} 天`;
-            reasons.push({icon:'⚡',text:`${tn}（${dl}）`,cls:tripDays<=3?'mktg-action-urgent':'mktg-action-info'});
-          }
+      if(ai.state==='dated'){
+        const dd=parseD(ai.ds);
+        if((dd<=winEnd&&dd>=winStart)||dd<now){
+          const dLeft=ai.days;
+          const txt=dLeft<0?`入園申請已逾期（${fmtShort(ai.ds)}）`:`入園申請截止 ${fmtShort(ai.ds)}（剩 ${dLeft} 天）`;
+          reasons.push({icon:'📋',text:txt,cls:dLeft<=3?'mktg-action-urgent':'mktg-action-apply',cat:'apply'});
+          if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply',cat:'lodge'});
+          if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply',cat:'meal'});
         }
       }
-      if(reasons.length>0)cards.push({t,ai,reasons,tripDays});
+      for(const tr of taskReminders){
+        const dd=taskDueDate(t,tr);
+        const trDays=daysUntil(t.date);
+        const isDone=(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes')||(tr.name==='保險處理'&&(t.insurance||{}).done==='yes')||(tr.name==='天氣提醒'&&t.weatherDone==='yes')||(tr.name==='行前手冊發放'&&t.preNoticeDone==='yes');
+        if(isDone)continue;
+        if((dd<=winEnd&&dd>=winStart)||dd<now){
+          const dl=trDays===0?'今天出發':`出發前 ${trDays} 天`;
+          reasons.push({icon:'⚡',text:`${tr.name}（${dl}）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
+        }
+      }
+      if(reasons.length>0)cards.push({t,ai,reasons,tripDays:daysUntil(t.date)});
     }
     if(cards.length===0)continue;
     cards.sort((a,b)=>a.tripDays-b.tripDays);
-    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${sec.title}</h2></div><div class="mktg-cards">`;
-    for(const c of cards){
-      html+=renderReminderCard(c.t,c.ai,c.reasons);
-    }
+    html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${win.title}</h2></div><div class="mktg-cards">`;
+    for(const c of cards)html+=renderReminderCard(c.t,c.ai,c.reasons);
     html+=`</div></div>`;
   }
+  if(!html)html='<div class="empty" style="padding:40px"><p>目前沒有待辦事項</p></div>';
   container.innerHTML=html;
 }
 
 function renderTaskReminders(){
   const container=document.getElementById('reminder-container');
   const futureTrips=trips.filter(t=>daysUntil(t.date)>=0);
+  const sf=scheduleSubFilter;
   const sections=[];
 
-  // 入園申請
-  const applyCards=[];
-  for(const t of futureTrips){
-    const ai=applyInfo(t);
-    if(ai.state!=='dated'||ai.days<0)continue;
-    const dl=ai.days===0?'今天截止':`剩 ${ai.days} 天`;
-    applyCards.push({t,ai,reasons:[{icon:'📋',text:`申請截止 ${fmtShort(ai.ds)}（${dl}）`,cls:ai.days<=7?'mktg-action-urgent':'mktg-action-apply'}],tripDays:daysUntil(t.date)});
+  if(sf==='all'||sf==='apply'){
+    const cards=[];
+    for(const t of futureTrips){
+      const ai=applyInfo(t);
+      if(ai.state!=='dated'||ai.days<0)continue;
+      const dl=ai.days===0?'今天截止':`剩 ${ai.days} 天`;
+      cards.push({t,reasons:[{icon:'📋',text:`申請截止 ${fmtShort(ai.ds)}（${dl}）`,cls:ai.days<=7?'mktg-action-urgent':'mktg-action-apply'}],tripDays:daysUntil(t.date)});
+    }
+    if(cards.length)sections.push({title:'申請入園',cards});
   }
-  if(applyCards.length)sections.push({title:'入園申請',cards:applyCards});
-
-  // 住宿、餐食
-  const lmCards=[];
-  for(const t of futureTrips){
-    const reasons=[];
-    if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
-    if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
-    if(reasons.length)lmCards.push({t,ai:applyInfo(t),reasons,tripDays:daysUntil(t.date)});
+  if(sf==='all'||sf==='lodge'){
+    const cards=[];
+    for(const t of futureTrips){
+      const reasons=[];
+      if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:'住宿尚未預訂',cls:'mktg-action-apply'});
+      if(getMealUnbooked(t))reasons.push({icon:'🍽',text:'餐食尚未預訂',cls:'mktg-action-apply'});
+      if(reasons.length)cards.push({t,reasons,tripDays:daysUntil(t.date)});
+    }
+    if(cards.length)sections.push({title:'住宿、餐食',cards});
   }
-  if(lmCards.length)sections.push({title:'住宿、餐食',cards:lmCards});
-
-  // custom task reminders
+  const taskMap={charter:{key:'charter',title:'訂包車',check:t=>(t.charter||{}).book==='yes'},prenotice:{key:'prenotice',title:'行前手冊發放',check:t=>t.preNoticeDone==='yes'},weather:{key:'weather',title:'天氣提醒',check:t=>t.weatherDone==='yes'},insurance:{key:'insurance',title:'保險',check:t=>(t.insurance||{}).done==='yes'}};
+  const trNameMap={'訂包車時間':'charter','保險處理':'insurance','天氣提醒':'weather','行前手冊發放':'prenotice'};
   for(const tr of taskReminders){
+    const catKey=trNameMap[tr.name];
+    if(sf!=='all'&&sf!==catKey)continue;
+    const tm=catKey?taskMap[catKey]:null;
     const maxDay=Math.max(...tr.daysBefore);
-    const tCards=[];
+    const cards=[];
     for(const t of futureTrips){
       const tripDays=daysUntil(t.date);
       if(tripDays>maxDay)continue;
+      if(tm&&tm.check(t))continue;
       const dl=tripDays===0?'今天出發':`出發前 ${tripDays} 天`;
       const overdue=tripDays<Math.min(...tr.daysBefore);
-      tCards.push({t,ai:applyInfo(t),reasons:[{icon:'⚡',text:`${tr.name}（${dl}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
+      cards.push({t,reasons:[{icon:'⚡',text:`${tr.name}（${dl}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
     }
-    if(tCards.length)sections.push({title:tr.name,cards:tCards});
+    if(cards.length)sections.push({title:tr.name,cards});
   }
 
   let html='';
   for(const sec of sections){
     sec.cards.sort((a,b)=>a.tripDays-b.tripDays);
     html+=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${esc(sec.title)}</h2></div><div class="mktg-cards">`;
-    for(const c of sec.cards)html+=renderReminderCard(c.t,c.ai,c.reasons);
+    for(const c of sec.cards)html+=renderTaskReminderCard(c.t,c.reasons);
     html+=`</div></div>`;
   }
+  if(!html)html='<div class="empty" style="padding:40px"><p>目前沒有待辦事項</p></div>';
   container.innerHTML=html;
+}
+function renderTaskReminderCard(t,reasons){
+  const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtDate(t.date);
+  let h=`<div class="rc-card"><button class="rc-jump" onclick="jumpToCard('${t.id}')" title="跳到方格卡片">&#8599;</button>`;
+  h+=`<div class="rc-head"><div class="rc-name">${esc(t.name)}</div><div class="rc-date">${dateRange}</div></div>`;
+  if(reasons&&reasons.length>0){
+    h+=`<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">`;
+    for(const r of reasons)h+=`<div class="mktg-action ${r.cls}" style="font-size:11px">${r.icon} ${esc(r.text)}</div>`;
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+  return h;
 }
 
 function renderMktgReminders(){
@@ -1184,36 +1223,49 @@ function renderMktgReminders(){
 
 function renderReminderCard(t,ai,reasons){
   const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtDate(t.date);
-  const applyText=ai.state==='dated'?fmtDate(ai.ds):ai.state==='none'?'免申請':'未設定';
-  const nights=nightsOf(t);const L=t.lodging||[];
-  const ch=t.charter||{book:'no',pay:'no'};
-  const ins=t.insurance||{done:'no',pay:'no'};
-  const chB=bookInfo(ch.book),chP=payInfo(ch.pay);
-  const insD=doneInfo(ins.done),insP=paidInfo(ins.pay);
-  const wD=doneInfo(t.weatherDone==='yes'?'yes':'no');
-  const pnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
-
-  let lodgeH='';
-  if(nights>0){for(let i=0;i<nights;i++){const e=L[i]||{book:'no',pay:'no'};const bi=bookInfo(e.book),pi=payInfo(e.pay);
-    lodgeH+=`<div class="lm-row"><span class="lm-lab">第${i+1}晚</span><button class="stbtn ${bi.cls}" onclick="cycleLodgeBook('${t.id}',${i})">${bi.label}</button><button class="stbtn ${pi.cls}" onclick="cycleLodgePay('${t.id}',${i})">${pi.label}</button></div>`;
-  }}else lodgeH=`<span style="color:var(--text-muted);font-size:12px">單日行程</span>`;
-  const m=t.meal||{book:'no',pay:'no'};const mbi=bookInfo(m.book),mpi=payInfo(m.pay);
-  const mealH=`<button class="stbtn ${mbi.cls}" onclick="cycleMealBook('${t.id}')">${mbi.label}</button><button class="stbtn ${mpi.cls}" onclick="cycleMealPay('${t.id}')">${mpi.label}</button>`;
-
-  let h=`<div class="rc-card">`;
-  h+=`<div class="rc-head"><div><div class="rc-name">${esc(t.name)}</div><div class="rc-date">${dateRange}｜${t.registered}/${t.capacity} 人</div></div></div>`;
-  h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">入園申請</div><div class="rc-val">${applyText}</div></div>`;
-  h+=`<div class="rc-field"><div class="rc-label">報名人數</div><div class="rc-val">${t.registered} / ${t.capacity}</div></div></div>`;
-  h+=`<div class="rc-row"><div class="rc-field lm-item"><div class="rc-label">住宿</div>${lodgeH}</div>`;
-  h+=`<div class="rc-field"><div class="rc-label">餐食</div><div class="rc-val">${mealH}</div></div></div>`;
-  h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">租包車</div><div class="rc-val"><button class="stbtn ${chB.cls}" onclick="cycleCharterBook('${t.id}')">${chB.label}</button><button class="stbtn ${chP.cls}" onclick="cycleCharterPay('${t.id}')">${chP.label}</button></div></div>`;
-  h+=`<div class="rc-field"><div class="rc-label">保險</div><div class="rc-val"><button class="stbtn ${insD.cls}" onclick="cycleInsBook('${t.id}')">${insD.label}</button><button class="stbtn ${insP.cls}" onclick="cycleInsPay('${t.id}')">${insP.label}</button></div></div></div>`;
-  h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">天氣預報</div><div class="rc-val"><button class="stbtn ${wD.cls}" onclick="cycleWeather('${t.id}')">${wD.label}</button></div></div>`;
-  h+=`<div class="rc-field"><div class="rc-label">行前通知</div><div class="rc-val"><button class="stbtn ${pnD.cls}" onclick="cyclePreNotice('${t.id}')">${pnD.label}</button></div></div></div>`;
+  let h=`<div class="rc-card"><button class="rc-jump" onclick="jumpToCard('${t.id}')" title="跳到方格卡片">&#8599;</button>`;
+  h+=`<div class="rc-head"><div class="rc-name">${esc(t.name)}</div><div class="rc-date">${dateRange}</div></div>`;
   if(reasons&&reasons.length>0){
-    h+=`<div style="padding-top:8px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:4px">`;
+    h+=`<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">`;
     for(const r of reasons)h+=`<div class="mktg-action ${r.cls}" style="font-size:11px">${r.icon} ${esc(r.text)}</div>`;
     h+=`</div>`;
+  }
+  h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">報名人數</div><div class="rc-val">${t.registered} / ${t.capacity}</div></div></div>`;
+  const cats=new Set((reasons||[]).map(r=>r.cat).filter(Boolean));
+  if(cats.has('apply')){
+    const applyText=ai.state==='dated'?fmtDate(ai.ds):ai.state==='none'?'免申請':'未設定';
+    h+=`<div class="rc-row"><div class="rc-field"><div class="rc-label">入園申請</div><div class="rc-val">${applyText}</div></div></div>`;
+  }
+  if(cats.has('lodge')||cats.has('meal')){
+    const nights=nightsOf(t);const L=t.lodging||[];
+    let lodgeH='';
+    if(nights>0){for(let i=0;i<nights;i++){const e=L[i]||{book:'no',pay:'no'};const bi=bookInfo(e.book),pi=payInfo(e.pay);
+      lodgeH+=`<div class="lm-row"><span class="lm-lab">第${i+1}晚</span><button class="stbtn ${bi.cls}" onclick="cycleLodgeBook('${t.id}',${i})">${bi.label}</button><button class="stbtn ${pi.cls}" onclick="cycleLodgePay('${t.id}',${i})">${pi.label}</button></div>`;
+    }}else lodgeH=`<span style="color:var(--text-muted);font-size:12px">單日行程</span>`;
+    const m=t.meal||{book:'no',pay:'no'};const mbi=bookInfo(m.book),mpi=payInfo(m.pay);
+    const mealH=`<button class="stbtn ${mbi.cls}" onclick="cycleMealBook('${t.id}')">${mbi.label}</button><button class="stbtn ${mpi.cls}" onclick="cycleMealPay('${t.id}')">${mpi.label}</button>`;
+    h+=`<div class="rc-row"><div class="rc-field lm-item"><div class="rc-label">住宿</div>${lodgeH}</div>`;
+    h+=`<div class="rc-field"><div class="rc-label">餐食</div><div class="rc-val">${mealH}</div></div></div>`;
+  }
+  if(cats.has('task')){
+    const ch=t.charter||{book:'no',pay:'no'};const ins=t.insurance||{done:'no',pay:'no'};
+    const taskReasons=(reasons||[]).filter(r=>r.cat==='task').map(r=>r.text);
+    const showCharter=taskReasons.some(x=>x.includes('訂包車'));
+    const showIns=taskReasons.some(x=>x.includes('保險'));
+    const showWeather=taskReasons.some(x=>x.includes('天氣'));
+    const showPN=taskReasons.some(x=>x.includes('行前手冊'));
+    if(showCharter||showIns){
+      h+=`<div class="rc-row">`;
+      if(showCharter){const chB=bookInfo(ch.book),chP=payInfo(ch.pay);h+=`<div class="rc-field"><div class="rc-label">租包車</div><div class="rc-val"><button class="stbtn ${chB.cls}" onclick="cycleCharterBook('${t.id}')">${chB.label}</button><button class="stbtn ${chP.cls}" onclick="cycleCharterPay('${t.id}')">${chP.label}</button></div></div>`}
+      if(showIns){const insD=doneInfo(ins.done),insP=paidInfo(ins.pay);h+=`<div class="rc-field"><div class="rc-label">保險</div><div class="rc-val"><button class="stbtn ${insD.cls}" onclick="cycleInsBook('${t.id}')">${insD.label}</button><button class="stbtn ${insP.cls}" onclick="cycleInsPay('${t.id}')">${insP.label}</button></div></div>`}
+      h+=`</div>`;
+    }
+    if(showWeather||showPN){
+      h+=`<div class="rc-row">`;
+      if(showWeather){const wD=doneInfo(t.weatherDone==='yes'?'yes':'no');h+=`<div class="rc-field"><div class="rc-label">天氣預報</div><div class="rc-val"><button class="stbtn ${wD.cls}" onclick="cycleWeather('${t.id}')">${wD.label}</button></div></div>`}
+      if(showPN){const pnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');h+=`<div class="rc-field"><div class="rc-label">行前通知</div><div class="rc-val"><button class="stbtn ${pnD.cls}" onclick="cyclePreNotice('${t.id}')">${pnD.label}</button></div></div>`}
+      h+=`</div>`;
+    }
   }
   h+=`</div>`;
   return h;
@@ -1852,10 +1904,16 @@ function render(){
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
+    const _ch=t.charter||{book:'no',pay:'no'};const _chB=bookInfo(_ch.book),_chP=payInfo(_ch.pay);
+    const charterH=`<button class="stbtn ${_chB.cls}" onclick="event.stopPropagation();cycleCharterBook('${t.id}')">${_chB.label}</button> <button class="stbtn ${_chP.cls}" onclick="event.stopPropagation();cycleCharterPay('${t.id}')">${_chP.label}</button>`;
+    const _pnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
+    const prenoticeH=`<button class="stbtn ${_pnD.cls}" onclick="event.stopPropagation();cyclePreNotice('${t.id}')">${_pnD.label}</button>`;
+    const _ins=t.insurance||{done:'no',pay:'no'};const _insD=doneInfo(_ins.done),_insP=paidInfo(_ins.pay);
+    const insuranceH=`<button class="stbtn ${_insD.cls}" onclick="event.stopPropagation();cycleInsBook('${t.id}')">${_insD.label}</button> <button class="stbtn ${_insP.cls}" onclick="event.stopPropagation();cycleInsPay('${t.id}')">${_insP.label}</button>`;
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="訂包車">${charterH}</td><td data-label="行前手冊">${prenoticeH}</td><td data-label="保險">${insuranceH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -1880,12 +1938,12 @@ function render(){
     const mpnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
     const starCls=(t.promoted||0)>0?'star-on':'star-off';
     const starBtn=`<button class="star-btn ${starCls}" onclick="toggleStar('${t.id}')" title="重點宣傳">★</button>`;
-    cards.push(`<div class="mcard${isPast?' past':''}">`
+    cards.push(`<div class="mcard${isPast?' past':''}" data-id="${t.id}">`
       +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-name2">${esc(t.name)} ${dp.num} <span class="mc-dow">${dp.dow}</span></span></div><div class="mc-r1r">${starBtn}${statusH}</div></div>`
       +`<div class="mc-line"><div><b>報名人數</b>${regCapH}</div><div><b>申請人數</b>${applyStatH}</div></div>`
       +`<div class="mc-line mc-line3"><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
-      +`<div class="mc-line"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}<div class="mc-note"><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div><div class="lm-item"><b>餐食狀況</b>${mlm.meal}<div class="mc-note"><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div></div>`
-      +`<div class="mc-line"><div><b>包租車狀況</b><div class="lm-row"><button class="stbtn ${mchB.cls}" onclick="cycleCharterBook('${t.id}')">${mchB.label}</button><button class="stbtn ${mchP.cls}" onclick="cycleCharterPay('${t.id}')">${mchP.label}</button></div><div class="mc-note"><b>包租車備註</b><span class="v">${t.charterNotes?esc(t.charterNotes):'—'}</span></div></div><div><b>保險處理狀況</b><div class="lm-row"><button class="stbtn ${minsD.cls}" onclick="cycleInsBook('${t.id}')">${minsD.label}</button><button class="stbtn ${minsP.cls}" onclick="cycleInsPay('${t.id}')">${minsP.label}</button></div><div class="mc-note"><b>保險備註</b><span class="v">${t.insuranceNotes?esc(t.insuranceNotes):'—'}</span></div></div></div>`
+      +`<div class="mc-line mc-vdiv"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}<div class="mc-note"><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div><div class="lm-item"><b>餐食狀況</b>${mlm.meal}<div class="mc-note"><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div></div>`
+      +`<div class="mc-line mc-vdiv"><div><b>包租車狀況</b><div class="lm-row"><button class="stbtn ${mchB.cls}" onclick="cycleCharterBook('${t.id}')">${mchB.label}</button><button class="stbtn ${mchP.cls}" onclick="cycleCharterPay('${t.id}')">${mchP.label}</button></div><div class="mc-note"><b>包租車備註</b><span class="v">${t.charterNotes?esc(t.charterNotes):'—'}</span></div></div><div><b>保險處理狀況</b><div class="lm-row"><button class="stbtn ${minsD.cls}" onclick="cycleInsBook('${t.id}')">${minsD.label}</button><button class="stbtn ${minsP.cls}" onclick="cycleInsPay('${t.id}')">${minsP.label}</button></div><div class="mc-note"><b>保險備註</b><span class="v">${t.insuranceNotes?esc(t.insuranceNotes):'—'}</span></div></div></div>`
       +`<div class="mc-line"><div><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${mpnD.cls}" onclick="cyclePreNotice('${t.id}')">${mpnD.label}</button></div></div><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div></div>`
       +`<div class="mc-bottom"><div><b>Excel 名單</b><span style="margin-left:8px">${mExcelH}</span></div><div class="mc-acts">${editDelH}</div></div>`
       +`</div>`);
