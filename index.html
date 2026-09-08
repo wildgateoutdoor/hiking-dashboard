@@ -2065,8 +2065,8 @@ function render(){
       applyDeadH='<span style="color:var(--text-muted)">未設定</span>';applyCdH='—';applyCdC='cd-past';
       applyStatH='<span class="pill pill-closed">未設定</span>';
     }else if(ai.state==='none'){
-      applyDeadH='<span style="color:var(--text-muted)">免申請</span>';applyCdH='<span style="color:var(--text-muted);font-weight:normal;font-size:inherit">免申請</span>';applyCdC='';
-      applyStatH='<span class="pill pill-none">免申請</span>';
+      applyDeadH='<span style="color:var(--text-muted);font-size:12px">免申請</span>';applyCdH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">免申請</span>';applyCdC='';
+      applyStatH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">免申請</span>';
     }else{
       applyDeadH=fmtDate(ai.ds);
       const d=ai.days;
@@ -2109,7 +2109,7 @@ function render(){
       const charterNoteH=t.charterNotes?esc(t.charterNotes):'—';
       const insNoteH=t.insuranceNotes?esc(t.insuranceNotes):'—';
       const applyStatusNoteH=t.applyStatusNotes?esc(t.applyStatusNotes):'—';
-      const _dApBtnH=_dApSt.auto?`<span style="color:var(--text-muted);font-weight:normal;font-size:13px">${_dApSt.label}</span>`:`<button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button>`;
+      const _dApBtnH=_dApSt.auto?`<span style="color:var(--text-muted);font-weight:normal;font-size:12px">${_dApSt.label}</span>`:`<button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button>`;
       detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}"><div class="detail-grid6">`
         +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
@@ -2134,7 +2134,7 @@ function render(){
       +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-name2">${esc(t.name)} ${dp.num} <span class="mc-dow">${dp.dow}</span></span></div><div class="mc-r1r">${starBtn}${statusH}</div></div>`
       +`<div class="mc-line"><div><b>報名人數</b>${regCapH}</div><div><b>申請人數</b>${applyStatH}</div></div>`
       +`<div class="mc-line mc-line3"><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
-      +`<div class="mc-line"><div><b>申請狀態</b><div class="lm-row">${(()=>{const _as=getApplyStatusForTrip(t);return _as.auto?`<span style="color:var(--text-muted);font-weight:normal;font-size:13px">${_as.label}</span>`:`<button class="stbtn ${_as.cls}" onclick="cycleApplyStatus('${t.id}')">${_as.label}</button>`})()}</div></div><div><b>申請備註</b><span class="v">${t.applyStatusNotes?esc(t.applyStatusNotes):'—'}</span></div></div>`
+      +`<div class="mc-line"><div><b>申請狀態</b><div class="lm-row">${(()=>{const _as=getApplyStatusForTrip(t);return _as.auto?`<span style="color:var(--text-muted);font-weight:normal;font-size:12px">${_as.label}</span>`:`<button class="stbtn ${_as.cls}" onclick="cycleApplyStatus('${t.id}')">${_as.label}</button>`})()}</div></div><div><b>申請備註</b><span class="v">${t.applyStatusNotes?esc(t.applyStatusNotes):'—'}</span></div></div>`
       +`<div class="mc-line mc-vdiv"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}<div class="mc-note"><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div><div class="lm-item"><b>餐食狀況</b>${mlm.meal}<div class="mc-note"><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div></div>`
       +`<div class="mc-line mc-vdiv"><div><b>包租車狀況</b><div class="lm-row"><button class="stbtn ${mchB.cls}" onclick="cycleCharterBook('${t.id}')">${mchB.label}</button><button class="stbtn ${mchP.cls}" onclick="cycleCharterPay('${t.id}')">${mchP.label}</button></div><div class="mc-note"><b>包租車備註</b><span class="v">${t.charterNotes?esc(t.charterNotes):'—'}</span></div></div><div><b>保險處理狀況</b><div class="lm-row"><button class="stbtn ${minsD.cls}" onclick="cycleInsBook('${t.id}')">${minsD.label}</button><button class="stbtn ${minsP.cls}" onclick="cycleInsPay('${t.id}')">${minsP.label}</button></div><div class="mc-note"><b>保險備註</b><span class="v">${t.insuranceNotes?esc(t.insuranceNotes):'—'}</span></div></div></div>`
       +`<div class="mc-line"><div><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${mpnD.cls}" onclick="cyclePreNotice('${t.id}')">${mpnD.label}</button></div></div><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div></div>`
