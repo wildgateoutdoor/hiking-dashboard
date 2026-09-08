@@ -455,7 +455,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .f-pair,.f-triple{grid-template-columns:1fr}
   .cal-day{min-height:56px;padding:3px 4px}.cal-ev{font-size:9px;padding:1px 3px}
   .cal-num{font-size:12px}
-  .mktg-cards{grid-template-columns:1fr 1fr;gap:8px}
+  .mktg-cards{grid-template-columns:1fr;gap:8px}
   .mktg-card{padding:10px 12px}.mktg-card-name{font-size:13px}.mktg-card-date{font-size:11px}.mktg-action{font-size:11px}
   .reminder-toggle button{padding:5px 10px;font-size:11px}
   .modal{max-width:100%}.modal-body{padding:18px}
@@ -463,10 +463,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .reg-btn{width:28px;height:28px}
   .cal-bar{flex-direction:column;align-items:stretch}.cal-add-btns .btn{flex:1;justify-content:center}
 
-  /* 活動列表：手機改用專屬卡片，隱藏表格 */
+  /* 活動列表：手機隱藏表格，改用卡片；條列=單欄卡片，方格=雙欄網格 */
   #view-list .tbl-wrap{display:none!important}
-  #view-list .mcards{display:block}
-  .layout-toggle{display:none}
+  #view-list.lay-list .mcards{display:flex;flex-direction:column;gap:10px}
+  #view-list.lay-grid .mcards{display:grid;grid-template-columns:1fr;gap:10px}
 }
 @media(max-width:480px){
   .stat b{font-size:16px}.stat{font-size:10px}
