@@ -678,8 +678,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <button class="stab" data-tab="apply" onclick="switchTab('apply')">申請截止</button>
         <button class="stab" data-tab="lodge" onclick="switchTab('lodge')">住宿預訂</button>
         <button class="stab" data-tab="meal" onclick="switchTab('meal')">餐食預定</button>
-        <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
         <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
+        <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
       </div>
 
       <div class="stab-panel on" id="tab-deadline">
@@ -734,18 +734,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <div class="f-actions"><button type="button" class="btn btn-p" onclick="addMealRule()">新增規則</button></div>
       </div>
 
-      <div class="stab-panel" id="tab-mktg">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定各路線的宣傳起始時間。系統會自動計算本週行銷重點。</p>
-        <div class="rule-list" id="rule-list-mktg"></div>
-        <hr class="rule-divider">
-        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增行銷規則</h3>
-        <div class="f-pair">
-          <div class="f-row"><label>提前宣傳月數</label><select id="rm-months"><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option><option value="4">4 個月</option></select></div>
-          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rm-names" type="text" placeholder="例：玉山, 雪山"></div>
-        </div>
-        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addMktgRule()">新增規則</button></div>
-      </div>
-
       <div class="stab-panel" id="tab-taskrem">
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定活動日前幾天需要執行的團務項目。系統會在團務提醒中自動顯示。</p>
         <div class="tr-list" id="tr-list"></div>
@@ -756,6 +744,18 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label>活動日前幾天提醒</label><input id="tr-days" type="text" placeholder="例：14 或 7,3,1" style="font-variant-numeric:tabular-nums"></div>
         </div>
         <div class="f-actions"><button type="button" class="btn btn-p" onclick="addTaskReminder()">新增</button></div>
+      </div>
+
+      <div class="stab-panel" id="tab-mktg">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定各路線的宣傳起始時間。系統會自動計算本週行銷重點。</p>
+        <div class="rule-list" id="rule-list-mktg"></div>
+        <hr class="rule-divider">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增行銷規則</h3>
+        <div class="f-pair">
+          <div class="f-row"><label>提前宣傳月數</label><select id="rm-months"><option value="1">1 個月</option><option value="2">2 個月</option><option value="3">3 個月</option><option value="4">4 個月</option></select></div>
+          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rm-names" type="text" placeholder="例：玉山, 雪山"></div>
+        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addMktgRule()">新增規則</button></div>
       </div>
     </div>
   </div>
