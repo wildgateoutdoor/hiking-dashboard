@@ -927,6 +927,9 @@ function fmtRangeParts(s,e){
 }
 
 // ── Rules: load / save / match / label ──
+const DEF_MINGROUP=[
+  {id:'mg1',minPax:3,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林','郡大山','玉山','嘉明湖','北大武','奇萊南華','眠月線','大小霸','雪山主東']},
+];
 const DEF_LODGE=[];
 const DEF_MEAL=[];
 const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders'};
@@ -947,7 +950,7 @@ async function loadAllRules(){
   lodgeRules=m.lodgeRules||localGet('hk-lodge',DEF_LODGE);
   mealRules=m.mealRules||localGet('hk-meal',DEF_MEAL);
   mktgRules=m.mktgRules||localGet('hk-mktg',DEF_MKTG);
-  minGroupRules=m.minGroupRules||localGet('hk-mingroup',[]);
+  minGroupRules=m.minGroupRules||localGet('hk-mingroup',DEF_MINGROUP);
   mktgEvents=m.mktgEvents||localGet('hk-mktgevents',[]);
   taskReminders=m.taskReminders||localGet('hk-task-reminders',null);
   if(!taskReminders)taskReminders=JSON.parse(JSON.stringify(DEF_TASK_REMINDERS));
