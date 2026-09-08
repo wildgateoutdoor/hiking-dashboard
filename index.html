@@ -1159,6 +1159,15 @@ function taskDueDate(t,tr){
   const maxD=Math.max(...tr.daysBefore);
   const d=new Date(parseD(t.date));d.setDate(d.getDate()-maxD);return d;
 }
+function taskDueDates(t,tr){
+  const base=parseD(t.date);
+  return tr.daysBefore.slice().sort((a,b)=>b-a).map(db=>{const d=new Date(base);d.setDate(d.getDate()-db);return d});
+}
+function taskDueLabel(t,tr){
+  const dates=taskDueDates(t,tr);
+  if(dates.length<=1)return`需於 ${fmtShort(dateStr(dates[0]))} 前完成`;
+  return`請於 ${dates.map(d=>fmtShort(dateStr(d))).join('、')} 完成`;
+}
 function renderTimeReminders(){
   const container=document.getElementById('reminder-container');
   const now=today();
@@ -1199,8 +1208,7 @@ function renderTimeReminders(){
       const isDone=(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes')||(tr.name==='保險處理'&&(t.insurance||{}).done==='yes')||(tr.name==='天氣提醒'&&t.weatherDone==='yes')||(tr.name==='行前手冊發放'&&t.preNoticeDone==='yes');
       if(isDone)continue;
       if(useAll||dd<=endDate||dd<now){
-        const dueDateStr=fmtShort(dateStr(dd));
-        reasons.push({icon:'⚡',text:`${tr.name}（需於 ${dueDateStr} 前完成）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
+        reasons.push({icon:'⚡',text:`${tr.name}（${taskDueLabel(t,tr)}）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
       }
     }
     return reasons;
@@ -1287,10 +1295,8 @@ function renderTaskReminders(){
       const tripDays=daysUntil(t.date);
       if(tripDays>maxDay)continue;
       if(tm&&tm.check(t))continue;
-      const dd2=taskDueDate(t,tr);
-      const dueDateStr=fmtShort(dateStr(dd2));
       const overdue=tripDays<Math.min(...tr.daysBefore);
-      cards.push({t,reasons:[{icon:'⚡',text:`${tr.name}（需於 ${dueDateStr} 前完成）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
+      cards.push({t,reasons:[{icon:'⚡',text:`${tr.name}（${taskDueLabel(t,tr)}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
     }
     if(cards.length)sections.push({title:tr.name,cards});
   }
