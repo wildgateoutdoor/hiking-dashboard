@@ -1040,7 +1040,7 @@ function getMarketingItems(){
     const ar=matchRuleIn(applyRules,t.name);
     if(!mr&&!ar)continue;
     let inPromo=false,promoStart=null;
-    if(mr){promoStart=calcDateBefore(t.date,mr.promoMonths,0);inPromo=now>=promoStart&&now<=parseD(t.date)}
+    if(mr){promoStart=calcDateBefore(t.date,mr.promoMonths,0);const promoEnd=ar?(ar.months<0?new Date(parseD(t.date).getTime()-2*864e5):calcDateBefore(t.date,ar.months,ar.days)):parseD(t.date);inPromo=now>=promoStart&&now<=promoEnd}
     let applyDeadline=null,applyDaysLeft=null,noApply=false;
     if(ar){
       if(ar.months<0){noApply=true}
@@ -1169,7 +1169,7 @@ function renderTimeReminders(){
   function collectReasons(t,endDate){
     const ai=applyInfo(t);
     const reasons=[];
-    if(ai.state==='dated'){
+    if(ai.state==='dated'&&t.applyStatus!=='applied'&&t.applyStatus!=='waitlist'){
       const dd=parseD(ai.ds);
       if(useAll||dd<=endDate||dd<now){
         const dLeft=ai.days;
@@ -1255,6 +1255,7 @@ function renderTaskReminders(){
     for(const t of futureTrips){
       const ai=applyInfo(t);
       if(ai.state!=='dated'||ai.days<0)continue;
+      if(t.applyStatus==='applied'||t.applyStatus==='waitlist')continue;
       const dl=ai.days===0?'今天截止':`剩 ${ai.days} 天`;
       cards.push({t,reasons:[{icon:'📋',text:`申請截止 ${fmtShort(ai.ds)}（${dl}）`,cls:ai.days<=7?'mktg-action-urgent':'mktg-action-apply'}],tripDays:daysUntil(t.date)});
     }
@@ -1391,7 +1392,9 @@ function getAllMktgPeriods(){
     const mr=matchRuleIn(mktgRules,t.name);
     if(!mr)continue;
     const start=calcDateBefore(t.date,mr.promoMonths,0);
-    items.push({trip:t,start,end:parseD(t.deadline)});
+    const ar=matchRuleIn(applyRules,t.name);
+    const end=ar?(ar.months<0?new Date(parseD(t.date).getTime()-2*864e5):calcDateBefore(t.date,ar.months,ar.days)):parseD(t.date);
+    items.push({trip:t,start,end});
   }
   items.sort((a,b)=>a.start-b.start);
   return items;
