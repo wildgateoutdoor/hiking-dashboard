@@ -679,6 +679,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <button class="stab" data-tab="lodge" onclick="switchTab('lodge')">住宿預訂</button>
         <button class="stab" data-tab="meal" onclick="switchTab('meal')">餐食預定</button>
         <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
+        <button class="stab" data-tab="mingroup" onclick="switchTab('mingroup')">最低成團</button>
         <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
       </div>
 
@@ -744,6 +745,18 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label>活動日前幾天提醒</label><input id="tr-days" type="text" placeholder="例：14 或 7,3,1" style="font-variant-numeric:tabular-nums"></div>
         </div>
         <div class="f-actions"><button type="button" class="btn btn-p" onclick="addTaskReminder()">新增</button></div>
+      </div>
+
+      <div class="stab-panel" id="tab-mingroup">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定各路線的最低成團人數，低於此人數表示未達成本門檻。</p>
+        <div class="rule-list" id="rule-list-mingroup"></div>
+        <hr class="rule-divider">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增最低成團規則</h3>
+        <div class="f-pair">
+          <div class="f-row"><label>最低人數</label><input id="rmg-min" type="number" min="1" value="8" style="width:80px"></div>
+          <div class="f-row"><label>路線名稱（逗號分隔）</label><input id="rmg-names" type="text" placeholder="例：玉山, 雪山"></div>
+        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addMinGroupRule()">新增規則</button></div>
       </div>
 
       <div class="stab-panel" id="tab-mktg">
@@ -867,7 +880,7 @@ const DEF_TASK_REMINDERS=[
   {id:'tr3',name:'天氣提醒',daysBefore:[7,3,1]},
   {id:'tr4',name:'行前手冊發放',daysBefore:[14]},
 ];
-let trips=[],deadlineRules=[],applyRules=[],lodgeRules=[],mealRules=[],mktgRules=[],mktgEvents=[],taskReminders=[];
+let trips=[],deadlineRules=[],applyRules=[],lodgeRules=[],mealRules=[],mktgRules=[],minGroupRules=[],mktgEvents=[],taskReminders=[];
 let sb=null,dlCap=null,store=null,rulesReady=false;
 // 標籤顏色選項
 const TAG_COLORS=[
@@ -916,7 +929,7 @@ function fmtRangeParts(s,e){
 // ── Rules: load / save / match / label ──
 const DEF_LODGE=[];
 const DEF_MEAL=[];
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -934,6 +947,7 @@ async function loadAllRules(){
   lodgeRules=m.lodgeRules||localGet('hk-lodge',DEF_LODGE);
   mealRules=m.mealRules||localGet('hk-meal',DEF_MEAL);
   mktgRules=m.mktgRules||localGet('hk-mktg',DEF_MKTG);
+  minGroupRules=m.minGroupRules||localGet('hk-mingroup',[]);
   mktgEvents=m.mktgEvents||localGet('hk-mktgevents',[]);
   taskReminders=m.taskReminders||localGet('hk-task-reminders',null);
   if(!taskReminders)taskReminders=JSON.parse(JSON.stringify(DEF_TASK_REMINDERS));
@@ -995,6 +1009,7 @@ function mealInfo(t){
   return{state:'dated',date:d,ds:dateStr(d),days:Math.ceil((d-today())/864e5)};
 }
 function mktgLabel(r){return`提前 ${r.promoMonths} 個月宣傳`}
+function minGroupLabel(r){return`最低 ${r.minPax} 人成團`}
 
 function calcDateBefore(tripDate,months,days){
   const d=parseD(tripDate);d.setMonth(d.getMonth()-(months||0));d.setDate(d.getDate()-(days||0));return d;
@@ -1749,7 +1764,7 @@ function openSettings(){renderAllRuleLists();switchTab('deadline');showOv('ov-se
 function closeSettings(){hideOv('ov-settings')}
 function switchTab(tab){
   document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  ['deadline','apply','lodge','meal','mktg','taskrem'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  ['deadline','apply','lodge','meal','taskrem','mingroup','mktg'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
   if(tab==='taskrem')renderTaskReminderList();
 }
 
@@ -1818,6 +1833,7 @@ function renderAllRuleLists(){
   renderRuleList('rule-list-apply',applyRules,applyLabel,'apply');
   renderRuleList('rule-list-lodge',lodgeRules,lodgeLabel,'lodge');
   renderRuleList('rule-list-meal',mealRules,mealLabel,'meal');
+  renderRuleList('rule-list-mingroup',minGroupRules,minGroupLabel,'mingroup');
   renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'mktg');
 }
 
@@ -1827,6 +1843,7 @@ async function delRule(id,type){
   else if(type==='apply'){applyRules=applyRules.filter(r=>r.id!==id);saveToLS('hk-apply',applyRules)}
   else if(type==='lodge'){lodgeRules=lodgeRules.filter(r=>r.id!==id);saveToLS('hk-lodge',lodgeRules)}
   else if(type==='meal'){mealRules=mealRules.filter(r=>r.id!==id);saveToLS('hk-meal',mealRules)}
+  else if(type==='mingroup'){minGroupRules=minGroupRules.filter(r=>r.id!==id);saveToLS('hk-mingroup',minGroupRules)}
   else{mktgRules=mktgRules.filter(r=>r.id!==id);saveToLS('hk-mktg',mktgRules)}
   renderAllRuleLists();toast('規則已刪除');
 }
@@ -1875,6 +1892,17 @@ async function addMktgRule(){
   mktgRules.push({id:genId(),promoMonths:m,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
   saveToLS('hk-mktg',mktgRules);renderAllRuleLists();document.getElementById('rm-names').value='';toast('規則已新增');
 }
+
+async function addMinGroupRule(){
+  if(!await ensureEditor())return;
+  const minPax=parseInt(document.getElementById('rmg-min').value)||1;
+  const ns=document.getElementById('rmg-names').value.trim();
+  if(!ns){toast('請輸入路線名稱');return}
+  minGroupRules.push({id:genId(),minPax,names:ns.split(/[,，、]/).map(s=>s.trim()).filter(Boolean)});
+  saveToLS('hk-mingroup',minGroupRules);renderAllRuleLists();document.getElementById('rmg-names').value='';toast('規則已新增');
+}
+
+function getMinGroup(t){const r=matchRuleIn(minGroupRules,t.name);return r?r.minPax:null}
 
 // ── Storage layer ──
 // 本機備援（Supabase 無法載入時仍可用，資料只存這台電腦）
@@ -2059,7 +2087,8 @@ function render(){
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
     const deadlineH=fmtShort(t.deadline);
     const excelMainH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟 ↗</a>`:'<span style="color:var(--text-muted)">未設定</span>';
-    const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}" onclick="editReg('${t.id}')" style="cursor:pointer" title="點擊輸入">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
+    const _mg=getMinGroup(t);const _mgH=_mg?((t.registered||0)>=_mg?`<div style="font-size:10px;color:var(--accent);margin-top:2px">已達最低 ${_mg} 人</div>`:`<div style="font-size:10px;color:var(--red);margin-top:2px">未達最低 ${_mg} 人</div>`):'';
+    const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}" onclick="editReg('${t.id}')" style="cursor:pointer" title="點擊輸入">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div>${_mgH}</div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
     const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="Excel 名單">${excelMainH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
