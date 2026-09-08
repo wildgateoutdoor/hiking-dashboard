@@ -78,6 +78,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .nav-mob-link:hover{background:var(--surface-hover);color:var(--text)}
 .nav-mob-link.on{color:var(--accent);background:var(--accent-bg)}
 .nav-mob-sep{height:1px;background:var(--border-sub);margin:8px 16px}
+.mob-tabs{display:none;position:fixed;bottom:0;left:0;right:0;z-index:48;background:var(--surface);border-top:1px solid var(--border);height:52px;align-items:stretch}
+.mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;color:var(--text-muted);font:500 10px var(--font);cursor:pointer;padding:4px 0;transition:color .12s}
+.mob-tab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mob-tab.on{color:var(--accent)}
 .hdr-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
 
 .stats-star-wrap{position:relative;display:inline-flex}
@@ -455,7 +459,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .f-pair,.f-triple{grid-template-columns:1fr}
   .cal-day{min-height:56px;padding:3px 4px}.cal-ev{font-size:9px;padding:1px 3px}
   .cal-num{font-size:12px}
-  .mktg-cards{grid-template-columns:1fr;gap:8px}
+  .mktg-cards{grid-template-columns:1fr 1fr;gap:8px}
+  .mktg-cards.time-cards{grid-template-columns:1fr}
   .mktg-card{padding:10px 12px}.mktg-card-name{font-size:13px}.mktg-card-date{font-size:11px}.mktg-action{font-size:11px}
   .reminder-toggle button{padding:5px 10px;font-size:11px}
   .modal{max-width:100%}.modal-body{padding:18px}
@@ -463,10 +468,13 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .reg-btn{width:28px;height:28px}
   .cal-bar{flex-direction:column;align-items:stretch}.cal-add-btns .btn{flex:1;justify-content:center}
 
-  /* 活動列表：手機隱藏表格，改用卡片；條列=單欄卡片，方格=雙欄網格 */
+  /* 活動列表：手機隱藏表格，改用卡片 */
   #view-list .tbl-wrap{display:none!important}
-  #view-list.lay-list .mcards{display:flex;flex-direction:column;gap:10px}
-  #view-list.lay-grid .mcards{display:grid;grid-template-columns:1fr;gap:10px}
+  #view-list.lay-list .mcards{display:flex!important;flex-direction:column;gap:10px}
+  #view-list.lay-grid .mcards{display:grid!important;grid-template-columns:1fr;gap:10px}
+  /* 手機底部分頁列 */
+  .mob-tabs{display:flex!important}
+  .app{padding-bottom:64px!important}
 }
 @media(max-width:480px){
   .stat b{font-size:16px}.stat{font-size:10px}
@@ -515,6 +523,13 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     </button>
   </div>
 </nav>
+
+<div class="mob-tabs" id="mob-tabs">
+  <button class="mob-tab on" id="mtab-schedule" onclick="setView('schedule')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>時程提醒</span></button>
+  <button class="mob-tab" id="mtab-list" onclick="setView('list')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>團務列表</span></button>
+  <button class="mob-tab" id="mtab-mktg" onclick="setView('mktgview')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>行銷列表</span></button>
+  <button class="mob-tab" id="mtab-cal" onclick="setView('calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日曆總覽</span></button>
+</div>
 
 <div class="nav-mobile-menu" id="nav-mobile-menu" onclick="closeMobileMenu()">
   <div class="nav-mobile-panel" onclick="event.stopPropagation()">
@@ -1257,7 +1272,7 @@ function renderTimeReminders(){
     }
     if(!cards.length)return '';
     cards.sort((a,b)=>a.tripDays-b.tripDays);
-    let h=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${label}</h2></div><div class="mktg-cards">`;
+    let h=`<div class="mktg" style="margin-bottom:16px"><div class="mktg-header"><h2>${label}</h2></div><div class="mktg-cards time-cards">`;
     for(const c of cards)h+=renderReminderCard(c.t,c.ai,c.reasons);
     h+=`</div></div>`;
     return h;
@@ -1778,6 +1793,7 @@ document.addEventListener('click',()=>{document.getElementById('cal-popup').styl
 const VIEW_IDS=['schedule','list','calendar','mktgview'];
 const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg'};
 const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg'};
+const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg'};
 function setView(mode){
   viewMode=mode;
   VIEW_IDS.forEach(v=>{
@@ -1785,6 +1801,7 @@ function setView(mode){
   });
   Object.entries(NAV_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
   Object.entries(MOB_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
+  Object.entries(MTAB_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
   if(mode==='calendar')renderCal();
   if(mode==='mktgview')renderMktgView();
 }
