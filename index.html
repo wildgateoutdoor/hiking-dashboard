@@ -2064,12 +2064,13 @@ function render(){
       const _dCh=t.charter||{book:'no',pay:'no'};const _dChB=bookInfo(_dCh.book),_dChP=payInfo(_dCh.pay);
       const _dIns=t.insurance||{done:'no',pay:'no'};const _dInsD=doneInfo(_dIns.done),_dInsP=paidInfo(_dIns.pay);
       const _dPnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
-      const _dApSt=applyStatusInfo(t.applyStatus);
+      const _dApSt=getApplyStatusForTrip(t);
       const charterNoteH=t.charterNotes?esc(t.charterNotes):'—';
       const insNoteH=t.insuranceNotes?esc(t.insuranceNotes):'—';
       const applyStatusNoteH=t.applyStatusNotes?esc(t.applyStatusNotes):'—';
+      const _dApBtnH=_dApSt.auto?`<span class="stbtn ${_dApSt.cls}">${_dApSt.label}</span>`:`<button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button>`;
       detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}"><div class="detail-grid6">`
-        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row"><button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button></div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>餐食備註</b><span>${mealNoteH}</span></div></div>`
         +`<div class="dcol"><div class="detail-item"><b>訂包車</b><div class="lm-row"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div></div><div class="detail-item"><b>包租車備註</b><span>${charterNoteH}</span></div></div>`
@@ -2092,7 +2093,7 @@ function render(){
       +`<div class="mc-r1"><div class="mc-titleline"><span class="mc-name2">${esc(t.name)} ${dp.num} <span class="mc-dow">${dp.dow}</span></span></div><div class="mc-r1r">${starBtn}${statusH}</div></div>`
       +`<div class="mc-line"><div><b>報名人數</b>${regCapH}</div><div><b>申請人數</b>${applyStatH}</div></div>`
       +`<div class="mc-line mc-line3"><div><b>申請倒數</b><span class="v"><span class="cd ${applyCdC}">${applyCdH}</span></span></div><div><b>申請日期</b><span class="v">${applyDeadH}</span></div><div><b>報名截止</b><span class="v">${fmtShort(t.deadline)}</span></div></div>`
-      +`<div class="mc-line"><div><b>申請狀態</b><div class="lm-row"><button class="stbtn ${applyStatusInfo(t.applyStatus).cls}" onclick="cycleApplyStatus('${t.id}')">${applyStatusInfo(t.applyStatus).label}</button></div></div><div><b>申請備註</b><span class="v">${t.applyStatusNotes?esc(t.applyStatusNotes):'—'}</span></div></div>`
+      +`<div class="mc-line"><div><b>申請狀態</b><div class="lm-row">${(()=>{const _as=getApplyStatusForTrip(t);return _as.auto?`<span class="stbtn ${_as.cls}">${_as.label}</span>`:`<button class="stbtn ${_as.cls}" onclick="cycleApplyStatus('${t.id}')">${_as.label}</button>`})()}</div></div><div><b>申請備註</b><span class="v">${t.applyStatusNotes?esc(t.applyStatusNotes):'—'}</span></div></div>`
       +`<div class="mc-line mc-vdiv"><div class="lm-item"><b>住宿狀況</b>${mlm.lodge}<div class="mc-note"><b>住宿備註</b><span class="v">${t.lodgeNotes?esc(t.lodgeNotes):'—'}</span></div></div><div class="lm-item"><b>餐食狀況</b>${mlm.meal}<div class="mc-note"><b>餐食備註</b><span class="v">${t.mealNotes?esc(t.mealNotes):'—'}</span></div></div></div>`
       +`<div class="mc-line mc-vdiv"><div><b>包租車狀況</b><div class="lm-row"><button class="stbtn ${mchB.cls}" onclick="cycleCharterBook('${t.id}')">${mchB.label}</button><button class="stbtn ${mchP.cls}" onclick="cycleCharterPay('${t.id}')">${mchP.label}</button></div><div class="mc-note"><b>包租車備註</b><span class="v">${t.charterNotes?esc(t.charterNotes):'—'}</span></div></div><div><b>保險處理狀況</b><div class="lm-row"><button class="stbtn ${minsD.cls}" onclick="cycleInsBook('${t.id}')">${minsD.label}</button><button class="stbtn ${minsP.cls}" onclick="cycleInsPay('${t.id}')">${minsP.label}</button></div><div class="mc-note"><b>保險備註</b><span class="v">${t.insuranceNotes?esc(t.insuranceNotes):'—'}</span></div></div></div>`
       +`<div class="mc-line"><div><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${mpnD.cls}" onclick="cyclePreNotice('${t.id}')">${mpnD.label}</button></div></div><div><b>嚮導</b><span class="v">${t.guide?esc(t.guide):'—'}</span></div></div>`
@@ -2153,8 +2154,9 @@ function nextBookNa(s){return s==='no'?'yes':s==='yes'?'no':'no'}
 function nextDone(s){return s==='yes'?'no':'yes'}
 function doneInfo(s){return s==='yes'?{label:'已處理',cls:'rc-st-done'}:{label:'未處理',cls:'rc-st-notdone'}}
 function paidInfo(s){return s==='yes'?{label:'已付款',cls:'rc-st-paid'}:{label:'未付款',cls:'rc-st-unpaid'}}
-const APPLY_STATUS_OPTS=[{key:'notApplied',label:'未申請',cls:'st-nob'},{key:'applied',label:'已申請',cls:'st-yes'},{key:'waitlist',label:'候補中',cls:'st-warn'}];
+const APPLY_STATUS_OPTS=[{key:'notApplied',label:'未申請',cls:'st-nob'},{key:'applied',label:'已申請',cls:'st-yes'},{key:'waitlist',label:'候補中',cls:'st-warn'},{key:'noApply',label:'免申請',cls:'st-na'}];
 function applyStatusInfo(s){const o=APPLY_STATUS_OPTS.find(x=>x.key===s);return o||APPLY_STATUS_OPTS[0]}
+function getApplyStatusForTrip(t){if(applyInfo(t).state==='none')return{key:'noApply',label:'免申請',cls:'st-na',auto:true};return{...applyStatusInfo(t.applyStatus),auto:false}}
 async function cycleApplyStatus(id){
   if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;
   const cur=t.applyStatus||'notApplied';
