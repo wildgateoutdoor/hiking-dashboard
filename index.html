@@ -1235,6 +1235,10 @@ function renderTimeReminders(){
     const mg=getMinGroup(t);
     if(!mg||(t.registered||0)>=mg)return reasons;
     if((t.registered||0)===0)return[];
+    const ai=applyInfo(t);
+    const applyPast=ai.state==='dated'&&ai.days<0;
+    const noApply=ai.state==='none';
+    if(!applyPast&&!noApply)return[];
     return[{icon:'⚠️',text:`未達最低 ${mg} 人成團，處理未成團後續事項`,cls:'mktg-action-urgent',cat:'mingroup'}];
   }
   function buildSection(label,endDate,startDate){
@@ -1333,6 +1337,10 @@ function renderTaskReminders(){
     for(const t of futureTrips){
       if(!belowMinTrips.has(t.id))continue;
       if((t.registered||0)===0)continue;
+      const ai=applyInfo(t);
+      const applyPast=ai.state==='dated'&&ai.days<0;
+      const noApply=ai.state==='none';
+      if(!applyPast&&!noApply)continue;
       const mg=getMinGroup(t);
       mgCards.push({t,reasons:[{icon:'⚠️',text:`未達最低 ${mg} 人成團，處理未成團後續事項`,cls:'mktg-action-urgent'}],tripDays:daysUntil(t.date)});
     }
