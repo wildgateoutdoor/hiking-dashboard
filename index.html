@@ -282,7 +282,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .mktg{margin-bottom:20px}
 .mktg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .mktg-header h2{font-size:16px;font-weight:700}
-.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,380px));gap:10px}
+.mktg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:10px}
 .rc-card .lm-row{flex-wrap:nowrap}
 .mktg-card{padding:14px 16px;border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm)}
 .mktg-card-name{font-weight:600;font-size:14px;margin-bottom:4px}
@@ -1341,7 +1341,7 @@ function renderMktgReminders(){
 function renderReminderCard(t,ai,reasons){
   const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${fmtShort(t.date)}~${fmtShort(t.dateEnd)}`:fmtDate(t.date);
   let h=`<div class="rc-card"><button class="rc-jump" onclick="jumpToCard('${t.id}')" title="跳到方格卡片">&#8599;</button>`;
-  h+=`<div class="rc-head"><div class="rc-name">${esc(t.name)}</div><div class="rc-date">${dateRange}（${t.registered}/${t.capacity}人）</div></div>`;
+  h+=`<div class="rc-head"><div class="rc-name">${esc(t.name)}</div><div class="rc-date">${dateRange}（報名：${t.registered}/${t.capacity}人）</div></div>`;
   if(reasons&&reasons.length>0){
     h+=`<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">`;
     for(const r of reasons)h+=`<div class="mktg-action ${r.cls}" style="font-size:11px">${r.icon} ${esc(r.text)}</div>`;
