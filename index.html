@@ -1231,18 +1231,23 @@ function renderTimeReminders(){
     }
     return reasons;
   }
+  function applyMinGroupFilter(t,reasons){
+    const mg=getMinGroup(t);
+    if(!mg||(t.registered||0)>=mg)return reasons;
+    if((t.registered||0)===0)return[];
+    return[{icon:'⚠️',text:`未達最低 ${mg} 人成團，處理未成團後續事項`,cls:'mktg-action-urgent',cat:'mingroup'}];
+  }
   function buildSection(label,endDate,startDate){
     const cards=[];
     for(const t of futureTrips){
-      const reasons=collectReasons(t,endDate);
+      let reasons=collectReasons(t,endDate);
       if(startDate){
         const reasons7=collectReasons(t,startDate);
         const r7Set=new Set(reasons7.map(r=>r.text));
-        const filtered=reasons.filter(r=>!r7Set.has(r.text));
-        if(filtered.length>0)cards.push({t,ai:applyInfo(t),reasons:filtered,tripDays:daysUntil(t.date)});
-      }else{
-        if(reasons.length>0)cards.push({t,ai:applyInfo(t),reasons,tripDays:daysUntil(t.date)});
+        reasons=reasons.filter(r=>!r7Set.has(r.text));
       }
+      reasons=applyMinGroupFilter(t,reasons);
+      if(reasons.length>0)cards.push({t,ai:applyInfo(t),reasons,tripDays:daysUntil(t.date)});
     }
     if(!cards.length)return '';
     cards.sort((a,b)=>a.tripDays-b.tripDays);
@@ -1275,10 +1280,13 @@ function renderTaskReminders(){
   const futureTrips=trips.filter(t=>daysUntil(t.date)>=0);
   const sf=scheduleSubFilter;
   const sections=[];
+  function isBelowMin(t){const mg=getMinGroup(t);return mg&&(t.registered||0)<mg}
+  const belowMinTrips=new Set(futureTrips.filter(t=>isBelowMin(t)).map(t=>t.id));
 
   if(sf==='all'||sf==='apply'){
     const cards=[];
     for(const t of futureTrips){
+      if(belowMinTrips.has(t.id))continue;
       const ai=applyInfo(t);
       if(ai.state!=='dated'||ai.days<0)continue;
       if(t.applyStatus==='applied'||t.applyStatus==='waitlist')continue;
@@ -1290,6 +1298,7 @@ function renderTaskReminders(){
   if(sf==='all'||sf==='lodge'){
     const cards=[];
     for(const t of futureTrips){
+      if(belowMinTrips.has(t.id))continue;
       const reasons=[];
       const li2=lodgeInfo(t);const ai2=applyInfo(t);
       const lodgeDlTxt=li2.state==='dated'&&li2.days>=0?`需於 ${fmtShort(li2.ds)} 前完成`:ai2.state==='dated'&&ai2.days>=0?`需於 ${fmtShort(ai2.ds)} 前完成`:`出發日 ${fmtShort(t.date)}`;
@@ -1310,6 +1319,7 @@ function renderTaskReminders(){
     const maxDay=Math.max(...tr.daysBefore);
     const cards=[];
     for(const t of futureTrips){
+      if(belowMinTrips.has(t.id))continue;
       const tripDays=daysUntil(t.date);
       if(tripDays>maxDay)continue;
       if(tm&&tm.check(t))continue;
@@ -1317,6 +1327,16 @@ function renderTaskReminders(){
       cards.push({t,reasons:[{icon:'⚡',text:`${tr.name}（${taskDueLabel(t,tr)}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
     }
     if(cards.length)sections.push({title:tr.name,cards});
+  }
+  if(sf==='all'){
+    const mgCards=[];
+    for(const t of futureTrips){
+      if(!belowMinTrips.has(t.id))continue;
+      if((t.registered||0)===0)continue;
+      const mg=getMinGroup(t);
+      mgCards.push({t,reasons:[{icon:'⚠️',text:`未達最低 ${mg} 人成團，處理未成團後續事項`,cls:'mktg-action-urgent'}],tripDays:daysUntil(t.date)});
+    }
+    if(mgCards.length)sections.push({title:'未成團處理',cards:mgCards});
   }
 
   let html='';
