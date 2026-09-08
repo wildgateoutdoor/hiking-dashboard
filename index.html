@@ -2046,7 +2046,7 @@ function render(){
       else{applyCdH=`剩 ${d} 天`;applyCdC='cd-ok'}
       const applyPct=(t.registered||0)>0?Math.min(applied/t.registered,1):0;
       const applyBarC=applied>=(t.registered||0)&&(t.registered||0)>0?'var(--accent)':applyPct>=0.8?'var(--amber)':'var(--accent)';
-      applyStatH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',-1)" ${applied<=0?'disabled':''}>−</button><span class="cap-nums">${applied} / ${t.registered}</span><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',1)" ${applied>=(t.registered||0)?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${applyPct*100}%;background:${applyBarC}"></div></div></div>`;
+      applyStatH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',-1)" ${applied<=0?'disabled':''}>−</button><span class="cap-nums" onclick="event.stopPropagation();editApplied('${t.id}')" style="cursor:pointer" title="點擊輸入">${applied} / ${t.registered}</span><button class="reg-btn" onclick="event.stopPropagation();adjApplied('${t.id}',1)" ${applied>=(t.registered||0)?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${applyPct*100}%;background:${applyBarC}"></div></div></div>`;
     }
 
     let barC;if(isFull)barC='var(--red)';else if(pct>=0.8)barC='var(--amber)';else barC='var(--accent)';
@@ -2059,7 +2059,7 @@ function render(){
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
     const deadlineH=fmtShort(t.deadline);
     const excelMainH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟 ↗</a>`:'<span style="color:var(--text-muted)">未設定</span>';
-    const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
+    const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}" onclick="editReg('${t.id}')" style="cursor:pointer" title="點擊輸入">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div></div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
 
     const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="申請人數">${applyStatH}</td><td data-label="Excel 名單">${excelMainH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
@@ -2138,7 +2138,22 @@ async function adjReg(id,delta){
   if((t.applied||0)>next)patch.applied=next;
   store.upd(id,patch);
 }
+async function editReg(id){
+  if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;
+  const v=prompt('請輸入報名人數',t.registered||0);if(v===null)return;
+  const n=parseInt(v,10);if(isNaN(n)||n<0)return;
+  const next=t.capacity>0?Math.min(n,t.capacity):n;
+  const patch={registered:next};if((t.applied||0)>next)patch.applied=next;
+  store.upd(id,patch);
+}
 async function adjApplied(id,delta){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const max=t.registered||0;const next=Math.max(0,Math.min(max,(t.applied||0)+delta));store.upd(id,{applied:next})}
+async function editApplied(id){
+  if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;
+  const v=prompt('請輸入申請人數',t.applied||0);if(v===null)return;
+  const n=parseInt(v,10);if(isNaN(n)||n<0)return;
+  const next=Math.min(n,t.registered||0);
+  store.upd(id,{applied:next});
+}
 async function setStatus(id,val){if(!await ensureEditor()){render();return}store.upd(id,{status:val})}
 function toggleExpand(id){if(expandedIds.has(id))expandedIds.delete(id);else expandedIds.add(id);render()}
 
