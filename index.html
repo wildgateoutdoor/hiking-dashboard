@@ -2082,10 +2082,10 @@ function render(){
     if(isPast){
       applyDeadH='—';applyCdH='已結束';applyCdC='cd-past';applyStatH='<span class="pill pill-done">已結束</span>';
     }else if(ai.state==='unset'){
-      applyDeadH='<span style="color:var(--text-muted)">未設定</span>';applyCdH='—';applyCdC='cd-past';
-      applyStatH='<span class="pill pill-closed">未設定</span>';
+      applyDeadH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';applyCdH='—';applyCdC='cd-past';
+      applyStatH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
     }else if(ai.state==='none'){
-      applyDeadH='<span style="color:var(--text-muted);font-size:12px">免申請</span>';applyCdH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">免申請</span>';applyCdC='';
+      applyDeadH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">免申請</span>';applyCdH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">免申請</span>';applyCdC='';
       applyStatH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">免申請</span>';
     }else{
       applyDeadH=fmtDate(ai.ds);
@@ -2109,7 +2109,7 @@ function render(){
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
     const deadlineH=fmtShort(t.deadline);
-    const excelMainH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟 ↗</a>`:'<span style="color:var(--text-muted)">未設定</span>';
+    const excelMainH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟 ↗</a>`:'<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
     const _mg=getMinGroup(t);const _mgH=_mg&&(t.registered||0)<_mg?`<div style="font-size:10px;color:var(--red);margin-top:2px">未達最低 ${_mg} 人</div>`:'';
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}" onclick="editReg('${t.id}')" style="cursor:pointer" title="點擊輸入">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div>${_mgH}</div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
@@ -2118,7 +2118,7 @@ function render(){
 
     let detailRow='';
     if(isOpen){
-      const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span>未設定</span>';
+      const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
       const lm=lodgeMealH(t);
       const lodgeNoteH=t.lodgeNotes?esc(t.lodgeNotes):'—';
       const mealNoteH=t.mealNotes?esc(t.mealNotes):'—';
@@ -2141,7 +2141,7 @@ function render(){
     }
 
     // 方格模式卡片（手機＋桌機方格）
-    const mExcelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span class="v" style="color:var(--text-muted)">未設定</span>';
+    const mExcelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span class="v" style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
     const mlm=lodgeMealH(t);
     const dp=fmtRangeParts(t.date,t.dateEnd);
     const mch=t.charter||{book:'no',pay:'no'};const mchB=bookInfo(mch.book),mchP=payInfo(mch.pay);
