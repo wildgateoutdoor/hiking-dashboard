@@ -1627,15 +1627,13 @@ function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCal()}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCal()}
 
 function isMultiDay(t){return t.dateEnd&&t.dateEnd!==t.date&&parseD(t.dateEnd)>parseD(t.date)}
-function multiDayTrips(){
+function calBarTrips(){
   if(calFilter==='mktg')return[];
-  return trips.filter(isMultiDay);
+  return trips;
 }
 function getEventsForDate(ds){
   const events=[];
   for(const t of trips){
-    // 跨日活動改以連續橫條顯示，不再放單日文字標籤
-    if(t.date===ds&&!isMultiDay(t))events.push({type:'trip',label:t.name,id:t.id});
     if(t.deadline===ds)events.push({type:'deadline',label:'報名截止：'+t.name,id:t.id});
   }
   for(const t of trips){
@@ -1661,8 +1659,8 @@ function setCalFilter(f){calFilter=f;renderCal()}
 function weekBars(weekDates){
   const wStart=parseD(weekDates[0]),wEnd=parseD(weekDates[6]);
   const segs=[];
-  for(const t of multiDayTrips()){
-    const ts=parseD(t.date),te=parseD(t.dateEnd);
+  for(const t of calBarTrips()){
+    const ts=parseD(t.date),te=parseD(t.dateEnd||t.date);
     if(te<wStart||ts>wEnd)continue;
     let s=dayDiff(weekDates[0],t.date);if(s<0)s=0;
     let e=dayDiff(weekDates[0],t.dateEnd);if(e>6)e=6;
