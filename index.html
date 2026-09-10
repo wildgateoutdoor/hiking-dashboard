@@ -916,6 +916,7 @@ let listLayout='list';try{const _l=localStorage.getItem('hk-list-layout');if(_l=
 let reminderMode='time';try{const _rm=localStorage.getItem('hk-reminder-mode');if(_rm==='time'||_rm==='task'||_rm==='mktg')reminderMode=_rm}catch{}
 let scheduleSubFilter='all';
 let timeWindowFilter='14';try{const _tw=localStorage.getItem('hk-time-window');if(_tw==='7'||_tw==='14'||_tw==='all')timeWindowFilter=_tw}catch{}
+let mktgDateFrom='',mktgDateTo='';
 
 function today(){const d=new Date();d.setHours(0,0,0,0);return d}
 function parseD(s){return new Date(s+'T00:00:00')}
@@ -1518,10 +1519,15 @@ function renderMktgView(){
   for(const e of mktgEvents)rows.push({sort:parseD(e.date),kind:'event',ev:e});
   rows.sort((a,b)=>a.sort-b.sort);
 
-  let html=highlightHtml+`<div class="mktgview-head"><button class="btn btn-p" onclick="openMktgEvent()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行銷時程</button></div>`;
-  if(rows.length===0){el.innerHTML=html+'<div class="empty"><p>目前沒有行銷時程</p></div>';return}
+  if(!mktgDateFrom){const n=today();mktgDateFrom=dateStr(n)}
+  if(!mktgDateTo){const m=new Date(today());m.setMonth(m.getMonth()+1);mktgDateTo=dateStr(m)}
+  const fFrom=parseD(mktgDateFrom),fTo=parseD(mktgDateTo);fTo.setHours(23,59,59);
+  const filtered=rows.filter(r=>r.sort>=fFrom&&r.sort<=fTo);
+
+  let html=highlightHtml+`<div class="mktgview-head" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn btn-p" onclick="openMktgEvent()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行銷時程</button><div class="date-filter" style="margin:0"><input type="date" value="${mktgDateFrom}" onchange="mktgDateFrom=this.value;renderMktgView()"><span>~</span><input type="date" value="${mktgDateTo}" onchange="mktgDateTo=this.value;renderMktgView()"><button type="button" onclick="mktgDateFrom='';mktgDateTo='';renderMktgView()">重置</button></div></div>`;
+  if(filtered.length===0){el.innerHTML=html+'<div class="empty"><p>此期間沒有行銷時程</p></div>';return}
   const groups=[];
-  for(const r of rows){
+  for(const r of filtered){
     const d=r.sort;const key=`${d.getFullYear()}年${d.getMonth()+1}月`;
     let g=groups.find(x=>x.key===key);if(!g){g={key,items:[]};groups.push(g)}
     g.items.push(r);
