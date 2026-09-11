@@ -1297,22 +1297,20 @@ function renderTimeReminders(){
         reasons.push({icon:'⚡',text:`${tr.name}（${taskDueLabel(t,tr)}）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
       }
     }
+    if(t.name&&t.name.includes('玉山'))console.log('[DEBUG 玉山]',t.name,'reasons:',JSON.stringify(reasons.map(r=>r.text)),'| apply:',ai.state,t.applyStatus,'| lodgeUnbooked:',getLodgeUnbooked(t),'| mealUnbooked:',getMealUnbooked(t),'| taskReminders#:',taskReminders.length,'| charter:',JSON.stringify(t.charter),'| insurance:',JSON.stringify(t.insurance),'| weather:',t.weatherDone,'| preNotice:',t.preNoticeDone);
     return reasons;
   }
   function applyMinGroupFilter(t,reasons){
     const mg=getMinGroup(t);
     if(!mg||(t.registered||0)>=mg)return reasons;
-    const tripDays=daysUntil(t.date);
-    const minWarn={icon:'⚠️',text:`未達最低 ${mg} 人成團（${t.registered||0}/${mg}人），處理未成團後續事項`,cls:'mktg-action-urgent',cat:'mingroup'};
-    if(tripDays<=7){return[minWarn,...reasons]}
     if((t.registered||0)===0)return[];
     const ai=applyInfo(t);
     if(ai.state==='dated'){
       if(ai.days>=0)return[];
     }else{
-      return[];
+      if(daysUntil(t.date)>7)return[];
     }
-    return[minWarn];
+    return[{icon:'⚠️',text:`未達最低 ${mg} 人成團，處理未成團後續事項`,cls:'mktg-action-urgent',cat:'mingroup'}];
   }
   function buildSection(label,endDate,startDate){
     const cards=[];
