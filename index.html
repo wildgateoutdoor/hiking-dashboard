@@ -1291,13 +1291,15 @@ function renderTimeReminders(){
     for(const tr of taskReminders){
       const dd=taskDueDate(t,tr);
       const trDays=daysUntil(t.date);
-      const isDone=(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes')||(tr.name==='保險處理'&&(t.insurance||{}).done==='yes')||(tr.name==='天氣提醒'&&t.weatherDone==='yes')||(tr.name==='行前手冊發放'&&t.preNoticeDone==='yes');
+      const isDone=(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes'&&(t.charter||{}).pay==='yes')||(tr.name==='保險處理'&&(t.insurance||{}).done==='yes'&&(t.insurance||{}).pay==='yes')||(tr.name==='天氣提醒'&&t.weatherDone==='yes')||(tr.name==='行前手冊發放'&&t.preNoticeDone==='yes');
       if(isDone)continue;
+      let taskLabel=tr.name;
+      if(tr.name==='保險處理'&&(t.insurance||{}).done==='yes'&&(t.insurance||{}).pay!=='yes')taskLabel='保險付款';
+      if(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes'&&(t.charter||{}).pay!=='yes')taskLabel='包車付款';
       if(useAll||dd<=endDate||dd<now||parseD(t.date)<=endDate){
-        reasons.push({icon:'⚡',text:`${tr.name}（${taskDueLabel(t,tr)}）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
+        reasons.push({icon:'⚡',text:`${taskLabel}（${taskDueLabel(t,tr)}）`,cls:trDays<=3?'mktg-action-urgent':'mktg-action-info',cat:'task'});
       }
     }
-    if(t.name&&t.name.includes('玉山'))console.log('[DEBUG 玉山]',t.name,'reasons:',JSON.stringify(reasons.map(r=>r.text)),'| apply:',ai.state,t.applyStatus,'| lodgeUnbooked:',getLodgeUnbooked(t),'| mealUnbooked:',getMealUnbooked(t),'| taskReminders#:',taskReminders.length,'| charter:',JSON.stringify(t.charter),'| insurance:',JSON.stringify(t.insurance),'| weather:',t.weatherDone,'| preNotice:',t.preNoticeDone);
     return reasons;
   }
   function applyMinGroupFilter(t,reasons){
@@ -1385,7 +1387,7 @@ function renderTaskReminders(){
     }
     if(cards.length)sections.push({title:'住宿、餐食',cards});
   }
-  const taskMap={charter:{key:'charter',title:'訂包車',check:t=>(t.charter||{}).book==='yes'},prenotice:{key:'prenotice',title:'行前手冊發放',check:t=>t.preNoticeDone==='yes'},weather:{key:'weather',title:'天氣提醒',check:t=>t.weatherDone==='yes'},insurance:{key:'insurance',title:'保險',check:t=>(t.insurance||{}).done==='yes'}};
+  const taskMap={charter:{key:'charter',title:'訂包車',check:t=>(t.charter||{}).book==='yes'&&(t.charter||{}).pay==='yes'},prenotice:{key:'prenotice',title:'行前手冊發放',check:t=>t.preNoticeDone==='yes'},weather:{key:'weather',title:'天氣提醒',check:t=>t.weatherDone==='yes'},insurance:{key:'insurance',title:'保險',check:t=>(t.insurance||{}).done==='yes'&&(t.insurance||{}).pay==='yes'}};
   const trNameMap={'訂包車時間':'charter','保險處理':'insurance','天氣提醒':'weather','行前手冊發放':'prenotice'};
   for(const tr of taskReminders){
     const catKey=trNameMap[tr.name];
@@ -1398,8 +1400,11 @@ function renderTaskReminders(){
       const tripDays=daysUntil(t.date);
       if(tripDays>maxDay)continue;
       if(tm&&tm.check(t))continue;
+      let tLabel=tr.name;
+      if(tr.name==='保險處理'&&(t.insurance||{}).done==='yes'&&(t.insurance||{}).pay!=='yes')tLabel='保險付款';
+      if(tr.name==='訂包車時間'&&(t.charter||{}).book==='yes'&&(t.charter||{}).pay!=='yes')tLabel='包車付款';
       const overdue=tripDays<Math.min(...tr.daysBefore);
-      cards.push({t,reasons:[{icon:'⚡',text:`${tr.name}（${taskDueLabel(t,tr)}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
+      cards.push({t,reasons:[{icon:'⚡',text:`${tLabel}（${taskDueLabel(t,tr)}）`,cls:overdue?'mktg-action-urgent':'mktg-action-info'}],tripDays});
     }
     if(cards.length)sections.push({title:tr.name,cards});
   }
