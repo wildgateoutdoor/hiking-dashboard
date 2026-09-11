@@ -680,7 +680,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           </select></div>
           <div class="f-row"><label for="f-apply-status-notes">申請備註（選填）</label><input id="f-apply-status-notes" type="text" placeholder="例：申請狀態說明"></div>
         </div>
-        <details class="f-section">
+        <details class="f-section" open>
           <summary>出發資訊</summary>
           <div class="f-pair">
             <div class="f-row"><label for="f-dep-location">出發地點</label><input id="f-dep-location" type="text" placeholder="例：台北車站"></div>
@@ -688,18 +688,18 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           </div>
           <div class="f-row"><label for="f-dep-notes">出發備註</label><input id="f-dep-notes" type="text" placeholder="例：集合地點備註"></div>
         </details>
-        <details class="f-section">
+        <details class="f-section" open>
           <summary>住宿明細</summary>
           <div class="f-row"><label for="f-lodge-notes">住宿備註（選填）</label><input id="f-lodge-notes" type="text" placeholder="例：山屋、營地名稱"></div>
           <div id="f-lodge-details"></div>
         </details>
-        <details class="f-section">
+        <details class="f-section" open>
           <summary>餐食明細</summary>
           <div class="f-row"><label for="f-meal-notes">餐食備註（選填）</label><input id="f-meal-notes" type="text" placeholder="例：早餐自理"></div>
           <div id="f-meal-details"></div>
           <button type="button" class="btn btn-s" onclick="addMealRow()" style="margin-top:6px">＋ 新增餐食</button>
         </details>
-        <details class="f-section">
+        <details class="f-section" open>
           <summary>包租車明細</summary>
           <div class="f-row"><label for="f-charter-notes">包租車備註（選填）</label><input id="f-charter-notes" type="text" placeholder="例：九人座、接駁點"></div>
           <div class="f-pair">
@@ -708,16 +708,16 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           </div>
           <div class="f-row"><label for="f-charter-qty">數量</label><input id="f-charter-qty" type="text" placeholder="例：9人座x2台"></div>
         </details>
-        <details class="f-section">
+        <details class="f-section" open>
           <summary>保險</summary>
           <div class="f-row"><label for="f-insurance-notes">保險備註（選填）</label><input id="f-insurance-notes" type="text" placeholder="例：保險公司名稱"></div>
         </details>
-        <details class="f-section">
+        <details class="f-section" open>
           <summary>裝備租借</summary>
           <div id="f-equipment-list"></div>
           <button type="button" class="btn btn-s" onclick="addEquipRow()" style="margin-top:6px">＋ 新增裝備</button>
         </details>
-        <details class="f-section">
+        <details class="f-section" open>
           <summary>代揹服務</summary>
           <div class="f-pair">
             <div class="f-row"><label for="f-porter-weight">公斤數</label><input id="f-porter-weight" type="number" step="0.1" min="0" placeholder="例：5"></div>
@@ -1302,14 +1302,17 @@ function renderTimeReminders(){
   function applyMinGroupFilter(t,reasons){
     const mg=getMinGroup(t);
     if(!mg||(t.registered||0)>=mg)return reasons;
+    const tripDays=daysUntil(t.date);
+    const minWarn={icon:'⚠️',text:`未達最低 ${mg} 人成團（${t.registered||0}/${mg}人），處理未成團後續事項`,cls:'mktg-action-urgent',cat:'mingroup'};
+    if(tripDays<=7){return[minWarn,...reasons]}
     if((t.registered||0)===0)return[];
     const ai=applyInfo(t);
     if(ai.state==='dated'){
       if(ai.days>=0)return[];
     }else{
-      if(daysUntil(t.date)>7)return[];
+      return[];
     }
-    return[{icon:'⚠️',text:`未達最低 ${mg} 人成團，處理未成團後續事項`,cls:'mktg-action-urgent',cat:'mingroup'}];
+    return[minWarn];
   }
   function buildSection(label,endDate,startDate){
     const cards=[];
