@@ -518,6 +518,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .fin-card .fc-exp{color:var(--red,#c0392b)}
 .fin-card .fc-inc{color:var(--green,#27ae60)}
 .fin-card .fc-profit{color:var(--text)}
+.fin-inp{width:80px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:inherit;font-size:12px;text-align:right;-moz-appearance:textfield}
+.fin-inp::-webkit-inner-spin-button,.fin-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.fin-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(39,174,96,.15)}
+.fi-exp{color:var(--red,#c0392b)}.fi-inc{color:var(--green,#27ae60)}
+.fi-hint{display:block;font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap}
 </style>
 
 <div class="login-gate" id="login-gate">
@@ -2549,6 +2554,68 @@ function collectEquipRows(){
 }
 
 // ── Finance ──
+function finInput(id,field,val,cls){
+  return`<input class="fin-inp ${cls}" type="number" min="0" value="${val||''}" data-id="${id}" data-field="${field}" onchange="finSave(this)" placeholder="0">`;
+}
+let _finSaveTimer=null;
+async function finSave(el){
+  if(!await ensureEditor())return;
+  const id=el.dataset.id,field=el.dataset.field,val=parseInt(el.value)||0;
+  const t=trips.find(x=>x.id===id);if(!t)return;
+  if(field==='porterCost'){
+    const p={...(t.porter||{weight:0,totalCost:0,notes:''})};p.totalCost=val;
+    Object.assign(t,{porter:p});
+    if(store===SupaStore)sb.from('trips').update({data:t,updated_at:new Date().toISOString()}).eq('id',id);
+    else try{localStorage.setItem('hk-trips',JSON.stringify(trips))}catch{}
+  }else{
+    t[field]=val;
+    if(store===SupaStore)sb.from('trips').update({data:t,updated_at:new Date().toISOString()}).eq('id',id);
+    else try{localStorage.setItem('hk-trips',JSON.stringify(trips))}catch{}
+  }
+  finUpdateRow(el.closest('tr'),t);
+  clearTimeout(_finSaveTimer);
+  _finSaveTimer=setTimeout(()=>finUpdateTotals(),100);
+}
+function finUpdateRow(tr,t){
+  if(!tr)return;
+  const fmt=n=>n?'$'+n.toLocaleString():'—';
+  const expense=(t.lodgeCost||0)+(t.mealCost||0)+(t.charterCost||0)+(t.insuranceCost||0)+(t.guideFee||0);
+  const iTripFee=(t.tripFee||0)*(t.registered||0);
+  const iEquip=(t.equipment||[]).reduce((s,e)=>s+(e.totalCost||0),0);
+  const iPorter=(t.porter||{}).totalCost||0;
+  const income=iTripFee+iEquip+iPorter;
+  const profit=income-expense;
+  const cells=tr.querySelectorAll('td');
+  cells[7].innerHTML=fmt(expense);cells[7].className='fin-exp';cells[7].style.fontWeight='600';
+  const hint=cells[8].querySelector('.fi-hint');if(hint)hint.textContent=`×${t.registered||0}＝${fmt(iTripFee)}`;
+  cells[11].innerHTML=fmt(income);cells[11].className='fin-inc';cells[11].style.fontWeight='600';
+  cells[12].innerHTML=fmt(profit);cells[12].className='fin-profit '+(profit>=0?'fin-pos':'fin-neg');
+}
+function finUpdateTotals(){
+  const tbl=document.querySelector('.fin-tbl');if(!tbl)return;
+  const fmt=n=>n?'$'+n.toLocaleString():'—';
+  const active=trips.filter(t=>t.status!=='notFormed');
+  let tL=0,tM=0,tC=0,tI=0,tG=0,tE=0,tTF=0,tEq=0,tP=0,tInc=0,tProfit=0;
+  for(const t of active){
+    const l=t.lodgeCost||0,m=t.mealCost||0,c=t.charterCost||0,i=t.insuranceCost||0,g=t.guideFee||0;
+    const exp=l+m+c+i+g;
+    const tf=(t.tripFee||0)*(t.registered||0);
+    const eq=(t.equipment||[]).reduce((s,e)=>s+(e.totalCost||0),0);
+    const p=(t.porter||{}).totalCost||0;
+    const inc=tf+eq+p;
+    tL+=l;tM+=m;tC+=c;tI+=i;tG+=g;tE+=exp;tTF+=tf;tEq+=eq;tP+=p;tInc+=inc;tProfit+=inc-exp;
+  }
+  const foot=tbl.querySelector('tfoot tr');if(foot){
+    const fc=foot.querySelectorAll('td');
+    fc[2].innerHTML=fmt(tL);fc[3].innerHTML=fmt(tM);fc[4].innerHTML=fmt(tC);fc[5].innerHTML=fmt(tI);fc[6].innerHTML=fmt(tG);fc[7].innerHTML=fmt(tE);
+    fc[8].innerHTML=fmt(tTF);fc[9].innerHTML=fmt(tEq);fc[10].innerHTML=fmt(tP);fc[11].innerHTML=fmt(tInc);
+    fc[12].innerHTML=fmt(tProfit);fc[12].className='fin-profit '+(tProfit>=0?'fin-pos':'fin-neg');
+  }
+  const cards=document.querySelectorAll('.fin-card .fc-val');
+  if(cards[0])cards[0].innerHTML=fmt(tE);
+  if(cards[1])cards[1].innerHTML=fmt(tInc);
+  if(cards[2]){cards[2].innerHTML=fmt(tProfit);cards[2].className='fc-val '+(tProfit>=0?'fc-inc':'fc-exp');}
+}
 function renderFinance(){
   const el=document.getElementById('finance-body');
   const sorted=[...trips].filter(t=>t.status!=='notFormed').sort((a,b)=>a.date<b.date?-1:1);
@@ -2572,15 +2639,15 @@ function renderFinance(){
     return`<tr>
       <td>${esc(t.name)}<br><small style="color:var(--text-muted)">${t.date}</small></td>
       <td>${t.registered||0}</td>
-      <td class="fin-exp">${fmt(eLodge)}</td>
-      <td class="fin-exp">${fmt(eMeal)}</td>
-      <td class="fin-exp">${fmt(eCharter)}</td>
-      <td class="fin-exp">${fmt(eIns)}</td>
-      <td class="fin-exp">${fmt(eGuide)}</td>
+      <td>${finInput(t.id,'lodgeCost',eLodge,'fi-exp')}</td>
+      <td>${finInput(t.id,'mealCost',eMeal,'fi-exp')}</td>
+      <td>${finInput(t.id,'charterCost',eCharter,'fi-exp')}</td>
+      <td>${finInput(t.id,'insuranceCost',eIns,'fi-exp')}</td>
+      <td>${finInput(t.id,'guideFee',eGuide,'fi-exp')}</td>
       <td class="fin-exp" style="font-weight:600">${fmt(expense)}</td>
-      <td class="fin-inc">${fmt(iTripFee)}</td>
+      <td>${finInput(t.id,'tripFee',t.tripFee||0,'fi-inc')}<small class="fi-hint">×${t.registered||0}＝${fmt(iTripFee)}</small></td>
       <td class="fin-inc">${fmt(iEquip)}</td>
-      <td class="fin-inc">${fmt(iPorter)}</td>
+      <td>${finInput(t.id,'porterCost',iPorter,'fi-inc')}</td>
       <td class="fin-inc" style="font-weight:600">${fmt(income)}</td>
       <td class="fin-profit ${profit>=0?'fin-pos':'fin-neg'}">${fmt(profit)}</td>
     </tr>`;
@@ -2596,7 +2663,7 @@ function renderFinance(){
       <thead><tr>
         <th>團名</th><th>人數</th>
         <th>住宿</th><th>餐食</th><th>包車</th><th>保險</th><th>嚮導費</th><th>支出小計</th>
-        <th>團費</th><th>器材租賃</th><th>代揹</th><th>收入小計</th><th>損益</th>
+        <th>每人團費</th><th>器材租賃</th><th>代揹</th><th>收入小計</th><th>損益</th>
       </tr></thead>
       <tbody>${rows}</tbody>
       <tfoot><tr>
