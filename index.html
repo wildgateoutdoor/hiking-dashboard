@@ -150,9 +150,10 @@ th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;colo
 .expand-all-btn:hover{background:rgba(255,255,255,.28)}
 td{padding:10px 14px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:14px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
-thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:100px}
+thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:160px}
+thead th:nth-child(4),tbody tr:not(.detail-row) td:nth-child(4){min-width:130px}
 thead th:nth-child(5),tbody tr:not(.detail-row) td:nth-child(5){white-space:nowrap;min-width:100px;font-weight:700}
-tbody tr:not(.detail-row) td:nth-child(11){white-space:nowrap}
+tbody tr:not(.detail-row) td:nth-child(12){white-space:nowrap}
 
 .stars{display:flex;gap:2px;cursor:pointer}
 .stars svg{width:18px;height:18px;transition:transform .12s}.stars svg:hover{transform:scale(1.2)}
@@ -210,8 +211,27 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .detail-grid6 .dcol:first-child{padding-left:0}
 .detail-grid6 .dcol:last-child{border-right:none;padding-right:0}
 .detail-grid6 .lm-row{flex-wrap:nowrap}
-@media(max-width:1200px){.detail-grid6{grid-template-columns:repeat(3,1fr)}.detail-grid6 .dcol:nth-child(3){border-right:none}}
-@media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}.detail-grid6{grid-template-columns:1fr 1fr}.detail-grid6 .dcol:nth-child(2n){border-right:none}}
+.detail-grid8{display:grid;grid-template-columns:repeat(8,1fr);gap:0;font-size:13px}
+.detail-grid8 .dcol{display:flex;flex-direction:column;gap:10px;min-width:0;padding:0 12px;border-right:1px dashed var(--border)}
+.detail-grid8 .dcol:first-child{padding-left:0}
+.detail-grid8 .dcol:last-child{border-right:none;padding-right:0}
+.detail-grid8 .lm-row{flex-wrap:nowrap}
+.sum-exp{color:#2563eb;font-size:12px;font-weight:700;margin-top:4px;cursor:help;display:inline-block}
+.sum-inc{color:#ea580c;font-size:12px;font-weight:700;margin-top:4px;cursor:help;display:inline-block}
+.collapse-toggle{cursor:pointer;font-size:11px;color:var(--accent);margin-top:6px;user-select:none;display:inline-flex;align-items:center;gap:3px}
+.collapse-toggle::before{content:'▶';font-size:8px;transition:transform .15s}
+.collapse-toggle.open::before{transform:rotate(90deg)}
+.collapse-body{background:var(--surface-alt);border-radius:6px;padding:8px 10px;margin-top:6px;font-size:12px;color:var(--text-2);line-height:1.6}
+.fin-summary-val{font-size:20px;font-weight:700;line-height:1.3}
+.fin-profit{color:#ea580c}
+.fin-loss{color:#2563eb}
+.meal-detail-row{font-size:11px;color:var(--text-2);display:flex;gap:4px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px}
+.meal-detail-row .meal-note{background:var(--surface-alt);border-radius:4px;padding:1px 5px;font-size:10px;color:var(--text-muted)}
+.notes-overview b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;margin-top:8px}
+.notes-overview b:first-child{margin-top:0}
+.notes-overview span{font-size:12px;color:var(--text-2)}
+@media(max-width:1200px){.detail-grid6{grid-template-columns:repeat(3,1fr)}.detail-grid6 .dcol:nth-child(3){border-right:none}.detail-grid8{grid-template-columns:repeat(4,1fr)}.detail-grid8 .dcol:nth-child(4n){border-right:none}}
+@media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}.detail-grid6{grid-template-columns:1fr 1fr}.detail-grid6 .dcol:nth-child(2n){border-right:none}.detail-grid8{grid-template-columns:1fr 1fr}.detail-grid8 .dcol:nth-child(2n){border-right:none}}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .detail-item a{color:var(--accent)}
 .detail-item span{color:var(--text-2)}
@@ -756,6 +776,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
             <div class="f-row"><label for="f-charter-contact">聯繫窗口</label><input id="f-charter-contact" type="text" placeholder="例：司機王先生"></div>
           </div>
           <div class="f-row"><label for="f-charter-qty">數量</label><input id="f-charter-qty" type="text" placeholder="例：9人座x2台"></div>
+          <div class="f-row"><label for="f-shuttle-notes">當地接駁備註</label><input id="f-shuttle-notes" type="text" placeholder="例：接駁車安排說明"></div>
         </details>
         <details class="f-section" open>
           <summary>保險</summary>
@@ -768,6 +789,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <summary>裝備租借</summary>
           <div id="f-equipment-list"></div>
           <button type="button" class="btn btn-s" onclick="addEquipRow()" style="margin-top:6px">＋ 新增裝備</button>
+          <div style="margin-top:12px;border-top:1px solid var(--border-sub);padding-top:10px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted)">租賃者明細</label>
+            <div id="f-equip-renters"></div>
+            <button type="button" class="btn btn-s" onclick="addEquipRenter()" style="margin-top:6px">＋ 新增租賃者</button>
+          </div>
         </details>
         <details class="f-section" open>
           <summary>代揹服務</summary>
@@ -776,6 +802,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
             <div class="f-row"><label for="f-porter-cost">總金額</label><input id="f-porter-cost" type="number" min="0" placeholder="例：3000"></div>
           </div>
           <div class="f-row"><label for="f-porter-notes">代揹備註</label><input id="f-porter-notes" type="text" placeholder="例：背負物品說明"></div>
+          <div style="margin-top:12px;border-top:1px solid var(--border-sub);padding-top:10px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted)">購買者明細</label>
+            <div id="f-porter-buyers"></div>
+            <button type="button" class="btn btn-s" onclick="addPorterBuyer()" style="margin-top:6px">＋ 新增購買者</button>
+          </div>
         </details>
         <div class="f-row"><label for="f-notes">備註（選填）</label><textarea id="f-notes" placeholder="內部備忘"></textarea></div>
         <div class="f-actions">
@@ -959,6 +990,7 @@ const COLS=[
   {key:'_applyStat',label:'出團人數',sort:false},
   {key:'_excel',label:'Excel 名單',sort:false},
   {key:'_guide',label:'嚮導',sort:false},
+  {key:'_depInfo',label:'出團資訊',sort:false},
   {key:'_acts',label:'',sort:false},
 ];
 const FILTERS=[{key:'all',label:'全部'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'}];
@@ -2275,40 +2307,94 @@ function render(){
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
-    const deadlineH=fmtShort(t.deadline);
+    const deadlineH=fmtDate(t.deadline);
     const excelMainH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟 ↗</a>`:'<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
     const _mg=getMinGroup(t);const _mgH=_mg&&(t.registered||0)<_mg?`<div style="font-size:10px;color:var(--red);margin-top:2px">未達最低 ${_mg} 人</div>`:'';
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}" onclick="editReg('${t.id}')" style="cursor:pointer" title="點擊輸入">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div>${_mgH}</div>`;
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
+    const dep=t.departure||{};
+    const depInfoH=dep.location||dep.time?`<span style="font-size:12px">${dep.location?esc(dep.location):''}${dep.location&&dep.time?' ':''}${dep.time?esc(dep.time):''}</span>`:'<span style="color:var(--text-muted);font-size:12px">—</span>';
 
     const isChecked=checkedIds.has(t.id);
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td style="text-align:center"><input type="checkbox" ${isChecked?'checked':''} onchange="toggleCheck('${t.id}',this.checked)" onclick="event.stopPropagation()"></td><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="Excel 名單">${excelMainH}</td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td style="text-align:center"><input type="checkbox" ${isChecked?'checked':''} onchange="toggleCheck('${t.id}',this.checked)" onclick="event.stopPropagation()"></td><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="Excel 名單">${excelMainH}</td><td data-label="嚮導">${guideH}</td><td data-label="出團資訊">${depInfoH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
-      const excelH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
       const lm=lodgeMealH(t);
-      const lodgeNoteH=t.lodgeNotes?esc(t.lodgeNotes):'—';
-      const mealNoteH=t.mealNotes?esc(t.mealNotes):'—';
       const _dCh=t.charter||{book:'no',pay:'no'};const _dChB=bookInfo(_dCh.book),_dChP=payInfo(_dCh.pay);
       const _dIns=t.insurance||{done:'no',pay:'no'};const _dInsD=doneInfo(_dIns.done),_dInsP=paidInfo(_dIns.pay);
       const _dPnD=doneInfo(t.preNoticeDone==='yes'?'yes':'no');
       const _dApSt=getApplyStatusForTrip(t);
-      const charterNoteH=t.charterNotes?esc(t.charterNotes):'—';
-      const insNoteH=t.insuranceNotes?esc(t.insuranceNotes):'—';
-      const applyStatusNoteH=t.applyStatusNotes?esc(t.applyStatusNotes):'—';
       const _dApBtnH=_dApSt.auto?`<span style="color:var(--text-muted);font-weight:normal;font-size:12px">${_dApSt.label}</span>`:`<button class="stbtn ${_dApSt.cls}" onclick="cycleApplyStatus('${t.id}')">${_dApSt.label}</button>`;
-      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}"><div class="detail-grid6">`
-        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b><span>${applyStatusNoteH}</span></div></div>`
-        +`<div class="dcol"><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}</div><div class="detail-item"><b>住宿備註</b><span>${lodgeNoteH}</span></div></div>`
-        +`<div class="dcol"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}</div><div class="detail-item"><b>餐食備註</b><span>${mealNoteH}</span></div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>訂包車</b><div class="lm-row"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div></div><div class="detail-item"><b>包租車備註</b><span>${charterNoteH}</span></div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>保險</b><div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div><div class="detail-item"><b>保險備註</b><span>${insNoteH}</span></div></div>`
-        +`</div>`
-        +(()=>{const dep=t.departure||{};const hasD=dep.location||dep.time||dep.notes;const folderH=t.folderLink?`<a href="${escAttr(t.folderLink)}" target="_blank" rel="noopener">開啟連結 ↗</a>`:'';let extra='';if(hasD||folderH){extra+='<div class="detail-grid6" style="margin-top:10px">';if(hasD)extra+=`<div class="dcol"><div class="detail-item"><b>出發地點</b><span>${dep.location?esc(dep.location):'—'}</span></div></div><div class="dcol"><div class="detail-item"><b>出發時間</b><span>${dep.time?esc(dep.time):'—'}</span></div></div><div class="dcol"><div class="detail-item"><b>出發備註</b><span>${dep.notes?esc(dep.notes):'—'}</span></div></div>`;if(folderH)extra+=`<div class="dcol"><div class="detail-item"><b>團務資料夾</b>${folderH}</div></div>`;extra+='</div>'}return extra})()
-        +(()=>{const eq=t.equipment||[];const pt=t.porter||{};let extra='';if(eq.length||pt.weight||pt.totalCost){extra+='<div class="detail-grid6" style="margin-top:10px">';if(eq.length)extra+=`<div class="dcol" style="grid-column:span 3"><div class="detail-item"><b>裝備租借</b><div style="font-size:12px;margin-top:4px">${eq.map(e=>`${esc(e.item)} ${e.days}天×${e.quantity} $${e.totalCost}${e.notes?' ('+esc(e.notes)+')':''}`).join('<br>')}</div></div></div>`;if(pt.weight||pt.totalCost)extra+=`<div class="dcol"><div class="detail-item"><b>代揹</b><span>${pt.weight}kg / $${pt.totalCost}</span></div>${pt.notes?`<div class="detail-item"><b>代揹備註</b><span>${esc(pt.notes)}</span></div>`:''}</div>`;extra+='</div>'}return extra})()
-        +`</td></tr>`;
+
+      const nights=nightsOf(t);
+      const lodgeSumH=t.lodgeCost?`<span class="sum-exp" title="${nights>0?Math.round(t.lodgeCost/nights).toLocaleString()+'（每晚）×'+nights+'（晚）= '+t.lodgeCost.toLocaleString()+'元':t.lodgeCost.toLocaleString()+'元'}">SUM（${t.lodgeCost.toLocaleString()}）</span>`:'';
+
+      const mealTypes={breakfast:'早餐',lunch:'中餐',dinner:'晚餐'};
+      const md=t.mealDetails||[];
+      let mealDetailsH='';
+      md.forEach(m=>{
+        const dateH=m.date?fmtShort(m.date):'';
+        mealDetailsH+=`<div class="meal-detail-row">${dateH} ${mealTypes[m.mealType]||m.mealType} ×${m.quantity}${m.notes?` <span class="meal-note">${esc(m.notes)}</span>`:''}${m.unitPrice?` $${m.unitPrice}`:''}</div>`;
+      });
+      const mealTotalQty=md.reduce((s,m)=>s+(m.quantity||0),0);
+      const mealSumH=t.mealCost?`<span class="sum-exp" title="${mealTotalQty>0?Math.round(t.mealCost/mealTotalQty).toLocaleString()+'（一份）×'+mealTotalQty+'（份）= '+t.mealCost.toLocaleString()+'元':t.mealCost.toLocaleString()+'元'}">SUM（${t.mealCost.toLocaleString()}）</span>`:'';
+
+      const cdQty=parseInt((t.charterDetail||{}).qty)||0;
+      const charterSumH=t.charterCost?`<span class="sum-exp" title="${cdQty>0?Math.round(t.charterCost/cdQty).toLocaleString()+'（一車）×'+cdQty+'（車）= '+t.charterCost.toLocaleString()+'元':t.charterCost.toLocaleString()+'元'}">SUM（${t.charterCost.toLocaleString()}）</span>`:'';
+      const shuttleH=t.shuttleNotes?esc(t.shuttleNotes):'<span style="color:var(--text-muted);font-size:12px">未設定</span>';
+
+      const reg=t.registered||0;
+      const insSumH=t.insuranceCost?`<span class="sum-exp" title="${reg>0?Math.round(t.insuranceCost/reg).toLocaleString()+'（一人）×'+reg+'（人）= '+t.insuranceCost.toLocaleString()+'元':t.insuranceCost.toLocaleString()+'元'}">SUM（${t.insuranceCost.toLocaleString()}）</span>`:'';
+
+      const eq=t.equipment||[];
+      const eqTotalInc=eq.reduce((s,e)=>s+(e.totalCost||0),0);
+      const eqItemsH=eq.map(e=>`${esc(e.item)} ${e.days}天×${e.quantity}`).join('、')||'<span style="color:var(--text-muted);font-size:12px">無</span>';
+      const eqSumH=eqTotalInc?`<span class="sum-inc" title="裝備租賃總收入 ${eqTotalInc.toLocaleString()}元">SUM（${eqTotalInc.toLocaleString()}）</span>`:'';
+      const renters=t.equipRenters||[];
+      let eqRenterH='';
+      if(renters.length){
+        eqRenterH=`<span class="collapse-toggle" onclick="toggleCollapse(this)">租賃者明細</span><div class="collapse-body" hidden>`;
+        renters.forEach(r=>{eqRenterH+=`<div>${esc(r.name)}：${esc(r.items)||'—'}</div>`});
+        eqRenterH+='</div>';
+      }
+
+      const pt=t.porter||{};
+      const ptTotalInc=pt.totalCost||0;
+      const ptSumH=ptTotalInc?`<span class="sum-inc" title="代揹總收入 ${ptTotalInc.toLocaleString()}元">SUM（${ptTotalInc.toLocaleString()}）</span>`:'';
+      const buyers=t.porterBuyers||[];
+      let ptBuyerH='';
+      if(buyers.length){
+        ptBuyerH=`<span class="collapse-toggle" onclick="toggleCollapse(this)">購買者明細</span><div class="collapse-body" hidden>`;
+        buyers.forEach(b=>{ptBuyerH+=`<div>${esc(b.name)}：${b.weight}kg / $${(b.cost||0).toLocaleString()}</div>`});
+        ptBuyerH+='</div>';
+      }
+
+      let notesH='';
+      const noteItems=[
+        ['申請備註',t.applyStatusNotes],['住宿備註',t.lodgeNotes],['餐食備註',t.mealNotes],
+        ['包車備註',t.charterNotes],['保險備註',t.insuranceNotes],
+        ['出發備註',(t.departure||{}).notes],['代揹備註',pt.notes],['其他備註',t.notes]
+      ];
+      noteItems.forEach(([label,val])=>{if(val)notesH+=`<b>${label}</b><span>${esc(val)}</span>`});
+      if(!notesH)notesH='<span style="color:var(--text-muted);font-size:12px">無備註</span>';
+
+      const expenses=(t.lodgeCost||0)+(t.mealCost||0)+(t.charterCost||0)+(t.insuranceCost||0)+(t.guideFee||0);
+      const income=(t.tripFee||0)*reg+eqTotalInc+ptTotalInc;
+      const net=income-expenses;
+      const netCls=net>=0?'fin-profit':'fin-loss';
+      const netSign=net>=0?'+':'';
+      const folderH=t.folderLink?`<div style="margin-top:6px"><b style="display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:2px">團務資料夾</b><a href="${escAttr(t.folderLink)}" target="_blank" rel="noopener" style="font-size:12px">開啟連結 ↗</a></div>`:'';
+
+      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}"><div class="detail-grid8">`
+        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item lm-item"><b>住宿</b>${lm.lodge}${lodgeSumH}</div></div>`
+        +`<div class="dcol" style="grid-column:span 2"><div class="detail-item lm-item"><b>餐食</b>${lm.meal}${mealDetailsH}${mealSumH}</div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>訂包車 ${charterSumH}</b><div class="lm-row"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div></div><div class="detail-item"><b>當地接駁</b><span>${shuttleH}</span></div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>保險</b><div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div>${insSumH}</div><div class="detail-item"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>裝備租賃</b><div style="font-size:12px;margin-top:4px">${eqItemsH}</div>${eqSumH}${eqRenterH}</div></div>`
+        +`<div class="dcol"><div class="detail-item"><b>代揹</b><div style="font-size:12px;margin-top:4px">${pt.weight?pt.weight+'kg':'—'}</div>${ptSumH}${ptBuyerH}</div></div>`
+        +`<div class="dcol"><div class="detail-item notes-overview"><b>備註總覽</b>${notesH}</div><div class="detail-item" style="margin-top:10px"><b>收支統計</b><div style="font-size:12px;margin-top:4px"><div>支出：<span style="color:#2563eb;font-weight:600">$${expenses.toLocaleString()}</span></div><div>收入：<span style="color:#ea580c;font-weight:600">$${income.toLocaleString()}</span></div><div class="fin-summary-val ${netCls}" style="margin-top:4px">${netSign}$${Math.abs(net).toLocaleString()}</div></div></div>${folderH}</div>`
+        +`</div></td></tr>`;
     }
 
     // 方格模式卡片（手機＋桌機方格）
@@ -2382,6 +2468,7 @@ async function editApplied(id){
 }
 async function setStatus(id,val){if(!await ensureEditor()){render();return}store.upd(id,{status:val})}
 function toggleExpand(id){if(expandedIds.has(id))expandedIds.delete(id);else expandedIds.add(id);render()}
+function toggleCollapse(btn){const body=btn.nextElementSibling;if(body){body.hidden=!body.hidden;btn.classList.toggle('open')}}
 function toggleCheck(id,checked){if(checked)checkedIds.add(id);else checkedIds.delete(id);render()}
 function toggleCheckAll(checked){const list=sorted(filtered());if(checked)list.forEach(t=>checkedIds.add(t.id));else list.forEach(t=>checkedIds.delete(t.id));render()}
 
@@ -2435,7 +2522,7 @@ function toggleExpandAll(){
   render();
 }
 
-async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-time').value='';document.getElementById('f-charter-contact').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-porter-weight').value='';document.getElementById('f-porter-cost').value='';document.getElementById('f-porter-notes').value='';document.getElementById('f-trip-fee').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-lodge-cost').value='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-equipment-list').innerHTML='';showOv('ov-trip')}
+async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-time').value='';document.getElementById('f-charter-contact').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-porter-weight').value='';document.getElementById('f-porter-cost').value='';document.getElementById('f-porter-notes').value='';document.getElementById('f-trip-fee').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-lodge-cost').value='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-notes').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-equipment-list').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';showOv('ov-trip')}
 async function openEdit(id){
   if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
@@ -2455,10 +2542,13 @@ async function openEdit(id){
   document.getElementById('f-trip-fee').value=t.tripFee||'';document.getElementById('f-guide-fee').value=t.guideFee||'';
   document.getElementById('f-lodge-cost').value=t.lodgeCost||'';document.getElementById('f-meal-cost').value=t.mealCost||'';
   document.getElementById('f-charter-cost').value=t.charterCost||'';document.getElementById('f-ins-cost').value=t.insuranceCost||'';
+  document.getElementById('f-shuttle-notes').value=t.shuttleNotes||'';
   const pt=t.porter||{};document.getElementById('f-porter-weight').value=pt.weight||'';document.getElementById('f-porter-cost').value=pt.totalCost||'';document.getElementById('f-porter-notes').value=pt.notes||'';
   renderLodgeDetailForm(t);
   renderMealDetailForm(t);
   renderEquipmentForm(t);
+  renderEquipRenters(t);
+  renderPorterBuyers(t);
   document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');
   showOv('ov-trip');
 }
@@ -2475,8 +2565,11 @@ function saveTrip(e){
   data.charterCost=parseInt(document.getElementById('f-charter-cost').value)||0;
   data.insuranceCost=parseInt(document.getElementById('f-ins-cost').value)||0;
   data.porter={weight:parseFloat(document.getElementById('f-porter-weight').value)||0,totalCost:parseInt(document.getElementById('f-porter-cost').value)||0,notes:document.getElementById('f-porter-notes').value.trim()};
+  data.shuttleNotes=document.getElementById('f-shuttle-notes').value.trim();
   data.mealDetails=collectMealRows();
   data.equipment=collectEquipRows();
+  data.equipRenters=collectEquipRenters();
+  data.porterBuyers=collectPorterBuyers();
   const nights=nightsOf(data);
   const lodgeD=collectLodgeDetailRows();
   if(editId){const cur=trips.find(x=>x.id===editId);data.lodging=resizeLodging(cur&&cur.lodging,nights);for(let i=0;i<data.lodging.length;i++){if(lodgeD[i])Object.assign(data.lodging[i],lodgeD[i])}data.meal=(cur&&cur.meal)||{book:'no',pay:'no'};store.upd(editId,data);toast('已更新')}else{data.id=genId();data.promoted=0;data.applied=0;data.lodging=resizeLodging(null,nights);for(let i=0;i<data.lodging.length;i++){if(lodgeD[i])Object.assign(data.lodging[i],lodgeD[i])}data.meal={book:'no',pay:'no'};data.createdAt=Date.now();store.add(data);toast('已新增')}
@@ -2519,15 +2612,17 @@ function renderMealDetailForm(t){
   md.forEach((m,i)=>el.appendChild(buildMealRowEl(m,i)));
 }
 function buildMealRowEl(m,i){
-  const div=document.createElement('div');div.className='f-dyn-row';div.style.gridTemplateColumns='1fr 1fr 1fr 80px';
-  div.innerHTML=`<button type="button" class="f-dyn-del" onclick="this.parentElement.remove()">&times;</button><div class="f-row"><label>日期</label><input type="date" value="${m.date||''}" class="meal-d-date"></div><div class="f-row"><label>餐廳</label><input type="text" value="${esc(m.restaurant||'')}" class="meal-d-rest" placeholder="例：排雲餐廳"></div><div class="f-row"><label>餐別</label><select class="meal-d-type"><option value="breakfast"${m.mealType==='breakfast'?' selected':''}>早餐</option><option value="lunch"${m.mealType==='lunch'?' selected':''}>中餐</option><option value="dinner"${m.mealType==='dinner'?' selected':''}>晚餐</option></select></div><div class="f-row"><label>數量</label><input type="number" min="0" value="${m.quantity||0}" class="meal-d-qty"></div>`;
+  const div=document.createElement('div');div.className='f-dyn-row';div.style.gridTemplateColumns='1fr 1fr 1fr 80px 80px';
+  div.innerHTML=`<button type="button" class="f-dyn-del" onclick="this.parentElement.remove()">&times;</button><div class="f-row"><label>日期</label><input type="date" value="${m.date||''}" class="meal-d-date"></div><div class="f-row"><label>餐廳</label><input type="text" value="${esc(m.restaurant||'')}" class="meal-d-rest" placeholder="例：排雲餐廳"></div><div class="f-row"><label>餐別</label><select class="meal-d-type"><option value="breakfast"${m.mealType==='breakfast'?' selected':''}>早餐</option><option value="lunch"${m.mealType==='lunch'?' selected':''}>中餐</option><option value="dinner"${m.mealType==='dinner'?' selected':''}>晚餐</option></select></div><div class="f-row"><label>數量</label><input type="number" min="0" value="${m.quantity||0}" class="meal-d-qty"></div><div class="f-row"><label>單價</label><input type="number" min="0" value="${m.unitPrice||0}" class="meal-d-price"></div>`;
+  const notesDiv=document.createElement('div');notesDiv.className='f-row';notesDiv.style.gridColumn='1/-1';notesDiv.innerHTML=`<label>備註</label><input type="text" value="${esc((m&&m.notes)||'')}" class="meal-d-notes" placeholder="選填">`;
+  div.appendChild(notesDiv);
   return div;
 }
 function addMealRow(){document.getElementById('f-meal-details').appendChild(buildMealRowEl({},0))}
 function collectMealRows(){
   const rows=[];
   document.querySelectorAll('#f-meal-details .f-dyn-row').forEach(div=>{
-    rows.push({date:div.querySelector('.meal-d-date').value,restaurant:div.querySelector('.meal-d-rest').value.trim(),mealType:div.querySelector('.meal-d-type').value,quantity:parseInt(div.querySelector('.meal-d-qty').value)||0});
+    rows.push({date:div.querySelector('.meal-d-date').value,restaurant:div.querySelector('.meal-d-rest').value.trim(),mealType:div.querySelector('.meal-d-type').value,quantity:parseInt(div.querySelector('.meal-d-qty').value)||0,unitPrice:parseInt(div.querySelector('.meal-d-price').value)||0,notes:(div.querySelector('.meal-d-notes')||{}).value?.trim()||''});
   });
   return rows;
 }
@@ -2549,6 +2644,44 @@ function collectEquipRows(){
   const rows=[];
   document.querySelectorAll('#f-equipment-list .f-dyn-row').forEach(div=>{
     rows.push({item:div.querySelector('.eq-item').value.trim(),days:parseInt(div.querySelector('.eq-days').value)||0,quantity:parseInt(div.querySelector('.eq-qty').value)||0,totalCost:parseInt(div.querySelector('.eq-cost').value)||0,notes:div.querySelector('.eq-notes').value.trim()});
+  });
+  return rows;
+}
+
+// ── Equip Renters & Porter Buyers ──
+function renderEquipRenters(t){
+  const el=document.getElementById('f-equip-renters');if(!el)return;
+  const renters=t.equipRenters||[];el.innerHTML='';
+  renters.forEach(r=>el.appendChild(buildRenterRowEl(r)));
+}
+function buildRenterRowEl(r){
+  const div=document.createElement('div');div.className='f-dyn-row';div.style.gridTemplateColumns='1fr 2fr';
+  div.innerHTML=`<button type="button" class="f-dyn-del" onclick="this.parentElement.remove()">&times;</button><div class="f-row"><label>租賃者</label><input type="text" value="${esc((r&&r.name)||'')}" class="renter-name" placeholder="例：王小明"></div><div class="f-row"><label>租賃項目（逗號分隔）</label><input type="text" value="${esc((r&&r.items)||'')}" class="renter-items" placeholder="例：登山杖×1,冰爪×2"></div>`;
+  return div;
+}
+function addEquipRenter(){document.getElementById('f-equip-renters').appendChild(buildRenterRowEl({}))}
+function collectEquipRenters(){
+  const rows=[];
+  document.querySelectorAll('#f-equip-renters .f-dyn-row').forEach(div=>{
+    rows.push({name:div.querySelector('.renter-name').value.trim(),items:div.querySelector('.renter-items').value.trim()});
+  });
+  return rows;
+}
+function renderPorterBuyers(t){
+  const el=document.getElementById('f-porter-buyers');if(!el)return;
+  const buyers=t.porterBuyers||[];el.innerHTML='';
+  buyers.forEach(b=>el.appendChild(buildBuyerRowEl(b)));
+}
+function buildBuyerRowEl(b){
+  const div=document.createElement('div');div.className='f-dyn-row';div.style.gridTemplateColumns='1fr 80px 80px';
+  div.innerHTML=`<button type="button" class="f-dyn-del" onclick="this.parentElement.remove()">&times;</button><div class="f-row"><label>購買者</label><input type="text" value="${esc((b&&b.name)||'')}" class="buyer-name" placeholder="例：王小明"></div><div class="f-row"><label>公斤</label><input type="number" step="0.1" min="0" value="${(b&&b.weight)||0}" class="buyer-weight"></div><div class="f-row"><label>費用</label><input type="number" min="0" value="${(b&&b.cost)||0}" class="buyer-cost"></div>`;
+  return div;
+}
+function addPorterBuyer(){document.getElementById('f-porter-buyers').appendChild(buildBuyerRowEl({}))}
+function collectPorterBuyers(){
+  const rows=[];
+  document.querySelectorAll('#f-porter-buyers .f-dyn-row').forEach(div=>{
+    rows.push({name:div.querySelector('.buyer-name').value.trim(),weight:parseFloat(div.querySelector('.buyer-weight').value)||0,cost:parseInt(div.querySelector('.buyer-cost').value)||0});
   });
   return rows;
 }
