@@ -494,6 +494,30 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .cal-dow{font-size:10px}
   .cal-ev{white-space:normal;line-height:1.2}
 }
+.fin-wrap{overflow-x:auto}
+.fin-tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+.fin-tbl th,.fin-tbl td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+.fin-tbl th{background:var(--surface);color:var(--text-muted);font-weight:600;position:sticky;top:0;z-index:1}
+.fin-tbl td:first-child,.fin-tbl th:first-child{text-align:left;position:sticky;left:0;background:var(--bg);z-index:2}
+.fin-tbl th:first-child{z-index:3;background:var(--surface)}
+.fin-tbl tbody tr:hover{background:var(--surface-hover)}
+.fin-tbl .fin-exp{color:var(--red,#c0392b)}
+.fin-tbl .fin-inc{color:var(--green,#27ae60)}
+.fin-tbl .fin-profit{font-weight:700}
+.fin-tbl .fin-pos{color:var(--green,#27ae60)}
+.fin-tbl .fin-neg{color:var(--red,#c0392b)}
+.fin-tbl tfoot td{font-weight:700;border-top:2px solid var(--text);background:var(--surface)}
+.fin-tbl tfoot td:first-child{background:var(--surface)}
+.fin-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.fin-header h3{margin:0;font-size:16px}
+.fin-filter{padding:4px 8px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px}
+.fin-summary{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.fin-card{flex:1;min-width:140px;padding:12px 16px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface)}
+.fin-card .fc-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.fin-card .fc-val{font-size:20px;font-weight:700}
+.fin-card .fc-exp{color:var(--red,#c0392b)}
+.fin-card .fc-inc{color:var(--green,#27ae60)}
+.fin-card .fc-profit{color:var(--text)}
 </style>
 
 <div class="login-gate" id="login-gate">
@@ -514,6 +538,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <button class="nav-link" id="nav-list" onclick="setView('list')">團務列表</button>
       <button class="nav-link" id="nav-mktg" onclick="setView('mktgview')">行銷列表</button>
       <button class="nav-link" id="nav-cal" onclick="setView('calendar')">日曆總覽</button>
+      <button class="nav-link" id="nav-finance" onclick="setView('finance')">收支總覽</button>
     </div>
     <div class="nav-sep"></div>
     <div class="nav-util">
@@ -541,7 +566,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <button class="mob-tab on" id="mtab-schedule" onclick="setView('schedule')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>時程提醒</span></button>
   <button class="mob-tab" id="mtab-list" onclick="setView('list')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>團務列表</span></button>
   <button class="mob-tab" id="mtab-mktg" onclick="setView('mktgview')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>行銷列表</span></button>
-  <button class="mob-tab" id="mtab-cal" onclick="setView('calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日曆總覽</span></button>
+  <button class="mob-tab" id="mtab-cal" onclick="setView('calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日曆</span></button>
+  <button class="mob-tab" id="mtab-finance" onclick="setView('finance')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span>收支</span></button>
 </div>
 
 <div class="nav-mobile-menu" id="nav-mobile-menu" onclick="closeMobileMenu()">
@@ -550,6 +576,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <button class="nav-mob-link" id="mob-list" onclick="setView('list');closeMobileMenu()">團務列表</button>
     <button class="nav-mob-link" id="mob-mktg" onclick="setView('mktgview');closeMobileMenu()">行銷列表</button>
     <button class="nav-mob-link" id="mob-cal" onclick="setView('calendar');closeMobileMenu()">日曆總覽</button>
+    <button class="nav-mob-link" id="mob-finance" onclick="setView('finance');closeMobileMenu()">收支總覽</button>
     <div class="nav-mob-sep"></div>
     <button class="nav-mob-link" onclick="logout();closeMobileMenu()">登出</button>
     <button class="nav-mob-link" onclick="showReport();closeMobileMenu()">產生 LINE 日報</button>
@@ -632,6 +659,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <div id="view-mktgview" style="display:none">
     <div id="mktgview-body"></div>
   </div>
+
+  <div id="view-finance" style="display:none">
+    <div id="finance-body"></div>
+  </div>
 </div>
 
 <div class="cal-popup" id="cal-popup" style="display:none"></div>
@@ -664,6 +695,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label for="f-guide">嚮導（選填）</label><input id="f-guide" type="text" placeholder="例：王小明"></div>
           <div class="f-row"><label for="f-excel">Excel 名單連結（選填）</label><input id="f-excel" type="url" placeholder="https://..."></div>
         </div>
+        <div class="f-pair">
+          <div class="f-row"><label for="f-trip-fee">每人團費</label><input id="f-trip-fee" type="number" min="0" placeholder="例：8500"></div>
+          <div class="f-row"><label for="f-guide-fee">嚮導費總額</label><input id="f-guide-fee" type="number" min="0" placeholder="例：12000"></div>
+        </div>
         <div class="f-row"><label for="f-status">狀態</label><select id="f-status">
           <option value="reg">報名中</option>
           <option value="apply">申請中</option>
@@ -690,18 +725,27 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         </details>
         <details class="f-section" open>
           <summary>住宿明細</summary>
-          <div class="f-row"><label for="f-lodge-notes">住宿備註（選填）</label><input id="f-lodge-notes" type="text" placeholder="例：山屋、營地名稱"></div>
+          <div class="f-pair">
+            <div class="f-row"><label for="f-lodge-notes">住宿備註（選填）</label><input id="f-lodge-notes" type="text" placeholder="例：山屋、營地名稱"></div>
+            <div class="f-row"><label for="f-lodge-cost">住宿成本總額</label><input id="f-lodge-cost" type="number" min="0" placeholder="例：5000"></div>
+          </div>
           <div id="f-lodge-details"></div>
         </details>
         <details class="f-section" open>
           <summary>餐食明細</summary>
-          <div class="f-row"><label for="f-meal-notes">餐食備註（選填）</label><input id="f-meal-notes" type="text" placeholder="例：早餐自理"></div>
+          <div class="f-pair">
+            <div class="f-row"><label for="f-meal-notes">餐食備註（選填）</label><input id="f-meal-notes" type="text" placeholder="例：早餐自理"></div>
+            <div class="f-row"><label for="f-meal-cost">餐食成本總額</label><input id="f-meal-cost" type="number" min="0" placeholder="例：3000"></div>
+          </div>
           <div id="f-meal-details"></div>
           <button type="button" class="btn btn-s" onclick="addMealRow()" style="margin-top:6px">＋ 新增餐食</button>
         </details>
         <details class="f-section" open>
           <summary>包租車明細</summary>
-          <div class="f-row"><label for="f-charter-notes">包租車備註（選填）</label><input id="f-charter-notes" type="text" placeholder="例：九人座、接駁點"></div>
+          <div class="f-pair">
+            <div class="f-row"><label for="f-charter-notes">包租車備註（選填）</label><input id="f-charter-notes" type="text" placeholder="例：九人座、接駁點"></div>
+            <div class="f-row"><label for="f-charter-cost">包車成本總額</label><input id="f-charter-cost" type="number" min="0" placeholder="例：8000"></div>
+          </div>
           <div class="f-pair">
             <div class="f-row"><label for="f-charter-time">出發時間</label><input id="f-charter-time" type="text" placeholder="例：05:30"></div>
             <div class="f-row"><label for="f-charter-contact">聯繫窗口</label><input id="f-charter-contact" type="text" placeholder="例：司機王先生"></div>
@@ -710,7 +754,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         </details>
         <details class="f-section" open>
           <summary>保險</summary>
-          <div class="f-row"><label for="f-insurance-notes">保險備註（選填）</label><input id="f-insurance-notes" type="text" placeholder="例：保險公司名稱"></div>
+          <div class="f-pair">
+            <div class="f-row"><label for="f-insurance-notes">保險備註（選填）</label><input id="f-insurance-notes" type="text" placeholder="例：保險公司名稱"></div>
+            <div class="f-row"><label for="f-ins-cost">保險成本總額</label><input id="f-ins-cost" type="number" min="0" placeholder="例：2000"></div>
+          </div>
         </details>
         <details class="f-section" open>
           <summary>裝備租借</summary>
@@ -1875,10 +1922,10 @@ function showDayPopup(evt,ds){
 document.addEventListener('click',()=>{document.getElementById('cal-popup').style.display='none'});
 
 // ── View switching ──
-const VIEW_IDS=['schedule','list','calendar','mktgview'];
-const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg'};
-const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg'};
-const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg'};
+const VIEW_IDS=['schedule','list','calendar','mktgview','finance'];
+const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance'};
+const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance'};
+const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance'};
 function setView(mode){
   viewMode=mode;
   VIEW_IDS.forEach(v=>{
@@ -1889,6 +1936,7 @@ function setView(mode){
   Object.entries(MTAB_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
   if(mode==='calendar')renderCal();
   if(mode==='mktgview')renderMktgView();
+  if(mode==='finance')renderFinance();
 }
 function toggleMobileMenu(){document.getElementById('nav-mobile-menu').classList.add('open')}
 function closeMobileMenu(){document.getElementById('nav-mobile-menu').classList.remove('open')}
@@ -2165,6 +2213,7 @@ function render(){
   renderReminders();
   if(viewMode==='calendar')renderCal();
   if(viewMode==='mktgview')renderMktgView();
+  if(viewMode==='finance')renderFinance();
 
   document.getElementById('filters').innerHTML=FILTERS.map(f=>`<button class="chip${filter===f.key?' on':''}" onclick="setFilter('${f.key}')">${f.label}</button>`).join('');
 
@@ -2381,7 +2430,7 @@ function toggleExpandAll(){
   render();
 }
 
-async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-time').value='';document.getElementById('f-charter-contact').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-porter-weight').value='';document.getElementById('f-porter-cost').value='';document.getElementById('f-porter-notes').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-equipment-list').innerHTML='';showOv('ov-trip')}
+async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-time').value='';document.getElementById('f-charter-contact').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-porter-weight').value='';document.getElementById('f-porter-cost').value='';document.getElementById('f-porter-notes').value='';document.getElementById('f-trip-fee').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-lodge-cost').value='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-equipment-list').innerHTML='';showOv('ov-trip')}
 async function openEdit(id){
   if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
@@ -2398,6 +2447,9 @@ async function openEdit(id){
   document.getElementById('f-folder-link').value=t.folderLink||'';
   const dep=t.departure||{};document.getElementById('f-dep-location').value=dep.location||'';document.getElementById('f-dep-time').value=dep.time||'';document.getElementById('f-dep-notes').value=dep.notes||'';
   const cd2=t.charterDetail||{};document.getElementById('f-charter-time').value=cd2.time||'';document.getElementById('f-charter-contact').value=cd2.contact||'';document.getElementById('f-charter-qty').value=cd2.qty||'';
+  document.getElementById('f-trip-fee').value=t.tripFee||'';document.getElementById('f-guide-fee').value=t.guideFee||'';
+  document.getElementById('f-lodge-cost').value=t.lodgeCost||'';document.getElementById('f-meal-cost').value=t.mealCost||'';
+  document.getElementById('f-charter-cost').value=t.charterCost||'';document.getElementById('f-ins-cost').value=t.insuranceCost||'';
   const pt=t.porter||{};document.getElementById('f-porter-weight').value=pt.weight||'';document.getElementById('f-porter-cost').value=pt.totalCost||'';document.getElementById('f-porter-notes').value=pt.notes||'';
   renderLodgeDetailForm(t);
   renderMealDetailForm(t);
@@ -2411,6 +2463,12 @@ function saveTrip(e){
   const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),charterNotes:document.getElementById('f-charter-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim()};
   data.departure={location:document.getElementById('f-dep-location').value.trim(),time:document.getElementById('f-dep-time').value.trim(),notes:document.getElementById('f-dep-notes').value.trim()};
   data.charterDetail={time:document.getElementById('f-charter-time').value.trim(),contact:document.getElementById('f-charter-contact').value.trim(),qty:document.getElementById('f-charter-qty').value.trim()};
+  data.tripFee=parseInt(document.getElementById('f-trip-fee').value)||0;
+  data.guideFee=parseInt(document.getElementById('f-guide-fee').value)||0;
+  data.lodgeCost=parseInt(document.getElementById('f-lodge-cost').value)||0;
+  data.mealCost=parseInt(document.getElementById('f-meal-cost').value)||0;
+  data.charterCost=parseInt(document.getElementById('f-charter-cost').value)||0;
+  data.insuranceCost=parseInt(document.getElementById('f-ins-cost').value)||0;
   data.porter={weight:parseFloat(document.getElementById('f-porter-weight').value)||0,totalCost:parseInt(document.getElementById('f-porter-cost').value)||0,notes:document.getElementById('f-porter-notes').value.trim()};
   data.mealDetails=collectMealRows();
   data.equipment=collectEquipRows();
@@ -2488,6 +2546,69 @@ function collectEquipRows(){
     rows.push({item:div.querySelector('.eq-item').value.trim(),days:parseInt(div.querySelector('.eq-days').value)||0,quantity:parseInt(div.querySelector('.eq-qty').value)||0,totalCost:parseInt(div.querySelector('.eq-cost').value)||0,notes:div.querySelector('.eq-notes').value.trim()});
   });
   return rows;
+}
+
+// ── Finance ──
+function renderFinance(){
+  const el=document.getElementById('finance-body');
+  const sorted=[...trips].filter(t=>t.status!=='notFormed').sort((a,b)=>a.date<b.date?-1:1);
+  const fmt=n=>n?'$'+n.toLocaleString():'—';
+  let totLodge=0,totMeal=0,totCharter=0,totIns=0,totGuide=0,totExp=0;
+  let totTripFee=0,totEquip=0,totPorter=0,totInc=0,totProfit=0;
+  const rows=sorted.map(t=>{
+    const eLodge=t.lodgeCost||0;
+    const eMeal=t.mealCost||0;
+    const eCharter=t.charterCost||0;
+    const eIns=t.insuranceCost||0;
+    const eGuide=t.guideFee||0;
+    const expense=eLodge+eMeal+eCharter+eIns+eGuide;
+    const iTripFee=(t.tripFee||0)*(t.registered||0);
+    const iEquip=(t.equipment||[]).reduce((s,e)=>s+(e.totalCost||0),0);
+    const iPorter=(t.porter||{}).totalCost||0;
+    const income=iTripFee+iEquip+iPorter;
+    const profit=income-expense;
+    totLodge+=eLodge;totMeal+=eMeal;totCharter+=eCharter;totIns+=eIns;totGuide+=eGuide;totExp+=expense;
+    totTripFee+=iTripFee;totEquip+=iEquip;totPorter+=iPorter;totInc+=income;totProfit+=profit;
+    return`<tr>
+      <td>${esc(t.name)}<br><small style="color:var(--text-muted)">${t.date}</small></td>
+      <td>${t.registered||0}</td>
+      <td class="fin-exp">${fmt(eLodge)}</td>
+      <td class="fin-exp">${fmt(eMeal)}</td>
+      <td class="fin-exp">${fmt(eCharter)}</td>
+      <td class="fin-exp">${fmt(eIns)}</td>
+      <td class="fin-exp">${fmt(eGuide)}</td>
+      <td class="fin-exp" style="font-weight:600">${fmt(expense)}</td>
+      <td class="fin-inc">${fmt(iTripFee)}</td>
+      <td class="fin-inc">${fmt(iEquip)}</td>
+      <td class="fin-inc">${fmt(iPorter)}</td>
+      <td class="fin-inc" style="font-weight:600">${fmt(income)}</td>
+      <td class="fin-profit ${profit>=0?'fin-pos':'fin-neg'}">${fmt(profit)}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML=`
+    <div class="fin-header"><h3>收支總覽</h3></div>
+    <div class="fin-summary">
+      <div class="fin-card"><div class="fc-label">總支出</div><div class="fc-val fc-exp">${fmt(totExp)}</div></div>
+      <div class="fin-card"><div class="fc-label">總收入</div><div class="fc-val fc-inc">${fmt(totInc)}</div></div>
+      <div class="fin-card"><div class="fc-label">總損益</div><div class="fc-val ${totProfit>=0?'fc-inc':'fc-exp'}">${fmt(totProfit)}</div></div>
+    </div>
+    <div class="fin-wrap"><table class="fin-tbl">
+      <thead><tr>
+        <th>團名</th><th>人數</th>
+        <th>住宿</th><th>餐食</th><th>包車</th><th>保險</th><th>嚮導費</th><th>支出小計</th>
+        <th>團費</th><th>器材租賃</th><th>代揹</th><th>收入小計</th><th>損益</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td>合計</td><td></td>
+        <td class="fin-exp">${fmt(totLodge)}</td><td class="fin-exp">${fmt(totMeal)}</td>
+        <td class="fin-exp">${fmt(totCharter)}</td><td class="fin-exp">${fmt(totIns)}</td>
+        <td class="fin-exp">${fmt(totGuide)}</td><td class="fin-exp">${fmt(totExp)}</td>
+        <td class="fin-inc">${fmt(totTripFee)}</td><td class="fin-inc">${fmt(totEquip)}</td>
+        <td class="fin-inc">${fmt(totPorter)}</td><td class="fin-inc">${fmt(totInc)}</td>
+        <td class="fin-profit ${totProfit>=0?'fin-pos':'fin-neg'}">${fmt(totProfit)}</td>
+      </tr></tfoot>
+    </table></div>`;
 }
 
 // ── LINE Report ──
