@@ -1166,6 +1166,13 @@ function getLodgeUnbooked(t){
   return false;
 }
 function getMealUnbooked(t){const m=t.meal||{book:'no',pay:'no'};return m.book==='no'}
+function getLodgeUnpaid(t){
+  const nights=nightsOf(t);if(nights===0)return false;
+  const L=t.lodging||[];
+  for(let i=0;i<nights;i++){const e=L[i];if(e&&e.book==='yes'&&e.pay!=='yes')return true}
+  return false;
+}
+function getMealUnpaid(t){const m=t.meal||{book:'no',pay:'no'};return m.book==='yes'&&m.pay!=='yes'}
 function lodgeSummary(t){
   const nights=nightsOf(t);if(nights===0)return'單日行程';
   const L=t.lodging||[];let booked=0,na=0;
@@ -1280,6 +1287,13 @@ function renderTimeReminders(){
       else{dlTxt=`出發日 ${fmtShort(t.date)}`}
       if(dlTxt)reasons.push({icon:'🏨',text:`住宿尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'lodge'});
     }
+    if(getLodgeUnpaid(t)){
+      let dlTxt;
+      if(li.state==='dated'){const ldd=parseD(li.ds);if(useAll||ldd<=endDate||ldd<now||parseD(t.date)<=endDate){dlTxt=li.days>=0?`需於 ${fmtShort(li.ds)} 前完成`:'已逾期'}}
+      else if(ai.state==='dated'){dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期'}
+      else{dlTxt=`出發日 ${fmtShort(t.date)}`}
+      if(dlTxt)reasons.push({icon:'🏨',text:`住宿未付款（${dlTxt}）`,cls:'mktg-action-apply',cat:'lodge'});
+    }
     const mi=mealInfo(t);
     if(getMealUnbooked(t)){
       let dlTxt;
@@ -1287,6 +1301,13 @@ function renderTimeReminders(){
       else if(ai.state==='dated'){dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期'}
       else{dlTxt=`出發日 ${fmtShort(t.date)}`}
       if(dlTxt)reasons.push({icon:'🍽',text:`餐食尚未預訂（${dlTxt}）`,cls:'mktg-action-apply',cat:'meal'});
+    }
+    if(getMealUnpaid(t)){
+      let dlTxt;
+      if(mi.state==='dated'){const mdd=parseD(mi.ds);if(useAll||mdd<=endDate||mdd<now||parseD(t.date)<=endDate){dlTxt=mi.days>=0?`需於 ${fmtShort(mi.ds)} 前完成`:'已逾期'}}
+      else if(ai.state==='dated'){dlTxt=ai.days>=0?`需於 ${fmtShort(ai.ds)} 前完成`:'已逾期'}
+      else{dlTxt=`出發日 ${fmtShort(t.date)}`}
+      if(dlTxt)reasons.push({icon:'🍽',text:`餐食未付款（${dlTxt}）`,cls:'mktg-action-apply',cat:'meal'});
     }
     for(const tr of taskReminders){
       const dd=taskDueDate(t,tr);
@@ -1380,9 +1401,11 @@ function renderTaskReminders(){
       const li2=lodgeInfo(t);const ai2=applyInfo(t);
       const lodgeDlTxt=li2.state==='dated'&&li2.days>=0?`需於 ${fmtShort(li2.ds)} 前完成`:ai2.state==='dated'&&ai2.days>=0?`需於 ${fmtShort(ai2.ds)} 前完成`:`出發日 ${fmtShort(t.date)}`;
       if(getLodgeUnbooked(t))reasons.push({icon:'🏨',text:`住宿尚未預訂（${lodgeDlTxt}）`,cls:'mktg-action-apply'});
+      if(getLodgeUnpaid(t))reasons.push({icon:'🏨',text:`住宿未付款（${lodgeDlTxt}）`,cls:'mktg-action-apply'});
       const mi2=mealInfo(t);
       const mealDlTxt=mi2.state==='dated'&&mi2.days>=0?`需於 ${fmtShort(mi2.ds)} 前完成`:ai2.state==='dated'&&ai2.days>=0?`需於 ${fmtShort(ai2.ds)} 前完成`:`出發日 ${fmtShort(t.date)}`;
       if(getMealUnbooked(t))reasons.push({icon:'🍽',text:`餐食尚未預訂（${mealDlTxt}）`,cls:'mktg-action-apply'});
+      if(getMealUnpaid(t))reasons.push({icon:'🍽',text:`餐食未付款（${mealDlTxt}）`,cls:'mktg-action-apply'});
       if(reasons.length)cards.push({t,reasons,tripDays:daysUntil(t.date)});
     }
     if(cards.length)sections.push({title:'住宿、餐食',cards});
