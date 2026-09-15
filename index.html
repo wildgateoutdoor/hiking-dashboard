@@ -372,12 +372,17 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .f-triple{display:grid;grid-template-columns:1fr 1fr 2fr;gap:14px}
 .f-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:8px}
 
-/* Settings tabs */
-.stab-row{display:flex;flex-wrap:wrap;gap:0;margin-bottom:16px;overflow-x:auto}
-.stab-group{display:flex;align-items:center;border-bottom:2px solid var(--border-sub)}
-.stab-group-label{font:600 11px var(--font);color:var(--text-muted);padding:6px 10px 6px 2px;white-space:nowrap;opacity:.65;letter-spacing:.3px}
-.stab{padding:8px 14px;font:600 13px var(--font);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
-.stab:hover{color:var(--text-2)}.stab.on{color:var(--accent);border-bottom-color:var(--accent)}
+/* Settings tabs – bookmark style */
+.stab-row{display:flex;gap:0;margin-bottom:20px}
+.stab-group{display:flex;align-items:stretch;border-radius:10px 10px 0 0;padding:0 4px;transition:background .2s}
+.stab-group.inactive{background:rgba(52,100,72,.18)}
+.stab-group.active{background:rgba(52,100,72,.08)}
+.stab{padding:10px 16px;font:600 13px var(--font);background:none;border:none;color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap;border-radius:8px 8px 0 0;position:relative}
+.stab-group.inactive .stab{color:rgba(0,0,0,.45)}
+.stab-group.active .stab{color:var(--text-2)}
+.stab:hover{color:var(--text-1)}
+.stab.on{color:var(--accent);font-weight:700}
+.stab.on::after{content:'';position:absolute;bottom:0;left:8px;right:8px;height:2.5px;background:var(--accent);border-radius:2px}
 .stab-panel{display:none}.stab-panel.on{display:block}
 
 .deadline-hint{font-size:12px;margin-top:4px;padding:4px 8px;background:var(--accent-bg);color:var(--accent);border-radius:4px;display:none}
@@ -839,20 +844,17 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <div class="modal-h"><h2>規則設定</h2><button class="close-btn" onclick="closeSettings()">&times;</button></div>
     <div class="modal-body">
       <div class="stab-row">
-        <div class="stab-group">
-          <span class="stab-group-label">團務時程</span>
+        <div class="stab-group active" data-group="ops">
           <button class="stab on" data-tab="deadline" onclick="switchTab('deadline')">報名截止</button>
           <button class="stab" data-tab="apply" onclick="switchTab('apply')">申請截止</button>
           <button class="stab" data-tab="lodge" onclick="switchTab('lodge')">住宿預訂</button>
           <button class="stab" data-tab="meal" onclick="switchTab('meal')">餐食預定</button>
           <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
         </div>
-        <div class="stab-group">
-          <span class="stab-group-label">行銷時程</span>
+        <div class="stab-group inactive" data-group="mktg">
           <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
         </div>
-        <div class="stab-group">
-          <span class="stab-group-label">收益支出</span>
+        <div class="stab-group inactive" data-group="finance">
           <button class="stab" data-tab="mingroup" onclick="switchTab('mingroup')">最低成團</button>
           <button class="stab" data-tab="equip" onclick="switchTab('equip')">裝備費用</button>
           <button class="stab" data-tab="porter" onclick="switchTab('porter')">代揹費用</button>
@@ -2038,6 +2040,8 @@ function closeSettings(){hideOv('ov-settings')}
 function switchTab(tab){
   document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
   ['deadline','apply','lodge','meal','taskrem','mingroup','mktg','equip','porter'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  const activeBtn=document.querySelector(`.stab[data-tab="${tab}"]`);
+  if(activeBtn){const ag=activeBtn.closest('.stab-group');document.querySelectorAll('.stab-group').forEach(g=>{g.classList.toggle('active',g===ag);g.classList.toggle('inactive',g!==ag)})}
   if(tab==='taskrem')renderTaskReminderList();
 }
 
