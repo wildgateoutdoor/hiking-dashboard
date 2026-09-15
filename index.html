@@ -373,7 +373,9 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .f-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:8px}
 
 /* Settings tabs */
-.stab-row{display:flex;gap:0;border-bottom:2px solid var(--border-sub);margin-bottom:16px;overflow-x:auto}
+.stab-row{display:flex;flex-wrap:wrap;gap:0;margin-bottom:16px;overflow-x:auto}
+.stab-group{display:flex;align-items:center;border-bottom:2px solid var(--border-sub)}
+.stab-group-label{font:600 11px var(--font);color:var(--text-muted);padding:6px 10px 6px 2px;white-space:nowrap;opacity:.65;letter-spacing:.3px}
 .stab{padding:8px 14px;font:600 13px var(--font);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
 .stab:hover{color:var(--text-2)}.stab.on{color:var(--accent);border-bottom-color:var(--accent)}
 .stab-panel{display:none}.stab-panel.on{display:block}
@@ -837,15 +839,24 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <div class="modal-h"><h2>規則設定</h2><button class="close-btn" onclick="closeSettings()">&times;</button></div>
     <div class="modal-body">
       <div class="stab-row">
-        <button class="stab on" data-tab="deadline" onclick="switchTab('deadline')">報名截止</button>
-        <button class="stab" data-tab="apply" onclick="switchTab('apply')">申請截止</button>
-        <button class="stab" data-tab="lodge" onclick="switchTab('lodge')">住宿預訂</button>
-        <button class="stab" data-tab="meal" onclick="switchTab('meal')">餐食預定</button>
-        <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
-        <button class="stab" data-tab="mingroup" onclick="switchTab('mingroup')">最低成團</button>
-        <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
-        <button class="stab" data-tab="equip" onclick="switchTab('equip')">裝備費用</button>
-        <button class="stab" data-tab="porter" onclick="switchTab('porter')">代揹費用</button>
+        <div class="stab-group">
+          <span class="stab-group-label">團務時程</span>
+          <button class="stab on" data-tab="deadline" onclick="switchTab('deadline')">報名截止</button>
+          <button class="stab" data-tab="apply" onclick="switchTab('apply')">申請截止</button>
+          <button class="stab" data-tab="lodge" onclick="switchTab('lodge')">住宿預訂</button>
+          <button class="stab" data-tab="meal" onclick="switchTab('meal')">餐食預定</button>
+          <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
+        </div>
+        <div class="stab-group">
+          <span class="stab-group-label">行銷時程</span>
+          <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
+        </div>
+        <div class="stab-group">
+          <span class="stab-group-label">收益支出</span>
+          <button class="stab" data-tab="mingroup" onclick="switchTab('mingroup')">最低成團</button>
+          <button class="stab" data-tab="equip" onclick="switchTab('equip')">裝備費用</button>
+          <button class="stab" data-tab="porter" onclick="switchTab('porter')">代揹費用</button>
+        </div>
       </div>
 
       <div class="stab-panel on" id="tab-deadline">
