@@ -845,6 +845,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <button class="stab" data-tab="mingroup" onclick="switchTab('mingroup')">最低成團</button>
         <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
         <button class="stab" data-tab="equip" onclick="switchTab('equip')">裝備費用</button>
+        <button class="stab" data-tab="porter" onclick="switchTab('porter')">代揹費用</button>
       </div>
 
       <div class="stab-panel on" id="tab-deadline">
@@ -945,6 +946,18 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label>單價（元）</label><input id="req-price" type="number" min="0" placeholder="例：200"></div>
         </div>
         <div class="f-actions"><button type="button" class="btn btn-p" onclick="addEquipPricing()">新增</button></div>
+      </div>
+
+      <div class="stab-panel" id="tab-porter">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">設定代揹服務的每公斤價格。在團務列表中只需填重量，系統自動計算費用。</p>
+        <div class="rule-list" id="rule-list-porter"></div>
+        <hr class="rule-divider">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">新增代揹費用</h3>
+        <div class="f-pair">
+          <div class="f-row"><label>重量（公斤）</label><input id="rp-kg" type="number" min="1" placeholder="例：10"></div>
+          <div class="f-row"><label>每公斤價格（元）</label><input id="rp-price" type="number" min="0" placeholder="例：600"></div>
+        </div>
+        <div class="f-actions"><button type="button" class="btn btn-p" onclick="addPorterPricing()">新增</button></div>
       </div>
     </div>
   </div>
@@ -1057,7 +1070,7 @@ const DEF_TASK_REMINDERS=[
   {id:'tr3',name:'天氣提醒',daysBefore:[7,3,1]},
   {id:'tr4',name:'行前手冊發放',daysBefore:[14]},
 ];
-let trips=[],deadlineRules=[],applyRules=[],lodgeRules=[],mealRules=[],mktgRules=[],minGroupRules=[],mktgEvents=[],taskReminders=[],equipPricing=[];
+let trips=[],deadlineRules=[],applyRules=[],lodgeRules=[],mealRules=[],mktgRules=[],minGroupRules=[],mktgEvents=[],taskReminders=[],equipPricing=[],porterPricing=[];
 let sb=null,dlCap=null,store=null,rulesReady=false;
 // 標籤顏色選項
 const TAG_COLORS=[
@@ -1110,7 +1123,7 @@ const DEF_MINGROUP=[
 ];
 const DEF_LODGE=[];
 const DEF_MEAL=[];
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -1133,6 +1146,7 @@ async function loadAllRules(){
   taskReminders=m.taskReminders||localGet('hk-task-reminders',null);
   if(!taskReminders)taskReminders=JSON.parse(JSON.stringify(DEF_TASK_REMINDERS));
   equipPricing=m.equipPricing||localGet('hk-equip-pricing',[]);
+  porterPricing=m.porterPricing||localGet('hk-porter-pricing',[]);
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
@@ -1141,6 +1155,7 @@ async function loadAllRules(){
     if(!m.mktgRules)saveToLS('hk-mktg',mktgRules);
     if(!m.taskReminders)saveToLS('hk-task-reminders',taskReminders);
     if(!m.equipPricing)saveToLS('hk-equip-pricing',equipPricing);
+    if(!m.porterPricing)saveToLS('hk-porter-pricing',porterPricing);
   }
   rulesReady=true;
 }
@@ -2011,7 +2026,7 @@ function openSettings(){renderAllRuleLists();switchTab('deadline');showOv('ov-se
 function closeSettings(){hideOv('ov-settings')}
 function switchTab(tab){
   document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  ['deadline','apply','lodge','meal','taskrem','mingroup','mktg','equip'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  ['deadline','apply','lodge','meal','taskrem','mingroup','mktg','equip','porter'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
   if(tab==='taskrem')renderTaskReminderList();
 }
 
@@ -2083,6 +2098,7 @@ function renderAllRuleLists(){
   renderRuleList('rule-list-mingroup',minGroupRules,minGroupLabel,'mingroup');
   renderRuleList('rule-list-mktg',mktgRules,mktgLabel,'mktg');
   renderEquipPricingList();
+  renderPorterPricingList();
 }
 
 async function delRule(id,type){
@@ -2170,6 +2186,32 @@ async function delEquipPricing(id){
   equipPricing=equipPricing.filter(r=>r.id!==id);saveToLS('hk-equip-pricing',equipPricing);renderAllRuleLists();toast('已刪除');
 }
 function getEquipPrice(itemName){const r=equipPricing.find(p=>p.item===itemName);return r?r.price:0}
+
+async function addPorterPricing(){
+  if(!await ensureEditor())return;
+  const kg=parseInt(document.getElementById('rp-kg').value)||0;
+  const price=parseInt(document.getElementById('rp-price').value)||0;
+  if(!kg){toast('請輸入重量');return}if(!price){toast('請輸入每公斤價格');return}
+  porterPricing.push({id:genId(),kg,price});
+  porterPricing.sort((a,b)=>a.kg-b.kg);
+  saveToLS('hk-porter-pricing',porterPricing);renderAllRuleLists();document.getElementById('rp-kg').value='';document.getElementById('rp-price').value='';toast('代揹費用已新增');
+}
+function renderPorterPricingList(){
+  const el=document.getElementById('rule-list-porter');if(!el)return;
+  if(porterPricing.length===0){el.innerHTML='<div class="rule-empty">尚無代揹費用規則</div>';return}
+  el.innerHTML=porterPricing.map(r=>`<div class="rule-item"><div class="rule-info"><div class="rule-label">${r.kg} 公斤</div><div class="rule-names"><span class="rule-tag">$${r.price}/kg</span></div></div><div class="rule-acts"><button class="act-btn del" onclick="delPorterPricing('${r.id}')" title="刪除">${delSvg}</button></div></div>`).join('');
+}
+async function delPorterPricing(id){
+  if(!await ensureEditor())return;
+  porterPricing=porterPricing.filter(r=>r.id!==id);saveToLS('hk-porter-pricing',porterPricing);renderAllRuleLists();toast('已刪除');
+}
+function getPorterPrice(weight){
+  if(!porterPricing.length)return 0;
+  const sorted=[...porterPricing].sort((a,b)=>a.kg-b.kg);
+  let match=sorted[sorted.length-1];
+  for(const r of sorted){if(weight<=r.kg){match=r;break}}
+  return match.price;
+}
 
 // ── Storage layer ──
 // 本機備援（Supabase 無法載入時仍可用，資料只存這台電腦）
