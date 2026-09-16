@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <style>
 :root {
@@ -508,26 +509,27 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .fin-inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(39,174,96,.15)}
 .fi-exp{color:var(--red,#c0392b)}.fi-inc{color:var(--green,#27ae60)}
 .fi-hint{display:block;font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap}
-.fin-trips{display:flex;flex-direction:column;gap:12px}
-.fin-trip-card{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden}
-.ftc-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface-alt);border-bottom:1px solid var(--border-sub);flex-wrap:wrap}
-.ftc-name{font-size:14px;font-weight:700;flex:1;min-width:0}
-.ftc-date{font-size:12px;color:var(--text-2)}
-.ftc-profit{font-size:16px;font-weight:700;min-width:80px;text-align:right}
 .fin-pos{color:var(--green,#27ae60)}.fin-neg{color:var(--red,#c0392b)}
-.ftc-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.ftc-col{padding:12px 16px;min-width:0}
-.ftc-col+.ftc-col{border-left:1px dashed var(--border-sub)}
-.ftc-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
-.ftc-exp-title{color:var(--red,#c0392b)}
-.ftc-inc-title{color:var(--green,#27ae60)}
-.ftc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:13px}
-.ftc-label{color:var(--text-2);white-space:nowrap}
-.ftc-val{font-weight:600;text-align:right;white-space:nowrap}
-.ftc-subtotal{font-size:13px;font-weight:700;margin-top:10px;padding-top:8px;border-top:1px solid var(--border-sub);text-align:right}
-.fin-auto-hint{font-size:10px;color:var(--text-muted);margin:-2px 0 6px;text-align:right}
 .fin-exp{color:var(--red,#c0392b)}.fin-inc{color:var(--green,#27ae60)}
-@media(max-width:600px){.ftc-body{grid-template-columns:1fr}.ftc-col+.ftc-col{border-left:none;border-top:1px dashed var(--border-sub)}}
+.fin-charts{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+.fin-chart-box{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow-sm)}
+.fin-chart-box h4{margin:0 0 12px;font-size:13px;font-weight:700;color:var(--text)}
+.fin-chart-box canvas{width:100%!important;height:240px!important}
+.fin-tbl-wrap{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:auto}
+.fin-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.fin-tbl th{position:sticky;top:0;background:var(--surface-alt);font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;padding:10px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border-sub)}
+.fin-tbl th:first-child,.fin-tbl td:first-child{text-align:left}
+.fin-tbl td{padding:10px 12px;border-bottom:1px solid var(--border-sub);text-align:right;white-space:nowrap}
+.fin-tbl tr:last-child td{border-bottom:none}
+.fin-tbl tr:hover td{background:var(--surface-hover)}
+.fin-tbl .ft-name{font-weight:600;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+.fin-tbl .ft-date{font-size:12px;color:var(--text-2)}
+.fin-tbl .ft-bar{width:60px;height:6px;background:var(--surface-alt);border-radius:3px;display:inline-block;vertical-align:middle;overflow:hidden;margin-right:6px}
+.fin-tbl .ft-bar-fill{height:100%;border-radius:3px}
+.fin-tbl .ft-rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;color:#fff}
+.fin-tbl tfoot td{background:var(--surface-alt);font-weight:700;border-top:2px solid var(--border)}
+@media(max-width:900px){.fin-charts{grid-template-columns:1fr}}
+@media(max-width:600px){.fin-tbl{font-size:12px}.fin-tbl th,.fin-tbl td{padding:8px 8px}}
 </style>
 
 <div class="login-gate" id="login-gate">
@@ -2846,29 +2848,22 @@ async function finSave(el){
     if(store===SupaStore)sb.from('trips').update({data:t,updated_at:new Date().toISOString()}).eq('id',id);
     else try{localStorage.setItem('hk-trips',JSON.stringify(trips))}catch{}
   }
-  finUpdateRow(el.closest('.fin-trip-card'),t);
+  finUpdateRow(el.closest('tr[data-id]'),t);
   clearTimeout(_finSaveTimer);
   _finSaveTimer=setTimeout(()=>finUpdateTotals(),100);
 }
-function finUpdateRow(card,t){
-  if(!card)return;
+function finUpdateRow(row,t){
+  if(!row)return;
   const fmt=n=>n?'$'+n.toLocaleString():'—';
-  const autoLodge=finAutoLodge(t);const eLodge=t.lodgeCost||autoLodge;
-  const autoMeal=finAutoMeal(t);const eMeal=t.mealCost||autoMeal;
-  const eCharter=finAutoCharter(t);
-  const eIns=t.insuranceCost||0;
-  const eGuide=t.guideFee||0;
+  const eLodge=t.lodgeCost||finAutoLodge(t);const eMeal=t.mealCost||finAutoMeal(t);
+  const eCharter=finAutoCharter(t);const eIns=t.insuranceCost||0;const eGuide=t.guideFee||0;
   const expense=eLodge+eMeal+eCharter+eIns+eGuide;
-  const iTripFee=finAutoTripFee(t);
-  const iEquip=finAutoEquip(t);
-  const iPorter=calcPorterIncome(t);
-  const income=iTripFee+iEquip+iPorter;
+  const income=finAutoTripFee(t)+finAutoEquip(t)+calcPorterIncome(t);
   const profit=income-expense;
-  const profitEl=card.querySelector('.ftc-profit');
-  if(profitEl){profitEl.textContent=(profit>=0?'+':'')+fmt(profit);profitEl.className='ftc-profit '+(profit>=0?'fin-pos':'fin-neg')}
-  const subs=card.querySelectorAll('.ftc-subtotal');
-  if(subs[0])subs[0].textContent='小計　'+fmt(expense);
-  if(subs[1])subs[1].textContent='小計　'+fmt(income);
+  const cells=row.querySelectorAll('td');
+  if(cells[9]){cells[9].textContent=fmt(expense)}
+  if(cells[10]){cells[10].textContent=fmt(income)}
+  if(cells[11]){cells[11].className=(profit>=0?'fin-pos':'fin-neg');cells[11].style.fontWeight='700';cells[11].textContent=(profit>=0?'+':'')+fmt(profit)}
   finUpdateTotals();
 }
 function finUpdateTotals(){
@@ -2894,66 +2889,129 @@ function finAutoMeal(t){return(t.mealDetails||[]).reduce((s,m)=>s+((m.unitPrice|
 function finAutoCharter(t){return(t.charterCost||0)+(t.shuttleCost||0)}
 function finAutoTripFee(t){return(t.tripFees&&t.tripFees.length)?t.tripFees.reduce((s,f)=>s+(f.fee||0)*(f.count||0),0):(t.tripFee||0)*(t.registered||0)}
 function finAutoEquip(t){return(t.equipment||[]).reduce((s,e)=>s+(e.totalCost||0),0)}
+let _finBarChart=null,_finDonutChart=null;
 function renderFinance(){
   const el=document.getElementById('finance-body');
   const sorted=[...trips].filter(t=>t.status!=='notFormed').sort((a,b)=>a.date<b.date?-1:1);
   const fmt=n=>n?'$'+n.toLocaleString():'—';
-  let totExp=0,totInc=0,totProfit=0;
-  const tripCards=sorted.map(t=>{
+  const data=sorted.map(t=>{
     const autoLodge=finAutoLodge(t);const eLodge=t.lodgeCost||autoLodge;
     const autoMeal=finAutoMeal(t);const eMeal=t.mealCost||autoMeal;
-    const eCharter=finAutoCharter(t);
-    const eIns=t.insuranceCost||0;
-    const eGuide=t.guideFee||0;
+    const eCharter=finAutoCharter(t);const eIns=t.insuranceCost||0;const eGuide=t.guideFee||0;
     const expense=eLodge+eMeal+eCharter+eIns+eGuide;
-    const iTripFee=finAutoTripFee(t);
-    const iEquip=finAutoEquip(t);
-    const iPorter=calcPorterIncome(t);
+    const iTripFee=finAutoTripFee(t);const iEquip=finAutoEquip(t);const iPorter=calcPorterIncome(t);
     const income=iTripFee+iEquip+iPorter;
-    const profit=income-expense;
-    totExp+=expense;totInc+=income;totProfit+=profit;
-    const profitCls=profit>=0?'fin-pos':'fin-neg';
-    const profitSign=profit>=0?'+':'';
-    const tfHint=(t.tripFees&&t.tripFees.length)?t.tripFees.map(f=>`${f.label?esc(f.label)+' ':''}$${(f.fee||0).toLocaleString()}×${f.count||0}`).join(' + '):`$${(t.tripFee||0).toLocaleString()}×${t.registered||0}`;
-    const lodgeAutoH=autoLodge?`<span class="fin-auto-hint">自動計算 $${autoLodge.toLocaleString()}</span>`:'';
-    const mealAutoH=autoMeal?`<span class="fin-auto-hint">自動計算 $${autoMeal.toLocaleString()}</span>`:'';
-    return`<div class="fin-trip-card" data-id="${t.id}">
-      <div class="ftc-header">
-        <div class="ftc-name">${esc(t.name)}</div>
-        <div class="ftc-date">${fmtShort(t.date)}${t.dateEnd&&t.dateEnd!==t.date?' ~ '+fmtShort(t.dateEnd):''}　${t.registered||0}人</div>
-        <div class="ftc-profit ${profitCls}">${profitSign}${fmt(profit)}</div>
-      </div>
-      <div class="ftc-body">
-        <div class="ftc-col">
-          <div class="ftc-col-title ftc-exp-title">支出</div>
-          <div class="ftc-row"><span class="ftc-label">住宿</span><span class="ftc-val">${finInput(t.id,'lodgeCost',eLodge,'fi-exp')}</span></div>
-          ${lodgeAutoH}
-          <div class="ftc-row"><span class="ftc-label">餐食</span><span class="ftc-val">${finInput(t.id,'mealCost',eMeal,'fi-exp')}</span></div>
-          ${mealAutoH}
-          <div class="ftc-row"><span class="ftc-label">包車+接駁</span><span class="ftc-val fin-exp">${fmt(eCharter)}</span></div>
-          <div class="ftc-row"><span class="ftc-label">保險</span><span class="ftc-val fin-exp">${fmt(eIns)}</span></div>
-          <div class="ftc-row"><span class="ftc-label">嚮導費</span><span class="ftc-val">${finInput(t.id,'guideFee',eGuide,'fi-exp')}</span></div>
-          <div class="ftc-subtotal ftc-exp-title">小計　${fmt(expense)}</div>
-        </div>
-        <div class="ftc-col">
-          <div class="ftc-col-title ftc-inc-title">收入</div>
-          <div class="ftc-row"><span class="ftc-label">團費</span><span class="ftc-val fin-inc">${fmt(iTripFee)}</span></div>
-          <div class="fin-auto-hint">${tfHint}</div>
-          <div class="ftc-row"><span class="ftc-label">裝備租借</span><span class="ftc-val fin-inc">${fmt(iEquip)}</span></div>
-          <div class="ftc-row"><span class="ftc-label">代揹</span><span class="ftc-val fin-inc">${fmt(iPorter)}</span></div>
-          <div class="ftc-subtotal ftc-inc-title">小計　${fmt(income)}</div>
-        </div>
-      </div>
-    </div>`;
+    return{t,eLodge,eMeal,eCharter,eIns,eGuide,expense,iTripFee,iEquip,iPorter,income,profit:income-expense,autoLodge,autoMeal};
+  });
+  let totExp=0,totInc=0;
+  data.forEach(d=>{totExp+=d.expense;totInc+=d.income});
+  const totProfit=totInc-totExp;
+  const totTrips=data.length;
+  const avgProfit=totTrips?Math.round(totProfit/totTrips):0;
+  const profitRank=[...data].sort((a,b)=>b.profit-a.profit);
+  const maxProfit=profitRank.length?Math.max(...profitRank.map(d=>Math.abs(d.profit)),1):1;
+  const popRank=[...data].sort((a,b)=>(b.t.registered||0)-(a.t.registered||0));
+  const maxReg=popRank.length?Math.max(...popRank.map(d=>d.t.registered||0),1):1;
+  const rankColors=['#e28929','#8a9990','#b87333'];
+
+  const tblRows=data.map(d=>{
+    const t=d.t;const profitCls=d.profit>=0?'fin-pos':'fin-neg';
+    const ri=profitRank.indexOf(d);const pi=popRank.indexOf(d);
+    const rankH=ri<3?`<span class="ft-rank" style="background:${rankColors[ri]}">${ri+1}</span>`:`<span style="font-size:12px;color:var(--text-muted)">${ri+1}</span>`;
+    const popBar=`<span class="ft-bar"><span class="ft-bar-fill" style="width:${((t.registered||0)/maxReg*100)}%;background:var(--accent)"></span></span>${t.registered||0}人`;
+    const profitBar=`<span class="ft-bar"><span class="ft-bar-fill" style="width:${(Math.abs(d.profit)/maxProfit*100)}%;background:${d.profit>=0?'var(--green,#27ae60)':'var(--red,#c0392b)'}"></span></span>`;
+    return`<tr data-id="${t.id}">
+      <td>${rankH}</td>
+      <td class="ft-name">${esc(t.name)}</td>
+      <td class="ft-date">${fmtShort(t.date)}${t.dateEnd&&t.dateEnd!==t.date?'~'+fmtShort(t.dateEnd):''}</td>
+      <td>${popBar}</td>
+      <td class="fin-inc">${finInput(t.id,'lodgeCost',d.eLodge,'fi-exp')}</td>
+      <td class="fin-inc">${finInput(t.id,'mealCost',d.eMeal,'fi-exp')}</td>
+      <td class="fin-exp">${fmt(d.eCharter)}</td>
+      <td class="fin-exp">${fmt(d.eIns)}</td>
+      <td class="fin-inc">${finInput(t.id,'guideFee',d.eGuide,'fi-exp')}</td>
+      <td class="fin-exp" style="font-weight:600">${fmt(d.expense)}</td>
+      <td class="fin-inc" style="font-weight:600">${fmt(d.income)}</td>
+      <td class="${profitCls}" style="font-weight:700">${profitBar}${(d.profit>=0?'+':'')+fmt(d.profit)}</td>
+    </tr>`;
   }).join('');
+
+  const totLodge=data.reduce((s,d)=>s+d.eLodge,0);
+  const totMeal=data.reduce((s,d)=>s+d.eMeal,0);
+  const totCharter=data.reduce((s,d)=>s+d.eCharter,0);
+  const totIns=data.reduce((s,d)=>s+d.eIns,0);
+  const totGuide=data.reduce((s,d)=>s+d.eGuide,0);
+
   el.innerHTML=`
     <div class="fin-header"><h3>收支總覽</h3></div>
     <div class="fin-summary">
-      <div class="fin-card"><div class="fc-label">總支出</div><div class="fc-val fc-exp">${fmt(totExp)}</div></div>
       <div class="fin-card"><div class="fc-label">總收入</div><div class="fc-val fc-inc">${fmt(totInc)}</div></div>
-      <div class="fin-card"><div class="fc-label">總損益</div><div class="fc-val ${totProfit>=0?'fc-inc':'fc-exp'}">${fmt(totProfit)}</div></div>
+      <div class="fin-card"><div class="fc-label">總支出</div><div class="fc-val fc-exp">${fmt(totExp)}</div></div>
+      <div class="fin-card"><div class="fc-label">總損益</div><div class="fc-val ${totProfit>=0?'fc-inc':'fc-exp'}">${(totProfit>=0?'+':'')+fmt(totProfit)}</div></div>
+      <div class="fin-card"><div class="fc-label">活動數</div><div class="fc-val">${totTrips}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">平均損益 ${(avgProfit>=0?'+':'')+fmt(avgProfit)}</div></div>
     </div>
-    <div class="fin-trips">${tripCards}</div>`;
+    <div class="fin-charts">
+      <div class="fin-chart-box"><h4>各活動收支比較</h4><canvas id="fin-bar-chart"></canvas></div>
+      <div class="fin-chart-box"><h4>支出結構</h4><canvas id="fin-donut-chart"></canvas></div>
+    </div>
+    <div class="fin-tbl-wrap">
+      <table class="fin-tbl">
+        <thead><tr>
+          <th>#</th><th>活動名稱</th><th>日期</th><th>人數</th>
+          <th>住宿</th><th>餐食</th><th>包車接駁</th><th>保險</th><th>嚮導費</th>
+          <th style="color:var(--red)">總支出</th><th style="color:var(--green)">總收入</th><th>損益</th>
+        </tr></thead>
+        <tbody>${tblRows}</tbody>
+        <tfoot><tr>
+          <td colspan="4" style="text-align:left">合計</td>
+          <td class="fin-exp">${fmt(totLodge)}</td><td class="fin-exp">${fmt(totMeal)}</td>
+          <td class="fin-exp">${fmt(totCharter)}</td><td class="fin-exp">${fmt(totIns)}</td>
+          <td class="fin-exp">${fmt(totGuide)}</td>
+          <td class="fin-exp" style="font-weight:700">${fmt(totExp)}</td>
+          <td class="fin-inc" style="font-weight:700">${fmt(totInc)}</td>
+          <td class="${totProfit>=0?'fin-pos':'fin-neg'}" style="font-weight:700">${(totProfit>=0?'+':'')+fmt(totProfit)}</td>
+        </tr></tfoot>
+      </table>
+    </div>`;
+
+  renderFinCharts(data);
+}
+function renderFinCharts(data){
+  if(typeof Chart==='undefined'){
+    const b=document.getElementById('fin-bar-chart');const d=document.getElementById('fin-donut-chart');
+    if(b)b.parentElement.innerHTML='<h4>各活動收支比較</h4><div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center">圖表元件載入中…</div>';
+    if(d)d.parentElement.innerHTML='<h4>支出結構</h4><div style="color:var(--text-muted);font-size:13px;padding:40px 0;text-align:center">圖表元件載入中…</div>';
+    return;
+  }
+  if(_finBarChart){_finBarChart.destroy();_finBarChart=null}
+  if(_finDonutChart){_finDonutChart.destroy();_finDonutChart=null}
+  const names=data.map(d=>d.t.name);
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark'||(!document.documentElement.getAttribute('data-theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  const gridC=isDark?'rgba(255,255,255,.1)':'rgba(0,0,0,.06)';
+  const txtC=isDark?'rgba(255,255,255,.7)':'rgba(0,0,0,.55)';
+  const barEl=document.getElementById('fin-bar-chart');
+  if(barEl){
+    _finBarChart=new Chart(barEl,{type:'bar',data:{
+      labels:names,
+      datasets:[
+        {label:'收入',data:data.map(d=>d.income),backgroundColor:'rgba(39,174,96,.7)',borderRadius:4,barPercentage:.7},
+        {label:'支出',data:data.map(d=>d.expense),backgroundColor:'rgba(192,57,43,.6)',borderRadius:4,barPercentage:.7}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:12},color:txtC,usePointStyle:true,pointStyle:'circle',padding:16}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:11},color:txtC,maxRotation:45}},y:{grid:{color:gridC},ticks:{font:{size:11},color:txtC,callback:v=>v>=1000?(v/1000)+'k':'$'+v}}}}});
+  }
+  const donutEl=document.getElementById('fin-donut-chart');
+  if(donutEl){
+    const totLodge=data.reduce((s,d)=>s+d.eLodge,0);
+    const totMeal=data.reduce((s,d)=>s+d.eMeal,0);
+    const totCharter=data.reduce((s,d)=>s+d.eCharter,0);
+    const totIns=data.reduce((s,d)=>s+d.eIns,0);
+    const totGuide=data.reduce((s,d)=>s+d.eGuide,0);
+    const vals=[totLodge,totMeal,totCharter,totIns,totGuide];
+    const lbls=['住宿','餐食','包車接駁','保險','嚮導費'];
+    _finDonutChart=new Chart(donutEl,{type:'doughnut',data:{
+      labels:lbls,datasets:[{data:vals,backgroundColor:['#6480e2','#e28929','#27ae60','#e74c3c','#9b59b6'],borderWidth:0,hoverOffset:6}]
+    },options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{font:{size:11},color:txtC,usePointStyle:true,pointStyle:'circle',padding:12}},tooltip:{callbacks:{label:ctx=>{const tot=vals.reduce((a,b)=>a+b,0);const pct=tot?(ctx.parsed/tot*100).toFixed(1):'0';return`${ctx.label}: $${ctx.parsed.toLocaleString()} (${pct}%)`}}}}}});
+  }
 }
 
 // ── LINE Report ──
