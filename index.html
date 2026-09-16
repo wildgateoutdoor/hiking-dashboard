@@ -644,7 +644,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <div id="view-list" style="display:none">
     <div class="bar">
       <div class="filters" id="filters"></div>
-      <button class="btn btn-s" id="export-word-btn" onclick="exportCheckedToWord()" style="display:none;margin-left:8px;font-size:12px;padding:4px 10px">匯出 Word</button>
     </div>
     <div class="date-filter">
       <input type="date" id="df-from" onchange="setDateFilter()">
@@ -2368,14 +2367,12 @@ function render(){
   const list=sorted(filtered());const tb=document.getElementById('tbody');const emp=document.getElementById('empty');
   const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
 
-  const allChecked=list.length>0&&list.every(t=>checkedIds.has(t.id));
-  document.getElementById('thead-row').innerHTML=`<th style="width:32px;text-align:center"><input type="checkbox" ${allChecked?'checked':''} onchange="toggleCheckAll(this.checked)" onclick="event.stopPropagation()"></th>`+COLS.map(c=>{
+  document.getElementById('thead-row').innerHTML=COLS.map(c=>{
     const expandBtn=c.key==='_acts'?`<button class="expand-all-btn" onclick="event.stopPropagation();toggleExpandAll()">${allOpen?'全部收合':'全部展開'}</button>`:'';
     if(!c.sort)return`<th>${c.label}${expandBtn}</th>`;
     const active=sortKey===c.key;const arr=active?(sortDir==='asc'?'▲':'▼'):'▲';
     return`<th class="sortable${active?' sorted':''}" onclick="setSort('${c.key}')">${c.label}<span class="arr">${arr}</span>${expandBtn}</th>`;
   }).join('');
-  document.getElementById('export-word-btn').style.display=checkedIds.size>0?'inline-block':'none';
 
   if(list.length===0){tb.innerHTML='';emp.hidden=false;return}
   emp.hidden=true;
@@ -2423,8 +2420,7 @@ function render(){
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
     const depInfoH=t.folderLink?`<a href="${escAttr(t.folderLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:12px">開啟 ↗</a>`:'<span style="color:var(--text-muted);font-size:12px">—</span>';
 
-    const isChecked=checkedIds.has(t.id);
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td style="text-align:center"><input type="checkbox" ${isChecked?'checked':''} onchange="toggleCheck('${t.id}',this.checked)" onclick="event.stopPropagation()"></td><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="出團名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="出團名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -2523,7 +2519,7 @@ function render(){
       const insSumH=t.insuranceCost?`<span class="sum-exp">SUM（${t.insuranceCost.toLocaleString()}）</span>`:'';
       const insCompanyH=t.insuranceNotes?`<div style="font-size:13px;font-weight:700;margin-bottom:4px">${esc(t.insuranceNotes)}</div>`:'';
 
-      detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}">`
+      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}">`
         +`<div class="detail-grid-top">`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b>${applyNotesH}</div></div><div class="dcol-half"><div class="detail-item lm-item"><b>住宿 ${lodgeSumH}</b>${lm.lodge}</div></div></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b style="margin-bottom:12px">餐食 ${mealSumH}</b>${mealDetailsH||'<div style="font-size:12px;color:var(--text-muted)">未設定</div>'}</div></div>`
