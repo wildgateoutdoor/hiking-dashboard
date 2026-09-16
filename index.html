@@ -251,6 +251,16 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .notes-overview b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;margin-top:8px}
 .notes-overview b:first-child{margin-top:0}
 .notes-overview span{font-size:12px;color:var(--text-2)}
+.notes-content mark{background:#fef3cd;padding:0 2px;border-radius:2px}
+.rte-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+.rte-toolbar{display:flex;gap:2px;padding:4px 6px;background:var(--surface-alt);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.rte-btn{background:none;border:1px solid transparent;border-radius:4px;padding:3px 7px;font-size:12px;cursor:pointer;color:var(--text);line-height:1.3}
+.rte-btn:hover{background:var(--surface-hover);border-color:var(--border)}
+.rte-btn.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+.rte-btn[data-size]{font-weight:600}
+.rte-body{min-height:80px;max-height:200px;overflow-y:auto;padding:8px 10px;font-size:13px;line-height:1.6;color:var(--text);outline:none}
+.rte-body:empty::before{content:attr(data-placeholder);color:var(--text-muted)}
+.rte-body mark{background:#fef3cd;padding:0 2px;border-radius:2px}
 @media(max-width:1200px){.detail-grid6{grid-template-columns:repeat(3,1fr)}.detail-grid6 .dcol:nth-child(3){border-right:none}.detail-grid-top{grid-template-columns:repeat(2,1fr)}.detail-grid-top .dcol:nth-child(2n){border-right:none}.detail-grid-bottom{grid-template-columns:repeat(2,1fr)}.detail-grid-bottom .dcol:nth-child(2n){border-right:none}}
 @media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}.detail-grid6{grid-template-columns:1fr 1fr}.detail-grid6 .dcol:nth-child(2n){border-right:none}.detail-grid-top{grid-template-columns:1fr}.detail-grid-top .dcol{border-right:none;padding:10px 0;border-bottom:1px dashed var(--border)}.detail-grid-top .dcol:last-child{border-bottom:none}.detail-grid-bottom{grid-template-columns:1fr}.detail-grid-bottom .dcol{border-right:none;padding:10px 0;border-bottom:1px dashed var(--border)}.detail-grid-bottom .dcol:last-child{border-bottom:none}}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
@@ -790,7 +800,20 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
             <button type="button" class="btn btn-s" onclick="addPorterBuyer()" style="margin-top:6px">＋ 新增購買者</button>
           </div>
         </details>
-        <div class="f-row"><label for="f-notes">備註（選填）</label><textarea id="f-notes" placeholder="內部備忘"></textarea></div>
+        <div class="f-row"><label>備註（選填）</label>
+          <div class="rte-wrap">
+            <div class="rte-toolbar">
+              <button type="button" class="rte-btn" onclick="rteCmd('bold')" title="粗體"><b>B</b></button>
+              <button type="button" class="rte-btn" onclick="rteCmd('strikeThrough')" title="刪除線"><s>S</s></button>
+              <button type="button" class="rte-btn" onclick="rteHighlight()" title="螢光筆">🖍</button>
+              <span style="border-left:1px solid var(--border);margin:0 4px"></span>
+              <button type="button" class="rte-btn" data-size="s" onclick="rteFontSize(1)" title="小字" style="font-size:10px">A</button>
+              <button type="button" class="rte-btn" data-size="m" onclick="rteFontSize(3)" title="中字" style="font-size:13px">A</button>
+              <button type="button" class="rte-btn" data-size="l" onclick="rteFontSize(5)" title="大字" style="font-size:16px">A</button>
+            </div>
+            <div class="rte-body" id="f-notes" contenteditable="true" data-placeholder="內部備忘"></div>
+          </div>
+        </div>
         <div class="f-actions">
           <button type="button" class="btn btn-g" onclick="closeTrip()">取消</button>
           <button type="submit" class="btn btn-p">儲存</button>
@@ -1076,6 +1099,23 @@ function daysUntil(s){return Math.ceil((parseD(s)-today())/864e5)}
 function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function dateStr(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function escNl(s){return esc(s).replace(/\n/g,'<br>')}
+function rteCmd(cmd){document.execCommand(cmd,false,null);document.getElementById('f-notes').focus()}
+function rteHighlight(){
+  const sel=window.getSelection();
+  if(!sel.rangeCount)return;
+  const r=sel.getRangeAt(0);
+  const parent=sel.anchorNode.parentElement;
+  if(parent&&parent.tagName==='MARK'){
+    const txt=document.createTextNode(parent.textContent);
+    parent.replaceWith(txt);
+    sel.removeAllRanges();const nr=document.createRange();nr.selectNodeContents(txt);sel.addRange(nr);
+  }else{
+    document.execCommand('insertHTML',false,'<mark>'+sel.toString()+'</mark>');
+  }
+  document.getElementById('f-notes').focus();
+}
+function rteFontSize(size){document.execCommand('fontSize',false,size);document.getElementById('f-notes').focus()}
 function escAttr(s){return esc(s).replace(/"/g,'&quot;')}
 function fmtRange(s,e){
   if(!e||s===e)return fmtDate(s);
@@ -2466,7 +2506,7 @@ function render(){
       }
       const ptCollapseId='pt-collapse-'+t.id;
 
-      let notesH=t.notes?`<span style="font-size:12px;color:var(--text-2)">${esc(t.notes)}</span>`:'<span style="color:var(--text-muted);font-size:12px">無備註</span>';
+      let notesH=t.notes?`<div style="font-size:12px;color:var(--text-2);line-height:1.6;white-space:pre-wrap;word-break:break-word" class="notes-content">${t.notesHtml||escNl(t.notes)}</div>`:'<span style="color:var(--text-muted);font-size:12px">無備註</span>';
 
       const expenses=(lodgeTotalCost)+(t.mealCost||mealCalcTotal)+(t.charterCost||0)+(t.shuttleCost||0)+(t.insuranceCost||0)+(t.guideFee||0);
       const tripFeeTotal=(t.tripFees&&t.tripFees.length)?t.tripFees.reduce((s,f)=>s+(f.fee||0)*(f.count||0),0):(t.tripFee||0)*reg;
@@ -2588,7 +2628,7 @@ function toggleExpandAll(){
   render();
 }
 
-async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';showOv('ov-trip')}
+async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip')}
 async function openEdit(id){
   if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
@@ -2596,7 +2636,7 @@ async function openEdit(id){
   document.getElementById('f-name').value=t.name;document.getElementById('f-date').value=t.date;
   document.getElementById('f-date-end').value=t.dateEnd||t.date;
   document.getElementById('f-dead').value=t.deadline;document.getElementById('f-reg').value=t.registered;
-  document.getElementById('f-cap').value=t.capacity;document.getElementById('f-notes').value=t.notes||'';
+  document.getElementById('f-cap').value=t.capacity;document.getElementById('f-notes').innerHTML=t.notesHtml||escNl(t.notes||'');
   document.getElementById('f-lodge-notes').value=t.lodgeNotes||'';document.getElementById('f-meal-notes').value=t.mealNotes||'';
   document.getElementById('f-insurance-notes').value=t.insuranceNotes||'';
   document.getElementById('f-apply-status').value=t.applyStatus||'notApplied';document.getElementById('f-apply-status-notes').value=t.applyStatusNotes||'';
@@ -2622,7 +2662,8 @@ async function openEdit(id){
 function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
-  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:document.getElementById('f-notes').value.trim(),lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim()};
+  const _notesEl=document.getElementById('f-notes');const _notesHtml=_notesEl.innerHTML.trim();const _notesTxt=_notesEl.textContent.trim();
+  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:_notesTxt,notesHtml:_notesTxt?_notesHtml:'',lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim()};
   data.departure={location:document.getElementById('f-dep-location').value.trim(),time:document.getElementById('f-dep-time').value.trim(),notes:document.getElementById('f-dep-notes').value.trim()};
   data.charterDetail={contacts:collectCharterContacts(),qty:document.getElementById('f-charter-qty').value.trim()};
   data.tripFees=collectTripFees();
