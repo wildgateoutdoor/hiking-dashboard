@@ -767,7 +767,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <button type="button" class="btn btn-s" onclick="addMealRow()" style="margin-top:6px">＋ 新增餐食</button>
         </details>
         <details class="f-section" open>
-          <summary>包租車</summary>
+          <summary>訂包車</summary>
           <div class="f-pair">
             <div class="f-row"><label for="f-charter-cost">費用</label><input id="f-charter-cost" type="number" min="0" placeholder="例：8000"></div>
             <div class="f-row"><label for="f-charter-qty">數量</label><input id="f-charter-qty" type="text" placeholder="例：9人座x2台"></div>
@@ -3155,11 +3155,33 @@ async function exportCheckedToWord(){
       for(const m of md)mRows.push(new TableRow({children:[txtCell(m.date||''),txtCell(mealLabels[m.mealType]||m.mealType),txtCell(m.restaurant||''),txtCell(String(m.quantity||0)),txtCell(m.notes||'')]}));
       children.push(new Table({rows:mRows,width:{size:100,type:WidthType.PERCENTAGE}}));
     }
-    if(cd2.time||cd2.contact||cd2.qty){
-      children.push(new Paragraph({children:[new TextRun({text:'包租車',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
-      const cRows=[new TableRow({children:[hdrCell('出發時間'),hdrCell('聯絡窗口'),hdrCell('數量')]})];
-      cRows.push(new TableRow({children:[txtCell(cd2.time||''),txtCell(cd2.contact||''),txtCell(cd2.qty||'')]}));
+    const charterContacts=(cd2.contacts||[]).filter(Boolean);
+    if(t.charterCost||cd2.qty||charterContacts.length){
+      children.push(new Paragraph({children:[new TextRun({text:'訂包車',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
+      const cRows=[new TableRow({children:[hdrCell('費用'),hdrCell('數量'),hdrCell('聯繫窗口')]})];
+      cRows.push(new TableRow({children:[txtCell(t.charterCost?'$'+t.charterCost.toLocaleString():''),txtCell(cd2.qty||''),txtCell(charterContacts.join('、')||'')]}));
       children.push(new Table({rows:cRows,width:{size:100,type:WidthType.PERCENTAGE}}));
+    }
+    const sd=t.shuttleDetail||{};const shuttleContacts=(sd.contacts||[]).filter(Boolean);
+    if(t.shuttleCost||sd.qty||shuttleContacts.length){
+      children.push(new Paragraph({children:[new TextRun({text:'當地接駁',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
+      const sRows=[new TableRow({children:[hdrCell('費用'),hdrCell('數量'),hdrCell('聯繫窗口')]})];
+      sRows.push(new TableRow({children:[txtCell(t.shuttleCost?'$'+t.shuttleCost.toLocaleString():''),txtCell(sd.qty||''),txtCell(shuttleContacts.join('、')||'')]}));
+      children.push(new Table({rows:sRows,width:{size:100,type:WidthType.PERCENTAGE}}));
+    }
+    const eqRenters=t.equipRenters||[];
+    if(eqRenters.length){
+      children.push(new Paragraph({children:[new TextRun({text:'裝備租借',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
+      const eRows=[new TableRow({children:[hdrCell('租借人'),hdrCell('租借項目'),hdrCell('數量')]})];
+      for(const r of eqRenters){for(const ri of(r.rentals||[])){eRows.push(new TableRow({children:[txtCell(r.name||''),txtCell(ri.item||''),txtCell(String(ri.qty||0))]}))}}
+      children.push(new Table({rows:eRows,width:{size:100,type:WidthType.PERCENTAGE}}));
+    }
+    const ptBuyers=t.porterBuyers||[];const ptTotal=(t.porter||{}).weight||ptBuyers.reduce((s,b)=>s+b.weight,0);
+    if(ptBuyers.length){
+      children.push(new Paragraph({children:[new TextRun({text:`代揹服務（總重量 ${ptTotal} kg）`,bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
+      const pRows=[new TableRow({children:[hdrCell('購買人'),hdrCell('重量 (kg)'),hdrCell('天數')]})];
+      for(const b of ptBuyers){pRows.push(new TableRow({children:[txtCell(b.name||''),txtCell(String(b.weight||0)),txtCell(String(b.days||1))]}))}
+      children.push(new Table({rows:pRows,width:{size:100,type:WidthType.PERCENTAGE}}));
     }
     sections.push({properties:{},children});
   }
