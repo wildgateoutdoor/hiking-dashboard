@@ -442,7 +442,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .login-box{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:34px 28px;width:100%;max-width:360px;text-align:center}
 .login-box h1{font-family:var(--font-d);font-size:22px;font-weight:700;margin-bottom:6px;color:var(--text)}
 .login-box p{font-size:14px;color:var(--text-muted);margin-bottom:20px}
-.login-box input{width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);font:400 15px var(--font);color:var(--text);margin-bottom:14px}
+.pw-wrap{position:relative;margin-bottom:14px}
+.login-box input{width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);font:400 15px var(--font);color:var(--text)}
+.pw-wrap input{padding-right:40px;margin-bottom:0}
+.pw-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;display:flex;align-items:center}
+.pw-eye:hover{color:var(--text)}
 .login-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
 .login-box .btn{width:100%;justify-content:center;padding:11px}
 .login-err{color:var(--red);font-size:13px;margin-top:12px;min-height:18px}
@@ -546,7 +550,13 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <div class="login-box">
     <h1>入野門活動管理</h1>
     <p>請輸入密碼登入</p>
-    <input type="password" id="login-pw" placeholder="密碼" autocomplete="current-password">
+    <div class="pw-wrap">
+      <input type="password" id="login-pw" placeholder="密碼" autocomplete="current-password">
+      <button type="button" class="pw-eye" id="pw-eye" tabindex="-1" aria-label="顯示密碼">
+        <svg id="eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg id="eye-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </button>
+    </div>
     <button class="btn btn-p" id="login-btn">登入</button>
     <div class="login-err" id="login-err"></div>
   </div>
@@ -2288,7 +2298,7 @@ async function sha256hex(s){const b=await crypto.subtle.digest('SHA-256',new Tex
 async function ensureEditor(){return true}
 async function tryLogin(){
   const el=document.getElementById('login-pw');const err=document.getElementById('login-err');
-  const pw=el.value;
+  const pw=el.value.trim();
   if(!pw){err.textContent='請輸入密碼';return}
   let h;
   try{h=await sha256hex(pw)}
@@ -3204,6 +3214,13 @@ document.addEventListener('click',closeInfo);
 // 登入流程：進站先驗證密碼，登入後才載入內容
 document.getElementById('login-btn').addEventListener('click',tryLogin);
 document.getElementById('login-pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
+document.getElementById('pw-eye').addEventListener('click',()=>{
+  const inp=document.getElementById('login-pw');const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  document.getElementById('eye-open').style.display=show?'none':'';
+  document.getElementById('eye-closed').style.display=show?'':'none';
+  inp.focus();
+});
 let authed=false;try{authed=localStorage.getItem('hk-auth')==='1'}catch{}
 if(authed)enterApp();
 else{try{document.getElementById('login-pw').focus()}catch{}}
