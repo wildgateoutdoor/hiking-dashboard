@@ -215,7 +215,12 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .detail-grid6 .dcol:last-child{border-right:none;padding-right:0}
 .detail-grid6 .lm-row{flex-wrap:nowrap}
 .detail-grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:0;font-size:13px}
-.detail-grid-top .dcol{display:flex;flex-direction:column;gap:10px;min-width:0;padding:0 14px;border-right:1px dashed var(--border)}
+.detail-grid-top .dcol{display:flex;flex-direction:column;min-width:0;padding:0 14px;border-right:1px dashed var(--border)}
+.detail-grid-top .dcol>.detail-item{padding:10px 0}.detail-grid-top .dcol>.detail-item:first-child{padding-top:0}
+.dcol-split{display:flex;flex-direction:column;height:100%}
+.dcol-half{flex:1;padding:10px 0;display:flex;flex-direction:column;gap:6px}
+.dcol-half:first-child{padding-top:0}
+.dcol-half+.dcol-half{border-top:1px dashed var(--border-sub);padding-top:10px}
 .detail-grid-top .dcol:first-child{padding-left:0}
 .detail-grid-top .dcol:last-child{border-right:none;padding-right:0}
 .detail-grid-top .lm-row{flex-wrap:nowrap}
@@ -223,8 +228,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .detail-grid-bottom .dcol{display:flex;flex-direction:column;gap:10px;min-width:0;padding:0 14px;border-right:1px dashed var(--border)}
 .detail-grid-bottom .dcol:first-child{padding-left:0}
 .detail-grid-bottom .dcol:last-child{border-right:none;padding-right:0}
-.sum-exp{color:#6480e2;font-size:12px;font-weight:700;margin-top:4px;cursor:help;display:inline-block}
-.sum-inc{color:#e28929;font-size:12px;font-weight:700;margin-top:4px;cursor:help;display:inline-block}
+.sum-exp{color:#6480e2;font-size:12px;font-weight:700;margin-top:4px;display:inline-block}
+.sum-inc{color:#e28929;font-size:12px;font-weight:700;margin-top:4px;display:inline-block}
 .collapse-toggle{cursor:pointer;font-size:11px;color:var(--accent);margin-top:6px;user-select:none;display:inline-flex;align-items:center;gap:3px}
 .collapse-toggle::before{content:'▶';font-size:8px;transition:transform .15s}
 .collapse-toggle.open::before{transform:rotate(90deg)}
@@ -2336,7 +2341,7 @@ function render(){
     let applyDeadH,applyCdH,applyCdC,applyStatH;
     const applied=Math.min(t.applied||0,t.registered||0);
     if(isPast){
-      applyDeadH='—';applyCdH='已結束';applyCdC='cd-past';applyStatH='<span class="pill pill-done">已結束</span>';
+      applyDeadH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">—</span>';applyCdH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">已結束</span>';applyCdC='';applyStatH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">已結束</span>';
     }else if(ai.state==='unset'){
       applyDeadH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';applyCdH='—';applyCdC='cd-past';
       applyStatH='<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
@@ -2386,7 +2391,7 @@ function render(){
 
       const nights=nightsOf(t);
       const lodgeTotalCost=(t.lodging||[]).reduce((s,l)=>s+(l.cost||0),0);
-      const lodgeSumH=lodgeTotalCost?`<span class="sum-exp" title="${(t.lodging||[]).filter(l=>l.cost).map((l,i)=>'第'+(i+1)+'晚 $'+l.cost.toLocaleString()).join('、')}">SUM（${lodgeTotalCost.toLocaleString()}）</span>`:'';
+      const lodgeSumH=lodgeTotalCost?`<span class="sum-exp">SUM（${lodgeTotalCost.toLocaleString()}）</span>`:'';
 
       const mealTypes={earlyBreakfast:'早早餐',breakfast:'早餐',brunch:'早午餐',lunch:'午餐',dinner:'晚餐'};
       const md=t.mealDetails||[];
@@ -2472,11 +2477,11 @@ function render(){
       const insCompanyH=t.insuranceNotes?`<div style="font-size:13px;font-weight:700;margin-bottom:4px">${esc(t.insuranceNotes)}</div>`:'';
 
       detailRow=`<tr class="detail-row"><td></td><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}">`
-        +`<div class="detail-grid-top" style="grid-template-columns:1.3fr 1.2fr 1fr 1fr">`
-        +`<div class="dcol"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b>${applyNotesH}</div><div class="detail-item lm-item" style="margin-top:10px"><b>住宿 ${lodgeSumH}</b>${lm.lodge}</div></div>`
+        +`<div class="detail-grid-top">`
+        +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b>${applyNotesH}</div></div><div class="dcol-half"><div class="detail-item lm-item"><b>住宿 ${lodgeSumH}</b>${lm.lodge}</div></div></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b style="margin-bottom:12px">餐食 ${mealSumH}</b>${mealDetailsH||'<div style="font-size:12px;color:var(--text-muted)">未設定</div>'}</div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>訂包車 ${charterSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div>${charterInfoH}</div><div class="detail-item" style="margin-top:14px"><b>當地接駁 ${shuttleSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dShB.cls}" onclick="cycleShuttleBook('${t.id}')">${_dShB.label}</button><button class="stbtn ${_dShP.cls}" onclick="cycleShuttlePay('${t.id}')">${_dShP.label}</button></div>${shuttleInfoH}</div></div>`
-        +`<div class="dcol"><div class="detail-item"><b>保險 ${insSumH}</b>${insCompanyH}<div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div><div class="detail-item" style="margin-top:14px"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div>`
+        +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>訂包車 ${charterSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div>${charterInfoH}</div></div><div class="dcol-half"><div class="detail-item"><b>當地接駁 ${shuttleSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dShB.cls}" onclick="cycleShuttleBook('${t.id}')">${_dShB.label}</button><button class="stbtn ${_dShP.cls}" onclick="cycleShuttlePay('${t.id}')">${_dShP.label}</button></div>${shuttleInfoH}</div></div></div></div>`
+        +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>保險 ${insSumH}</b>${insCompanyH}<div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div></div><div class="dcol-half"><div class="detail-item"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div></div></div>`
         +`</div>`
         +`<div class="detail-grid-bottom">`
         +`<div class="dcol"><div class="detail-item"><b>裝備租借統計</b><div style="font-size:12px;margin-top:4px">所有租借項目｜${eqItemSummary}</div><div style="font-size:12px;margin-top:4px">所有租借收入｜<span class="eq-collapse-toggle${eqRenterH?' ':' '}" onclick="toggleCollapse2('${eqCollapseId}',this)"><span style="color:#e28929;font-weight:700">SUM（${eqTotalInc.toLocaleString()}）</span>${eqRenterH?'<span class="arr">▶</span>':''}</span></div>${eqRenterH?`<div class="eq-collapse-body" id="${eqCollapseId}" hidden>${eqRenterH}</div>`:''}</div></div>`
@@ -3015,9 +3020,14 @@ async function exportCheckedToWord(){
     const t=trips.find(x=>x.id===id);if(!t)continue;
     const dep=t.departure||{};const cd2=t.charterDetail||{};
     const children=[];
-    children.push(new Paragraph({children:[new TextRun({text:'入野門出團表',bold:true,size:32,font:'Microsoft JhengHei'})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
-    children.push(new Paragraph({children:[new TextRun({text:'統編 96628212',size:20,font:'Microsoft JhengHei'})],spacing:{after:40}}));
-    if(t.guide)children.push(new Paragraph({children:[new TextRun({text:`嚮導：${t.guide}`,size:20,font:'Microsoft JhengHei'})],spacing:{after:40}}));
+    const _dFmtS=t.date?(new Date(t.date).getMonth()+1)+'/'+new Date(t.date).getDate():'';
+    const _dFmtE=t.dateEnd&&t.dateEnd!==t.date?(new Date(t.dateEnd).getMonth()+1)+'/'+new Date(t.dateEnd).getDate():'';
+    const _dRange=_dFmtE?`${_dFmtS}~${_dFmtE}`:_dFmtS;
+    const _docTitle=`入野門出團表-${t.name} ${_dRange}`;
+    children.push(new Paragraph({children:[new TextRun({text:_docTitle,bold:true,size:32,font:'Microsoft JhengHei'})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
+    children.push(new Paragraph({children:[new TextRun({text:'公司名稱　山澗戶外有限公司',size:20,font:'Microsoft JhengHei'})],spacing:{after:40}}));
+    children.push(new Paragraph({children:[new TextRun({text:'統編　96628212',size:20,font:'Microsoft JhengHei'})],spacing:{after:40}}));
+    if(t.guide)children.push(new Paragraph({children:[new TextRun({text:`嚮導　${t.guide}`,size:20,font:'Microsoft JhengHei'})],spacing:{after:40}}));
     children.push(new Paragraph({children:[new TextRun({text:`活動名稱：${t.name}`,bold:true,size:24,font:'Microsoft JhengHei'})],spacing:{before:100,after:100}}));
     children.push(new Paragraph({children:[new TextRun({text:'出發資訊',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:100,after:60}}));
     const depRows=[new TableRow({children:[hdrCell('出團日期'),hdrCell('出發地點'),hdrCell('出發時間')]})];
@@ -3052,7 +3062,15 @@ async function exportCheckedToWord(){
   const doc=new Document({sections});
   try{
     const blob=await Packer.toBlob(doc);
-    const fn=`入野門出團表_${new Date().toISOString().slice(0,10)}.docx`;
+    const _fnTrips=[...checkedIds].map(cid=>trips.find(x=>x.id===cid)).filter(Boolean);
+    const _fnT=_fnTrips[0];
+    let fn='入野門出團表.docx';
+    if(_fnT){
+      const _fS=_fnT.date?(new Date(_fnT.date).getMonth()+1)+'/'+new Date(_fnT.date).getDate():'';
+      const _fE=_fnT.dateEnd&&_fnT.dateEnd!==_fnT.date?(new Date(_fnT.dateEnd).getMonth()+1)+'/'+new Date(_fnT.dateEnd).getDate():'';
+      const _fD=_fE?`${_fS}至${_fE}`:_fS;
+      fn=`入野門出團表-${_fnT.name}-${_fD}.docx`;
+    }
     if(typeof saveAs!=='undefined'){saveAs(blob,fn)}
     else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
     toast('已匯出 Word 檔案');
