@@ -257,13 +257,13 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .rte-btn{background:none;border:1px solid transparent;border-radius:4px;padding:3px 7px;font-size:12px;cursor:pointer;color:var(--text);line-height:1.3}
 .rte-btn:hover{background:var(--surface-hover);border-color:var(--border)}
 .rte-btn.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-.rte-btn[data-size]{font-weight:600}
 .rte-body{min-height:80px;max-height:200px;overflow-y:auto;padding:8px 10px;font-size:13px;line-height:1.6;color:var(--text);outline:none}
 .rte-body:empty::before{content:attr(data-placeholder);color:var(--text-muted)}
 .rte-body mark{background:#fef3cd;padding:0 2px;border-radius:2px}
 @media(max-width:1200px){.detail-grid6{grid-template-columns:repeat(3,1fr)}.detail-grid6 .dcol:nth-child(3){border-right:none}.detail-grid-top{grid-template-columns:repeat(2,1fr)}.detail-grid-top .dcol:nth-child(2n){border-right:none}.detail-grid-bottom{grid-template-columns:repeat(2,1fr)}.detail-grid-bottom .dcol:nth-child(2n){border-right:none}}
 @media(max-width:900px){.detail-grid3{grid-template-columns:1fr 1fr}.detail-grid6{grid-template-columns:1fr 1fr}.detail-grid6 .dcol:nth-child(2n){border-right:none}.detail-grid-top{grid-template-columns:1fr}.detail-grid-top .dcol{border-right:none;padding:10px 0;border-bottom:1px dashed var(--border)}.detail-grid-top .dcol:last-child{border-bottom:none}.detail-grid-bottom{grid-template-columns:1fr}.detail-grid-bottom .dcol{border-right:none;padding:10px 0;border-bottom:1px dashed var(--border)}.detail-grid-bottom .dcol:last-child{border-bottom:none}}
 .detail-item b{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.notes-content b{display:inline;font-size:inherit;font-weight:700;color:inherit;text-transform:none;letter-spacing:normal;margin-bottom:0}
 .detail-item a{color:var(--accent)}
 .detail-item span:not(.sum-exp){color:var(--text-2)}
 /* 住宿／餐食狀態 */
@@ -806,10 +806,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
               <button type="button" class="rte-btn" onclick="rteCmd('bold')" title="粗體"><b>B</b></button>
               <button type="button" class="rte-btn" onclick="rteCmd('strikeThrough')" title="刪除線"><s>S</s></button>
               <button type="button" class="rte-btn" onclick="rteHighlight()" title="螢光筆">🖍</button>
-              <span style="border-left:1px solid var(--border);margin:0 4px"></span>
-              <button type="button" class="rte-btn" data-size="s" onclick="rteFontSize(1)" title="小字" style="font-size:10px">A</button>
-              <button type="button" class="rte-btn" data-size="m" onclick="rteFontSize(3)" title="中字" style="font-size:13px">A</button>
-              <button type="button" class="rte-btn" data-size="l" onclick="rteFontSize(5)" title="大字" style="font-size:16px">A</button>
             </div>
             <div class="rte-body" id="f-notes" contenteditable="true" data-placeholder="內部備忘"></div>
           </div>
@@ -1115,7 +1111,6 @@ function rteHighlight(){
   }
   document.getElementById('f-notes').focus();
 }
-function rteFontSize(size){document.execCommand('fontSize',false,size);document.getElementById('f-notes').focus()}
 function escAttr(s){return esc(s).replace(/"/g,'&quot;')}
 function fmtRange(s,e){
   if(!e||s===e)return fmtDate(s);
