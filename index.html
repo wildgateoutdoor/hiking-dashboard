@@ -180,6 +180,7 @@ tbody tr:not(.detail-row):hover td:last-child{background:var(--surface-hover)}
 .pill-done{background:var(--surface-alt);color:var(--text-muted)}
 .pill-none{background:var(--accent-bg);color:var(--accent)}.pill-apply{background:var(--amber-bg);color:var(--amber)}
 .pill-waiting{background:var(--purple-bg);color:var(--purple)}
+.pill-private{background:#e0f0ff;color:#2b6cb0}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
 .cd{font-weight:600;font-size:14px;white-space:nowrap}
@@ -193,6 +194,7 @@ select.pill.pill-open{background:var(--accent-bg);color:var(--accent)}
 select.pill.pill-apply{background:var(--amber-bg);color:var(--amber)}
 select.pill.pill-full{background:var(--red-bg);color:var(--red)}
 select.pill.pill-waiting{background:var(--purple-bg);color:var(--purple)}
+select.pill.pill-private{background:#e0f0ff;color:#2b6cb0}
 select.pill.pill-done{background:var(--surface-alt);color:var(--text-muted)}
 
 .acts{display:flex;gap:4px}
@@ -299,7 +301,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .cspan-bar{background:var(--accent);color:var(--accent-on);font-size:10px;font-weight:600;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .cspan-bar.bar-rl{border-top-left-radius:8px;border-bottom-left-radius:8px}
 .cspan-bar.bar-rr{border-top-right-radius:8px;border-bottom-right-radius:8px}
+.cal-day{cursor:pointer}
 .cal-day:hover{background:var(--surface-hover)}.cal-day.other{opacity:.35}.cal-day.today{background:var(--accent-bg)}
+.cal-add-popup{position:fixed;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:6px;display:flex;flex-direction:column;gap:2px}
+.cal-add-popup button{background:none;border:none;padding:8px 16px;font:500 13px var(--font);color:var(--text);cursor:pointer;border-radius:var(--r);text-align:left;white-space:nowrap}
+.cal-add-popup button:hover{background:var(--surface-hover)}
 .cal-num{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;margin-bottom:4px}
 .cal-today-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-on);margin:-2px}
 .cal-ev{font-size:11px;line-height:1.4;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
@@ -730,6 +736,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
         <div class="f-row"><label for="f-status">狀態</label><select id="f-status">
           <option value="reg">報名中</option>
           <option value="apply">申請中</option>
+          <option value="private">包團</option>
           <option value="notFormed">未成團</option>
           <option value="waiting">等待出團</option>
           <option value="done">已結束</option>
@@ -1040,6 +1047,7 @@ const FILTERS=[{key:'all',label:'全部'},{key:'soon',label:'即將截止'},{key
 const STATUS_OPTS=[
   {key:'reg',label:'報名中',cls:'pill-open'},
   {key:'apply',label:'申請中',cls:'pill-apply'},
+  {key:'private',label:'包團',cls:'pill-private'},
   {key:'notFormed',label:'未成團',cls:'pill-full'},
   {key:'waiting',label:'等待出團',cls:'pill-waiting'},
   {key:'done',label:'已結束',cls:'pill-done'},
@@ -1950,11 +1958,32 @@ function renderCal(){
         }
         barsH+='</div>';
       }
-      html+=`<div class="cal-day${c.other?' other':''}${isToday?' today':''}"><div class="cal-num">${numH}</div>${barsH}${renderCalEvs(getEventsForDate(c.ds),c.ds)}</div>`;
+      html+=`<div class="cal-day${c.other?' other':''}${isToday?' today':''}" onclick="calDayClick(event,'${c.ds}')"><div class="cal-num">${numH}</div>${barsH}${renderCalEvs(getEventsForDate(c.ds),c.ds)}</div>`;
     });
   }
   grid.innerHTML=html;
 }
+
+let _calPopup=null;
+function closeCalPopup(){if(_calPopup){_calPopup.remove();_calPopup=null}}
+function calDayClick(evt,ds){
+  if(evt.target.closest('.cal-ev'))return;
+  evt.stopPropagation();closeCalPopup();
+  const pop=document.createElement('div');pop.className='cal-add-popup';
+  pop.innerHTML=`<button onclick="event.stopPropagation();closeCalPopup();calAddTrip('${ds}')">＋ 新增活動</button><button onclick="event.stopPropagation();closeCalPopup();calAddPromo('${ds}')">＋ 新增宣傳</button>`;
+  pop.addEventListener('click',e=>e.stopPropagation());
+  const rect=evt.currentTarget.getBoundingClientRect();
+  let left=rect.left,top=rect.bottom+4;
+  document.body.appendChild(pop);
+  if(left+pop.offsetWidth>window.innerWidth-8)left=window.innerWidth-pop.offsetWidth-8;
+  if(top+pop.offsetHeight>window.innerHeight-8)top=rect.top-pop.offsetHeight-4;
+  if(left<8)left=8;if(top<8)top=8;
+  pop.style.left=left+'px';pop.style.top=top+'px';
+  _calPopup=pop;
+}
+function calAddTrip(ds){openAdd();document.getElementById('f-date').value=ds;document.getElementById('f-date-end').value=ds}
+function calAddPromo(ds){openMktgEvent();document.getElementById('me-date').value=ds}
+document.addEventListener('click',closeCalPopup);
 
 function renderCalEvs(evs,ds){
   let html='';const max=3;
@@ -2629,7 +2658,7 @@ function toggleExpandAll(){
   render();
 }
 
-async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip')}
+async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0)}
 async function openEdit(id){
   if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
@@ -2658,7 +2687,7 @@ async function openEdit(id){
   renderShuttleContacts(t);
   renderTripFees(t);
   document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');
-  showOv('ov-trip');
+  showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0);
 }
 function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
