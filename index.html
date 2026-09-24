@@ -1074,7 +1074,7 @@ const DEF_MKTG=[
 // ── Supabase 設定 ──
 const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
-const EDIT_PW_HASH='d54e054acc8dab3375095459244c8ed7da5d4a8f3069e069fc66089f0f11b0fa';
+const EDIT_PW_HASH='3f7cfd02d51d09c322fc3c27bdce98e87aabb9847683262e67be13710dfb90b7';
 
 const DEF_TASK_REMINDERS=[
   {id:'tr1',name:'訂包車時間',daysBefore:[14]},
@@ -2326,7 +2326,7 @@ async function sha256hex(s){const b=await crypto.subtle.digest('SHA-256',new Tex
 async function ensureEditor(){return true}
 async function tryLogin(){
   const el=document.getElementById('login-pw');const err=document.getElementById('login-err');
-  const pw=el.value.trim();
+  const pw=el.value.trim().normalize('NFKC');
   if(!pw){err.textContent='請輸入密碼';return}
   let h;
   try{h=await sha256hex(pw)}
