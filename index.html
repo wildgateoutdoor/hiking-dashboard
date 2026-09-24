@@ -2442,7 +2442,8 @@ function render(){
     const isOpen=expandedIds.has(t.id);
     const expandBtn=`<button class="act-btn expand${isOpen?' open':''}" onclick="toggleExpand('${t.id}')" title="更多資訊"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
     const guideH=t.guide?esc(t.guide):'<span style="color:var(--text-muted)">—</span>';
-    const deadlineH=fmtDate(t.deadline);
+    const deadlinePast=t.deadline&&daysUntil(t.deadline)<0;
+    const deadlineH=deadlinePast?`<span style="color:var(--text-muted)">${fmtDate(t.deadline)}</span>`:fmtDate(t.deadline);
     const excelMainH=t.excelLink?`<a href="${escAttr(t.excelLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟 ↗</a>`:'<span style="color:var(--text-muted);font-weight:normal;font-size:12px">未設定</span>';
     const _mg=getMinGroup(t);const _mgH=_mg&&(t.registered||0)<_mg?`<div style="font-size:10px;color:var(--red);margin-top:2px">未達最低 ${_mg} 人</div>`:'';
     const regCapH=`<div class="cap"><div class="reg-row"><button class="reg-btn" onclick="adjReg('${t.id}',-1)" ${t.registered<=0?'disabled':''}>−</button><span class="cap-nums ${isFull?'cap-full':pct>=0.8?'cap-high':''}" onclick="editReg('${t.id}')" style="cursor:pointer" title="點擊輸入">${t.registered} / ${t.capacity}</span><button class="reg-btn" onclick="adjReg('${t.id}',1)" ${isFull?'disabled':''}>+</button></div><div class="cap-bar"><div class="cap-fill" style="width:${pct*100}%;background:${barC}"></div></div>${_mgH}</div>`;
