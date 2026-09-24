@@ -2055,6 +2055,7 @@ const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgvi
 const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance'};
 function setView(mode){
   viewMode=mode;
+  try{localStorage.setItem('hk-view',mode)}catch{}
   VIEW_IDS.forEach(v=>{
     const el=document.getElementById('view-'+v);if(el)el.style.display=v===mode?'block':'none';
   });
@@ -2339,6 +2340,7 @@ function enterApp(){
   const g=document.getElementById('login-gate');if(g)g.hidden=true;
   if(appStarted)return;appStarted=true;
   loadTaskReminders();initCal();render();initDB();
+  try{const sv=localStorage.getItem('hk-view');if(sv&&VIEW_IDS.includes(sv))setView(sv)}catch{}
 }
 function logout(){try{localStorage.removeItem('hk-auth')}catch{}location.reload()}
 
