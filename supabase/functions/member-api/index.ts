@@ -4,7 +4,7 @@
 //         → 會員用 Google 登入後，以 token 裡的 email 找到自己的資料
 // 後台端：{ action:'admin:*', ... } + header x-admin-pw → 驗證後台密碼後讀寫所有會員
 //
-// 金流規則：所有儲值金／回饋金異動都呼叫資料庫函式（member_txn、member_purchase_trip …），
+// 金流規則：所有儲值金／點數異動都呼叫資料庫函式（member_txn、member_purchase_trip …），
 // 由資料庫在單一交易內鎖定、檢查餘額、寫流水帳、更新快照。這裡不做任何金額運算，金額一律以字串傳遞。
 //
 // 後台密碼：比對 SHA-256，與 index.html 的 EDIT_PW_HASH 相同（該值本來就公開在網頁裡）。
@@ -165,7 +165,7 @@ async function admin(action: string, b: Record<string, any>) {
 
     case "admin:delete": {
       const { count } = await db.from("member_ledger").select("id", { count: "exact", head: true }).eq("member_id", b.id);
-      if (count) throw new HttpError(400, "這位會員已有儲值金或回饋金紀錄，為了保留帳務紀錄不能刪除");
+      if (count) throw new HttpError(400, "這位會員已有儲值金或點數紀錄，為了保留帳務紀錄不能刪除");
       must(await db.from("members").delete().eq("id", b.id));
       return { ok: true };
     }
@@ -179,7 +179,7 @@ async function admin(action: string, b: Record<string, any>) {
       return { ok: true };
     }
 
-    // 儲值 / 儲值金扣款 / 發放回饋金 / 扣除回饋金
+    // 儲值 / 儲值金扣款 / 發放點數 / 扣除點數
     case "admin:txn": {
       if (!["topup", "spend", "grant", "deduct"].includes(b.type)) throw new HttpError(400, "不支援的交易類型");
       const entry = must(await db.rpc("member_txn", {
@@ -202,13 +202,13 @@ async function admin(action: string, b: Record<string, any>) {
         p_trip_date: dateOrNull(b.trip_date), p_trip_date_end: dateOrNull(b.trip_date_end),
         p_price: optAmountStr(b.price, "行程金額"), p_note: strOrNull(b.note),
         p_pay_stored: optAmountStr(b.pay_stored, "儲值金支付金額"),
-        p_pay_rebate: optAmountStr(b.pay_rebate, "回饋金折抵金額"),
+        p_pay_rebate: optAmountStr(b.pay_rebate, "點數折抵"),
         p_key: idemKey(b.key),
       }));
       return { trip };
     }
 
-    // 取消行程：自動沖正這個行程的扣款（退回儲值金／回饋金）
+    // 取消行程：自動沖正這個行程的扣款（退回儲值金／點數）
     case "admin:cancelTrip": {
       const trip = must(await db.rpc("member_cancel_trip", { p_trip: b.id }));
       return { trip };
