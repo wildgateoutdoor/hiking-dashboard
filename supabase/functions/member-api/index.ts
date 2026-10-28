@@ -4,8 +4,8 @@
 //         → 會員用 Google 登入後，以 token 裡的 email 找到自己的資料
 // 後台端：{ action:'admin:*', ... } + header x-admin-pw → 驗證後台密碼後讀寫所有會員
 //
-// 需要設定的 secret：
-//   ADMIN_PW_HASH    後台密碼的 SHA-256（與 index.html 的 EDIT_PW_HASH 相同）
+// 後台密碼：比對 SHA-256，與 index.html 的 EDIT_PW_HASH 相同（該值本來就公開在網頁裡）。
+//   改密碼時兩邊要一起改；也可以用 secret ADMIN_PW_HASH 覆蓋。
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 由 Supabase 自動提供。
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -75,9 +75,10 @@ async function memberMe(req: Request) {
 }
 
 // ── 後台 ──
+const DEFAULT_ADMIN_PW_HASH = "3f7cfd02d51d09c322fc3c27bdce98e87aabb9847683262e67be13710dfb90b7";
 async function checkAdmin(req: Request) {
   const pw = (req.headers.get("x-admin-pw") || "").trim().normalize("NFKC");
-  const want = (Deno.env.get("ADMIN_PW_HASH") || "").toLowerCase();
+  const want = (Deno.env.get("ADMIN_PW_HASH") || DEFAULT_ADMIN_PW_HASH).toLowerCase();
   if (!pw || !want || !sameStr(await sha256hex(pw), want)) throw new HttpError(401, "後台密碼錯誤");
 }
 

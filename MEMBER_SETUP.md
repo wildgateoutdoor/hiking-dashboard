@@ -12,9 +12,9 @@
 會員是用 **email** 對應的：後台可以先用 Gmail 建好會員、輸入儲值和行程，會員之後用同一個 Google 帳號登入就會看到。
 沒先建的人登入後也會自動變成「一般會員」。
 
-## 1. 建立資料表
+## 1. 建立資料表（已完成）
 
-Supabase → SQL Editor，貼上 `supabase/migrations/20261028000000_members.sql` 的內容並執行。
+`supabase/migrations/20261028000000_members.sql` 已套用到 hiking-dashboard 專案。
 
 ## 2. 建立 Google OAuth 用戶端
 
@@ -31,27 +31,16 @@ Supabase → SQL Editor，貼上 `supabase/migrations/20261028000000_members.sql
 2. Authentication → URL Configuration → **Redirect URLs** 加入 `member.html` 的網址
    （例如 `https://wildgateoutdoor.github.io/hiking-dashboard/member.html`）
 
-## 4. 部署 Edge Function
+## 4. 部署 Edge Function（已完成）
 
-需要安裝 [Supabase CLI](https://supabase.com/docs/guides/cli)，在這個資料夾執行：
-
-```bash
-supabase login
-```
-
-```bash
-supabase link --project-ref dygxochowbhmdftstgoz
-```
-
-```bash
-supabase secrets set ADMIN_PW_HASH=3f7cfd02d51d09c322fc3c27bdce98e87aabb9847683262e67be13710dfb90b7
-```
+`member-api` 已部署（verify_jwt 關閉，函式自己驗證身分）。之後修改程式後重新部署：
 
 ```bash
 supabase functions deploy member-api --no-verify-jwt
 ```
 
-`ADMIN_PW_HASH` 就是 `index.html` 裡的 `EDIT_PW_HASH`。之後如果改了後台密碼，這裡也要一起改。
+後台密碼比對的是 `index.html` 裡的 `EDIT_PW_HASH`（函式裡有同一個值）。改後台密碼時兩邊要一起改，
+或在 Supabase 設定 secret `ADMIN_PW_HASH` 覆蓋。
 
 ## 5. 給會員的連結
 
