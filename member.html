@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>入野門會員中心</title>
 <link rel="icon" type="image/png" href="favicon.png">
-<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   --brand:#2e3c26;--brand-2:#3f5234;--gold:#dfac10;--gold-bg:#FBF3DA;
@@ -45,8 +45,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .center img{width:72px;height:72px;border-radius:50%}
 .center h1{font-size:20px}
 .center p{color:var(--text-muted);font-size:14px}
-.line-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:8px;border:none;background:#06C755;color:#fff;font:700 15px var(--font);cursor:pointer}
-.line-btn:active{opacity:.85}
+.g-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 24px;border-radius:8px;border:1px solid #DADCE0;background:#fff;color:#3C4043;font:600 15px var(--font);cursor:pointer;text-decoration:none}
+.g-btn svg{width:18px;height:18px}
+.g-btn:active{background:#F1F3F4}
+.p-btn{display:inline-flex;padding:11px 24px;border-radius:8px;border:none;background:var(--brand);color:#F3EFE6;font:600 15px var(--font);cursor:pointer}
+.p-email{font-size:12px;color:var(--text-muted);margin-top:2px;word-break:break-all}
+.hint{font-size:13px;color:var(--text-muted);line-height:1.7;max-width:300px}
 .foot{text-align:center;margin-top:24px}
 .foot button{background:none;border:none;color:var(--text-muted);font:13px var(--font);text-decoration:underline;cursor:pointer}
 .spin{width:28px;height:28px;border:3px solid var(--border-sub);border-top-color:var(--brand);border-radius:50%;animation:sp 0.8s linear infinite}
@@ -58,10 +62,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 
 <script>
 // ── 設定 ──
-const LIFF_ID='YOUR_LIFF_ID';  // LINE Developers → LIFF 分頁的 LIFF ID
 const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
 const API=SB_URL+'/functions/v1/member-api';
+// 用獨立的 storageKey，避免會員登入狀態被同網域的後台 index.html 讀到
+const sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:'hk-member-auth',flowType:'pkce',detectSessionInUrl:true,persistSession:true}}):null;
+const G_ICON='<svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>';
 
 const DAYS=['日','一','二','三','四','五','六'];
 const app=document.getElementById('app');
@@ -82,24 +88,40 @@ function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getM
 function showMsg(title,msg,btn){
   app.innerHTML=`<div class="center"><img src="favicon.png" alt=""><h1>${esc(title)}</h1><p>${esc(msg)}</p>${btn||''}</div>`;
 }
+const RELOAD_BTN='<button class="p-btn" onclick="location.reload()">重新整理</button>';
+function pageUrl(){return location.origin+location.pathname}
 function showLogin(){
-  showMsg('入野門會員中心','用 LINE 登入，查看儲值金與參加過的行程',
-    '<button class="line-btn" onclick="login()">使用 LINE 登入</button>');
+  showMsg('入野門會員中心','用 Google 帳號登入，查看儲值金與參加過的行程',
+    `<button class="g-btn" onclick="login()">${G_ICON}使用 Google 登入</button>`);
 }
-function login(){liff.login({redirectUri:location.href.split('#')[0]})}
-function logout(){liff.logout();location.reload()}
+async function login(){
+  const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:pageUrl(),queryParams:{prompt:'select_account'}}});
+  if(error)showMsg('登入失敗',error.message,RELOAD_BTN);
+}
+async function logout(){await sb.auth.signOut();showLogin()}
 
-async function load(){
-  const idToken=liff.getIDToken();
-  if(!idToken){showLogin();return}
+// Google 不允許在 App 內建瀏覽器（LINE、FB、IG）登入，要請會員改用 Safari / Chrome
+function inAppBrowser(){const ua=navigator.userAgent;return/Line\/|FBAN|FBAV|Instagram/i.test(ua)?(/Line\//i.test(ua)?'line':'other'):''}
+function showInAppHint(){
+  const url=pageUrl();
+  showMsg('請用瀏覽器開啟','Google 登入不支援在 App 內開啟，請點右上角選單，選「用瀏覽器開啟」',
+    `<button class="p-btn" onclick="copyUrl()">複製網址</button><div class="hint" id="copy-hint">${esc(url)}</div>`);
+}
+function copyUrl(){
+  const url=pageUrl();
+  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(
+    ()=>{document.getElementById('copy-hint').textContent='已複製，請貼到 Safari 或 Chrome'},
+    ()=>{document.getElementById('copy-hint').textContent=url});
+}
+
+async function load(session){
   let res,body;
   try{
-    res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'me',idToken})});
+    res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+session.access_token},body:JSON.stringify({action:'me'})});
     body=await res.json();
-  }catch(e){showMsg('連線失敗','請檢查網路後重新整理','<button class="line-btn" onclick="location.reload()">重新整理</button>');return}
-  // ID token 過期 → 重新登入取得新的
-  if(res.status===401){liff.logout();showLogin();return}
-  if(!res.ok){showMsg('讀取失敗',body.error||'請稍後再試','<button class="line-btn" onclick="location.reload()">重新整理</button>');return}
+  }catch(e){showMsg('連線失敗','請檢查網路後重新整理',RELOAD_BTN);return}
+  if(res.status===401){await sb.auth.signOut();showLogin();return}
+  if(!res.ok){showMsg('讀取失敗',body.error||'請稍後再試',RELOAD_BTN);return}
   data=body;render();
 }
 
@@ -124,8 +146,8 @@ function render(){
     <div class="hero"><div class="hero-brand"><img src="favicon.png" alt="">入野門 WILDGATE</div></div>
     <div class="wrap">
       <div class="card profile">
-        ${m.line_picture?`<img class="avatar" src="${esc(m.line_picture)}" alt="">`:'<div class="avatar"></div>'}
-        <div><div class="p-name">${esc(m.real_name||m.line_name||'會員')}</div><span class="tier">${esc(m.tier)}</span></div>
+        ${m.google_picture?`<img class="avatar" src="${esc(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:'<div class="avatar"></div>'}
+        <div style="min-width:0"><div class="p-name">${esc(m.real_name||m.google_name||'會員')}</div><div class="p-email">${esc(m.email)}</div><span class="tier">${esc(m.tier)}</span></div>
       </div>
       <div class="card balance"><div class="bal-label">儲值金餘額</div><div class="bal-val"><small>NT$</small>${money(balance)}</div></div>
       <div class="tabs">
@@ -138,15 +160,17 @@ function render(){
 }
 
 (async()=>{
-  if(typeof liff==='undefined'){showMsg('載入失敗','LINE 元件無法載入，請重新整理');return}
-  try{await liff.init({liffId:LIFF_ID})}
-  catch(e){showMsg('載入失敗','LINE 登入初始化失敗：'+(e.message||e));return}
-  if(!liff.isLoggedIn()){
-    // 在 LINE App 內開啟就直接登入，不用多按一次
-    if(liff.isInClient())login();else showLogin();
-    return;
-  }
-  load();
+  // LINE 支援加 openExternalBrowser=1 直接跳到外部瀏覽器；其他 App 只能請會員自己切換
+  const iab=inAppBrowser();
+  if(iab==='line'&&!new URLSearchParams(location.search).has('openExternalBrowser')){location.replace(pageUrl()+'?openExternalBrowser=1');return}
+  if(iab){showInAppHint();return}
+  if(!sb){showMsg('載入失敗','登入元件無法載入，請重新整理',RELOAD_BTN);return}
+  // Google 登入回來時網址帶 ?code=...，getSession 會自動換成登入狀態
+  const{data:{session},error}=await sb.auth.getSession();
+  if(location.search.includes('code='))history.replaceState(null,'',pageUrl());
+  if(error){showMsg('登入失敗',error.message,`<button class="g-btn" onclick="login()">${G_ICON}重新登入</button>`);return}
+  if(!session){showLogin();return}
+  load(session);
 })();
 </script>
 </body>

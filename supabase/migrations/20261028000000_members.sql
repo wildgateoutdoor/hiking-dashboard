@@ -3,16 +3,16 @@
 -- 只能透過 Edge Function（member-api，用 service role）存取。
 
 create table if not exists public.members (
-  id            uuid primary key default gen_random_uuid(),
-  line_user_id  text not null unique,
-  line_name     text,
-  line_picture  text,
-  real_name     text,
-  phone         text,
-  tier          text not null default '一般會員',
-  note          text,               -- 後台內部備註，會員看不到
-  created_at    timestamptz not null default now(),
-  last_login_at timestamptz
+  id             uuid primary key default gen_random_uuid(),
+  email          text not null unique,   -- Google 帳號 email（一律小寫）
+  google_name    text,
+  google_picture text,
+  real_name      text,
+  phone          text,
+  tier           text not null default '一般會員',
+  note           text,                   -- 後台內部備註，會員看不到
+  created_at     timestamptz not null default now(),
+  last_login_at  timestamptz
 );
 
 -- 儲值金流水帳：正數＝儲值，負數＝扣款；餘額＝加總

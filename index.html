@@ -1062,6 +1062,24 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 </div>
 
+<!-- New member modal -->
+<div class="overlay" id="ov-newmember">
+  <div class="modal">
+    <div class="modal-h"><h2>新增會員</h2><button class="close-btn" onclick="hideOv('ov-newmember')">&times;</button></div>
+    <div class="modal-body">
+      <div class="f-row"><label for="nm-email">Gmail（會員登入用的 Google 帳號）</label><input id="nm-email" type="email" placeholder="example@gmail.com"></div>
+      <div class="f-pair">
+        <div class="f-row"><label for="nm-name">姓名</label><input id="nm-name"></div>
+        <div class="f-row"><label for="nm-tier">會員等級</label><select id="nm-tier"></select></div>
+      </div>
+      <div class="f-actions">
+        <button type="button" class="btn btn-g" onclick="hideOv('ov-newmember')">取消</button>
+        <button type="button" class="btn btn-p" onclick="saveNewMember()">新增</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Member tiers modal -->
 <div class="overlay" id="ov-tiers">
   <div class="modal">
@@ -2157,7 +2175,7 @@ function filteredMembers(){
   return(membersList||[]).filter(m=>{
     if(memberTierFilter!=='all'&&m.tier!==memberTierFilter)return false;
     if(!q)return true;
-    return[m.line_name,m.real_name,m.phone,m.note].some(x=>x&&x.toLowerCase().includes(q));
+    return[m.email,m.google_name,m.real_name,m.phone,m.note].some(x=>x&&x.toLowerCase().includes(q));
   });
 }
 function renderMembers(){
@@ -2184,9 +2202,10 @@ function renderMembers(){
       <div class="fin-card"><div class="fc-label">儲值金總餘額</div><div class="fc-val">${fmtMoney(total)}</div></div>
     </div>
     <div class="mb-bar">
-      <input type="search" placeholder="搜尋 LINE 名稱、姓名、電話、備註" value="${escAttr(memberSearch)}" oninput="setMemberSearch(this.value)">
+      <input type="search" placeholder="搜尋 Email、姓名、電話、備註" value="${escAttr(memberSearch)}" oninput="setMemberSearch(this.value)">
       <div class="filters">${tierChips}</div>
       <button class="btn btn-o" onclick="openTiers()">等級設定</button>
+      <button class="btn btn-p" style="margin-left:0" onclick="openNewMember()">新增會員</button>
     </div>
     <div class="fin-tbl-wrap">
       <table class="fin-tbl mb-tbl">
@@ -2199,15 +2218,15 @@ function renderMembers(){
 function renderMemberRows(){
   const tb=document.getElementById('mb-tbody');if(!tb)return;
   const list=filteredMembers();
-  if(!list.length){tb.innerHTML=`<tr><td colspan="6" class="mb-none">${membersList.length?'沒有符合的會員':'還沒有會員。會員用 LINE 登入會員頁後，就會出現在這裡'}</td></tr>`;return}
+  if(!list.length){tb.innerHTML=`<tr><td colspan="6" class="mb-none">${membersList.length?'沒有符合的會員':'還沒有會員。可以先用 Gmail 新增，或等會員用 Google 登入會員頁後自動出現'}</td></tr>`;return}
   tb.innerHTML=list.map(m=>`<tr onclick="openMember('${m.id}')">
-    <td><div class="mb-who">${m.line_picture?`<img class="mb-ava" src="${escAttr(m.line_picture)}" alt="">`:'<span class="mb-ava"></span>'}
-      <div><div class="mb-name">${esc(m.real_name||m.line_name||'（未命名）')}</div>${m.real_name&&m.line_name?`<div class="mb-sub">LINE：${esc(m.line_name)}</div>`:''}</div></div></td>
+    <td><div class="mb-who">${m.google_picture?`<img class="mb-ava" src="${escAttr(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:'<span class="mb-ava"></span>'}
+      <div><div class="mb-name">${esc(m.real_name||m.google_name||'（未命名）')}</div><div class="mb-sub">${esc(m.email)}</div></div></div></td>
     <td><span class="mb-tier">${esc(m.tier)}</span></td>
     <td class="mb-hide-sm">${esc(m.phone||'—')}</td>
     <td class="num" style="font-weight:600">${fmtMoney(m.balance)}</td>
     <td class="num mb-hide-sm">${m.trip_count}</td>
-    <td class="mb-hide-sm" style="color:var(--text-muted)">${m.last_login_at?fmtShort(m.last_login_at.slice(0,10)):'—'}</td>
+    <td class="mb-hide-sm" style="color:var(--text-muted)">${m.last_login_at?fmtShort(m.last_login_at.slice(0,10)):'尚未登入'}</td>
   </tr>`).join('');
 }
 
@@ -2228,7 +2247,7 @@ async function reloadMemberDetail(){
 }
 function renderMemberDetail(){
   const{member:m,wallet,trips:mt,balance}=memberDetail;
-  document.getElementById('mbd-title').textContent=m.real_name||m.line_name||'會員資料';
+  document.getElementById('mbd-title').textContent=m.real_name||m.google_name||'會員資料';
   const tierOpts=[...new Set([...memberTiers,m.tier])].map(t=>`<option ${t===m.tier?'selected':''}>${esc(t)}</option>`).join('');
   const tripOpts=[...trips].filter(t=>t.date).sort((a,b)=>a.date<b.date?1:-1)
     .map(t=>`<option value="${escAttr(t.id)}">${esc(fmtShort(t.date))} ${esc(t.name)}</option>`).join('');
@@ -2239,8 +2258,8 @@ function renderMemberDetail(){
     ${t.price?`<div class="mb-row-amt">${fmtMoney(t.price)}</div>`:''}
     <button class="mb-del" title="刪除" onclick="delMemberTrip('${t.id}')">&times;</button></div>`).join('');
   document.getElementById('mbd-body').innerHTML=`
-    <div class="mb-who" style="margin-bottom:16px">${m.line_picture?`<img class="mb-ava" style="width:44px;height:44px" src="${escAttr(m.line_picture)}" alt="">`:''}
-      <div><div class="mb-name">LINE：${esc(m.line_name||'—')}</div><div class="mb-sub">加入 ${esc(m.created_at.slice(0,10))}${m.last_login_at?'・最後登入 '+esc(m.last_login_at.slice(0,10)):''}</div></div></div>
+    <div class="mb-who" style="margin-bottom:16px">${m.google_picture?`<img class="mb-ava" style="width:44px;height:44px" src="${escAttr(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:''}
+      <div><div class="mb-name">${esc(m.email)}${m.google_name?`<span class="mb-sub">（Google：${esc(m.google_name)}）</span>`:''}</div><div class="mb-sub">加入 ${esc(m.created_at.slice(0,10))}・${m.last_login_at?'最後登入 '+esc(m.last_login_at.slice(0,10)):'尚未登入過'}</div></div></div>
     <div class="f-pair">
       <div class="f-row"><label for="mbd-tier">會員等級</label><select id="mbd-tier">${tierOpts}</select></div>
       <div class="f-row"><label for="mbd-name">姓名</label><input id="mbd-name" value="${escAttr(m.real_name||'')}"></div>
@@ -2279,7 +2298,8 @@ function renderMemberDetail(){
         </div>
       </div>
       <div class="mb-rows">${tripRows||'<div class="mb-none">尚無行程紀錄</div>'}</div>
-    </div>`;
+    </div>
+    <div class="f-actions" style="margin-top:24px;justify-content:flex-start"><button class="btn btn-s" style="color:var(--red)" onclick="deleteMember()">刪除會員</button></div>`;
 }
 function pickMemberTrip(id){
   const t=trips.find(x=>x.id===id);if(!t)return;
@@ -2322,6 +2342,27 @@ function addMemberTrip(){
     price,note:document.getElementById('mbt-note').value,deduct},'已新增');
 }
 function delMemberTrip(id){if(confirm('確定刪除這筆行程紀錄？（不會自動退回儲值金）'))memberAct('admin:delTrip',{id},'已刪除')}
+
+function deleteMember(){
+  const m=memberDetail.member;
+  if(!confirm(`確定刪除會員 ${m.real_name||m.email}？\n儲值紀錄與行程紀錄會一起刪除，無法復原。`))return;
+  memberApi('admin:delete',{id:m.id}).then(()=>{toast('已刪除');closeMember()},e=>toast(e.message));
+}
+
+// 新增會員：先用 Gmail 建好，會員之後用同一個 Google 帳號登入就會接上
+function openNewMember(){
+  document.getElementById('nm-email').value='';document.getElementById('nm-name').value='';
+  document.getElementById('nm-tier').innerHTML=memberTiers.map(t=>`<option>${esc(t)}</option>`).join('');
+  showOv('ov-newmember');setTimeout(()=>document.getElementById('nm-email').focus(),50);
+}
+async function saveNewMember(){
+  const email=document.getElementById('nm-email').value.trim();
+  if(!email){toast('請填 Email');return}
+  try{
+    const{id}=await memberApi('admin:create',{email,real_name:document.getElementById('nm-name').value,tier:document.getElementById('nm-tier').value});
+    hideOv('ov-newmember');toast('已新增');loadMembers();openMember(id);
+  }catch(e){toast(e.message)}
+}
 
 // 會員等級（存在 settings 表，大家共用）
 function openTiers(){document.getElementById('tiers-input').value=memberTiers.join('\n');showOv('ov-tiers')}
@@ -2579,6 +2620,7 @@ async function initDB(){
   if(sb){
     store=SupaStore;
     await loadAllRules();
+    if(viewMode==='members')renderMembers();  // 會員等級來自 settings，載入後補畫
     await loadTrips();
     // 即時同步：任何人改動 → 重新讀取
     sb.channel('trips-rt')

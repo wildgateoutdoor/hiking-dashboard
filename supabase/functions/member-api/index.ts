@@ -1,10 +1,10 @@
 // 會員系統 API（Supabase Edge Function）
 //
-// 會員端：{ action:'me', idToken }           → 用 LINE ID token 驗證身分，回傳自己的資料
+// 會員端：{ action:'me' } + Authorization: Bearer <Supabase Auth 的 access token>
+//         → 會員用 Google 登入後，以 token 裡的 email 找到自己的資料
 // 後台端：{ action:'admin:*', ... } + header x-admin-pw → 驗證後台密碼後讀寫所有會員
 //
-// 需要設定的 secrets：
-//   LINE_CHANNEL_ID  LINE Login channel 的 Channel ID（LIFF 所在的 channel）
+// 需要設定的 secret：
 //   ADMIN_PW_HASH    後台密碼的 SHA-256（與 index.html 的 EDIT_PW_HASH 相同）
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 由 Supabase 自動提供。
 
@@ -50,28 +50,22 @@ function sameStr(a: string, b: string) {
 const intOrNull = (v: unknown) => (v === "" || v == null ? null : Math.round(Number(v)));
 const strOrNull = (v: unknown) => (v == null || String(v).trim() === "" ? null : String(v).trim());
 
-// ── 會員端 ──
-async function verifyLine(idToken: string) {
-  const r = await fetch("https://api.line.me/oauth2/v2.1/verify", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ id_token: idToken, client_id: Deno.env.get("LINE_CHANNEL_ID")! }),
-  });
-  const p = await r.json();
-  if (!r.ok || !p.sub) throw new HttpError(401, p.error_description || "LINE 驗證失敗");
-  return p as { sub: string; name?: string; picture?: string };
-}
+const normEmail = (v: unknown) => String(v ?? "").trim().toLowerCase();
 
-async function memberMe(idToken: string) {
-  if (!idToken) throw new HttpError(400, "missing idToken");
-  const line = await verifyLine(idToken);
-  // 只更新 LINE 資訊，不碰 tier 等後台欄位
+// ── 會員端 ──
+async function memberMe(req: Request) {
+  const jwt = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  const { data, error } = await db.auth.getUser(jwt);
+  if (error || !data.user?.email) throw new HttpError(401, "請重新登入");
+  const u = data.user;
+  const meta = u.user_metadata || {};
+  // 以 email 對應會員：後台先建好的會員，第一次登入就會接上；只更新 Google 資訊，不碰 tier 等後台欄位
   const m = must(await db.from("members").upsert({
-    line_user_id: line.sub,
-    line_name: line.name ?? null,
-    line_picture: line.picture ?? null,
+    email: normEmail(u.email),
+    google_name: meta.full_name || meta.name || null,
+    google_picture: meta.avatar_url || meta.picture || null,
     last_login_at: new Date().toISOString(),
-  }, { onConflict: "line_user_id" }).select("id,line_name,line_picture,real_name,tier,created_at").single());
+  }, { onConflict: "email" }).select("id,email,google_name,google_picture,real_name,tier,created_at").single());
   const wallet = must(await db.from("member_wallet").select("id,amount,note,txn_date")
     .eq("member_id", m.id).order("txn_date", { ascending: false }).order("created_at", { ascending: false }));
   const trips = must(await db.from("member_trips").select("id,trip_name,trip_date,trip_date_end,price,note")
@@ -96,7 +90,7 @@ async function admin(action: string, b: Record<string, any>) {
 
     case "admin:list": {
       const rows = must(await db.from("members")
-        .select("id,line_name,line_picture,real_name,phone,tier,note,created_at,last_login_at,member_wallet(amount),member_trips(id)")
+        .select("id,email,google_name,google_picture,real_name,phone,tier,note,created_at,last_login_at,member_wallet(amount),member_trips(id)")
         .order("created_at", { ascending: false }));
       return {
         members: rows.map(({ member_wallet, member_trips, ...m }: any) => ({
@@ -115,6 +109,21 @@ async function admin(action: string, b: Record<string, any>) {
         .order("trip_date", { ascending: false, nullsFirst: false }));
       return { member, wallet, trips, balance: wallet.reduce((s: number, w: any) => s + w.amount, 0) };
     }
+
+    case "admin:create": {
+      const email = normEmail(b.email);
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new HttpError(400, "Email 格式不正確");
+      const { data, error } = await db.from("members").insert({
+        email, real_name: strOrNull(b.real_name), tier: strOrNull(b.tier) || "一般會員",
+      }).select("id").single();
+      if (error?.code === "23505") throw new HttpError(400, "這個 Email 已經是會員了");
+      if (error) throw new HttpError(500, error.message);
+      return { id: data.id };
+    }
+
+    case "admin:delete":
+      must(await db.from("members").delete().eq("id", b.id));
+      return { ok: true };
 
     case "admin:update": {
       const f: Record<string, unknown> = {};
@@ -164,7 +173,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "");
-    if (action === "me") return json(await memberMe(body.idToken));
+    if (action === "me") return json(await memberMe(req));
     if (action.startsWith("admin:")) {
       await checkAdmin(req);
       return json(await admin(action, body));
