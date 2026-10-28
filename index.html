@@ -2184,7 +2184,11 @@ async function memberApi(action,body={}){
 }
 function fmtMoney(n){n=Number(n)||0;return(n<0?'−$':'$')+Math.abs(n).toLocaleString()}
 // 金額只做顯示；所有加減與餘額檢查都在資料庫裡完成
-const ACCOUNT_LABEL={stored:'儲值金',rebate:'回饋金'};
+const ACCOUNT_LABEL={stored:'儲值金',rebate:'點數'};
+// 儲值金以元計（$1,000），點數以點計（300 點）
+function fmtPoints(n){n=Number(n)||0;return(n<0?'−':'')+Math.abs(n).toLocaleString()+' 點'}
+function fmtAmt(n,acc){return acc==='rebate'?fmtPoints(n):fmtMoney(n)}
+function fmtUnsigned(n,acc){n=Math.abs(Number(n)||0);return acc==='rebate'?n.toLocaleString()+' 點':'$'+n.toLocaleString()}
 const TXN_LABEL={topup:'儲值',spend:'扣款',grant:'發放',deduct:'扣除',reversal:'沖正'};
 // 每次送出交易都帶一個唯一識別碼；同一筆重送（網路重試、連點）會沿用同一個碼，資料庫只會入帳一次
 function newIdemKey(){
@@ -2227,7 +2231,7 @@ function filteredMembers(){
 async function auditLedger(){
   try{
     const{mismatches}=await memberApi('admin:audit');
-    if(!mismatches.length)alert('對帳結果：全部正確 ✓\n\n每位會員的儲值金與回饋金餘額，都和流水帳逐筆加總一致。');
+    if(!mismatches.length)alert('對帳結果：全部正確 ✓\n\n每位會員的儲值金與點數餘額，都和流水帳逐筆加總一致。');
     else alert('⚠️ 對帳發現 '+mismatches.length+' 個帳戶不一致，請聯絡系統管理者：\n\n'+mismatches.map(x=>`${x.member_id}（${ACCOUNT_LABEL[x.account]}）快照 ${x.snapshot} / 流水帳 ${x.ledger_sum}`).join('\n'));
   }catch(e){toast(e.message)}
 }
@@ -2256,7 +2260,7 @@ function renderMembers(){
     <div class="fin-summary">
       <div class="fin-card"><div class="fc-label">會員數</div><div class="fc-val">${membersList.length}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${tierCounts}</div></div>
       <div class="fin-card"><div class="fc-label">儲值金總餘額</div><div class="fc-val">${fmtMoney(totStored)}</div></div>
-      <div class="fin-card"><div class="fc-label">回饋金總餘額</div><div class="fc-val">${fmtMoney(totRebate)}</div></div>
+      <div class="fin-card"><div class="fc-label">點數總餘額</div><div class="fc-val">${fmtPoints(totRebate)}</div></div>
       <div class="fin-card"><div class="fc-label">會員期限</div><div class="fc-val ${expired?'fc-exp':''}">${expired} 已過期</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">30 天內到期 ${soon} 位</div></div>
     </div>
     <div class="mb-bar">
@@ -2268,7 +2272,7 @@ function renderMembers(){
     </div>
     <div class="fin-tbl-wrap">
       <table class="fin-tbl mb-tbl">
-        <thead><tr><th>會員</th><th>等級</th><th>會員期限</th><th class="num">儲值金</th><th class="num">回饋金</th><th class="num mb-hide-sm">行程數</th><th class="mb-hide-sm">最後登入</th></tr></thead>
+        <thead><tr><th>會員</th><th>等級</th><th>會員期限</th><th class="num">儲值金</th><th class="num">點數</th><th class="num mb-hide-sm">行程數</th><th class="mb-hide-sm">最後登入</th></tr></thead>
         <tbody id="mb-tbody"></tbody>
       </table>
     </div>`;
@@ -2284,7 +2288,7 @@ function renderMemberRows(){
     <td><span class="mb-tier">${esc(m.tier)}</span></td>
     <td class="${ex.cls}" style="${m.expires_at?'':'color:var(--text-muted)'}">${esc(ex.label)}</td>
     <td class="num" style="font-weight:600">${fmtMoney(m.balances.stored)}</td>
-    <td class="num" style="font-weight:600">${fmtMoney(m.balances.rebate)}</td>
+    <td class="num" style="font-weight:600">${fmtPoints(m.balances.rebate)}</td>
     <td class="num mb-hide-sm">${m.trip_count}</td>
     <td class="mb-hide-sm" style="color:var(--text-muted)">${m.last_login_at?fmtShort(m.last_login_at.slice(0,10)):'尚未登入'}</td>
   </tr>`}).join('');
@@ -2334,11 +2338,11 @@ function renderMemberDetail(){
       <td class="mb-sub">#${l.id}</td><td>${esc(l.txn_date)}</td>
       <td><span class="mb-acc mb-acc-${l.account}">${ACCOUNT_LABEL[l.account]}</span></td>
       <td>${TXN_LABEL[l.txn_type]}</td>
-      <td class="num ${l.amount>0?'fin-pos':'fin-neg'}" style="font-weight:700">${l.amount>0?'+':''}${fmtMoney(l.amount)}</td>
-      <td class="num mb-hide-sm mb-sub">${fmtMoney(l.balance_before)} → </td><td class="num" style="font-weight:600">${fmtMoney(l.balance_after)}</td>
+      <td class="num ${l.amount>0?'fin-pos':'fin-neg'}" style="font-weight:700">${l.amount>0?'+':''}${fmtAmt(l.amount,l.account)}</td>
+      <td class="num mb-hide-sm mb-sub">${fmtAmt(l.balance_before,l.account)} → </td><td class="num" style="font-weight:600">${fmtAmt(l.balance_after,l.account)}</td>
       <td class="mb-note">${esc(l.note||'')}</td><td>${act}</td></tr>`}).join('');
   const tripRows=mt.map(t=>{
-    const paid=ledger.filter(l=>l.trip_ref===t.id&&l.txn_type!=='reversal').map(l=>`${ACCOUNT_LABEL[l.account]} ${fmtMoney(-l.amount)}`).join('、');
+    const paid=ledger.filter(l=>l.trip_ref===t.id&&l.txn_type!=='reversal').map(l=>`${ACCOUNT_LABEL[l.account]} ${fmtUnsigned(l.amount,l.account)}`).join('、');
     const cancelled=t.status==='cancelled';
     return`<div class="mb-row ${cancelled?'mb-reversed':''}"><div class="mb-row-main">${esc(t.trip_name)}${cancelled?' <span class="mb-tag-x">已取消</span>':''}
       <div class="mb-sub">${t.trip_date?esc(fmtRange(t.trip_date,t.trip_date_end)):'未填日期'}${paid?'・支付：'+paid:''}${t.note?'・'+esc(t.note):''}</div></div>
@@ -2364,16 +2368,16 @@ function renderMemberDetail(){
     <div class="f-actions"><button class="btn btn-p" onclick="saveMemberProfile()">儲存會員資料</button></div>
 
     <div class="mb-sec">
-      <h3>儲值金與回饋金 ${verified?'<span class="mb-ok">✓ 對帳正確</span>':'<span class="mb-bad">⚠ 對帳異常，請勿再操作並聯絡管理者</span>'}</h3>
+      <h3>儲值金與點數 ${verified?'<span class="mb-ok">✓ 對帳正確</span>':'<span class="mb-bad">⚠ 對帳異常，請勿再操作並聯絡管理者</span>'}</h3>
       <div class="mb-bal">
         <div class="mb-bal-card"><div class="fc-label">儲值金餘額</div><div class="fc-val">${fmtMoney(balances.stored)}</div></div>
-        <div class="mb-bal-card"><div class="fc-label">入野門回饋金</div><div class="fc-val">${fmtMoney(balances.rebate)}</div></div>
+        <div class="mb-bal-card"><div class="fc-label">入野門點數</div><div class="fc-val">${fmtPoints(balances.rebate)}</div></div>
       </div>
       <div class="mb-form">
         <div class="f-row"><label for="mbw-type">類型</label><select id="mbw-type">
           <option value="topup">儲值金・儲值</option><option value="spend">儲值金・扣款</option>
-          <option value="grant">回饋金・發放</option><option value="deduct">回饋金・扣除</option></select></div>
-        <div class="f-row"><label for="mbw-amt">金額（整數）</label><input id="mbw-amt" inputmode="numeric" autocomplete="off" placeholder="例：5000"></div>
+          <option value="grant">點數・發放</option><option value="deduct">點數・扣除</option></select></div>
+        <div class="f-row"><label for="mbw-amt">金額／點數（整數）</label><input id="mbw-amt" inputmode="numeric" autocomplete="off" placeholder="例：5000"></div>
         <div class="f-row"><label for="mbw-date">日期</label><input id="mbw-date" type="date" value="${dateStr(new Date())}"></div>
         <div class="f-row"><label for="mbw-note">說明（會員看得到）</label><input id="mbw-note" placeholder="例：匯款儲值"></div>
         <div class="mb-form-acts"><button class="btn btn-p" id="mbw-btn" onclick="addMemberTxn()">入帳</button></div>
@@ -2394,7 +2398,7 @@ function renderMemberDetail(){
         <div class="f-row"><label for="mbt-end">回程日</label><input id="mbt-end" type="date"></div>
         <div class="f-row"><label for="mbt-price">行程金額</label><input id="mbt-price" inputmode="numeric" autocomplete="off"></div>
         <div class="f-row"><label for="mbt-stored">用儲值金支付 <a href="#" onclick="event.preventDefault();document.getElementById('mbt-stored').value=document.getElementById('mbt-price').value">全額</a></label><input id="mbt-stored" inputmode="numeric" autocomplete="off" placeholder="0"></div>
-        <div class="f-row"><label for="mbt-rebate">用回饋金折抵</label><input id="mbt-rebate" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+        <div class="f-row"><label for="mbt-rebate">用點數折抵（1 點 = 1 元）</label><input id="mbt-rebate" inputmode="numeric" autocomplete="off" placeholder="0"></div>
         <div class="f-row"><label for="mbt-note">備註（會員看得到）</label><input id="mbt-note"></div>
         <div class="mb-form-acts"><span class="mb-sub">餘額不足會整筆不成立；取消行程會自動退回已扣的金額</span>
           <button class="btn btn-p" id="mbt-btn" onclick="addMemberTrip()">新增行程</button></div>
@@ -2437,14 +2441,14 @@ function addMemberTxn(){
   if(!isAmountStr(amt)){toast('金額請輸入正整數');return}
   const type=document.getElementById('mbw-type').value;
   const label=document.getElementById('mbw-type').selectedOptions[0].textContent;
-  if(!confirm(`確定入帳？\n\n${label}　$${Number(amt).toLocaleString()}`))return;
+  if(!confirm(`確定入帳？\n\n${label}　${fmtUnsigned(amt,type==='grant'||type==='deduct'?'rebate':'stored')}`))return;
   memberAct('admin:txn',{member_id:memberDetail.member.id,type,amount:amt,
     txn_date:document.getElementById('mbw-date').value,
     note:document.getElementById('mbw-note').value,key:memberKeys.txn},'已入帳','txn');
 }
 function reverseLedger(id){
   const l=memberDetail.ledger.find(x=>x.id===id);if(!l)return;
-  if(!confirm(`沖正 #${id}？\n\n會新增一筆 ${ACCOUNT_LABEL[l.account]} ${l.amount>0?'−':'+'}$${Math.abs(l.amount).toLocaleString()} 的反向紀錄，原紀錄保留。`))return;
+  if(!confirm(`沖正 #${id}？\n\n會新增一筆 ${ACCOUNT_LABEL[l.account]} ${l.amount>0?'−':'+'}${fmtUnsigned(l.amount,l.account)} 的反向紀錄，原紀錄保留。`))return;
   memberAct('admin:reverse',{id},'已沖正');
 }
 function addMemberTrip(){
@@ -2452,9 +2456,9 @@ function addMemberTrip(){
   if(!name){toast('請填行程名稱');return}
   const price=document.getElementById('mbt-price').value.trim();
   const ps=document.getElementById('mbt-stored').value.trim(),pr=document.getElementById('mbt-rebate').value.trim();
-  for(const[v,lbl]of[[price,'行程金額'],[ps,'儲值金支付'],[pr,'回饋金折抵']])
+  for(const[v,lbl]of[[price,'行程金額'],[ps,'儲值金支付'],[pr,'點數折抵']])
     if(v&&v!=='0'&&!isAmountStr(v)){toast(lbl+'請輸入正整數');return}
-  const pays=[ps&&ps!=='0'?`儲值金 $${Number(ps).toLocaleString()}`:'',pr&&pr!=='0'?`回饋金 $${Number(pr).toLocaleString()}`:''].filter(Boolean);
+  const pays=[ps&&ps!=='0'?`儲值金 $${Number(ps).toLocaleString()}`:'',pr&&pr!=='0'?`點數 ${Number(pr).toLocaleString()} 點`:''].filter(Boolean);
   if(pays.length&&!confirm(`新增行程「${name}」並扣款：\n\n${pays.join('\n')}`))return;
   memberAct('admin:addTrip',{member_id:memberDetail.member.id,
     trip_id:document.getElementById('mbt-pick').value,trip_name:name,
@@ -2465,14 +2469,14 @@ function cancelMemberTrip(id){
   const t=memberDetail.trips.find(x=>x.id===id);if(!t)return;
   const reversed=new Set(memberDetail.ledger.filter(l=>l.reverses_id).map(l=>l.reverses_id));
   const refunds=memberDetail.ledger.filter(l=>l.trip_ref===id&&l.txn_type!=='reversal'&&!reversed.has(l.id))
-    .map(l=>`${ACCOUNT_LABEL[l.account]} +$${Math.abs(l.amount).toLocaleString()}`);
+    .map(l=>`${ACCOUNT_LABEL[l.account]} +${fmtUnsigned(l.amount,l.account)}`);
   if(!confirm(`取消行程「${t.trip_name}」？\n\n${refunds.length?'會自動退回：\n'+refunds.join('\n'):'這個行程沒有扣款紀錄。'}`))return;
   memberAct('admin:cancelTrip',{id},'已取消');
 }
 
 function deleteMember(){
   const m=memberDetail.member;
-  if(!confirm(`確定刪除會員 ${m.real_name||m.email}？\n（已有儲值金或回饋金紀錄的會員不能刪除）`))return;
+  if(!confirm(`確定刪除會員 ${m.real_name||m.email}？\n（已有儲值金或點數紀錄的會員不能刪除）`))return;
   memberApi('admin:delete',{id:m.id}).then(()=>{toast('已刪除');closeMember()},e=>toast(e.message));
 }
 

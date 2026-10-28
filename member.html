@@ -29,6 +29,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .balance{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#F3EFE6;border:none}
 .bal-label{font-size:13px;opacity:.8}
 .balance.rebate{background:linear-gradient(135deg,#6b5310,#9a7a16)}
+.bal-val small.pt{margin:0 0 0 4px}
 .bal-val{font-size:28px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
 .bal-val small{font-size:16px;font-weight:600;margin-right:4px;color:var(--gold)}
 .tabs{display:flex;gap:6px;margin:22px 0 10px}
@@ -82,7 +83,7 @@ let data=null,tab='trips';
 
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
 function money(n){return Number(n).toLocaleString('zh-TW')}
-const TXN_LABEL={topup:'儲值',spend:'扣款',grant:'回饋金發放',deduct:'回饋金使用',reversal:'更正'};
+const TXN_LABEL={topup:'儲值',spend:'扣款',grant:'點數發放',deduct:'點數使用',reversal:'更正'};
 function parseD(s){return new Date(s+'T00:00:00')}
 function fmtD(s){const d=parseD(s);return`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
 function fmtRange(s,e){
@@ -146,10 +147,12 @@ function render(){
       <div class="item-sub">${esc(fmtRange(t.trip_date,t.trip_date_end))}${t.note?'　'+esc(t.note):''}</div>
     </div>${t.price!=null?`<div class="item-amt">$${money(t.price)}</div>`:''}</div>`;
   }).join('');
+  // 儲值金以元計，點數以點計
+  const amt=(n,acc)=>acc==='rebate'?`${money(n)} 點`:`$${money(n)}`;
   const ledgerItems=acc=>ledger.filter(l=>l.account===acc).map(l=>`<div class="card item"><div class="item-main">
       <div class="item-title">${esc(l.note||TXN_LABEL[l.txn_type])}</div>
-      <div class="item-sub">${esc(fmtD(l.txn_date))}・餘額 $${money(l.balance_after)}</div>
-    </div><div class="item-amt ${l.amount>0?'pos':'neg'}">${l.amount>0?'+':'−'}$${money(Math.abs(l.amount))}</div></div>`).join('');
+      <div class="item-sub">${esc(fmtD(l.txn_date))}・餘額 ${amt(l.balance_after,acc)}</div>
+    </div><div class="item-amt ${l.amount>0?'pos':'neg'}">${l.amount>0?'+':'−'}${amt(Math.abs(l.amount),acc)}</div></div>`).join('');
   let exp='';
   if(m.expires_at){
     const left=Math.ceil((parseD(m.expires_at)-parseD(today))/864e5);
@@ -158,7 +161,7 @@ function render(){
   }
   const lists={trips:tripItems||'<div class="empty">還沒有行程紀錄</div>',
     stored:ledgerItems('stored')||'<div class="empty">還沒有儲值金紀錄</div>',
-    rebate:ledgerItems('rebate')||'<div class="empty">還沒有回饋金紀錄</div>'};
+    rebate:ledgerItems('rebate')||'<div class="empty">還沒有點數紀錄</div>'};
 
   app.innerHTML=`
     <div class="hero"><div class="hero-brand"><img src="favicon.png" alt="">入野門 WILDGATE</div></div>
@@ -169,12 +172,12 @@ function render(){
       </div>
       <div class="bal-grid">
         <div class="card balance"><div class="bal-label">儲值金餘額</div><div class="bal-val"><small>NT$</small>${money(balances.stored)}</div></div>
-        <div class="card balance rebate"><div class="bal-label">入野門回饋金</div><div class="bal-val"><small>NT$</small>${money(balances.rebate)}</div></div>
+        <div class="card balance rebate"><div class="bal-label">入野門點數</div><div class="bal-val">${money(balances.rebate)}<small class="pt">點</small></div></div>
       </div>
       <div class="tabs">
         <button class="${tab==='trips'?'on':''}" onclick="setTab('trips')">我的行程（${trips.filter(t=>t.status!=='cancelled').length}）</button>
         <button class="${tab==='stored'?'on':''}" onclick="setTab('stored')">儲值金紀錄</button>
-        <button class="${tab==='rebate'?'on':''}" onclick="setTab('rebate')">回饋金紀錄</button>
+        <button class="${tab==='rebate'?'on':''}" onclick="setTab('rebate')">點數紀錄</button>
       </div>
       <div class="list">${lists[tab]}</div>
       <div class="foot"><button onclick="logout()">登出</button></div>
