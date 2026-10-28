@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>入野門會員中心</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root{
+  --brand:#2e3c26;--brand-2:#3f5234;--gold:#dfac10;--gold-bg:#FBF3DA;
+  --bg:#F2EEE5;--surface:#FFFFFF;--text:#253D33;--text-2:#4E6358;--text-muted:#8A9990;
+  --border-sub:#E2DED5;--accent:#3D8B66;--red:#C24740;
+  --shadow:0 1px 4px rgba(37,61,51,.09);--r:10px;
+  --font:'PingFang TC','Microsoft JhengHei','Noto Sans TC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px 40px}
+.hero{background:var(--brand);color:#F3EFE6;padding:28px 16px 64px;text-align:center}
+.hero-brand{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;letter-spacing:.08em;font-size:14px;opacity:.9}
+.hero-brand img{width:26px;height:26px;border-radius:50%}
+.card{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.profile{margin-top:-44px;display:flex;align-items:center;gap:14px}
+.avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:var(--bg);flex-shrink:0;border:2px solid var(--surface)}
+.p-name{font-size:18px;font-weight:700}
+.tier{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:12px;background:var(--gold-bg);color:#8A6A08;font-size:12px;font-weight:700}
+.balance{margin-top:14px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#F3EFE6;border:none}
+.bal-label{font-size:13px;opacity:.8}
+.bal-val{font-size:34px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+.bal-val small{font-size:16px;font-weight:600;margin-right:4px;color:var(--gold)}
+.tabs{display:flex;gap:6px;margin:22px 0 10px}
+.tabs button{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border-sub);background:var(--surface);font:600 14px var(--font);color:var(--text-muted);cursor:pointer}
+.tabs button.on{background:var(--brand);border-color:var(--brand);color:#F3EFE6}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px}
+.item-main{min-width:0}
+.item-title{font-weight:700;font-size:15px}
+.item-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
+.item-amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pos{color:var(--accent)}.neg{color:var(--red)}
+.tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;vertical-align:2px;background:var(--gold-bg);color:#8A6A08}
+.empty{text-align:center;color:var(--text-muted);font-size:14px;padding:32px 0}
+.center{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:24px}
+.center img{width:72px;height:72px;border-radius:50%}
+.center h1{font-size:20px}
+.center p{color:var(--text-muted);font-size:14px}
+.line-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:8px;border:none;background:#06C755;color:#fff;font:700 15px var(--font);cursor:pointer}
+.line-btn:active{opacity:.85}
+.foot{text-align:center;margin-top:24px}
+.foot button{background:none;border:none;color:var(--text-muted);font:13px var(--font);text-decoration:underline;cursor:pointer}
+.spin{width:28px;height:28px;border:3px solid var(--border-sub);border-top-color:var(--brand);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app"><div class="center"><div class="spin"></div></div></div>
+
+<script>
+// ── 設定 ──
+const LIFF_ID='YOUR_LIFF_ID';  // LINE Developers → LIFF 分頁的 LIFF ID
+const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
+const API=SB_URL+'/functions/v1/member-api';
+
+const DAYS=['日','一','二','三','四','五','六'];
+const app=document.getElementById('app');
+let data=null,tab='trips';
+
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
+function money(n){return n.toLocaleString('zh-TW')}
+function parseD(s){return new Date(s+'T00:00:00')}
+function fmtD(s){const d=parseD(s);return`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
+function fmtRange(s,e){
+  if(!s)return'';
+  if(!e||e===s)return fmtD(s);
+  const de=parseD(e);
+  return`${fmtD(s)} ~ ${de.getMonth()+1}/${de.getDate()}（${DAYS[de.getDay()]}）`;
+}
+function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+
+function showMsg(title,msg,btn){
+  app.innerHTML=`<div class="center"><img src="favicon.png" alt=""><h1>${esc(title)}</h1><p>${esc(msg)}</p>${btn||''}</div>`;
+}
+function showLogin(){
+  showMsg('入野門會員中心','用 LINE 登入，查看儲值金與參加過的行程',
+    '<button class="line-btn" onclick="login()">使用 LINE 登入</button>');
+}
+function login(){liff.login({redirectUri:location.href.split('#')[0]})}
+function logout(){liff.logout();location.reload()}
+
+async function load(){
+  const idToken=liff.getIDToken();
+  if(!idToken){showLogin();return}
+  let res,body;
+  try{
+    res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'me',idToken})});
+    body=await res.json();
+  }catch(e){showMsg('連線失敗','請檢查網路後重新整理','<button class="line-btn" onclick="location.reload()">重新整理</button>');return}
+  // ID token 過期 → 重新登入取得新的
+  if(res.status===401){liff.logout();showLogin();return}
+  if(!res.ok){showMsg('讀取失敗',body.error||'請稍後再試','<button class="line-btn" onclick="location.reload()">重新整理</button>');return}
+  data=body;render();
+}
+
+function setTab(t){tab=t;render()}
+
+function render(){
+  const{member:m,balance,wallet,trips}=data;
+  const today=todayStr();
+  const tripItems=trips.map(t=>{
+    const upcoming=t.trip_date&&(t.trip_date_end||t.trip_date)>=today;
+    return`<div class="card item"><div class="item-main">
+      <div class="item-title">${esc(t.trip_name)}${upcoming?'<span class="tag">即將出發</span>':''}</div>
+      <div class="item-sub">${esc(fmtRange(t.trip_date,t.trip_date_end))}${t.note?'　'+esc(t.note):''}</div>
+    </div>${t.price?`<div class="item-amt">$${money(t.price)}</div>`:''}</div>`;
+  }).join('');
+  const walletItems=wallet.map(w=>`<div class="card item"><div class="item-main">
+      <div class="item-title">${esc(w.note||(w.amount>0?'儲值':'扣款'))}</div>
+      <div class="item-sub">${esc(fmtD(w.txn_date))}</div>
+    </div><div class="item-amt ${w.amount>0?'pos':'neg'}">${w.amount>0?'+':'−'}$${money(Math.abs(w.amount))}</div></div>`).join('');
+
+  app.innerHTML=`
+    <div class="hero"><div class="hero-brand"><img src="favicon.png" alt="">入野門 WILDGATE</div></div>
+    <div class="wrap">
+      <div class="card profile">
+        ${m.line_picture?`<img class="avatar" src="${esc(m.line_picture)}" alt="">`:'<div class="avatar"></div>'}
+        <div><div class="p-name">${esc(m.real_name||m.line_name||'會員')}</div><span class="tier">${esc(m.tier)}</span></div>
+      </div>
+      <div class="card balance"><div class="bal-label">儲值金餘額</div><div class="bal-val"><small>NT$</small>${money(balance)}</div></div>
+      <div class="tabs">
+        <button class="${tab==='trips'?'on':''}" onclick="setTab('trips')">我的行程（${trips.length}）</button>
+        <button class="${tab==='wallet'?'on':''}" onclick="setTab('wallet')">儲值紀錄</button>
+      </div>
+      <div class="list">${tab==='trips'?(tripItems||'<div class="empty">還沒有行程紀錄</div>'):(walletItems||'<div class="empty">還沒有儲值紀錄</div>')}</div>
+      <div class="foot"><button onclick="logout()">登出</button></div>
+    </div>`;
+}
+
+(async()=>{
+  if(typeof liff==='undefined'){showMsg('載入失敗','LINE 元件無法載入，請重新整理');return}
+  try{await liff.init({liffId:LIFF_ID})}
+  catch(e){showMsg('載入失敗','LINE 登入初始化失敗：'+(e.message||e));return}
+  if(!liff.isLoggedIn()){
+    // 在 LINE App 內開啟就直接登入，不用多按一次
+    if(liff.isInClient())login();else showLogin();
+    return;
+  }
+  load();
+})();
+</script>
+</body>
+</html>
