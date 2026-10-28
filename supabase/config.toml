@@ -1,0 +1,3 @@
+# member-api 自己驗證身分（會員的 Google 登入 token / 後台密碼）
+[functions.member-api]
+verify_jwt = false

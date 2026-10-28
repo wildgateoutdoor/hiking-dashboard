@@ -552,6 +552,47 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .fin-tbl tfoot td{background:var(--surface-alt);font-weight:700;border-top:2px solid var(--border)}
 @media(max-width:900px){.fin-charts{grid-template-columns:1fr}}
 @media(max-width:600px){.fin-tbl{font-size:12px}.fin-tbl th,.fin-tbl td{padding:8px 8px}}
+
+/* 會員管理 */
+.mb-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mb-bar input{flex:1;min-width:180px;max-width:320px;padding:7px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font:400 14px var(--font);color:var(--text)}
+.mb-bar input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.mb-bar .btn{margin-left:auto}
+.mb-who{display:flex;align-items:center;gap:10px;text-align:left}
+.mb-ava{width:32px;height:32px;border-radius:50%;object-fit:cover;background:var(--surface-alt);flex-shrink:0}
+.mb-name{font-weight:600}
+.mb-sub{font-size:12px;color:var(--text-muted)}
+.mb-tier{display:inline-block;padding:2px 10px;border-radius:12px;background:var(--amber-bg);color:var(--amber-on);font-size:12px;font-weight:700}
+.mb-tbl tbody tr{cursor:pointer}
+.mb-tbl th,.mb-tbl td{text-align:left}
+.mb-tbl th:last-child,.mb-tbl td:last-child{position:static;background:var(--surface-alt)}
+.mb-tbl td:last-child{background:inherit}
+.mb-tbl td.num,.mb-tbl th.num{text-align:right}
+.mb-unlock{max-width:360px;margin:40px auto;text-align:center}
+.mb-unlock p{font-size:14px;color:var(--text-muted);margin-bottom:14px}
+.mb-unlock input{width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font:400 15px var(--font);color:var(--text);margin-bottom:12px}
+.mb-unlock .btn{width:100%;justify-content:center;padding:10px}
+.mb-sec{margin-top:22px}
+.mb-sec h3{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:baseline;gap:10px}
+.mb-sec h3 span{font-size:13px;font-weight:600;color:var(--text-muted)}
+.mb-form{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;background:var(--bg);border:1px solid var(--border-sub);border-radius:var(--r);margin-bottom:10px}
+.mb-form .f-row{margin-bottom:0}
+.mb-form .span2{grid-column:span 2}.mb-form .span4{grid-column:1/-1}
+.mb-form .f-row input,.mb-form .f-row select{background:var(--surface)}
+.mb-form-acts{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:12px}
+.mb-form-acts label{font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:6px;cursor:pointer}
+.mb-rows{display:flex;flex-direction:column;border:1px solid var(--border-sub);border-radius:var(--r)}
+.mb-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border-bottom:1px solid var(--border-sub);font-size:14px}
+.mb-row:last-child{border-bottom:none}
+.mb-row-main{flex:1;min-width:0}
+.mb-row-amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mb-del{border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:4px}
+.mb-del:hover{color:var(--red);background:var(--red-bg)}
+.mb-none{padding:14px;text-align:center;font-size:13px;color:var(--text-muted)}
+@media(max-width:700px){
+  .mb-form{grid-template-columns:1fr 1fr}
+  .mb-hide-sm{display:none}
+}
 </style>
 
 <div class="login-gate" id="login-gate">
@@ -579,6 +620,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <button class="nav-link" id="nav-mktg" onclick="setView('mktgview')">行銷列表</button>
       <button class="nav-link" id="nav-cal" onclick="setView('calendar')">日曆總覽</button>
       <button class="nav-link" id="nav-finance" onclick="setView('finance')">收支總覽</button>
+      <button class="nav-link" id="nav-members" onclick="setView('members')">會員管理</button>
     </div>
     <div class="nav-sep"></div>
     <div class="nav-util">
@@ -608,6 +650,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <button class="mob-tab" id="mtab-mktg" onclick="setView('mktgview')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>行銷列表</span></button>
   <button class="mob-tab" id="mtab-cal" onclick="setView('calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日曆</span></button>
   <button class="mob-tab" id="mtab-finance" onclick="setView('finance')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span>收支</span></button>
+  <button class="mob-tab" id="mtab-members" onclick="setView('members')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>會員</span></button>
 </div>
 
 <div class="nav-mobile-menu" id="nav-mobile-menu" onclick="closeMobileMenu()">
@@ -617,6 +660,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <button class="nav-mob-link" id="mob-mktg" onclick="setView('mktgview');closeMobileMenu()">行銷列表</button>
     <button class="nav-mob-link" id="mob-cal" onclick="setView('calendar');closeMobileMenu()">日曆總覽</button>
     <button class="nav-mob-link" id="mob-finance" onclick="setView('finance');closeMobileMenu()">收支總覽</button>
+    <button class="nav-mob-link" id="mob-members" onclick="setView('members');closeMobileMenu()">會員管理</button>
     <div class="nav-mob-sep"></div>
     <button class="nav-mob-link" onclick="logout();closeMobileMenu()">登出</button>
     <button class="nav-mob-link" onclick="showReport();closeMobileMenu()">產生 LINE 日報</button>
@@ -696,6 +740,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
   <div id="view-finance" style="display:none">
     <div id="finance-body"></div>
+  </div>
+
+  <div id="view-members" style="display:none">
+    <div id="members-body"></div>
   </div>
 </div>
 
@@ -1006,6 +1054,46 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 </div>
 
+<!-- Member detail modal -->
+<div class="overlay" id="ov-member">
+  <div class="modal lg">
+    <div class="modal-h"><h2 id="mbd-title">會員資料</h2><button class="close-btn" onclick="closeMember()">&times;</button></div>
+    <div class="modal-body" id="mbd-body"></div>
+  </div>
+</div>
+
+<!-- New member modal -->
+<div class="overlay" id="ov-newmember">
+  <div class="modal">
+    <div class="modal-h"><h2>新增會員</h2><button class="close-btn" onclick="hideOv('ov-newmember')">&times;</button></div>
+    <div class="modal-body">
+      <div class="f-row"><label for="nm-email">Gmail（會員登入用的 Google 帳號）</label><input id="nm-email" type="email" placeholder="example@gmail.com"></div>
+      <div class="f-pair">
+        <div class="f-row"><label for="nm-name">姓名</label><input id="nm-name"></div>
+        <div class="f-row"><label for="nm-tier">會員等級</label><select id="nm-tier"></select></div>
+      </div>
+      <div class="f-actions">
+        <button type="button" class="btn btn-g" onclick="hideOv('ov-newmember')">取消</button>
+        <button type="button" class="btn btn-p" onclick="saveNewMember()">新增</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Member tiers modal -->
+<div class="overlay" id="ov-tiers">
+  <div class="modal">
+    <div class="modal-h"><h2>會員等級設定</h2><button class="close-btn" onclick="hideOv('ov-tiers')">&times;</button></div>
+    <div class="modal-body">
+      <div class="f-row"><label for="tiers-input">等級名稱（一行一個；新會員預設為「一般會員」）</label><textarea id="tiers-input" rows="6"></textarea></div>
+      <div class="f-actions">
+        <button type="button" class="btn btn-g" onclick="hideOv('ov-tiers')">取消</button>
+        <button type="button" class="btn btn-p" onclick="saveTiers()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Posts (發文排程) modal -->
 <div class="overlay" id="ov-posts">
   <div class="modal">
@@ -1085,6 +1173,7 @@ const DEF_TASK_REMINDERS=[
   {id:'tr3',name:'天氣提醒',daysBefore:[7,3,1]},
   {id:'tr4',name:'行前手冊發放',daysBefore:[14]},
 ];
+let memberTiers=[];
 let trips=[],deadlineRules=[],applyRules=[],lodgeRules=[],mealRules=[],mktgRules=[],minGroupRules=[],mktgEvents=[],taskReminders=[],equipPricing=[],porterPricing=[];
 let sb=null,dlCap=null,store=null,rulesReady=false;
 // 標籤顏色選項
@@ -1152,8 +1241,9 @@ const DEF_MINGROUP=[
   {id:'mg1',minPax:3,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林','郡大山','玉山','嘉明湖','北大武','奇萊南華','眠月線','大小霸','雪山主東']},
 ];
 const DEF_LODGE=[];
+const DEF_MEMBER_TIERS=['一般會員','銀卡會員','金卡會員'];
 const DEF_MEAL=[];
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing','hk-member-tiers':'memberTiers'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -1177,6 +1267,7 @@ async function loadAllRules(){
   if(!taskReminders)taskReminders=JSON.parse(JSON.stringify(DEF_TASK_REMINDERS));
   equipPricing=m.equipPricing||localGet('hk-equip-pricing',[]);
   porterPricing=m.porterPricing||localGet('hk-porter-pricing',[]);
+  memberTiers=m.memberTiers||localGet('hk-member-tiers',DEF_MEMBER_TIERS);
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
@@ -2051,11 +2142,242 @@ function showDayPopup(evt,ds){
 }
 document.addEventListener('click',()=>{document.getElementById('cal-popup').style.display='none'});
 
+// ── 會員管理 ──
+// 會員資料不放在 anon 可讀的表，一律經過 member-api（後台密碼驗證）
+const MEMBER_API=SB_URL+'/functions/v1/member-api';
+let membersList=null,memberSearch='',memberTierFilter='all',memberDetail=null,membersErr='';
+function adminPw(){try{return localStorage.getItem('hk-admin-pw')||''}catch{return''}}
+async function memberApi(action,body={}){
+  const res=await fetch(MEMBER_API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'x-admin-pw':adminPw()},body:JSON.stringify({action,...body})});
+  const j=await res.json().catch(()=>({}));
+  if(res.status===401){try{localStorage.removeItem('hk-admin-pw')}catch{}membersList=null;renderMembers();throw new Error(j.error||'後台密碼錯誤')}
+  if(!res.ok)throw new Error(j.error||'連線失敗（'+res.status+'）');
+  return j;
+}
+function fmtMoney(n){return(n<0?'−$':'$')+Math.abs(n).toLocaleString()}
+async function loadMembers(){
+  if(!adminPw()){renderMembers();return}
+  try{membersList=(await memberApi('admin:list')).members;membersErr=''}
+  catch(e){membersErr=e.message}
+  renderMembers();
+}
+async function unlockMembers(){
+  const el=document.getElementById('mb-pw');const pw=el.value.trim().normalize('NFKC');
+  if(!pw)return;
+  if(await sha256hex(pw)!==EDIT_PW_HASH){toast('密碼錯誤');el.select();return}
+  try{localStorage.setItem('hk-admin-pw',pw)}catch{}
+  loadMembers();
+}
+function setMemberSearch(v){memberSearch=v;renderMemberRows()}
+function setMemberTierFilter(v){memberTierFilter=v;renderMembers()}
+function filteredMembers(){
+  const q=memberSearch.trim().toLowerCase();
+  return(membersList||[]).filter(m=>{
+    if(memberTierFilter!=='all'&&m.tier!==memberTierFilter)return false;
+    if(!q)return true;
+    return[m.email,m.google_name,m.real_name,m.phone,m.note].some(x=>x&&x.toLowerCase().includes(q));
+  });
+}
+function renderMembers(){
+  const el=document.getElementById('members-body');if(!el)return;
+  if(!adminPw()){
+    el.innerHTML=`<div class="mb-unlock"><div class="fin-header" style="justify-content:center"><h3>會員管理</h3></div>
+      <p>請再輸入一次後台密碼以讀取會員資料</p>
+      <input type="password" id="mb-pw" placeholder="密碼" onkeydown="if(event.key==='Enter')unlockMembers()">
+      <button class="btn btn-p" onclick="unlockMembers()">確認</button></div>`;
+    return;
+  }
+  if(membersErr&&!membersList){
+    el.innerHTML=`<div class="empty"><p>讀取會員資料失敗：${esc(membersErr)}</p><button class="btn btn-o" onclick="loadMembers()" style="margin-top:12px">重試</button></div>`;
+    return;
+  }
+  if(!membersList){el.innerHTML='<div class="empty"><p>讀取中…</p></div>';return}
+  const total=membersList.reduce((s,m)=>s+m.balance,0);
+  const tierCounts=memberTiers.map(t=>`${esc(t)} ${membersList.filter(m=>m.tier===t).length}`).join('・');
+  const tierChips=['all',...memberTiers].map(t=>`<button class="chip ${memberTierFilter===t?'on':''}" onclick="setMemberTierFilter(${escAttr(JSON.stringify(t))})">${t==='all'?'全部':esc(t)}</button>`).join('');
+  el.innerHTML=`
+    <div class="fin-header"><h3>會員管理</h3></div>
+    <div class="fin-summary">
+      <div class="fin-card"><div class="fc-label">會員數</div><div class="fc-val">${membersList.length}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${tierCounts}</div></div>
+      <div class="fin-card"><div class="fc-label">儲值金總餘額</div><div class="fc-val">${fmtMoney(total)}</div></div>
+    </div>
+    <div class="mb-bar">
+      <input type="search" placeholder="搜尋 Email、姓名、電話、備註" value="${escAttr(memberSearch)}" oninput="setMemberSearch(this.value)">
+      <div class="filters">${tierChips}</div>
+      <button class="btn btn-o" onclick="openTiers()">等級設定</button>
+      <button class="btn btn-p" style="margin-left:0" onclick="openNewMember()">新增會員</button>
+    </div>
+    <div class="fin-tbl-wrap">
+      <table class="fin-tbl mb-tbl">
+        <thead><tr><th>會員</th><th>等級</th><th class="mb-hide-sm">電話</th><th class="num">儲值餘額</th><th class="num mb-hide-sm">行程數</th><th class="mb-hide-sm">最後登入</th></tr></thead>
+        <tbody id="mb-tbody"></tbody>
+      </table>
+    </div>`;
+  renderMemberRows();
+}
+function renderMemberRows(){
+  const tb=document.getElementById('mb-tbody');if(!tb)return;
+  const list=filteredMembers();
+  if(!list.length){tb.innerHTML=`<tr><td colspan="6" class="mb-none">${membersList.length?'沒有符合的會員':'還沒有會員。可以先用 Gmail 新增，或等會員用 Google 登入會員頁後自動出現'}</td></tr>`;return}
+  tb.innerHTML=list.map(m=>`<tr onclick="openMember('${m.id}')">
+    <td><div class="mb-who">${m.google_picture?`<img class="mb-ava" src="${escAttr(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:'<span class="mb-ava"></span>'}
+      <div><div class="mb-name">${esc(m.real_name||m.google_name||'（未命名）')}</div><div class="mb-sub">${esc(m.email)}</div></div></div></td>
+    <td><span class="mb-tier">${esc(m.tier)}</span></td>
+    <td class="mb-hide-sm">${esc(m.phone||'—')}</td>
+    <td class="num" style="font-weight:600">${fmtMoney(m.balance)}</td>
+    <td class="num mb-hide-sm">${m.trip_count}</td>
+    <td class="mb-hide-sm" style="color:var(--text-muted)">${m.last_login_at?fmtShort(m.last_login_at.slice(0,10)):'尚未登入'}</td>
+  </tr>`).join('');
+}
+
+// 會員詳細資料
+async function openMember(id){
+  memberDetail=null;
+  document.getElementById('mbd-title').textContent='會員資料';
+  document.getElementById('mbd-body').innerHTML='<div class="mb-none">讀取中…</div>';
+  showOv('ov-member');
+  try{memberDetail=await memberApi('admin:get',{id})}
+  catch(e){document.getElementById('mbd-body').innerHTML=`<div class="mb-none">讀取失敗：${esc(e.message)}</div>`;return}
+  renderMemberDetail();
+}
+function closeMember(){hideOv('ov-member');memberDetail=null;loadMembers()}
+async function reloadMemberDetail(){
+  memberDetail=await memberApi('admin:get',{id:memberDetail.member.id});
+  renderMemberDetail();
+}
+function renderMemberDetail(){
+  const{member:m,wallet,trips:mt,balance}=memberDetail;
+  document.getElementById('mbd-title').textContent=m.real_name||m.google_name||'會員資料';
+  const tierOpts=[...new Set([...memberTiers,m.tier])].map(t=>`<option ${t===m.tier?'selected':''}>${esc(t)}</option>`).join('');
+  const tripOpts=[...trips].filter(t=>t.date).sort((a,b)=>a.date<b.date?1:-1)
+    .map(t=>`<option value="${escAttr(t.id)}">${esc(fmtShort(t.date))} ${esc(t.name)}</option>`).join('');
+  const walletRows=wallet.map(w=>`<div class="mb-row"><div class="mb-row-main">${esc(w.note||(w.amount>0?'儲值':'扣款'))}<div class="mb-sub">${esc(w.txn_date)}</div></div>
+    <div class="mb-row-amt ${w.amount>0?'fin-pos':'fin-neg'}">${w.amount>0?'+':''}${fmtMoney(w.amount)}</div>
+    <button class="mb-del" title="刪除" onclick="delMemberWallet('${w.id}')">&times;</button></div>`).join('');
+  const tripRows=mt.map(t=>`<div class="mb-row"><div class="mb-row-main">${esc(t.trip_name)}<div class="mb-sub">${t.trip_date?esc(fmtRange(t.trip_date,t.trip_date_end)):'未填日期'}${t.note?'・'+esc(t.note):''}</div></div>
+    ${t.price?`<div class="mb-row-amt">${fmtMoney(t.price)}</div>`:''}
+    <button class="mb-del" title="刪除" onclick="delMemberTrip('${t.id}')">&times;</button></div>`).join('');
+  document.getElementById('mbd-body').innerHTML=`
+    <div class="mb-who" style="margin-bottom:16px">${m.google_picture?`<img class="mb-ava" style="width:44px;height:44px" src="${escAttr(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:''}
+      <div><div class="mb-name">${esc(m.email)}${m.google_name?`<span class="mb-sub">（Google：${esc(m.google_name)}）</span>`:''}</div><div class="mb-sub">加入 ${esc(m.created_at.slice(0,10))}・${m.last_login_at?'最後登入 '+esc(m.last_login_at.slice(0,10)):'尚未登入過'}</div></div></div>
+    <div class="f-pair">
+      <div class="f-row"><label for="mbd-tier">會員等級</label><select id="mbd-tier">${tierOpts}</select></div>
+      <div class="f-row"><label for="mbd-name">姓名</label><input id="mbd-name" value="${escAttr(m.real_name||'')}"></div>
+    </div>
+    <div class="f-pair">
+      <div class="f-row"><label for="mbd-phone">電話</label><input id="mbd-phone" type="tel" value="${escAttr(m.phone||'')}"></div>
+      <div class="f-row"><label for="mbd-note">內部備註（會員看不到）</label><input id="mbd-note" value="${escAttr(m.note||'')}"></div>
+    </div>
+    <div class="f-actions"><button class="btn btn-p" onclick="saveMemberProfile()">儲存會員資料</button></div>
+
+    <div class="mb-sec">
+      <h3>儲值金 <span>餘額 ${fmtMoney(balance)}</span></h3>
+      <div class="mb-form">
+        <div class="f-row"><label for="mbw-type">類型</label><select id="mbw-type"><option value="1">儲值</option><option value="-1">扣款</option></select></div>
+        <div class="f-row"><label for="mbw-amt">金額</label><input id="mbw-amt" type="number" min="1" placeholder="例：5000"></div>
+        <div class="f-row"><label for="mbw-date">日期</label><input id="mbw-date" type="date" value="${dateStr(new Date())}"></div>
+        <div class="f-row"><label for="mbw-note">說明（會員看得到）</label><input id="mbw-note" placeholder="例：匯款儲值"></div>
+        <div class="mb-form-acts"><button class="btn btn-p" onclick="addMemberWallet()">新增紀錄</button></div>
+      </div>
+      <div class="mb-rows">${walletRows||'<div class="mb-none">尚無儲值紀錄</div>'}</div>
+    </div>
+
+    <div class="mb-sec">
+      <h3>購買行程 <span>${mt.length} 筆</span></h3>
+      <div class="mb-form">
+        <div class="f-row span4"><label for="mbt-pick">從團務列表帶入（可不選，直接手動填）</label>
+          <select id="mbt-pick" onchange="pickMemberTrip(this.value)"><option value="">— 手動輸入 —</option>${tripOpts}</select></div>
+        <div class="f-row span2"><label for="mbt-name">行程名稱</label><input id="mbt-name"></div>
+        <div class="f-row"><label for="mbt-date">出發日</label><input id="mbt-date" type="date"></div>
+        <div class="f-row"><label for="mbt-end">回程日</label><input id="mbt-end" type="date"></div>
+        <div class="f-row"><label for="mbt-price">金額</label><input id="mbt-price" type="number" min="0"></div>
+        <div class="f-row" style="grid-column:span 3"><label for="mbt-note">備註（會員看得到）</label><input id="mbt-note"></div>
+        <div class="mb-form-acts">
+          <label><input type="checkbox" id="mbt-deduct">同時從儲值金扣款</label>
+          <button class="btn btn-p" onclick="addMemberTrip()">新增行程</button>
+        </div>
+      </div>
+      <div class="mb-rows">${tripRows||'<div class="mb-none">尚無行程紀錄</div>'}</div>
+    </div>
+    <div class="f-actions" style="margin-top:24px;justify-content:flex-start"><button class="btn btn-s" style="color:var(--red)" onclick="deleteMember()">刪除會員</button></div>`;
+}
+function pickMemberTrip(id){
+  const t=trips.find(x=>x.id===id);if(!t)return;
+  document.getElementById('mbt-name').value=t.name||'';
+  document.getElementById('mbt-date').value=t.date||'';
+  document.getElementById('mbt-end').value=t.dateEnd||'';
+  const fee=(t.tripFees&&t.tripFees.length)?t.tripFees[0].fee:0;
+  document.getElementById('mbt-price').value=fee||'';
+}
+async function memberAct(action,body,okMsg){
+  try{await memberApi(action,body);await reloadMemberDetail();if(okMsg)toast(okMsg)}
+  catch(e){toast(e.message)}
+}
+function saveMemberProfile(){
+  memberAct('admin:update',{id:memberDetail.member.id,fields:{
+    tier:document.getElementById('mbd-tier').value,
+    real_name:document.getElementById('mbd-name').value,
+    phone:document.getElementById('mbd-phone').value,
+    note:document.getElementById('mbd-note').value,
+  }},'已儲存');
+}
+function addMemberWallet(){
+  const amt=Math.round(Number(document.getElementById('mbw-amt').value));
+  if(!amt||amt<0){toast('請輸入金額');return}
+  memberAct('admin:addWallet',{member_id:memberDetail.member.id,
+    amount:amt*Number(document.getElementById('mbw-type').value),
+    txn_date:document.getElementById('mbw-date').value,
+    note:document.getElementById('mbw-note').value},'已新增');
+}
+function delMemberWallet(id){if(confirm('確定刪除這筆儲值紀錄？'))memberAct('admin:delWallet',{id},'已刪除')}
+function addMemberTrip(){
+  const name=document.getElementById('mbt-name').value.trim();
+  if(!name){toast('請填行程名稱');return}
+  const deduct=document.getElementById('mbt-deduct').checked;
+  const price=document.getElementById('mbt-price').value;
+  if(deduct&&!Number(price)){toast('要扣款請填金額');return}
+  memberAct('admin:addTrip',{member_id:memberDetail.member.id,
+    trip_id:document.getElementById('mbt-pick').value,trip_name:name,
+    trip_date:document.getElementById('mbt-date').value,trip_date_end:document.getElementById('mbt-end').value,
+    price,note:document.getElementById('mbt-note').value,deduct},'已新增');
+}
+function delMemberTrip(id){if(confirm('確定刪除這筆行程紀錄？（不會自動退回儲值金）'))memberAct('admin:delTrip',{id},'已刪除')}
+
+function deleteMember(){
+  const m=memberDetail.member;
+  if(!confirm(`確定刪除會員 ${m.real_name||m.email}？\n儲值紀錄與行程紀錄會一起刪除，無法復原。`))return;
+  memberApi('admin:delete',{id:m.id}).then(()=>{toast('已刪除');closeMember()},e=>toast(e.message));
+}
+
+// 新增會員：先用 Gmail 建好，會員之後用同一個 Google 帳號登入就會接上
+function openNewMember(){
+  document.getElementById('nm-email').value='';document.getElementById('nm-name').value='';
+  document.getElementById('nm-tier').innerHTML=memberTiers.map(t=>`<option>${esc(t)}</option>`).join('');
+  showOv('ov-newmember');setTimeout(()=>document.getElementById('nm-email').focus(),50);
+}
+async function saveNewMember(){
+  const email=document.getElementById('nm-email').value.trim();
+  if(!email){toast('請填 Email');return}
+  try{
+    const{id}=await memberApi('admin:create',{email,real_name:document.getElementById('nm-name').value,tier:document.getElementById('nm-tier').value});
+    hideOv('ov-newmember');toast('已新增');loadMembers();openMember(id);
+  }catch(e){toast(e.message)}
+}
+
+// 會員等級（存在 settings 表，大家共用）
+function openTiers(){document.getElementById('tiers-input').value=memberTiers.join('\n');showOv('ov-tiers')}
+function saveTiers(){
+  const list=[...new Set(document.getElementById('tiers-input').value.split('\n').map(x=>x.trim()).filter(Boolean))];
+  if(!list.length){toast('至少要有一個等級');return}
+  memberTiers=list;saveToLS('hk-member-tiers',memberTiers);
+  hideOv('ov-tiers');renderMembers();toast('已儲存');
+}
+
 // ── View switching ──
-const VIEW_IDS=['schedule','list','calendar','mktgview','finance'];
-const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance'};
-const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance'};
-const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance'};
+const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members'];
+const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance',members:'nav-members'};
+const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance',members:'mob-members'};
+const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance',members:'mtab-members'};
 function setView(mode){
   viewMode=mode;
   try{localStorage.setItem('hk-view',mode)}catch{}
@@ -2068,6 +2390,7 @@ function setView(mode){
   if(mode==='calendar')renderCal();
   if(mode==='mktgview')renderMktgView();
   if(mode==='finance')renderFinance();
+  if(mode==='members')loadMembers();
 }
 function toggleMobileMenu(){document.getElementById('nav-mobile-menu').classList.add('open')}
 function closeMobileMenu(){document.getElementById('nav-mobile-menu').classList.remove('open')}
@@ -2297,6 +2620,7 @@ async function initDB(){
   if(sb){
     store=SupaStore;
     await loadAllRules();
+    if(viewMode==='members')renderMembers();  // 會員等級來自 settings，載入後補畫
     await loadTrips();
     // 即時同步：任何人改動 → 重新讀取
     sb.channel('trips-rt')
@@ -2335,7 +2659,7 @@ async function tryLogin(){
   let h;
   try{h=await sha256hex(pw)}
   catch(e){err.textContent='此瀏覽器無法驗證，請用 Chrome/Safari 並確認網址是 https';return}
-  if(h===EDIT_PW_HASH){try{localStorage.setItem('hk-auth','1')}catch{}enterApp()}
+  if(h===EDIT_PW_HASH){try{localStorage.setItem('hk-auth','1');localStorage.setItem('hk-admin-pw',pw)}catch{}enterApp()}
   else{err.textContent='密碼錯誤';el.select()}
 }
 let appStarted=false;
@@ -2345,7 +2669,7 @@ function enterApp(){
   loadTaskReminders();initCal();render();initDB();
   try{const sv=localStorage.getItem('hk-view');if(sv&&VIEW_IDS.includes(sv))setView(sv)}catch{}
 }
-function logout(){try{localStorage.removeItem('hk-auth')}catch{}location.reload()}
+function logout(){try{localStorage.removeItem('hk-auth');localStorage.removeItem('hk-admin-pw')}catch{}location.reload()}
 
 // ── Render ──
 function filtered(){
