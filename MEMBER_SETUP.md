@@ -58,3 +58,26 @@ supabase functions deploy member-api --no-verify-jwt
 3. 收到匯款 → 新增一筆「儲值」；要扣錢 → 新增一筆「扣款」
 4. 會員報名行程 → 新增行程（可從團務列表帶入），勾「同時從儲值金扣款」會自動記一筆扣款
 5. 等級名稱可在「等級設定」修改（預設：一般會員、銀卡會員、金卡會員）
+
+## 金流設計（儲值金與回饋金）
+
+會員有兩個帳戶：**儲值金**、**入野門回饋金**。所有異動都記在 `member_ledger` 流水帳，`member_accounts` 是餘額快照。
+
+- **金額**：資料庫一律 `numeric(12,0)`（整數元），前端以字串傳送，不經過浮點數；加減與餘額檢查全部在資料庫函式內完成
+- **流水帳只能新增**：每筆記錄流水號、會員、帳戶、類型、金額、交易前餘額、交易後餘額、時間。
+  觸發器禁止 UPDATE / DELETE / TRUNCATE，記錯請用「沖正」新增一筆反向紀錄（每筆只能沖正一次）
+- **交易（ACID）**：`member_purchase_trip` 在同一個資料庫交易內建立行程、扣儲值金、扣回饋金，任一步失敗（例如餘額不足）全部 Rollback；
+  `member_cancel_trip` 取消行程並自動沖正該行程的扣款
+- **併發**：`ledger_post` 以 `SELECT … FOR UPDATE` 鎖住該會員該帳戶的快照列（悲觀鎖），同一帳戶的交易排隊執行，不會超扣
+- **冪等**：每筆請求帶唯一識別碼（後台送出時產生，重試沿用同一個），`idempotency_key` 有 unique 限制，重送只會入帳一次
+- **快照驗證**：交易提交前，deferred constraint trigger 檢查「快照 = 流水帳加總 = 最後一筆交易後餘額」，不一致整筆 Rollback；
+  後台「對帳檢查」會全體重新核對一次
+- 函式只開放 `service_role`（member-api）呼叫，前端 anon key 無法直接呼叫
+
+已有金流紀錄的會員不能刪除（保留帳務）。
+
+### 尚未執行的收尾 migration
+
+`supabase/migrations/20261028130000_member_cleanup.sql`：刪除已不用的空表 `member_wallet`、把 `member_trips.price` 改為 `numeric`。
+這步需要在 Supabase 確認，不影響功能，有空再執行。
+
