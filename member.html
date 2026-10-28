@@ -25,12 +25,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:var(--bg);flex-shrink:0;border:2px solid var(--surface)}
 .p-name{font-size:18px;font-weight:700}
 .tier{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:12px;background:var(--gold-bg);color:#8A6A08;font-size:12px;font-weight:700}
-.balance{margin-top:14px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#F3EFE6;border:none}
+.bal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.balance{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#F3EFE6;border:none}
 .bal-label{font-size:13px;opacity:.8}
-.bal-val{font-size:34px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+.balance.rebate{background:linear-gradient(135deg,#6b5310,#9a7a16)}
+.bal-val{font-size:28px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
 .bal-val small{font-size:16px;font-weight:600;margin-right:4px;color:var(--gold)}
 .tabs{display:flex;gap:6px;margin:22px 0 10px}
-.tabs button{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border-sub);background:var(--surface);font:600 14px var(--font);color:var(--text-muted);cursor:pointer}
+.tabs button{flex:1;padding:9px 4px;border-radius:8px;border:1px solid var(--border-sub);background:var(--surface);font:600 14px var(--font);color:var(--text-muted);cursor:pointer}
 .tabs button.on{background:var(--brand);border-color:var(--brand);color:#F3EFE6}
 .list{display:flex;flex-direction:column;gap:8px}
 .item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px}
@@ -39,6 +41,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .item-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
 .item-amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pos{color:var(--accent)}.neg{color:var(--red)}
+.tag-x{background:#FDECEA!important;color:#C24740!important}
+.dim{opacity:.6}
+.exp{font-size:12px;color:var(--accent);margin-top:6px;font-weight:600}
+.exp.soon{color:#B7791F}
+.exp.out{color:var(--red)}
 .tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;vertical-align:2px;background:var(--gold-bg);color:#8A6A08}
 .empty{text-align:center;color:var(--text-muted);font-size:14px;padding:32px 0}
 .center{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:24px}
@@ -74,7 +81,8 @@ const app=document.getElementById('app');
 let data=null,tab='trips';
 
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
-function money(n){return n.toLocaleString('zh-TW')}
+function money(n){return Number(n).toLocaleString('zh-TW')}
+const TXN_LABEL={topup:'儲值',spend:'扣款',grant:'回饋金發放',deduct:'回饋金使用',reversal:'更正'};
 function parseD(s){return new Date(s+'T00:00:00')}
 function fmtD(s){const d=parseD(s);return`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
 function fmtRange(s,e){
@@ -128,33 +136,47 @@ async function load(session){
 function setTab(t){tab=t;render()}
 
 function render(){
-  const{member:m,balance,wallet,trips}=data;
+  const{member:m,balances,ledger,trips}=data;
   const today=todayStr();
   const tripItems=trips.map(t=>{
-    const upcoming=t.trip_date&&(t.trip_date_end||t.trip_date)>=today;
-    return`<div class="card item"><div class="item-main">
-      <div class="item-title">${esc(t.trip_name)}${upcoming?'<span class="tag">即將出發</span>':''}</div>
+    const cancelled=t.status==='cancelled';
+    const upcoming=!cancelled&&t.trip_date&&(t.trip_date_end||t.trip_date)>=today;
+    return`<div class="card item ${cancelled?'dim':''}"><div class="item-main">
+      <div class="item-title">${esc(t.trip_name)}${upcoming?'<span class="tag">即將出發</span>':''}${cancelled?'<span class="tag tag-x">已取消</span>':''}</div>
       <div class="item-sub">${esc(fmtRange(t.trip_date,t.trip_date_end))}${t.note?'　'+esc(t.note):''}</div>
-    </div>${t.price?`<div class="item-amt">$${money(t.price)}</div>`:''}</div>`;
+    </div>${t.price!=null?`<div class="item-amt">$${money(t.price)}</div>`:''}</div>`;
   }).join('');
-  const walletItems=wallet.map(w=>`<div class="card item"><div class="item-main">
-      <div class="item-title">${esc(w.note||(w.amount>0?'儲值':'扣款'))}</div>
-      <div class="item-sub">${esc(fmtD(w.txn_date))}</div>
-    </div><div class="item-amt ${w.amount>0?'pos':'neg'}">${w.amount>0?'+':'−'}$${money(Math.abs(w.amount))}</div></div>`).join('');
+  const ledgerItems=acc=>ledger.filter(l=>l.account===acc).map(l=>`<div class="card item"><div class="item-main">
+      <div class="item-title">${esc(l.note||TXN_LABEL[l.txn_type])}</div>
+      <div class="item-sub">${esc(fmtD(l.txn_date))}・餘額 $${money(l.balance_after)}</div>
+    </div><div class="item-amt ${l.amount>0?'pos':'neg'}">${l.amount>0?'+':'−'}$${money(Math.abs(l.amount))}</div></div>`).join('');
+  let exp='';
+  if(m.expires_at){
+    const left=Math.ceil((parseD(m.expires_at)-parseD(today))/864e5);
+    exp=left<0?`<div class="exp out">會員已於 ${esc(fmtD(m.expires_at))} 到期</div>`
+      :`<div class="exp ${left<=30?'soon':''}">會員有效至 ${esc(fmtD(m.expires_at))}${left<=30?`（剩 ${left} 天）`:''}</div>`;
+  }
+  const lists={trips:tripItems||'<div class="empty">還沒有行程紀錄</div>',
+    stored:ledgerItems('stored')||'<div class="empty">還沒有儲值金紀錄</div>',
+    rebate:ledgerItems('rebate')||'<div class="empty">還沒有回饋金紀錄</div>'};
 
   app.innerHTML=`
     <div class="hero"><div class="hero-brand"><img src="favicon.png" alt="">入野門 WILDGATE</div></div>
     <div class="wrap">
       <div class="card profile">
         ${m.google_picture?`<img class="avatar" src="${esc(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:'<div class="avatar"></div>'}
-        <div style="min-width:0"><div class="p-name">${esc(m.real_name||m.google_name||'會員')}</div><div class="p-email">${esc(m.email)}</div><span class="tier">${esc(m.tier)}</span></div>
+        <div style="min-width:0"><div class="p-name">${esc(m.real_name||m.google_name||'會員')}</div><div class="p-email">${esc(m.email)}</div><span class="tier">${esc(m.tier)}</span>${exp}</div>
       </div>
-      <div class="card balance"><div class="bal-label">儲值金餘額</div><div class="bal-val"><small>NT$</small>${money(balance)}</div></div>
+      <div class="bal-grid">
+        <div class="card balance"><div class="bal-label">儲值金餘額</div><div class="bal-val"><small>NT$</small>${money(balances.stored)}</div></div>
+        <div class="card balance rebate"><div class="bal-label">入野門回饋金</div><div class="bal-val"><small>NT$</small>${money(balances.rebate)}</div></div>
+      </div>
       <div class="tabs">
-        <button class="${tab==='trips'?'on':''}" onclick="setTab('trips')">我的行程（${trips.length}）</button>
-        <button class="${tab==='wallet'?'on':''}" onclick="setTab('wallet')">儲值紀錄</button>
+        <button class="${tab==='trips'?'on':''}" onclick="setTab('trips')">我的行程（${trips.filter(t=>t.status!=='cancelled').length}）</button>
+        <button class="${tab==='stored'?'on':''}" onclick="setTab('stored')">儲值金紀錄</button>
+        <button class="${tab==='rebate'?'on':''}" onclick="setTab('rebate')">回饋金紀錄</button>
       </div>
-      <div class="list">${tab==='trips'?(tripItems||'<div class="empty">還沒有行程紀錄</div>'):(walletItems||'<div class="empty">還沒有儲值紀錄</div>')}</div>
+      <div class="list">${lists[tab]}</div>
       <div class="foot"><button onclick="logout()">登出</button></div>
     </div>`;
 }

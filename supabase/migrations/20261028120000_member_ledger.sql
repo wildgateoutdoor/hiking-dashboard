@@ -13,12 +13,8 @@
 -- ── 會員期限 ──
 alter table public.members add column if not exists expires_at date;
 
--- ── 舊的儲值表（尚無資料）改由流水帳取代 ──
-drop table if exists public.member_wallet;
-
 -- ── 購買行程：改為不可刪除，只能取消（取消時自動退款） ──
 alter table public.member_trips
-  alter column price type numeric(12,0),
   add column if not exists status text not null default 'active',
   add column if not exists cancelled_at timestamptz,
   add column if not exists idempotency_key text;
