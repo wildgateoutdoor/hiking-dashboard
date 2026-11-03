@@ -165,6 +165,7 @@ let D=null;              // API 回傳
 let wishState=null;      // 許願對話框狀態
 
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
+function escAttr(s){return esc(s).replace(/"/g,'&quot;')}
 async function api(action,body={}){
   const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action,...body})});
   const j=await res.json().catch(()=>({error:'連線失敗'}));
@@ -267,7 +268,7 @@ function drawChart(){
     const tx=flip?x-pinR-8:x+pinR+8, anchor=flip?'end':'start';
     const nameSize=mobile?13.5:16;
     labels+=`<text x="${tx}" y="${ly-4}" text-anchor="${anchor}" font-size="${nameSize}" font-weight="800" fill="#1F1D1A">${esc(m.name)}${m.region?`<tspan font-weight="400" font-size="${nameSize-3}" fill="#4A4741" class="mono"> [${esc(m.region)}]</tspan>`:''}</text>`
-      +`<text x="${tx}" y="${ly+14}" text-anchor="${anchor}" font-size="${mobile?11.5:13}" fill="#4A4741" class="mono">${m.total} 人許願${tm?` / 最熱 ${tm[0].replace('-','.')}`:''}${m.dates.length?` / 已開 ${m.dates.length} 團`:''}</text>`;
+      +`<text x="${tx}" y="${ly+14}" text-anchor="${anchor}" font-size="${mobile?11.5:13}" fill="#4A4741" class="mono">${m.total} 人許願${tm?` / 最熱 ${tm[0].replace('-','.')}`:''}${m.dates.length?` / 報名中 ${m.dates.length} 梯`:''}</text>`;
   });
   const title=mobile
     ?`<text x="20" y="44" font-family="'Noto Serif TC',serif" font-weight="700" font-size="30" fill="#4A4741">想去哪</text><text x="20" y="84" font-family="'Noto Serif TC',serif" font-weight="900" font-size="38" fill="#1F1D1A">許個願</text>`
@@ -302,15 +303,20 @@ function heatHTML(){
   return`<table class="heat"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
 }
 
+// 開團日期來自團務系統：顯示活動名稱與剩餘名額
+function dateSub(d){return[d.title,d.full?'額滿・可候補':d.seats!=null?`剩 ${d.seats} 位`:''].filter(Boolean).join('・')}
+function dateBtn(m,d,style=''){
+  return`<button class="date-btn" style="${style}" onclick="openSignup('${m.id}',${escAttr(JSON.stringify(d.id))})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">${d.full?'候補':'報名'}</span></button>`;
+}
 function cardHTML(m){
   const c=colorOf(m);
   const dates=m.dates.length
-    ?`<div class="dates">${m.dates.slice(0,4).map(d=>`<button class="date-btn" onclick="openSignup('${m.id}','${d.id}')"><span><b>${fmtRange(d.start_date,d.end_date)}</b>${d.note?`<small>${esc(d.note)}</small>`:''}</span><span class="go">報名</span></button>`).join('')}</div>`
-    :'<div class="no-date">目前還沒有開團日期</div>';
+    ?`<div class="dates">${m.dates.slice(0,4).map(d=>dateBtn(m,d)).join('')}</div>`
+    :'<div class="no-date">目前沒有報名中的梯次</div>';
   return`<div class="mt-card" style="--c:${c}">
     <div class="mt-head"><div><div class="mt-name">${esc(m.name)}</div><div class="mt-meta">${[m.region,m.elevation?m.elevation.toLocaleString()+' m':''].filter(Boolean).map(esc).join(' ・ ')}</div></div>
       <div class="mt-count"><b>${m.total}</b><small>人許願</small></div></div>
-    <div><div class="lbl" style="margin-bottom:6px">已開團日期</div>${dates}</div>
+    <div><div class="lbl" style="margin-bottom:6px">報名中的梯次</div>${dates}</div>
     <button class="wish-btn" onclick="openWish('${m.id}')">許願想去的月份</button>
   </div>`;
 }
@@ -337,7 +343,7 @@ function renderWish(){
     return`<button type="button" class="m-btn ${cls}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n">${sub}</span></button>`;
   }).join('');
   let dateList='';
-  if(sel){const ds=datesInMonth(m,sel);if(ds.length)dateList=ds.map(d=>`<button class="date-btn" style="width:100%;margin-bottom:6px" onclick="openSignup('${m.id}','${d.id}')"><span><b>${fmtRange(d.start_date,d.end_date)}</b>${d.note?`<small>${esc(d.note)}</small>`:''}</span><span class="go">報名</span></button>`).join('')}
+  if(sel){const ds=datesInMonth(m,sel);if(ds.length)dateList=ds.map(d=>dateBtn(m,d,'width:100%;margin-bottom:6px')).join('')}
   document.getElementById('dlg-wish').innerHTML=`
     <div class="dlg-h"><div><h3>許願：${esc(m.name)}</h3><p>選一個想去的月份。單月滿 ${D.threshold} 人，我們就會評估開團並通知你</p></div><button class="x" onclick="closeOv('ov-wish')">&times;</button></div>
     <div class="months">${monthBtns}</div>
@@ -381,8 +387,9 @@ function openSignup(mid,did){
   closeOv('ov-wish');
   const m=mt(mid);const d=m&&m.dates.find(x=>x.id===did);if(!d)return;
   document.getElementById('dlg-signup').innerHTML=`
-    <div class="dlg-h"><div><h3>報名：${esc(m.name)}</h3><p>${fmtRange(d.start_date,d.end_date)}${d.note?'・'+esc(d.note):''}</p></div><button class="x" onclick="closeOv('ov-signup')">&times;</button></div>
+    <div class="dlg-h"><div><h3>報名：${esc(m.name)}</h3><p>${fmtRange(d.start_date,d.end_date)}・${esc(dateSub(d))}</p></div><button class="x" onclick="closeOv('ov-signup')">&times;</button></div>
     <form onsubmit="submitSignup(event,'${m.id}','${d.id}')">
+      ${d.full?'<div class="picked">這個梯次目前額滿，送出後會列入<b>候補</b>，有名額時我們會通知你</div>':''}
       <div class="f"><label>姓名</label><input name="name" required maxlength="50" autocomplete="name"></div>
       <div class="f"><label>手機</label><input name="phone" type="tel" required autocomplete="tel" inputmode="tel"></div>
       <div class="f"><label>Email</label><input name="email" type="email" required autocomplete="email" inputmode="email"></div>
@@ -400,7 +407,7 @@ async function submitSignup(e,mid,did){
   const f=e.target,btn=document.getElementById('su-sub'),err=document.getElementById('su-err');
   err.textContent='';btn.disabled=true;btn.textContent='送出中…';
   try{
-    await api('signup',{date_id:did,name:f.name.value,phone:f.phone.value,email:f.email.value,party_size:f.party.value,note:f.note.value,website:f.website.value});
+    await api('signup',{trip_id:did,name:f.name.value,phone:f.phone.value,email:f.email.value,party_size:f.party.value,note:f.note.value,website:f.website.value});
     document.getElementById('dlg-signup').innerHTML=`<div class="done"><div class="big">🎒</div><h3>報名已送出</h3>
       <p>我們收到你的報名了，會盡快以電話或 Email 跟你確認細節與匯款資訊。</p><br>
       <button class="submit green" onclick="closeOv('ov-signup')">好</button></div>`;

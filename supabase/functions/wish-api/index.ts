@@ -1,10 +1,12 @@
 // 許願池 API（Supabase Edge Function）
 //
+// 山的開團日期直接取自團務系統（trips）：名稱包含山名或別名、狀態「報名中」、未過報名截止日的活動
+//
 // 前台（wish.html，不用登入）：
-//   { action:'list' }    → 可許願的山、已開日期、許願統計（只有數字，沒有個資）
+//   { action:'list' }    → 可許願的山、開團日期、許願統計（只有數字，沒有個資）
 //   { action:'wish' }    → 許願某座山某個月份；同一座山同一個月達到門檻時寄信到內部信箱（只寄一次）
 //   { action:'signup' }  → 報名已開的日期，寄信到內部信箱
-// 後台（wish-admin.html）：{ action:'admin:*' } + header x-admin-pw
+// 後台（index.html 的「許願池」分頁）：{ action:'admin:*' } + header x-admin-pw
 //
 // 需要的 secrets（Supabase → Edge Functions → Secrets）：
 //   RESEND_API_KEY   Resend 的 API key（沒設定的話功能照常，只是不寄信）
@@ -116,15 +118,36 @@ async function sendMail(subject: string, rows: [string, unknown][], intro: strin
   } catch (e) { console.error("resend", e); return false; }
 }
 
+// ── 團務系統連動 ──
+type Trip = { id: string; name: string; date: string; dateEnd?: string; deadline?: string; status?: string; capacity?: number; registered?: number };
+const norm = (s: string) => s.replace(/\s+/g, "").toLowerCase();
+function tripMatches(m: { name: string; aliases?: string[] | null }, t: Trip) {
+  const n = norm(t.name || "");
+  return [m.name, ...(m.aliases || [])].map((k) => norm(k || "")).some((k) => k && n.includes(k));
+}
+// 消費者可以報名的活動：報名中、還沒出發、還沒過報名截止
+const tripOpen = (t: Trip, today: string) =>
+  t.status === "reg" && !!t.date && t.date >= today && (!t.deadline || t.deadline >= today);
+async function loadTrips(): Promise<Trip[]> {
+  const rows = must(await db.from("trips").select("id,data"));
+  return rows.map((r: any) => ({ ...r.data, id: r.id }));
+}
+const tripDate = (t: Trip) => {
+  const left = (t.capacity || 0) - (t.registered || 0);
+  return {
+    id: t.id, start_date: t.date, end_date: t.dateEnd || null, title: t.name,
+    seats: t.capacity ? Math.max(0, left) : null, full: !!t.capacity && left <= 0,
+  };
+};
+
 // ── 前台 ──
 async function list() {
   const today = todayTW();
   const thisMonth = monthStart(today);
-  const mountains = must(await db.from("wish_mountains").select("id,name,region,elevation,sort")
+  const mountains = must(await db.from("wish_mountains").select("id,name,aliases,region,elevation,sort")
     .eq("active", true).order("sort").order("created_at"));
   const ids = mountains.map((m: any) => m.id);
-  const dates = ids.length ? must(await db.from("wish_dates").select("id,mountain_id,start_date,end_date,note")
-    .in("mountain_id", ids).eq("active", true).gte("start_date", today).order("start_date")) : [];
+  const open = (await loadTrips()).filter((t) => tripOpen(t, today)).sort((a, b) => a.date.localeCompare(b.date));
   const wishes = ids.length ? must(await db.from("wishes").select("mountain_id,wish_month")
     .in("mountain_id", ids).gte("wish_month", thisMonth)) : [];
   // 只回傳統計數字
@@ -137,9 +160,9 @@ async function list() {
   return {
     threshold: THRESHOLD,
     today,
-    mountains: mountains.map((m: any) => ({
+    mountains: mountains.map(({ aliases, ...m }: any) => ({
       ...m,
-      dates: (dates as any[]).filter((d) => d.mountain_id === m.id).map(({ mountain_id: _, ...d }) => d),
+      dates: open.filter((t) => tripMatches({ name: m.name, aliases }, t)).map(tripDate),
       months: counts[m.id] || {},
       total: Object.values(counts[m.id] || {}).reduce((a, b) => a + b, 0),
     })),
@@ -195,23 +218,26 @@ async function maybeAlert(mountainId: string, name: string, wishMonth: string, n
 
 async function signup(b: Record<string, any>) {
   if (b.website) return { ok: true };
-  const dateId = uuid(b.date_id);
-  const { data: d } = await db.from("wish_dates")
-    .select("id,start_date,end_date,note,active,mountain:wish_mountains(id,name,active)").eq("id", dateId).maybeSingle();
-  const mt = (d as any)?.mountain;
-  if (!d || !d.active || !mt?.active || d.start_date < todayTW()) throw new HttpError(400, "這個日期已經不開放報名，請重新整理");
+  const tripId = str(b.trip_id, 64);
+  const { data: tr } = await db.from("trips").select("id,data").eq("id", tripId).maybeSingle();
+  const t: Trip | null = tr ? { ...(tr as any).data, id: (tr as any).id } : null;
+  if (!t || !tripOpen(t, todayTW())) throw new HttpError(400, "這個日期已經不開放報名，請重新整理");
+  const mts = must(await db.from("wish_mountains").select("id,name,aliases").eq("active", true));
+  const mt = mts.find((m: any) => tripMatches(m, t));
+  const d = tripDate(t);
   const party = parseInt(String(b.party_size ?? "1"));
   if (!(party >= 1 && party <= 20)) throw new HttpError(400, "人數請填 1～20");
   const row = {
-    date_id: d.id, mountain_id: mt.id, mountain_name: mt.name, start_date: d.start_date, end_date: d.end_date,
+    trip_id: t.id, mountain_id: mt?.id ?? null, mountain_name: t.name, start_date: d.start_date, end_date: d.end_date,
     name: reqStr(b.name, "姓名", 50), email: email(b.email), phone: phone(b.phone, true)!,
     party_size: party, note: strOrNull(b.note),
   };
-  const ins = must(await db.from("wish_signups").insert(row).select("id").single());
+  const ins: any = must(await db.from("wish_signups").insert(row).select("id").single());
   const range = row.end_date && row.end_date !== row.start_date ? `${fmtDate(row.start_date)} ~ ${fmtDate(row.end_date)}` : fmtDate(row.start_date);
   const ok = await sendMail(
-    `【報名】${row.mountain_name} ${range}｜${row.name} ${party} 人`,
-    [["行程", row.mountain_name], ["日期", range + (d.note ? `（${d.note}）` : "")], ["姓名", row.name], ["人數", `${party} 人`],
+    `【報名${d.full ? "・候補" : ""}】${row.mountain_name} ${range}｜${row.name} ${party} 人`,
+    [["行程", row.mountain_name], ["日期", range], ["名額", d.full ? "已額滿（候補）" : d.seats != null ? `報名前剩 ${d.seats} 位` : "—"],
+     ["姓名", row.name], ["人數", `${party} 人`],
      ["手機", row.phone], ["Email", row.email], ["備註", row.note || "—"]],
     "有一筆新的報名：",
     row.email,
@@ -245,16 +271,17 @@ async function admin(action: string, b: Record<string, any>) {
 
     case "admin:list": {
       const mountains = must(await db.from("wish_mountains").select("*").order("sort").order("created_at"));
-      const dates = must(await db.from("wish_dates").select("*").order("start_date"));
       const wishes = must(await db.from("wishes").select("*").order("created_at", { ascending: false }));
       const signups = must(await db.from("wish_signups").select("*").order("created_at", { ascending: false }).limit(500));
       const alerts = must(await db.from("wish_alerts").select("*"));
-      return { threshold: THRESHOLD, mail: mailConfigured(), today: todayTW(), mountains, dates, wishes, signups, alerts };
+      return { threshold: THRESHOLD, mail: mailConfigured(), today: todayTW(), mountains, wishes, signups, alerts };
     }
 
     case "admin:saveMountain": {
       const f = {
         name: reqStr(b.name, "山的名稱", 50), region: strOrNull(b.region, 50),
+        aliases: (Array.isArray(b.aliases) ? b.aliases : String(b.aliases ?? "").split(/[、,，\n]/))
+          .map((x: unknown) => str(x, 50)).filter(Boolean).slice(0, 20),
         elevation: b.elevation === "" || b.elevation == null ? null : Math.round(Number(b.elevation)) || null,
         sort: Math.round(Number(b.sort)) || 0, active: b.active !== false,
       };
@@ -269,19 +296,6 @@ async function admin(action: string, b: Record<string, any>) {
       must(await db.from("wish_mountains").delete().eq("id", id));
       return { ok: true };
     }
-
-    case "admin:saveDate": {
-      const start = dateStr(b.start_date, "出發日期");
-      const end = b.end_date ? dateStr(b.end_date, "回程日期") : null;
-      if (end && end < start) throw new HttpError(400, "回程日期不能早於出發日期");
-      const f = { mountain_id: uuid(b.mountain_id), start_date: start, end_date: end, note: strOrNull(b.note, 100), active: b.active !== false };
-      if (b.id) must(await db.from("wish_dates").update(f).eq("id", uuid(b.id)));
-      else must(await db.from("wish_dates").insert(f));
-      return { ok: true };
-    }
-    case "admin:deleteDate":
-      must(await db.from("wish_dates").delete().eq("id", uuid(b.id)));
-      return { ok: true };
 
     case "admin:deleteWish":
       must(await db.from("wishes").delete().eq("id", uuid(b.id)));
