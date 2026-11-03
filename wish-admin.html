@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>許願池後台</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+:root{
+  --brand:#2e3c26;--gold:#dfac10;--gold-bg:#FBF3DA;--bg:#F2EEE5;--surface:#fff;--alt:#FAF8F3;
+  --text:#253D33;--text-2:#4E6358;--muted:#8A9990;--border:#E2DED5;--accent:#3D8B66;--red:#C24740;
+  --r:10px;--font:'PingFang TC','Microsoft JhengHei','Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 48px}
+header{background:var(--brand);color:#F3EFE6}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.05em}
+.brand img{width:26px;height:26px;border-radius:50%}
+header a,header button.lnk{color:#F3EFE6;opacity:.85;font-size:13px;background:none;border:none;cursor:pointer;text-decoration:underline}
+.h-acts{display:flex;gap:14px;align-items:center}
+.tabs{display:flex;gap:6px;margin:18px 0 14px;overflow-x:auto}
+.tabs button{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-weight:600;color:var(--text-2);cursor:pointer;white-space:nowrap}
+.tabs button.on{background:var(--brand);border-color:var(--brand);color:#F3EFE6}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card h3{font-size:15px;margin-bottom:10px}
+.status{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700}
+.pill.ok{background:#E3F1E9;color:#2C6B4D}.pill.no{background:#FDECEA;color:var(--red)}.pill.g{background:var(--gold-bg);color:#8A6A08}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.kpi small{color:var(--muted);font-size:12px}
+.kpi b{display:block;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+@media(max-width:640px){.kpis{grid-template-columns:1fr 1fr}}
+.btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--alt)}
+.btn.p{background:var(--brand);border-color:var(--brand);color:#F3EFE6}
+.btn.s{padding:4px 10px;font-size:12px}
+.btn.d{color:var(--red)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;background:var(--alt)}
+td.num,th.num{text-align:center;font-variant-numeric:tabular-nums}
+.grid th.mt{position:sticky;left:0;background:var(--surface);z-index:1;white-space:nowrap}
+.grid thead th.mt{background:var(--alt)}
+.grid td{text-align:center;cursor:pointer;min-width:44px}
+.grid td:hover{background:var(--alt)}
+.c{display:inline-block;min-width:26px;padding:2px 6px;border-radius:12px;font-weight:700;font-size:12px}
+.c1{background:#EEF4EF;color:#2C6B4D}.c2{background:#D6EADD;color:#2C6B4D}.c3{background:var(--gold);color:#3b2d00}
+.sent{font-size:10px;color:#8A6A08;display:block}
+.zero{color:#CFCBC2}
+.datecell{box-shadow:inset 0 -3px 0 var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:3px}
+.f label{font-size:12px;color:var(--muted);font-weight:600}
+.f input,.f select{padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;min-width:0}
+.f input:focus,.f select:focus{outline:none;border-color:var(--brand)}
+.mt-item{border:1px solid var(--border);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden}
+.mt-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.mt-top b{font-size:15px}
+.mt-top small{color:var(--muted);margin-left:6px}
+.mt-body{border-top:1px solid var(--border);padding:14px;background:var(--alt);display:none}
+.mt-item.open .mt-body{display:block}
+.off{opacity:.55}
+.date-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:6px}
+.date-row.past{opacity:.5}
+.sub{font-size:12px;color:var(--muted)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.login{min-height:80vh;display:flex;align-items:center;justify-content:center}
+.login .card{width:100%;max-width:340px;text-align:center;padding:28px}
+.login img{width:56px;height:56px;border-radius:50%;margin-bottom:10px}
+.login input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin:14px 0 8px;font-size:16px}
+.err{color:var(--red);font-size:13px;min-height:18px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(90px);background:var(--text);color:#fff;padding:10px 20px;border-radius:22px;transition:transform .25s;z-index:99}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.note{font-size:12px;color:var(--muted);line-height:1.7}
+.note code{background:var(--alt);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
+const API=SB_URL+'/functions/v1/wish-api';
+const PW_KEY='wish-admin-pw';
+const DAYS=['日','一','二','三','四','五','六'];
+const app=document.getElementById('app');
+let D=null,tab='stats',openMt=new Set(),fMt='',fMonth='';
+let tabSaved='';try{tabSaved=localStorage.getItem('wish-admin-tab')||''}catch{}
+if(['stats','mountains','wishes','signups'].includes(tabSaved))tab=tabSaved;
+
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
+const attr=s=>esc(s).replace(/"/g,'&quot;');
+function pw(){try{return localStorage.getItem(PW_KEY)||''}catch{return''}}
+async function api(action,body={},password){
+  const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'x-admin-pw':password??pw()},body:JSON.stringify({action,...body})});
+  const j=await res.json().catch(()=>({error:'連線失敗'}));
+  if(res.status===401&&password==null){try{localStorage.removeItem(PW_KEY)}catch{}showLogin('密碼錯誤或已變更，請重新登入');throw new Error('401')}
+  if(!res.ok)throw new Error(j.error||'發生錯誤');
+  return j;
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2400)}
+async function act(action,body,ok){
+  try{await api(action,body);if(ok)toast(ok);await load()}
+  catch(e){if(e.message!=='401')alert(e.message)}
+}
+function parseD(s){return new Date(s+'T00:00:00')}
+function fmtD(s){const d=parseD(s);return`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
+function fmtRange(s,e){if(!e||e===s)return fmtD(s);const d=parseD(e);return`${fmtD(s)} ~ ${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
+function fmtTime(s){const d=new Date(s);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+const fmtYM=k=>`${k.slice(0,4)}/${Number(k.slice(5,7))}`;
+const mName=id=>(D.mountains.find(m=>m.id===id)||{}).name||'（已刪除）';
+
+// ── 登入 ──
+function showLogin(msg){
+  app.innerHTML=`<div class="login"><div class="card"><img src="favicon.png" alt=""><h2>許願池後台</h2>
+    <input id="pw" type="password" placeholder="後台密碼" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+    <div class="err" id="lerr">${esc(msg||'')}</div><button class="btn p" style="width:100%" onclick="login()">登入</button></div></div>`;
+  setTimeout(()=>document.getElementById('pw').focus(),30);
+}
+async function login(){
+  const v=document.getElementById('pw').value.trim().normalize('NFKC');const err=document.getElementById('lerr');
+  if(!v){err.textContent='請輸入密碼';return}
+  try{await api('admin:check',{},v)}catch(e){err.textContent=e.message;return}
+  try{localStorage.setItem(PW_KEY,v)}catch{}
+  load();
+}
+function logout(){try{localStorage.removeItem(PW_KEY)}catch{}showLogin()}
+
+async function load(){
+  try{D=await api('admin:list')}catch(e){if(e.message!=='401')app.innerHTML=`<div class="login"><div class="card">讀取失敗：${esc(e.message)}<br><br><button class="btn p" onclick="load()">重試</button></div></div>`;return}
+  render();
+}
+function setTab(t){tab=t;try{localStorage.setItem('wish-admin-tab',t)}catch{}render()}
+
+function render(){
+  const pub=location.href.replace(/wish-admin\.html.*$/,'wish.html');
+  app.innerHTML=`<header><div class="wrap"><div class="brand"><img src="favicon.png" alt="">許願池後台</div>
+    <div class="h-acts"><a href="${attr(pub)}" target="_blank">開啟前台 ↗</a><button class="lnk" onclick="load()">重新整理</button><button class="lnk" onclick="logout()">登出</button></div></div></header>
+    <div class="wrap">
+      <div class="tabs">${[['stats','許願統計'],['mountains','山與日期'],['wishes',`許願名單（${D.wishes.length}）`],['signups',`報名名單（${D.signups.length}）`]].map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="setTab('${k}')">${l}</button>`).join('')}</div>
+      <div id="tab"></div>
+    </div>`;
+  document.getElementById('tab').innerHTML={stats:statsHTML,mountains:mountainsHTML,wishes:wishesHTML,signups:signupsHTML}[tab]();
+}
+
+// ── 統計 ──
+function monthRange(){
+  const [y,m]=D.today.split('-').map(Number);const out=[];
+  for(let i=0;i<12;i++){const d=new Date(y,m-1+i,1);out.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`)}
+  // 加上有許願但超出 12 個月的月份
+  const extra=[...new Set(D.wishes.map(w=>w.wish_month.slice(0,7)))].filter(k=>k>=out[0]&&!out.includes(k));
+  return[...out,...extra].sort();
+}
+function statsHTML(){
+  const thisM=D.today.slice(0,7);
+  const upcoming=D.wishes.filter(w=>w.wish_month.slice(0,7)>=thisM);
+  const months=monthRange();
+  const cnt={};upcoming.forEach(w=>{const k=w.mountain_id+'|'+w.wish_month.slice(0,7);cnt[k]=(cnt[k]||0)+1});
+  const sent=new Set(D.alerts.map(a=>a.mountain_id+'|'+a.wish_month.slice(0,7)));
+  const reached=Object.values(cnt).filter(v=>v>=D.threshold).length;
+  const mts=D.mountains.map(m=>({m,total:months.reduce((s,k)=>s+(cnt[m.id+'|'+k]||0),0)})).sort((a,b)=>b.total-a.total);
+  const dateSet=new Set(D.dates.filter(d=>d.active).map(d=>d.mountain_id+'|'+d.start_date.slice(0,7)));
+  const signupPax=D.signups.filter(s=>(s.start_date||'')>=D.today).reduce((s,x)=>s+x.party_size,0);
+  return`
+    <div class="card"><div class="status">
+      <span>寄信通知：</span>${D.mail?'<span class="pill ok">已設定</span>':'<span class="pill no">尚未設定（不會寄信）</span>'}
+      <span class="pill g">門檻：同山同月 ${D.threshold} 人</span>
+      ${D.mail?'<button class="btn s" onclick="testMail()">寄測試信</button>':''}
+    </div>${D.mail?'':'<p class="note" style="margin-top:8px">請在 Supabase → Edge Functions → Secrets 設定 <code>RESEND_API_KEY</code> 與 <code>NOTIFY_EMAIL</code>，詳見 WISH_SETUP.md。</p>'}</div>
+    <div class="kpis">
+      <div class="kpi"><small>未來的許願</small><b>${upcoming.length}</b></div>
+      <div class="kpi"><small>達門檻的山・月</small><b>${reached}</b></div>
+      <div class="kpi"><small>開放許願的山</small><b>${D.mountains.filter(m=>m.active).length}</b></div>
+      <div class="kpi"><small>即將出發的報名人數</small><b>${signupPax}</b></div>
+    </div>
+    <div class="card"><h3>每座山 × 每個月的許願人數</h3>
+      <p class="note" style="margin-bottom:10px">黃色＝達門檻（已寄信會標示「已通知」）；底線＝這個月已有開團日期。點格子看許願名單。</p>
+      ${D.mountains.length?`<div class="scroll"><table class="grid"><thead><tr><th class="mt">山</th><th class="num">合計</th>${months.map(k=>`<th class="num">${fmtYM(k)}</th>`).join('')}</tr></thead><tbody>
+      ${mts.map(({m,total})=>`<tr class="${m.active?'':'off'}"><th class="mt">${esc(m.name)}</th><td class="num"><b>${total}</b></td>${months.map(k=>{
+        const v=cnt[m.id+'|'+k]||0;const key=m.id+'|'+k;
+        const cls=v>=D.threshold?'c3':v>=2?'c2':'c1';
+        return`<td class="${dateSet.has(key)?'datecell':''}" onclick="viewWishes('${m.id}','${k}')">${v?`<span class="c ${cls}">${v}</span>`:'<span class="zero">·</span>'}${sent.has(key)?'<span class="sent">已通知</span>':''}</td>`}).join('')}</tr>`).join('')}
+      </tbody></table></div>`:'<div class="empty">還沒有山，請到「山與日期」新增</div>'}
+    </div>`;
+}
+function viewWishes(mid,ym){fMt=mid;fMonth=ym;setTab('wishes')}
+async function testMail(){try{await api('admin:testMail');toast('測試信已寄出，請查看內部信箱')}catch(e){if(e.message!=='401')alert(e.message)}}
+
+// ── 山與日期 ──
+function mountainsHTML(){
+  const wc={};D.wishes.forEach(w=>wc[w.mountain_id]=(wc[w.mountain_id]||0)+1);
+  return`<div class="card"><h3>新增一座山</h3>
+      <div class="row">
+        <div class="f" style="flex:2 1 160px"><label>山的名稱 *</label><input id="nm-name" placeholder="例：合歡山北峰"></div>
+        <div class="f" style="flex:1 1 110px"><label>地區</label><input id="nm-region" placeholder="例：南投"></div>
+        <div class="f" style="flex:1 1 90px"><label>海拔（m）</label><input id="nm-ele" type="number" min="0"></div>
+        <div class="f" style="flex:0 1 80px"><label>排序</label><input id="nm-sort" type="number" value="${D.mountains.length+1}"></div>
+        <button class="btn p" onclick="addMountain()">新增</button>
+      </div></div>
+    ${D.mountains.map(m=>{
+      const ds=D.dates.filter(d=>d.mountain_id===m.id);
+      const future=ds.filter(d=>d.start_date>=D.today&&d.active).length;
+      return`<div class="mt-item ${openMt.has(m.id)?'open':''}" id="mt-${m.id}">
+        <div class="mt-top" onclick="toggleMt('${m.id}')"><div><b class="${m.active?'':'off'}">${esc(m.name)}</b><small>${[m.region,m.elevation?m.elevation+' m':''].filter(Boolean).map(esc).join('・')}</small></div>
+          <div class="sub">${m.active?'':'<span class="pill no">不開放</span> '}${future} 個開團日期・${wc[m.id]||0} 筆許願</div></div>
+        <div class="mt-body">
+          <div class="row" style="margin-bottom:14px">
+            <div class="f" style="flex:2 1 150px"><label>名稱</label><input id="m-name-${m.id}" value="${attr(m.name)}"></div>
+            <div class="f" style="flex:1 1 100px"><label>地區</label><input id="m-region-${m.id}" value="${attr(m.region||'')}"></div>
+            <div class="f" style="flex:1 1 80px"><label>海拔</label><input id="m-ele-${m.id}" type="number" value="${m.elevation??''}"></div>
+            <div class="f" style="flex:0 1 70px"><label>排序</label><input id="m-sort-${m.id}" type="number" value="${m.sort}"></div>
+            <div class="f"><label>前台</label><select id="m-active-${m.id}"><option value="1" ${m.active?'selected':''}>開放許願</option><option value="0" ${m.active?'':'selected'}>不開放</option></select></div>
+            <button class="btn p" onclick="saveMountain('${m.id}')">儲存</button>
+            <button class="btn d" onclick="delMountain('${m.id}')">刪除</button>
+          </div>
+          <div style="font-weight:700;margin-bottom:6px">開團日期 <span class="sub">（前台點了會直接進報名表單；過去的日期不會顯示）</span></div>
+          ${ds.map(d=>`<div class="date-row ${d.start_date<D.today||!d.active?'past':''}"><div><b>${fmtRange(d.start_date,d.end_date)}</b>${d.note?` <span class="sub">${esc(d.note)}</span>`:''}${d.active?'':' <span class="pill no">隱藏</span>'}
+              <span class="sub">・報名 ${D.signups.filter(s=>s.date_id===d.id).reduce((a,s)=>a+s.party_size,0)} 人</span></div>
+            <div style="display:flex;gap:6px"><button class="btn s" onclick="toggleDate('${d.id}')">${d.active?'隱藏':'顯示'}</button><button class="btn s d" onclick="delDate('${d.id}')">刪除</button></div></div>`).join('')||'<div class="sub" style="margin-bottom:8px">還沒有日期</div>'}
+          <div class="row" style="margin-top:8px">
+            <div class="f"><label>出發日期 *</label><input id="d-start-${m.id}" type="date" onchange="const e=document.getElementById('d-end-${m.id}');if(!e.value||e.value<this.value)e.value=this.value"></div>
+            <div class="f"><label>回程日期</label><input id="d-end-${m.id}" type="date"></div>
+            <div class="f" style="flex:1 1 140px"><label>說明</label><input id="d-note-${m.id}" placeholder="例：兩天一夜・住山屋"></div>
+            <button class="btn p" onclick="addDate('${m.id}')">新增日期</button>
+          </div>
+        </div></div>`}).join('')||'<div class="empty">還沒有山</div>'}`;
+}
+function toggleMt(id){openMt.has(id)?openMt.delete(id):openMt.add(id);document.getElementById('mt-'+id).classList.toggle('open')}
+const val=id=>document.getElementById(id).value.trim();
+function addMountain(){
+  if(!val('nm-name'))return alert('請填山的名稱');
+  act('admin:saveMountain',{name:val('nm-name'),region:val('nm-region'),elevation:val('nm-ele'),sort:val('nm-sort')},'已新增');
+}
+function saveMountain(id){
+  act('admin:saveMountain',{id,name:val('m-name-'+id),region:val('m-region-'+id),elevation:val('m-ele-'+id),sort:val('m-sort-'+id),active:val('m-active-'+id)==='1'},'已儲存');
+}
+async function delMountain(id){
+  const m=D.mountains.find(x=>x.id===id);
+  if(!confirm(`確定刪除「${m.name}」？它的開團日期也會一起刪除。`))return;
+  try{await api('admin:deleteMountain',{id})}
+  catch(e){
+    if(e.message==='401')return;
+    if(!/筆許願/.test(e.message)){alert(e.message);return}
+    if(!confirm(e.message+'\n\n仍然要連同許願一起刪除嗎？'))return;
+    try{await api('admin:deleteMountain',{id,force:true})}catch(x){if(x.message!=='401')alert(x.message);return}
+  }
+  openMt.delete(id);toast('已刪除');load();
+}
+function addDate(mid){
+  const s=val('d-start-'+mid);if(!s)return alert('請選出發日期');
+  act('admin:saveDate',{mountain_id:mid,start_date:s,end_date:val('d-end-'+mid),note:val('d-note-'+mid)},'已新增日期');
+}
+function toggleDate(id){const d=D.dates.find(x=>x.id===id);act('admin:saveDate',{...d,active:!d.active},d.active?'已隱藏':'已顯示')}
+function delDate(id){if(confirm('確定刪除這個日期？（已報名的資料會保留）'))act('admin:deleteDate',{id},'已刪除')}
+
+// ── 許願名單 ──
+function wishMonths(){return[...new Set(D.wishes.map(w=>w.wish_month.slice(0,7)))].sort()}
+function filteredWishes(){return D.wishes.filter(w=>(!fMt||w.mountain_id===fMt)&&(!fMonth||w.wish_month.startsWith(fMonth)))}
+function wishesHTML(){
+  const list=filteredWishes();
+  const k=fMt&&fMonth?fMt+'|'+fMonth:null;
+  const alert_=k&&D.alerts.find(a=>a.mountain_id+'|'+a.wish_month.slice(0,7)===k);
+  return`<div class="card"><div class="filters">
+      <div class="f"><label>山</label><select onchange="fMt=this.value;render()"><option value="">全部</option>${D.mountains.map(m=>`<option value="${m.id}" ${m.id===fMt?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+      <div class="f"><label>月份</label><select onchange="fMonth=this.value;render()"><option value="">全部</option>${wishMonths().map(k=>`<option value="${k}" ${k===fMonth?'selected':''}>${fmtYM(k)}</option>`).join('')}</select></div>
+      <span class="sub" style="padding-bottom:8px">共 ${list.length} 筆</span>
+      <span style="flex:1"></span>
+      ${alert_?`<button class="btn s" onclick="resetAlert('${fMt}','${fMonth}')" title="之後再達門檻時會再寄一次">重新開放門檻通知</button>`:''}
+      <button class="btn s" onclick="exportWishes()">匯出 CSV</button>
+    </div>
+    ${list.length?`<div class="scroll"><table><thead><tr><th>許願時間</th><th>山</th><th>月份</th><th>姓名</th><th>Email</th><th>手機</th><th>想說的話</th><th></th></tr></thead><tbody>
+    ${list.map(w=>`<tr><td>${fmtTime(w.created_at)}</td><td>${esc(mName(w.mountain_id))}</td><td>${fmtYM(w.wish_month)}</td><td>${esc(w.name)}</td><td>${esc(w.email)}</td><td>${esc(w.phone||'')}</td><td>${esc(w.note||'')}</td><td><button class="btn s d" onclick="delWish('${w.id}')">刪除</button></td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty">沒有許願</div>'}</div>`;
+}
+function delWish(id){if(confirm('確定刪除這筆許願？'))act('admin:deleteWish',{id},'已刪除')}
+function resetAlert(mid,ym){if(confirm('重新開放後，下一位許願時若仍達門檻會再寄一次通知。確定？'))act('admin:resetAlert',{mountain_id:mid,wish_month:ym+'-01'},'已重新開放')}
+
+// ── 報名名單 ──
+function signupsHTML(){
+  const list=D.signups;
+  return`<div class="card"><div class="filters"><span class="sub">共 ${list.length} 筆・${list.reduce((a,s)=>a+s.party_size,0)} 人</span><span style="flex:1"></span><button class="btn s" onclick="exportSignups()">匯出 CSV</button></div>
+    ${list.length?`<div class="scroll"><table><thead><tr><th>報名時間</th><th>行程</th><th>日期</th><th>姓名</th><th class="num">人數</th><th>手機</th><th>Email</th><th>備註</th><th>通知信</th><th></th></tr></thead><tbody>
+    ${list.map(s=>`<tr><td>${fmtTime(s.created_at)}</td><td>${esc(s.mountain_name)}</td><td>${s.start_date?fmtRange(s.start_date,s.end_date):''}</td><td>${esc(s.name)}</td><td class="num">${s.party_size}</td><td>${esc(s.phone)}</td><td>${esc(s.email)}</td><td>${esc(s.note||'')}</td><td>${s.mailed_at?'<span class="pill ok">已寄</span>':'<span class="pill no">未寄</span>'}</td><td><button class="btn s d" onclick="delSignup('${s.id}')">刪除</button></td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty">還沒有報名</div>'}</div>`;
+}
+function delSignup(id){if(confirm('確定刪除這筆報名？'))act('admin:deleteSignup',{id},'已刪除')}
+
+// ── CSV ──
+function csv(name,head,rows){
+  const q=v=>{let s=String(v??'');if(/^[=+\-@]/.test(s))s="'"+s;return/[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const body='﻿'+[head,...rows].map(r=>r.map(q).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body],{type:'text/csv'}));a.download=name;a.click();
+}
+function exportWishes(){csv('許願名單.csv',['許願時間','山','月份','姓名','Email','手機','想說的話'],filteredWishes().map(w=>[new Date(w.created_at).toLocaleString('zh-TW'),mName(w.mountain_id),fmtYM(w.wish_month),w.name,w.email,w.phone,w.note]))}
+function exportSignups(){csv('報名名單.csv',['報名時間','行程','出發','回程','姓名','人數','手機','Email','備註'],D.signups.map(s=>[new Date(s.created_at).toLocaleString('zh-TW'),s.mountain_name,s.start_date,s.end_date,s.name,s.party_size,s.phone,s.email,s.note]))}
+
+if(pw())load();else showLogin();
+</script>
+</body>
+</html>
