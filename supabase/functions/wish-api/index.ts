@@ -4,7 +4,7 @@
 //
 // 前台（wish.html，不用登入）：
 //   { action:'list' }    → 可許願的山、開團日期、許願統計（只有數字，沒有個資）
-//   { action:'wish' }    → 許願某座山某個月份；同一座山同一個月達到門檻時寄信到內部信箱（只寄一次）
+//   { action:'wish' }    → 許願某座山（或自己填的山名）某個月份；同一座山同一個月達到門檻時寄信到內部信箱（只寄一次）
 //   { action:'signup' }  → 報名已開的日期，寄信到內部信箱
 // 後台（index.html 的「許願池」分頁）：{ action:'admin:*' } + header x-admin-pw
 //
@@ -144,19 +144,23 @@ const tripDate = (t: Trip) => {
 async function list() {
   const today = todayTW();
   const thisMonth = monthStart(today);
-  const mountains = must(await db.from("wish_mountains").select("id,name,aliases,region,elevation,sort")
+  const mountains = must(await db.from("wish_mountains").select("id,name,aliases,region,elevation,sort,intro,tags")
     .eq("active", true).order("sort").order("created_at"));
   const ids = mountains.map((m: any) => m.id);
   const open = (await loadTrips()).filter((t) => tripOpen(t, today)).sort((a, b) => a.date.localeCompare(b.date));
-  const wishes = ids.length ? must(await db.from("wishes").select("mountain_id,wish_month")
-    .in("mountain_id", ids).gte("wish_month", thisMonth)) : [];
-  // 只回傳統計數字
+  const wishes = must(await db.from("wishes").select("mountain_id,custom_name,wish_month").gte("wish_month", thisMonth));
+  // 只回傳統計數字；自填的山依名稱（不分大小寫、空白）合併
   const counts: Record<string, Record<string, number>> = {};
+  const customName: Record<string, string> = {};
   for (const w of wishes as any[]) {
-    const m = (counts[w.mountain_id] ||= {});
+    let key = w.mountain_id;
+    if (!key) { key = "c:" + norm(w.custom_name); customName[key] ||= w.custom_name; }
+    else if (!ids.includes(key)) continue;
+    const m = (counts[key] ||= {});
     const k = w.wish_month.slice(0, 7);
     m[k] = (m[k] || 0) + 1;
   }
+  const sum = (o: Record<string, number> = {}) => Object.values(o).reduce((a, b) => a + b, 0);
   return {
     threshold: THRESHOLD,
     today,
@@ -164,8 +168,10 @@ async function list() {
       ...m,
       dates: open.filter((t) => tripMatches({ name: m.name, aliases }, t)).map(tripDate),
       months: counts[m.id] || {},
-      total: Object.values(counts[m.id] || {}).reduce((a, b) => a + b, 0),
+      total: sum(counts[m.id]),
     })),
+    custom: Object.keys(customName).map((k) => ({ name: customName[k], months: counts[k], total: sum(counts[k]) }))
+      .sort((a, b) => b.total - a.total),
   };
 }
 
@@ -177,43 +183,59 @@ async function activeMountain(id: string) {
 
 async function wish(b: Record<string, any>) {
   if (b.website) return { ok: true, count: 0 }; // 機器人陷阱欄位
-  const m = await activeMountain(uuid(b.mountain_id));
+  const custom = str(b.custom_name, 30);
+  const m = b.mountain_id ? await activeMountain(uuid(b.mountain_id)) : null;
+  if (!m && !custom) throw new HttpError(400, "請選擇想去的山，或直接填寫山名");
+  const target = m ? m.name : custom;
   const month = str(b.month, 7);
   if (!/^\d{4}-\d{2}$/.test(month)) throw new HttpError(400, "請選擇月份");
   const wishMonth = month + "-01";
   const thisMonth = monthStart(todayTW());
   if (wishMonth < thisMonth || wishMonth > addMonths(thisMonth, 24)) throw new HttpError(400, "只能許願未來兩年內的月份");
   const row = {
-    mountain_id: m.id, wish_month: wishMonth,
+    mountain_id: m?.id ?? null, custom_name: m ? null : custom, wish_month: wishMonth,
     name: reqStr(b.name, "姓名", 50), email: email(b.email), phone: phone(b.phone, false), note: strOrNull(b.note),
   };
   const { error } = await db.from("wishes").insert(row);
-  if (error?.code === "23505") throw new HttpError(409, `你已經許過 ${fmtMonth(wishMonth)} 的${m.name}了，我們收到囉！`);
+  if (error?.code === "23505") throw new HttpError(409, `你已經許過 ${fmtMonth(wishMonth)} 的${target}了，我們收到囉！`);
   if (error) throw new HttpError(500, error.message);
 
-  const { count } = await db.from("wishes").select("id", { count: "exact", head: true })
-    .eq("mountain_id", m.id).eq("wish_month", wishMonth);
-  const n = count || 0;
-  if (n >= THRESHOLD) await maybeAlert(m.id, m.name, wishMonth, n);
+  const people = await wishPeople(m?.id ?? null, custom, wishMonth);
+  const n = people.length;
+  if (n >= THRESHOLD) await maybeAlert(m?.id ?? null, m ? null : custom, target, wishMonth, people);
   return { ok: true, count: n, threshold: THRESHOLD };
 }
 
+// 同一座山（或同名的自填山）同一個月的許願者
+async function wishPeople(mountainId: string | null, custom: string, wishMonth: string) {
+  let q = db.from("wishes").select("name,email,phone,note,custom_name,created_at").eq("wish_month", wishMonth).order("created_at");
+  q = mountainId ? q.eq("mountain_id", mountainId) : q.is("mountain_id", null);
+  const rows: any[] = must(await q);
+  return mountainId ? rows : rows.filter((r) => norm(r.custom_name || "") === norm(custom));
+}
+
 // 門檻通知：先搶到 wish_alerts 這一列的才寄；寄失敗就把列刪掉，下一位許願時再試
-async function maybeAlert(mountainId: string, name: string, wishMonth: string, n: number) {
+// 自填的山以正規化後的名稱（去空白、小寫）記錄，寫法不同的同名山只寄一次
+async function maybeAlert(mountainId: string | null, custom: string | null, name: string, wishMonth: string, people: any[]) {
+  const n = people.length;
   const { data, error } = await db.from("wish_alerts")
-    .insert({ mountain_id: mountainId, wish_month: wishMonth, wish_count: n }).select("mountain_id").maybeSingle();
+    .insert({ mountain_id: mountainId, custom_name: custom ? norm(custom) : null, wish_month: wishMonth, wish_count: n }).select("wish_month").maybeSingle();
   if (error || !data) return; // 已經寄過（23505）或其他錯誤
-  const people = must(await db.from("wishes").select("name,email,phone,note,created_at")
-    .eq("mountain_id", mountainId).eq("wish_month", wishMonth).order("created_at"));
   const ok = await sendMail(
     `【許願池】${name}｜${fmtMonth(wishMonth)} 已有 ${n} 人許願`,
     [
-      ["山", name], ["月份", fmtMonth(wishMonth)], ["許願人數", `${n} 人（門檻 ${THRESHOLD} 人）`],
+      ["山", name + (custom ? "（消費者自填）" : "")], ["月份", fmtMonth(wishMonth)], ["許願人數", `${n} 人（門檻 ${THRESHOLD} 人）`],
       ...people.map((p: any, i: number) => [`#${i + 1}`, [p.name, p.email, p.phone, p.note].filter(Boolean).join("｜")] as [string, unknown]),
     ],
     `${name} 在 ${fmtMonth(wishMonth)} 的許願人數已達門檻，可以考慮開團了！`,
   );
-  if (!ok) await db.from("wish_alerts").delete().eq("mountain_id", mountainId).eq("wish_month", wishMonth);
+  if (!ok) await deleteAlert(mountainId, custom, wishMonth);
+}
+async function deleteAlert(mountainId: string | null, custom: string | null, wishMonth: string) {
+  if (mountainId) { must(await db.from("wish_alerts").delete().eq("mountain_id", mountainId).eq("wish_month", wishMonth)); return; }
+  const rows: any[] = must(await db.from("wish_alerts").select("custom_name").is("mountain_id", null).eq("wish_month", wishMonth));
+  const hit = rows.filter((r) => norm(r.custom_name || "") === norm(custom || "")).map((r) => r.custom_name);
+  if (hit.length) must(await db.from("wish_alerts").delete().is("mountain_id", null).eq("wish_month", wishMonth).in("custom_name", hit));
 }
 
 async function signup(b: Record<string, any>) {
@@ -284,6 +306,8 @@ async function admin(action: string, b: Record<string, any>) {
           .map((x: unknown) => str(x, 50)).filter(Boolean).slice(0, 20),
         elevation: b.elevation === "" || b.elevation == null ? null : Math.round(Number(b.elevation)) || null,
         sort: Math.round(Number(b.sort)) || 0, active: b.active !== false,
+        intro: strOrNull(b.intro, 1000),
+        tags: (Array.isArray(b.tags) ? b.tags : []).map((x: unknown) => str(x, 20)).filter(Boolean).slice(0, 20),
       };
       if (b.id) must(await db.from("wish_mountains").update(f).eq("id", uuid(b.id)));
       else must(await db.from("wish_mountains").insert(f));
@@ -306,7 +330,7 @@ async function admin(action: string, b: Record<string, any>) {
 
     // 重新開放某山某月的門檻通知（例如開團後又想再收一次通知）
     case "admin:resetAlert":
-      must(await db.from("wish_alerts").delete().eq("mountain_id", uuid(b.mountain_id)).eq("wish_month", dateStr(b.wish_month)));
+      await deleteAlert(b.mountain_id ? uuid(b.mountain_id) : null, str(b.custom_name, 30) || null, dateStr(b.wish_month));
       return { ok: true };
 
     case "admin:testMail": {

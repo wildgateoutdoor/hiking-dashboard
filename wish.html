@@ -5,167 +5,181 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>入野門許願池</title>
 <meta name="description" content="想去哪座山？許個願，湊滿人我們就開團。">
+<meta name="theme-color" content="#ECEAE3">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* 只做手機版：電腦上也維持手機寬度置中 */
 :root{
-  --paper:#ECEAE3;--paper-2:#E3E0D7;--ink:#1F1D1A;--ink-2:#4A4741;--muted:#86827A;--line:#8F8B83;
-  --brand:#2e3c26;--gold:#dfac10;--card:#F7F5F0;--border:#D6D2C8;--red:#B5443A;--ok:#4F6B45;
+  --paper:#ECEAE3;--paper-2:#E3E0D7;--ink:#1F1D1A;--ink-2:#4A4741;--muted:#86827A;
+  --card:#F7F5F0;--border:#D6D2C8;--red:#B5443A;--ok:#4F6B45;--gold:#dfac10;
   --serif:'Noto Serif TC','Songti TC',serif;
   --sans:'PingFang TC','Microsoft JhengHei','Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --w:480px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0}
 html{-webkit-text-size-adjust:100%}
-body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{background:#D9D5CB;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
-.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
-
-/* 頁首 */
-.top{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
-.brand{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.08em;font-size:14px;color:var(--ink-2)}
-.brand img{width:26px;height:26px;border-radius:50%}
-.top a{color:var(--ink-2);font-size:13px}
+button{-webkit-tap-highlight-color:transparent}
+.phone{max-width:var(--w);margin:0 auto;min-height:100vh;background:var(--paper);position:relative;padding:0 16px calc(110px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:8px;padding:16px 0 4px;font-weight:700;letter-spacing:.08em;font-size:13px;color:var(--ink-2)}
+.top img{width:24px;height:24px;border-radius:50%}
 
 /* 統計圖 */
-.chart-sec{position:relative;padding:8px 0 0}
-.chart-title{font-family:var(--serif);font-weight:900;line-height:1.02;letter-spacing:.02em;color:var(--ink)}
-.chart-title span{display:block}
-.chart-title .thin{font-weight:700;color:var(--ink-2)}
 #chart{width:100%;display:block}
-#chart text{font-family:var(--sans)}
 #chart .mono{font-family:var(--mono)}
-.chart-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-top:1.5px solid var(--ink);padding:8px 0 0;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-2);flex-wrap:wrap}
-.chart-foot b{font-family:var(--sans);font-weight:700;letter-spacing:.1em;color:var(--ink)}
-.m-legend{list-style:none;padding:0;margin:4px 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+.chart-foot{border-top:1.5px solid var(--ink);padding:8px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--ink-2);line-height:1.7}
+.chart-foot b{font-family:var(--sans);letter-spacing:.1em;color:var(--ink)}
+.m-legend{list-style:none;padding:0;margin:4px 0 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
 .m-legend li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.3}
 .m-legend i{flex-shrink:0;width:18px;height:18px;border-radius:50%;color:#fff;font:500 10px/18px var(--mono);text-align:center;font-style:normal}
 .m-legend b{display:block;font-weight:800}
 .m-legend small{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
-.chart-empty{padding:60px 0;text-align:center;color:var(--muted)}
+.hint-line{font-size:13px;color:var(--muted);text-align:center;margin:6px 0 0}
+.center{padding:80px 0;text-align:center;color:var(--muted)}
 
-/* 月份熱度 */
-.sec{margin-top:48px}
-.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.sec-h h2{font-family:var(--serif);font-size:24px;font-weight:900}
-.sec-h p{font-size:13px;color:var(--muted)}
-.heat-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
-.heat{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
-.heat th,.heat td{padding:8px 4px;text-align:center;border-bottom:1px solid var(--border)}
-.heat tr:last-child td{border-bottom:none}
-.heat thead th{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--muted);white-space:nowrap}
-.heat thead th.yr{color:var(--ink)}
-.heat th.mt{text-align:left;font-weight:700;white-space:nowrap;padding-right:12px;position:sticky;left:0;background:var(--paper);z-index:1}
-.heat th.mt i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:0}
-.dot{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;line-height:1}
-.dot.reach{box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--gold)}
-.heat td.has-date{background:repeating-linear-gradient(-45deg,transparent 0 5px,rgba(79,107,69,.10) 5px 10px)}
-.heat .zero{color:#C4C0B6}
-.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.lg-reach{width:12px;height:12px;border-radius:50%;background:var(--ink-2);box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--gold)}
-.lg-date{width:16px;height:12px;background:repeating-linear-gradient(-45deg,transparent 0 3px,rgba(79,107,69,.35) 3px 6px);border:1px solid var(--border)}
+/* 主要按鈕 */
+.cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none}
+.cta-in{max-width:var(--w);margin:0 auto;padding:12px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--paper) 70%,rgba(236,234,227,0));pointer-events:auto}
+.cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border:none;border-radius:16px;background:var(--ink);color:var(--paper);font-size:18px;font-weight:800;letter-spacing:.12em;cursor:pointer;box-shadow:0 6px 18px rgba(31,29,26,.25)}
+.cta:active{transform:scale(.98)}
 
-/* 許願卡 */
-.mt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.mt-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
-.mt-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
-.mt-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.mt-name{font-size:19px;font-weight:800;letter-spacing:.02em}
-.mt-meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px}
-.mt-count{text-align:right;flex-shrink:0}
-.mt-count b{display:block;font-family:var(--serif);font-size:26px;line-height:1;font-weight:900;color:var(--c)}
-.mt-count small{font-size:11px;color:var(--muted)}
-.lbl{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.05em}
-.dates{display:flex;flex-direction:column;gap:6px}
-.date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--ok);background:#fff;cursor:pointer;text-align:left}
-.date-btn:hover{background:#F1F5EE}
-.date-btn b{font-weight:700;font-size:14px}
-.date-btn small{color:var(--muted);font-size:12px;display:block}
-.date-btn .go{flex-shrink:0;font-size:12px;font-weight:700;color:#fff;background:var(--ok);padding:4px 10px;border-radius:20px}
-.no-date{font-size:13px;color:var(--muted)}
-.wish-btn{padding:11px;border-radius:10px;border:none;background:var(--ink);color:var(--paper);font-weight:700;cursor:pointer;letter-spacing:.05em}
-.wish-btn:hover{background:#000}
+/* 全螢幕流程 */
+.sheet{position:fixed;inset:0;z-index:40;display:none;background:rgba(31,29,26,.45)}
+.sheet.show{display:block}
+.sheet-in{max-width:var(--w);margin:0 auto;height:100%;background:var(--paper);display:flex;flex-direction:column;animation:up .22s ease}
+@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+.sh-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;border-bottom:1px solid var(--border)}
+.sh-head b{font-size:16px;font-weight:800}
+.ic-btn{width:40px;height:40px;border:none;background:none;border-radius:50%;font-size:22px;line-height:1;cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
+.ic-btn:active{background:var(--paper-2)}
+.ic-btn.hide{visibility:hidden}
+.sh-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px calc(28px + env(safe-area-inset-bottom))}
+.q{font-family:var(--serif);font-size:24px;font-weight:900;line-height:1.35;margin-bottom:6px}
+.q-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
 
-/* 對話框 */
-.ov{position:fixed;inset:0;background:rgba(31,29,26,.5);display:none;align-items:flex-end;justify-content:center;z-index:50}
-.ov.show{display:flex}
-.dlg{background:var(--card);width:100%;max-width:480px;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom))}
-@media(min-width:600px){.ov{align-items:center}.dlg{border-radius:18px}}
-.dlg-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
-.dlg-h h3{font-size:19px;font-weight:800}
-.dlg-h p{font-size:13px;color:var(--muted);margin-top:2px}
-.x{border:none;background:none;font-size:26px;line-height:1;cursor:pointer;color:var(--muted);padding:0 4px}
-.months{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}
-.m-btn{padding:8px 2px;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:58px;justify-content:center}
+.choice{display:flex;align-items:center;gap:14px;width:100%;padding:20px 18px;margin-bottom:12px;border-radius:16px;border:1.5px solid var(--border);background:#fff;text-align:left;cursor:pointer}
+.choice:active{border-color:var(--ink)}
+.choice .em{font-size:30px;line-height:1}
+.choice b{display:block;font-size:18px;font-weight:800}
+.choice small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.choice.dark{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.choice.dark small{color:#BDB8AE}
+
+.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.exp{padding:18px 10px;border-radius:14px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:15px}
+.exp .em{font-size:30px;line-height:1}
+.exp:active{border-color:var(--ink);background:var(--paper-2)}
+
+/* 表單 */
+.f{margin-bottom:20px}
+.f>label,.f .lb{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:800;margin-bottom:8px}
+.f .no{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--paper);font:500 12px var(--mono);flex-shrink:0}
+.f small{font-weight:400;color:var(--muted);font-size:12px}
+.f input,.f select,.f textarea{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:#fff;font-size:16px;-webkit-appearance:none;appearance:none}
+.f select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A4741' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:36px}
+.f select:disabled{background-color:var(--paper-2);color:var(--muted)}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--ink)}
+.f textarea{min-height:72px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 16px;border-radius:22px;border:1.5px solid var(--border);background:#fff;font-weight:700;font-size:15px;cursor:pointer}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.months{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.m-btn{padding:10px 4px;border-radius:12px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:62px;justify-content:center}
 .m-btn .y{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.m-btn .m{font-weight:800;font-size:15px}
-.m-btn .n{font-size:10px;color:var(--muted)}
+.m-btn .m{font-weight:800;font-size:16px}
+.m-btn .n{font-size:10.5px;color:var(--muted)}
+.m-btn .n.open{color:var(--ok);font-weight:700}
 .m-btn.on{border-color:var(--ink);background:var(--ink);color:var(--paper)}
 .m-btn.on .y,.m-btn.on .n{color:#CFCBC2}
-.m-btn.open{border-color:var(--ok);background:#F1F5EE}
-.m-btn.open .n{color:var(--ok);font-weight:700}
-.m-hint{font-size:12px;color:var(--muted);margin-bottom:14px}
-.f{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
-.f label{font-size:13px;font-weight:700;color:var(--ink-2)}
-.f label small{font-weight:400;color:var(--muted)}
-.f input,.f textarea,.f select{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:16px}
-.f input:focus,.f textarea:focus,.f select:focus{outline:none;border-color:var(--ink)}
-.f textarea{min-height:64px;resize:vertical}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:-6px 0 14px}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--border)}
+.trips{background:#F1F5EE;border:1.5px solid #C9D6C2;border-radius:14px;padding:12px;margin:-8px 0 20px}
+.trips p{font-size:13px;color:var(--ok);font-weight:700;margin-bottom:8px}
+.date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1.5px solid var(--ok);background:#fff;cursor:pointer;text-align:left}
+.date-btn:last-child{margin-bottom:0}
+.date-btn b{font-weight:700;font-size:14px}
+.date-btn small{color:var(--muted);font-size:12px;display:block}
+.date-btn .go{flex-shrink:0;font-size:12px;font-weight:700;color:#fff;background:var(--ok);padding:5px 12px;border-radius:20px}
+.divider{border:none;border-top:1px dashed var(--border);margin:6px 0 20px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.err{color:var(--red);font-size:13px;min-height:18px;margin-bottom:8px}
-.submit{width:100%;padding:13px;border-radius:12px;border:none;background:var(--ink);color:var(--paper);font-weight:800;font-size:16px;cursor:pointer;letter-spacing:.05em}
+.err{color:var(--red);font-size:14px;min-height:20px;margin-bottom:8px}
+.submit{width:100%;padding:15px;border-radius:14px;border:none;background:var(--ink);color:var(--paper);font-weight:800;font-size:17px;cursor:pointer;letter-spacing:.08em}
 .submit:disabled{opacity:.5}
 .submit.green{background:var(--ok)}
-.done{text-align:center;padding:16px 0 4px}
-.done .big{font-size:44px}
-.done h3{font-size:20px;margin:6px 0}
-.done p{color:var(--ink-2);font-size:14px}
-.meter{height:8px;border-radius:4px;background:var(--paper-2);overflow:hidden;margin:14px auto 6px;max-width:260px}
-.meter i{display:block;height:100%;background:var(--gold)}
-.picked{background:var(--paper);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:14px}
-.picked b{font-weight:800}
+.submit.ghost{background:none;color:var(--ink);border:1.5px solid var(--ink);margin-top:10px}
 
-.foot{padding:48px 0 32px;text-align:center;font-size:12px;color:var(--muted)}
-.loading{min-height:60vh;display:flex;align-items:center;justify-content:center}
-.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:sp .8s linear infinite}
+/* 探索結果 */
+.res-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.res-h .em{font-size:34px}
+.mt-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
+.mt-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.mt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.mt-name{font-size:19px;font-weight:800}
+.mt-meta{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.mt-count{text-align:right;flex-shrink:0;font-size:11px;color:var(--muted)}
+.mt-count b{display:block;font-family:var(--serif);font-size:22px;line-height:1.1;color:var(--c)}
+.mt-intro{font-size:14px;color:var(--ink-2);line-height:1.75;margin:10px 0 12px}
+.mt-card .trips{margin:0 0 12px}
+.mt-card .wish-this{width:100%;padding:12px;border-radius:12px;border:none;background:var(--ink);color:var(--paper);font-weight:800;cursor:pointer}
+
+/* 完成 */
+.done{text-align:center;padding:30px 0 10px}
+.done .big{font-size:56px}
+.done h3{font-family:var(--serif);font-size:24px;margin:10px 0 8px}
+.done p{color:var(--ink-2);font-size:15px}
+.meter{height:10px;border-radius:5px;background:var(--paper-2);overflow:hidden;margin:18px auto 8px;max-width:260px}
+.meter i{display:block;height:100%;background:var(--gold)}
+.picked{background:var(--paper-2);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:18px;line-height:1.6}
+.picked b{font-weight:800}
+.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto}
 @keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <div class="brand"><img src="favicon.png" alt="">入野門 WILDGATE</div>
-  </div>
-  <div id="main"><div class="loading"><div class="spin"></div></div></div>
-  <div class="foot">入野門 Wildgate Outdoor ・ 許願湊滿人數，我們就開團</div>
+<div class="phone">
+  <div class="top"><img src="favicon.png" alt="">入野門 WILDGATE</div>
+  <div id="main"><div class="center"><div class="spin"></div></div></div>
 </div>
+<div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><button class="cta" onclick="startFlow()">⛰️ 我要許願</button></div></div>
 
-<!-- 許願 -->
-<div class="ov" id="ov-wish" onclick="if(event.target===this)closeOv('ov-wish')">
-  <div class="dlg" id="dlg-wish"></div>
-</div>
-<!-- 報名 -->
-<div class="ov" id="ov-signup" onclick="if(event.target===this)closeOv('ov-signup')">
-  <div class="dlg" id="dlg-signup"></div>
-</div>
+<div class="sheet" id="sheet"><div class="sheet-in">
+  <div class="sh-head"><button class="ic-btn" id="sh-back" onclick="back()" aria-label="上一步">‹</button><b id="sh-title">許願</b><button class="ic-btn" onclick="closeSheet()" aria-label="關閉">&times;</button></div>
+  <div class="sh-body" id="sh-body"></div>
+</div></div>
 
 <script>
 const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
 const API=SB_URL+'/functions/v1/wish-api';
-// 參考圖的大地色系，依序給每座山
+// 參考圖的大地色系
 const PALETTE=['#5B3A24','#B9774B','#8E3E1C','#E2B44A','#4F6B45','#9EB0B3','#CF574D','#A8AD83','#E6C46A','#77735D','#6E8C8A','#C49A6C'];
 const DAYS=['日','一','二','三','四','五','六'];
-const MONTHS_AHEAD=18;
+const REGION_ORDER=['北部','中部','南部','東部'];
+// 「我想探索看看」的選項；key 對應後台「體驗分類」
+const EXPS=[
+  {key:'親子同樂',title:'親子首推',em:'👨‍👩‍👧'},
+  {key:'迷霧森林',title:'迷霧森林',em:'🌫️'},
+  {key:'百岳森林',title:'百岳森林',em:'🌲'},
+  {key:'大片草原',title:'大片草原',em:'🌾'},
+  {key:'高山湖泊',title:'高山湖泊',em:'🏞️'},
+  {key:'野地紮營',title:'野營首推',em:'⛺'},
+  {key:'野溪溫泉',title:'野溪溫泉',em:'♨️'},
+  {key:'流星雨',title:'流星雨',em:'🌠'},
+  {key:'百岳經典',title:'百岳首推',em:'⛰️'},
+];
 
-let D=null;              // API 回傳
-let wishState=null;      // 許願對話框狀態
+let D=null;
+// 流程狀態：stack 記錄走過的畫面，按「上一步」時退回
+let F=null;
 
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
 function escAttr(s){return esc(s).replace(/"/g,'&quot;')}
+const js=v=>escAttr(JSON.stringify(v));
 async function api(action,body={}){
   const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action,...body})});
   const j=await res.json().catch(()=>({error:'連線失敗'}));
@@ -174,108 +188,66 @@ async function api(action,body={}){
 }
 function parseD(s){return new Date(s+'T00:00:00')}
 function fmtD(s){const d=parseD(s);return`${d.getMonth()+1}/${d.getDate()}（${DAYS[d.getDay()]}）`}
-function fmtRange(s,e){
-  const d=parseD(s);const y=d.getFullYear();
-  if(!e||e===s)return`${y}/${fmtD(s)}`;
-  return`${y}/${fmtD(s)} – ${fmtD(e)}`;
-}
-function ymList(){
+function fmtRange(s,e){const y=parseD(s).getFullYear();return!e||e===s?`${y}/${fmtD(s)}`:`${y}/${fmtD(s)} – ${fmtD(e)}`}
+// 可許願的月份：從下個月起算一整年，共 12 個月
+function nextMonths(){
   const [y,m]=D.today.split('-').map(Number);const out=[];
-  for(let i=0;i<MONTHS_AHEAD;i++){const d=new Date(y,m-1+i,1);out.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`)}
+  for(let i=1;i<=12;i++){const d=new Date(y,m-1+i,1);out.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`)}
   return out;
 }
 const fmtYM=k=>`${k.slice(0,4)} 年 ${Number(k.slice(5))} 月`;
-function colorOf(m){return PALETTE[D.mountains.indexOf(m)%PALETTE.length]}
-function topMonth(m){let best=null;for(const[k,v]of Object.entries(m.months))if(!best||v>best[1]||(v===best[1]&&k<best[0]))best=[k,v];return best}
-function datesInMonth(m,ym){return m.dates.filter(d=>d.start_date.slice(0,7)===ym)}
+const mt=id=>D.mountains.find(m=>m.id===id);
+function colorOf(m){return PALETTE[Math.max(0,D.mountains.indexOf(m))%PALETTE.length]}
+function topMonth(x){let best=null;for(const[k,v]of Object.entries(x.months||{}))if(!best||v>best[1]||(v===best[1]&&k<best[0]))best=[k,v];return best}
+function datesInMonth(m,ym){return m?m.dates.filter(d=>d.start_date.slice(0,7)===ym):[]}
+function dateSub(d){return[d.title,d.full?'額滿・可候補':d.seats!=null?`剩 ${d.seats} 位`:''].filter(Boolean).join('・')}
+function dateBtn(m,d){return`<button type="button" class="date-btn" onclick="openSignup(${js(m.id)},${js(d.id)})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">${d.full?'候補':'報名'}</span></button>`}
 
 async function load(){
   try{D=await api('list')}
-  catch(e){document.getElementById('main').innerHTML=`<div class="chart-empty">讀取失敗：${esc(e.message)}<br><br><button class="wish-btn" onclick="location.reload()">重新整理</button></div>`;return}
+  catch(e){document.getElementById('main').innerHTML=`<div class="center">讀取失敗：${esc(e.message)}<br><br><button class="submit" style="width:auto;padding:10px 24px" onclick="location.reload()">重新整理</button></div>`;return}
   render();
 }
-
 function render(){
   const main=document.getElementById('main');
-  if(!D.mountains.length){main.innerHTML='<div class="chart-empty">許願池準備中，請稍後再來</div>';return}
-  main.innerHTML=`
-    <section class="chart-sec"><div id="chart-box"></div>
-      <div class="chart-foot"><span><b>入野門許願池</b>　｜　未來 ${MONTHS_AHEAD} 個月</span><span>依許願人數排序 ・ 單月滿 ${D.threshold} 人就通知我們評估開團</span></div>
-    </section>
-    <section class="sec">
-      <div class="sec-h"><h2>想去哪座山？</h2><p>已有日期的直接報名；沒有的話，許一個想去的月份</p></div>
-      <div class="mt-grid">${D.mountains.map(cardHTML).join('')}</div>
-    </section>
-    <section class="sec">
-      <div class="sec-h"><h2>每月許願熱度</h2><p>點格子可以直接許願那個月份</p></div>
-      <div class="heat-wrap">${heatHTML()}</div>
-      <div class="legend"><span><i class="lg-reach"></i>已達 ${D.threshold} 人</span><span><i class="lg-date"></i>這個月已有開團日期</span></div>
-    </section>`;
+  if(!D.mountains.length){main.innerHTML='<div class="center">許願池準備中，請稍後再來</div>';return}
+  const total=D.mountains.reduce((a,m)=>a+m.total,0)+(D.custom||[]).reduce((a,c)=>a+c.total,0);
+  main.innerHTML=`<div id="chart-box"></div>
+    <div class="chart-foot"><b>入野門許願池</b>　｜　共 ${total} 個願望<br>依許願人數排序・同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>
+    ${total?'':'<p class="hint-line">還沒有人許願，搶先許下第一個願望吧！</p>'}`;
+  document.getElementById('cta-bar').hidden=false;
   drawChart();
 }
 
-// ── 山形統計圖（參考「SO OLD SO HIGH」）──
+// ── 山形統計圖（參考「SO OLD SO HIGH」，手機版）──
+function chartItems(){
+  const items=[...D.mountains.map(m=>({name:m.name,total:m.total,months:m.months,c:colorOf(m),o:D.mountains.indexOf(m)})),
+    ...(D.custom||[]).map((c,i)=>({name:c.name,total:c.total,months:c.months,c:PALETTE[(D.mountains.length+i)%PALETTE.length],o:999+i}))];
+  return items.sort((a,b)=>b.total-a.total||a.o-b.o).slice(0,10);
+}
 function drawChart(){
   const box=document.getElementById('chart-box');if(!box)return;
-  const W=Math.max(320,box.clientWidth);
-  const mobile=W<640;
-  const list=[...D.mountains].sort((a,b)=>b.total-a.total||D.mountains.indexOf(a)-D.mountains.indexOf(b)).slice(0,10);
-  const n=list.length;
+  const W=Math.max(300,box.clientWidth);
+  const list=chartItems();const n=list.length;
   const max=Math.max(1,...list.map(m=>m.total));
-  // 版面
-  // 手機：圖上只放編號針，名稱改列在圖下方
-  const rowH=mobile?20:56;
-  const labelTop=mobile?118:34;            // 第一個標籤的 y
-  const baseY=labelTop+n*rowH+(mobile?120:230);
-  const H=baseY+4;
-  const minPeak=mobile?26:34;
-  const peakMaxTop=labelTop+rowH*0.9;      // 最高的山頂不超過第一個標籤下方太多
-  const left=mobile?20:W*0.2, right=W-(mobile?20:40);
-  const step=n>1?(right-left)/(n-1)*(mobile?0.86:0.9):0;
-  const halfBase=mobile?Math.max(46,(right-left)/n*1.1):Math.max(70,(right-left)/n*1.15);
-  let peaks='',pins='',labels='';
+  const rowH=20,labelTop=118,baseY=labelTop+n*rowH+120,H=baseY+4,minPeak=26,peakMaxTop=labelTop+rowH*0.9;
+  const left=20,right=W-20;
+  const step=n>1?(right-left)/(n-1)*0.86:0;
+  const halfBase=Math.max(46,(right-left)/n*1.1);
+  let peaks='',pins='';
   list.forEach((m,i)=>{
-    const c=colorOf(m);
-    const x=left+(n>1?i*step:(right-left)/2);
-    const ly=labelTop+i*rowH;
-    // 山頂高度依人數；同時不能高過自己的標籤
+    const x=left+(n>1?i*step:(right-left)/2),ly=labelTop+i*rowH;
     const avail=baseY-Math.max(peakMaxTop,ly+rowH*0.75);
-    const h=minPeak+(avail-minPeak)*(m.total/max);
-    const top=baseY-h;
+    const h=minPeak+(avail-minPeak)*(m.total/max),top=baseY-h;
     const hb=halfBase*(0.95+0.5*(h/(baseY-peakMaxTop)));
-    // 帶一點階梯與肩部，像參考圖的平頂山形
     const r=k=>{const s=Math.sin((i+1)*12.9898+k*78.233)*43758.5453;return s-Math.floor(s)};
-    const shL=0.35+r(1)*0.25, shR=0.3+r(2)*0.3, flat=Math.min(hb*0.12,8+r(3)*10);
-    const pts=[
-      [x-hb,baseY],
-      [x-hb*shL-hb*0.1,baseY-h*(0.55+r(4)*0.1)],
-      [x-hb*shL+4,baseY-h*(0.6+r(4)*0.1)],
-      [x-flat,top],[x+flat,top],
-      [x+hb*shR,baseY-h*(0.52+r(5)*0.12)],
-      [x+hb*shR+6,baseY-h*(0.48+r(5)*0.12)],
-      [x+hb,baseY],
-    ].map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
-    peaks=`<polygon points="${pts}" fill="${c}" opacity=".93" filter="url(#grain)"/>`+peaks; // 後面的先畫，最高的在最前面
-    // 針與編號
-    const pinR=mobile?8:10;
-    pins+=`<line x1="${x}" y1="${ly+pinR}" x2="${x}" y2="${top}" stroke="#7d796f" stroke-width="1"/>`
-      +`<circle cx="${x}" cy="${ly}" r="${pinR}" fill="${c}"/>`
-      +`<text x="${x}" y="${ly+3.8}" text-anchor="middle" font-size="${mobile?10:11}" font-weight="700" fill="#fff" class="mono">${i+1}</text>`;
-    // 標籤：靠右的改放在針的左邊
-    const tm=topMonth(m);
-    if(mobile)return;
-    const flip=x>W*0.68;
-    const tx=flip?x-pinR-8:x+pinR+8, anchor=flip?'end':'start';
-    const nameSize=mobile?13.5:16;
-    labels+=`<text x="${tx}" y="${ly-4}" text-anchor="${anchor}" font-size="${nameSize}" font-weight="800" fill="#1F1D1A">${esc(m.name)}${m.region?`<tspan font-weight="400" font-size="${nameSize-3}" fill="#4A4741" class="mono"> [${esc(m.region)}]</tspan>`:''}</text>`
-      +`<text x="${tx}" y="${ly+14}" text-anchor="${anchor}" font-size="${mobile?11.5:13}" fill="#4A4741" class="mono">${m.total} 人許願${tm?` / 最熱 ${tm[0].replace('-','.')}`:''}${m.dates.length?` / 報名中 ${m.dates.length} 梯`:''}</text>`;
+    const shL=0.35+r(1)*0.25,shR=0.3+r(2)*0.3,flat=Math.min(hb*0.12,8+r(3)*10);
+    const pts=[[x-hb,baseY],[x-hb*shL-hb*0.1,baseY-h*(0.55+r(4)*0.1)],[x-hb*shL+4,baseY-h*(0.6+r(4)*0.1)],[x-flat,top],[x+flat,top],
+      [x+hb*shR,baseY-h*(0.52+r(5)*0.12)],[x+hb*shR+6,baseY-h*(0.48+r(5)*0.12)],[x+hb,baseY]].map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+    peaks=`<polygon points="${pts}" fill="${m.c}" opacity=".93" filter="url(#grain)"/>`+peaks;
+    pins+=`<line x1="${x}" y1="${ly+8}" x2="${x}" y2="${top}" stroke="#7d796f" stroke-width="1"/><circle cx="${x}" cy="${ly}" r="8" fill="${m.c}"/>`
+      +`<text x="${x}" y="${ly+3.6}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" class="mono">${i+1}</text>`;
   });
-  const title=mobile
-    ?`<text x="20" y="44" font-family="'Noto Serif TC',serif" font-weight="700" font-size="30" fill="#4A4741">想去哪</text><text x="20" y="84" font-family="'Noto Serif TC',serif" font-weight="900" font-size="38" fill="#1F1D1A">許個願</text>`
-    :`<text x="14" y="${labelTop+70}" font-family="'Noto Serif TC',serif" font-weight="700" font-size="${Math.min(64,W*0.062)}" fill="#4A4741">想去</text>
-      <text x="14" y="${labelTop+70+Math.min(64,W*0.062)*1.05}" font-family="'Noto Serif TC',serif" font-weight="700" font-size="${Math.min(64,W*0.062)}" fill="#4A4741">哪座</text>
-      <text x="14" y="${labelTop+70+Math.min(64,W*0.062)*2.1}" font-family="'Noto Serif TC',serif" font-weight="900" font-size="${Math.min(64,W*0.062)}" fill="#1F1D1A">許個</text>
-      <text x="14" y="${labelTop+70+Math.min(64,W*0.062)*3.15}" font-family="'Noto Serif TC',serif" font-weight="900" font-size="${Math.min(64,W*0.062)}" fill="#1F1D1A">願</text>`;
   box.innerHTML=`<svg id="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="各山許願人數">
     <defs><filter id="grain" x="0" y="0" width="100%" height="100%">
       <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" result="t"/>
@@ -283,139 +255,176 @@ function drawChart(){
       <feComposite in="spk" in2="SourceGraphic" operator="in" result="s2"/>
       <feBlend in="SourceGraphic" in2="s2" mode="multiply"/>
     </filter></defs>
-    ${title}${peaks}${pins}${labels}
-  </svg>`+(mobile?`<ol class="m-legend">${list.map((m,i)=>{const tm=topMonth(m);return`<li><i style="background:${colorOf(m)}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>`:'');
+    <text x="4" y="44" font-family="'Noto Serif TC',serif" font-weight="700" font-size="30" fill="#4A4741">想去哪</text>
+    <text x="4" y="86" font-family="'Noto Serif TC',serif" font-weight="900" font-size="40" fill="#1F1D1A">許個願</text>
+    ${peaks}${pins}</svg>
+    <ol class="m-legend">${list.map((m,i)=>{const tm=topMonth(m);return`<li><i style="background:${m.c}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>`;
 }
 
-function heatHTML(){
-  const months=ymList();
-  const max=Math.max(1,...D.mountains.flatMap(m=>Object.values(m.months)));
-  let head='<tr><th class="mt"></th>'+months.map((k,i)=>{const yr=i===0||k.endsWith('-01');return`<th class="${yr?'yr':''}">${yr?k.slice(2,4)+"'<br>":''}${Number(k.slice(5))}月</th>`}).join('')+'</tr>';
-  const rows=D.mountains.map(m=>{
-    const c=colorOf(m);
-    return`<tr><th class="mt"><i style="background:${c}"></i>${esc(m.name)}</th>`+months.map(k=>{
-      const v=m.months[k]||0;const hasDate=datesInMonth(m,k).length>0;
-      const sz=v?Math.round(18+12*(v/max)):0;
-      const inner=v?`<span class="dot${v>=D.threshold?' reach':''}" style="width:${sz}px;height:${sz}px;background:${c}">${v}</span>`:'<span class="zero">·</span>';
-      return`<td class="${hasDate?'has-date':''}" style="cursor:pointer" onclick="openWish('${m.id}','${k}')" title="${esc(m.name)} ${fmtYM(k)}：${v} 人許願">${inner}</td>`;
-    }).join('')+'</tr>';
-  }).join('');
-  return`<table class="heat"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+// ── 許願流程 ──
+function startFlow(){F={stack:['choose'],region:'',mid:'',custom:'',month:'',exp:''};showSheet();renderStep()}
+function showSheet(){document.getElementById('sheet').classList.add('show');document.body.style.overflow='hidden'}
+function closeSheet(){document.getElementById('sheet').classList.remove('show');document.body.style.overflow='';if(F&&F.dirty){F=null;load()}else F=null}
+function go(step){F.stack.push(step);renderStep()}
+function back(){if(F.stack.length>1){F.stack.pop();renderStep()}else closeSheet()}
+function cur(){return F.stack[F.stack.length-1]}
+function renderStep(){
+  const s=cur();
+  const titles={choose:'我要許願',direct:'我要直接許願',explore:'我想探索看看',result:'我想探索看看',done:'許願完成',signup:'報名',signed:'報名完成'};
+  document.getElementById('sh-title').textContent=titles[s]||'許願';
+  document.getElementById('sh-back').classList.toggle('hide',F.stack.length<2||s==='done'||s==='signed');
+  const body=document.getElementById('sh-body');
+  body.innerHTML={choose:chooseHTML,direct:directHTML,explore:exploreHTML,result:resultHTML,signup:signupHTML,done:()=>F.doneHTML,signed:signedHTML}[s]();
+  body.scrollTop=0;
 }
 
-// 開團日期來自團務系統：顯示活動名稱與剩餘名額
-function dateSub(d){return[d.title,d.full?'額滿・可候補':d.seats!=null?`剩 ${d.seats} 位`:''].filter(Boolean).join('・')}
-function dateBtn(m,d,style=''){
-  return`<button class="date-btn" style="${style}" onclick="openSignup('${m.id}',${escAttr(JSON.stringify(d.id))})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">${d.full?'候補':'報名'}</span></button>`;
-}
-function cardHTML(m){
-  const c=colorOf(m);
-  const dates=m.dates.length
-    ?`<div class="dates">${m.dates.slice(0,4).map(d=>dateBtn(m,d)).join('')}</div>`
-    :'<div class="no-date">目前沒有報名中的梯次</div>';
-  return`<div class="mt-card" style="--c:${c}">
-    <div class="mt-head"><div><div class="mt-name">${esc(m.name)}</div><div class="mt-meta">${[m.region,m.elevation?m.elevation.toLocaleString()+' m':''].filter(Boolean).map(esc).join(' ・ ')}</div></div>
-      <div class="mt-count"><b>${m.total}</b><small>人許願</small></div></div>
-    <div><div class="lbl" style="margin-bottom:6px">報名中的梯次</div>${dates}</div>
-    <button class="wish-btn" onclick="openWish('${m.id}')">許願想去的月份</button>
-  </div>`;
+function chooseHTML(){
+  return`<div class="q">你想怎麼許願？</div><div class="q-sub">已經有想去的山，或還在找靈感都可以</div>
+    <button class="choice dark" onclick="go('direct')"><span class="em">✍️</span><span><b>我要直接許願</b><small>選地區、選山、選月份</small></span></button>
+    <button class="choice" onclick="go('explore')"><span class="em">🧭</span><span><b>我想探索看看</b><small>從喜歡的體驗找到適合的山</small></span></button>`;
 }
 
-// ── 對話框 ──
-function openOv(id){document.getElementById(id).classList.add('show');document.body.style.overflow='hidden'}
-function closeOv(id){document.getElementById(id).classList.remove('show');document.body.style.overflow=''}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeOv('ov-wish');closeOv('ov-signup')}});
-const mt=id=>D.mountains.find(m=>m.id===id);
+function regions(){
+  const rs=[...new Set(D.mountains.map(m=>m.region||'其他'))];
+  return rs.sort((a,b)=>(REGION_ORDER.indexOf(a)+1||99)-(REGION_ORDER.indexOf(b)+1||99));
+}
+function directHTML(){
+  const m=mt(F.mid);
+  const inRegion=D.mountains.filter(x=>(x.region||'其他')===F.region);
+  const months=nextMonths();
+  const trips=datesInMonth(m,F.month);
+  const target=m?m.name:F.custom.trim();
+  const cnt=k=>m?(m.months[k]||0):0;
+  return`<form onsubmit="submitWish(event)" novalidate>
+    <div class="f"><div class="lb"><span class="no">1</span>想去哪個地區？</div>
+      <div class="chips">${regions().map(r=>`<button type="button" class="chip ${F.region===r?'on':''}" onclick="pickRegion(${js(r)})">${esc(r)}</button>`).join('')}</div></div>
+    <div class="f"><label for="w-mt"><span class="no">2</span>想去哪座山？</label>
+      <select id="w-mt" ${F.region?'':'disabled'} onchange="pickMountain(this.value)">
+        <option value="">${F.region?'請選擇山':'請先選擇地區'}</option>
+        ${inRegion.map(x=>`<option value="${escAttr(x.id)}" ${x.id===F.mid?'selected':''}>${esc(x.name)}</option>`).join('')}
+      </select></div>
+    <div class="or">或</div>
+    <div class="f"><label for="w-custom"><span class="no">3</span>找不到想去的山嗎？請直接填寫</label>
+      <input id="w-custom" maxlength="30" placeholder="例：武陵四秀" value="${escAttr(F.custom)}" oninput="typeCustom(this.value)"></div>
+    <div class="f"><div class="lb"><span class="no">4</span>想去的月份</div>
+      <div class="months">${months.map(k=>{const t=datesInMonth(m,k).length,v=cnt(k);
+        return`<button type="button" class="m-btn ${k===F.month?'on':''}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n ${t?'open':''}">${t?'有梯次':v?`${v} 人想去`:''}</span></button>`}).join('')}</div></div>
+    ${trips.length?`<div class="trips"><p>${fmtYM(F.month)}已經有開團，可以直接報名 👇</p>${trips.map(d=>dateBtn(m,d)).join('')}</div>`:''}
+    <hr class="divider">
+    ${target&&F.month?`<div class="picked">許願：<b>${esc(target)}</b>・<b>${fmtYM(F.month)}</b><br>目前 ${m?cnt(F.month):'—'} 人想去${m?`，滿 ${D.threshold} 人我們就評估開團`:''}</div>`:''}
+    ${contactFields()}
+    <div class="err" id="w-err"></div>
+    <button class="submit" id="w-sub">丟進許願池</button>
+  </form>`;
+}
+function contactFields(){
+  const c=F.contact||{};
+  return`<div class="f"><label for="c-name">你的名字</label><input id="c-name" maxlength="50" autocomplete="name" value="${escAttr(c.name||'')}" oninput="saveContact()"></div>
+    <div class="f"><label for="c-email">Email <small>開團時通知你</small></label><input id="c-email" type="email" inputmode="email" autocomplete="email" value="${escAttr(c.email||'')}" oninput="saveContact()"></div>
+    <div class="f"><label for="c-phone">手機 <small>選填</small></label><input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" value="${escAttr(c.phone||'')}" oninput="saveContact()"></div>
+    <div class="f"><label for="c-note">想說的話 <small>選填</small></label><textarea id="c-note" maxlength="500" placeholder="例：想走兩天一夜、希望週末出發" oninput="saveContact()">${esc(c.note||'')}</textarea></div>
+    <div class="hp"><input id="c-web" tabindex="-1" autocomplete="off"></div>`;
+}
+const val=id=>{const e=document.getElementById(id);return e?e.value:''};
+function saveContact(){F.contact={name:val('c-name'),email:val('c-email'),phone:val('c-phone'),note:val('c-note')}}
+function rerender(){saveContact();const b=document.getElementById('sh-body'),y=b.scrollTop;renderStep();b.scrollTop=y}
+function pickRegion(r){F.region=r;if(F.mid&&(mt(F.mid).region||'其他')!==r)F.mid='';rerender()}
+function pickMountain(id){F.mid=id;if(id)F.custom='';rerender()}
+function typeCustom(v){
+  F.custom=v;
+  // 自己填山名時，清掉清單的選擇
+  if(v.trim()&&F.mid){F.mid='';const s=document.getElementById('w-mt');if(s)s.value='';rerender();const i=document.getElementById('w-custom');i.focus();i.setSelectionRange(v.length,v.length)}
+}
+function pickMonth(k){F.month=k;rerender()}
 
-function openWish(mid,ym){
-  const m=mt(mid);if(!m)return;
-  // 點的月份已經有我們開的日期 → 直接進報名表單
-  if(ym){const ds=datesInMonth(m,ym);if(ds.length===1){openSignup(mid,ds[0].id);return}}
-  wishState={mid,ym:ym||null};
-  renderWish();openOv('ov-wish');
-}
-function renderWish(){
-  const m=mt(wishState.mid);const sel=wishState.ym;
-  const monthBtns=ymList().map(k=>{
-    const v=m.months[k]||0;const ds=datesInMonth(m,k);
-    const cls=ds.length?'open':(k===sel?'on':'');
-    const sub=ds.length?'已開團':(v?`${v} 人`:'');
-    return`<button type="button" class="m-btn ${cls}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n">${sub}</span></button>`;
-  }).join('');
-  let dateList='';
-  if(sel){const ds=datesInMonth(m,sel);if(ds.length)dateList=ds.map(d=>dateBtn(m,d,'width:100%;margin-bottom:6px')).join('')}
-  document.getElementById('dlg-wish').innerHTML=`
-    <div class="dlg-h"><div><h3>許願：${esc(m.name)}</h3><p>選一個想去的月份。單月滿 ${D.threshold} 人，我們就會評估開團並通知你</p></div><button class="x" onclick="closeOv('ov-wish')">&times;</button></div>
-    <div class="months">${monthBtns}</div>
-    <div class="m-hint">綠色＝我們已經開好日期，點了直接報名</div>
-    ${dateList}
-    <form onsubmit="submitWish(event)" ${sel?'':'style="display:none"'}>
-      <div class="picked">許願月份：<b>${sel?fmtYM(sel):''}</b>（目前 ${sel?(m.months[sel]||0):0} 人）</div>
-      <div class="f"><label>姓名</label><input name="name" required maxlength="50" autocomplete="name"></div>
-      <div class="f"><label>Email <small>（開團時通知你）</small></label><input name="email" type="email" required autocomplete="email" inputmode="email"></div>
-      <div class="f"><label>手機 <small>（選填）</small></label><input name="phone" type="tel" autocomplete="tel" inputmode="tel"></div>
-      <div class="f"><label>想說的話 <small>（選填）</small></label><textarea name="note" maxlength="500" placeholder="例：想走兩天一夜、希望週末出發"></textarea></div>
-      <div class="hp"><input name="website" tabindex="-1" autocomplete="off"></div>
-      <div class="err" id="wish-err"></div>
-      <button class="submit" id="wish-sub">丟進許願池</button>
-    </form>`;
-}
-function pickMonth(k){
-  const m=mt(wishState.mid);const ds=datesInMonth(m,k);
-  if(ds.length===1){closeOv('ov-wish');openSignup(m.id,ds[0].id);return}
-  wishState.ym=k;renderWish();
-  const f=document.querySelector('#dlg-wish input[name=name]');if(f&&!ds.length)setTimeout(()=>f.focus(),50);
-}
 async function submitWish(e){
-  e.preventDefault();
-  const f=e.target,btn=document.getElementById('wish-sub'),err=document.getElementById('wish-err');
-  const m=mt(wishState.mid),ym=wishState.ym;
-  err.textContent='';btn.disabled=true;btn.textContent='送出中…';
+  e.preventDefault();saveContact();
+  const err=document.getElementById('w-err'),btn=document.getElementById('w-sub');
+  const m=mt(F.mid),custom=F.custom.trim(),c=F.contact;
+  err.textContent='';
+  if(!m&&!custom){err.textContent='請選擇想去的山，或直接填寫山名';return}
+  if(!F.month){err.textContent='請選擇想去的月份';return}
+  if(!c.name.trim()){err.textContent='請填寫你的名字';return}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email.trim())){err.textContent='請填寫正確的 Email';return}
+  btn.disabled=true;btn.textContent='送出中…';
   try{
-    const r=await api('wish',{mountain_id:m.id,month:ym,name:f.name.value,email:f.email.value,phone:f.phone.value,note:f.note.value,website:f.website.value});
-    m.months[ym]=r.count;m.total=Object.values(m.months).reduce((a,b)=>a+b,0);
-    const pct=Math.min(100,r.count/D.threshold*100);
-    document.getElementById('dlg-wish').innerHTML=`<div class="done"><div class="big">⛰️</div><h3>願望收到了！</h3>
-      <p>${esc(m.name)}・${fmtYM(ym)}<br>目前有 <b>${r.count}</b> 人許願${r.count>=D.threshold?'，已達開團門檻，我們會盡快評估！':`，再 ${D.threshold-r.count} 人就達到門檻`}</p>
+    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,month:F.month,name:c.name,email:c.email,phone:c.phone,note:c.note,website:val('c-web')});
+    F.dirty=true;
+    const target=m?m.name:custom,pct=Math.min(100,r.count/D.threshold*100);
+    F.doneHTML=`<div class="done"><div class="big">⛰️</div><h3>願望收到了！</h3>
+      <p>${esc(target)}・${fmtYM(F.month)}<br>目前有 <b>${r.count}</b> 人想去${r.count>=D.threshold?'，已達開團門檻，我們會盡快評估！':`，再 ${D.threshold-r.count} 人就達到門檻`}</p>
       <div class="meter"><i style="width:${pct}%"></i></div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">揪朋友一起許願，更快成團</p>
-      <button class="submit" onclick="closeOv('ov-wish');render()">好</button></div>`;
+      <p style="font-size:13px;color:var(--muted);margin-bottom:24px">揪朋友一起許願，更快成團</p>
+      <button class="submit" onclick="closeSheet()">完成</button>
+      <button class="submit ghost" onclick="againWish()">再許一個願</button></div>`;
+    go('done');
   }catch(x){err.textContent=x.message;btn.disabled=false;btn.textContent='丟進許願池'}
 }
+function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',custom:'',month:'',exp:'',contact:c,dirty:true};renderStep()}
 
-function openSignup(mid,did){
-  closeOv('ov-wish');
-  const m=mt(mid);const d=m&&m.dates.find(x=>x.id===did);if(!d)return;
-  document.getElementById('dlg-signup').innerHTML=`
-    <div class="dlg-h"><div><h3>報名：${esc(m.name)}</h3><p>${fmtRange(d.start_date,d.end_date)}・${esc(dateSub(d))}</p></div><button class="x" onclick="closeOv('ov-signup')">&times;</button></div>
-    <form onsubmit="submitSignup(event,'${m.id}','${d.id}')">
-      ${d.full?'<div class="picked">這個梯次目前額滿，送出後會列入<b>候補</b>，有名額時我們會通知你</div>':''}
-      <div class="f"><label>姓名</label><input name="name" required maxlength="50" autocomplete="name"></div>
-      <div class="f"><label>手機</label><input name="phone" type="tel" required autocomplete="tel" inputmode="tel"></div>
-      <div class="f"><label>Email</label><input name="email" type="email" required autocomplete="email" inputmode="email"></div>
-      <div class="f"><label>人數</label><select name="party">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1} 人</option>`).join('')}</select></div>
-      <div class="f"><label>備註 <small>（選填）</small></label><textarea name="note" maxlength="500" placeholder="例：同行者姓名、飲食需求、想租裝備"></textarea></div>
-      <div class="hp"><input name="website" tabindex="-1" autocomplete="off"></div>
-      <div class="err" id="su-err"></div>
-      <button class="submit green" id="su-sub">送出報名</button>
-    </form>`;
-  openOv('ov-signup');
-  setTimeout(()=>{const f=document.querySelector('#dlg-signup input[name=name]');if(f)f.focus()},50);
+// 探索
+function exploreHTML(){
+  return`<div class="q">請問哪一個體驗最吸引你？</div><div class="q-sub">選一個，我們推薦適合的山給你</div>
+    <div class="exp-grid">${EXPS.map(x=>`<button class="exp" onclick="pickExp('${x.key}')"><span class="em">${x.em}</span>${esc(x.key)}</button>`).join('')}</div>`;
 }
-async function submitSignup(e,mid,did){
+function pickExp(k){F.exp=k;go('result')}
+function resultHTML(){
+  const x=EXPS.find(e=>e.key===F.exp);
+  const list=D.mountains.filter(m=>(m.tags||[]).includes(F.exp));
+  return`<div class="res-h"><span class="em">${x.em}</span><div class="q" style="margin:0">${esc(x.title)}</div></div>
+    <div class="q-sub">${list.length?`推薦 ${list.length} 個地方給你`:'這個分類的推薦整理中'}</div>
+    ${list.map(m=>`<div class="mt-card" style="--c:${colorOf(m)}">
+      <div class="mt-top"><div><div class="mt-name">${esc(m.name)}</div><div class="mt-meta">${[m.region,m.elevation?m.elevation.toLocaleString()+' m':''].filter(Boolean).map(esc).join('・')}</div></div>
+        <div class="mt-count"><b>${m.total}</b>人想去</div></div>
+      ${m.intro?`<p class="mt-intro">${esc(m.intro)}</p>`:'<div style="height:12px"></div>'}
+      ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${m.dates.slice(0,3).map(d=>dateBtn(m,d)).join('')}</div>`:''}
+      <button class="wish-this" onclick="wishThis(${js(m.id)})">許願這座山</button>
+    </div>`).join('')}
+    <button class="submit ghost" onclick="back()">看看其他體驗</button>`;
+}
+function wishThis(id){const m=mt(id);F.mid=id;F.region=m.region||'其他';F.custom='';F.month='';go('direct')}
+
+// 報名（已有梯次）
+function openSignup(mid,did){F.sign={mid,did};saveContact();go('signup')}
+function signupHTML(){
+  const m=mt(F.sign.mid),d=m&&m.dates.find(x=>x.id===F.sign.did);if(!d)return'<div class="center">這個梯次已不開放報名</div>';
+  const c=F.contact||{};
+  return`<div class="q">${esc(m.name)}</div><div class="q-sub">${fmtRange(d.start_date,d.end_date)}・${esc(dateSub(d))}</div>
+    ${d.full?'<div class="picked">這個梯次目前額滿，送出後會列入<b>候補</b>，有名額時我們會通知你</div>':''}
+    <form onsubmit="submitSignup(event)" novalidate>
+      <div class="f"><label for="s-name">姓名</label><input id="s-name" maxlength="50" autocomplete="name" value="${escAttr(c.name||'')}"></div>
+      <div class="f"><label for="s-phone">手機</label><input id="s-phone" type="tel" inputmode="tel" autocomplete="tel" value="${escAttr(c.phone||'')}"></div>
+      <div class="f"><label for="s-email">Email</label><input id="s-email" type="email" inputmode="email" autocomplete="email" value="${escAttr(c.email||'')}"></div>
+      <div class="f"><label for="s-party">人數</label><select id="s-party">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1} 人</option>`).join('')}</select></div>
+      <div class="f"><label for="s-note">備註 <small>選填</small></label><textarea id="s-note" maxlength="500" placeholder="例：同行者姓名、飲食需求、想租裝備"></textarea></div>
+      <div class="hp"><input id="s-web" tabindex="-1" autocomplete="off"></div>
+      <div class="err" id="s-err"></div>
+      <button class="submit green" id="s-sub">送出報名</button>
+    </form>`;
+}
+async function submitSignup(e){
   e.preventDefault();
-  const f=e.target,btn=document.getElementById('su-sub'),err=document.getElementById('su-err');
-  err.textContent='';btn.disabled=true;btn.textContent='送出中…';
+  const err=document.getElementById('s-err'),btn=document.getElementById('s-sub');
+  const name=val('s-name').trim(),phone=val('s-phone').trim(),email=val('s-email').trim();
+  err.textContent='';
+  if(!name){err.textContent='請填寫姓名';return}
+  if(!phone){err.textContent='請填寫手機';return}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){err.textContent='請填寫正確的 Email';return}
+  btn.disabled=true;btn.textContent='送出中…';
   try{
-    await api('signup',{trip_id:did,name:f.name.value,phone:f.phone.value,email:f.email.value,party_size:f.party.value,note:f.note.value,website:f.website.value});
-    document.getElementById('dlg-signup').innerHTML=`<div class="done"><div class="big">🎒</div><h3>報名已送出</h3>
-      <p>我們收到你的報名了，會盡快以電話或 Email 跟你確認細節與匯款資訊。</p><br>
-      <button class="submit green" onclick="closeOv('ov-signup')">好</button></div>`;
+    await api('signup',{trip_id:F.sign.did,name,phone,email,party_size:val('s-party'),note:val('s-note'),website:val('s-web')});
+    F.contact={...(F.contact||{}),name,phone,email};
+    go('signed');
   }catch(x){err.textContent=x.message;btn.disabled=false;btn.textContent='送出報名'}
 }
+function signedHTML(){
+  return`<div class="done"><div class="big">🎒</div><h3>報名已送出</h3>
+    <p>我們收到你的報名了，會盡快以電話或 Email 跟你確認細節與匯款資訊。</p><br>
+    <button class="submit green" onclick="closeSheet()">完成</button></div>`;
+}
 
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&F)closeSheet()});
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(D&&D.mountains.length)drawChart()},150)});
-// 字型載入後重畫，避免中文字寬變動
 if(document.fonts)document.fonts.ready.then(()=>{if(D&&D.mountains.length)drawChart()});
 load();
 </script>
