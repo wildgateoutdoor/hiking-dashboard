@@ -574,6 +574,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .wp-mt-body{display:none;border-top:1px solid var(--border-sub);padding:12px 14px}
 .wp-mt.open .wp-mt-body{display:block}
 .wp-mt .mb-row{flex-wrap:wrap}
+.wp-tag{display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px}
+.wp-tag input{display:none}
 .wp-sel{padding:7px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font:400 14px var(--font);color:var(--text)}
 .wp-tbl th,.wp-tbl td{text-align:left}
 .wp-tbl a{color:var(--accent);font-weight:600}
@@ -2581,7 +2583,16 @@ function wishMatch(m,t){const n=wishNorm(t.name);return[m.name,...(m.aliases||[]
 function wishTripOpen(t){const td=dateStr(today());return t.status==='reg'&&t.date&&t.date>=td&&(!t.deadline||t.deadline>=td)}
 function wishTripsOf(m){const td=dateStr(today());return trips.filter(t=>t.date&&(t.dateEnd||t.date)>=td&&wishMatch(m,t)).sort((a,b)=>a.date.localeCompare(b.date))}
 const wishYM=k=>`${k.slice(0,4)}/${Number(k.slice(5,7))}`;
-const wishMName=id=>((wishData.mountains.find(m=>m.id===id)||{}).name)||'（已刪除）';
+// 許願的對象：清單裡的山（mountain_id），或消費者自填的山名（依名稱合併，key 為「c:名稱」）
+const wishKeyOf=w=>w.mountain_id||('c:'+wishNorm(w.custom_name));
+function wishTargetName(key){
+  if(!key.startsWith('c:'))return((wishData.mountains.find(m=>m.id===key)||{}).name)||'（已刪除）';
+  const w=wishData.wishes.find(x=>!x.mountain_id&&wishKeyOf(x)===key)||wishData.alerts.find(x=>!x.mountain_id&&wishKeyOf(x)===key);
+  return(w?w.custom_name:key.slice(2))+'（自填）';
+}
+const wishMName=wishTargetName;
+// 「我想探索看看」的體驗分類（與前台 wish.html 的 EXPS 相同）
+const WISH_EXPS=['親子同樂','迷霧森林','百岳森林','大片草原','高山湖泊','野地紮營','野溪溫泉','流星雨','百岳經典'];
 function wishTime(s){const d=new Date(s);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
 function wishRange(s,e){return!e||e===s?fmtDate(s):`${fmtDate(s)} ~ ${fmtDate(e)}`}
 
@@ -2614,11 +2625,13 @@ function wishStatsHTML(){
   const W=wishData,thisM=dateStr(today()).slice(0,7);
   const upcoming=W.wishes.filter(w=>w.wish_month.slice(0,7)>=thisM);
   const months=wishMonths();
-  const cnt={};upcoming.forEach(w=>{const k=w.mountain_id+'|'+w.wish_month.slice(0,7);cnt[k]=(cnt[k]||0)+1});
-  const sent=new Set(W.alerts.map(a=>a.mountain_id+'|'+a.wish_month.slice(0,7)));
+  const cnt={};upcoming.forEach(w=>{const k=wishKeyOf(w)+'|'+w.wish_month.slice(0,7);cnt[k]=(cnt[k]||0)+1});
+  const sent=new Set(W.alerts.map(a=>wishKeyOf(a)+'|'+a.wish_month.slice(0,7)));
   const reached=Object.values(cnt).filter(v=>v>=W.threshold).length;
   const openSet=new Set();W.mountains.forEach(m=>trips.filter(t=>wishTripOpen(t)&&wishMatch(m,t)).forEach(t=>openSet.add(m.id+'|'+t.date.slice(0,7))));
-  const rows=W.mountains.map(m=>({m,total:months.reduce((s,k)=>s+(cnt[m.id+'|'+k]||0),0)})).sort((a,b)=>b.total-a.total);
+  const customKeys=[...new Set(upcoming.filter(w=>!w.mountain_id).map(wishKeyOf))];
+  const rows=[...W.mountains.map(m=>({key:m.id,name:m.name,active:m.active})),...customKeys.map(k=>({key:k,name:wishTargetName(k),active:true}))]
+    .map(r=>({...r,total:months.reduce((s,k)=>s+(cnt[r.key+'|'+k]||0),0)})).sort((a,b)=>b.total-a.total);
   const signupPax=W.signups.filter(s=>(s.start_date||'')>=dateStr(today())).reduce((s,x)=>s+x.party_size,0);
   return`
     <div class="wp-status">寄信通知：${W.mail?'<span class="wp-pill ok">已設定</span> <button class="btn btn-s" onclick="wishTestMail()">寄測試信</button>':'<span class="wp-pill no">尚未設定，不會寄信</span><span class="wp-note">請在 Supabase → Edge Functions → Secrets 設定 RESEND_API_KEY 與 NOTIFY_EMAIL（見 WISH_SETUP.md）</span>'}
@@ -2629,11 +2642,11 @@ function wishStatsHTML(){
       <div class="fin-card"><div class="fc-label">開放許願的山</div><div class="fc-val">${W.mountains.filter(m=>m.active).length}</div></div>
       <div class="fin-card"><div class="fc-label">即將出發的報名人數</div><div class="fc-val">${signupPax}</div></div>
     </div>
-    <p class="wp-note" style="margin-bottom:8px">黃色＝達門檻（寄過信會標「已通知」）；綠色底線＝那個月團務列表有「報名中」的梯次。點格子看許願名單。</p>
+    <p class="wp-note" style="margin-bottom:8px">黃色＝達門檻（寄過信會標「已通知」）；綠色底線＝那個月團務列表有「報名中」的梯次；標「自填」的是消費者自己填的山名。點格子看許願名單。</p>
     ${W.mountains.length?`<div class="fin-tbl-wrap"><table class="fin-tbl wp-x wp-grid"><thead><tr><th>山</th><th>合計</th>${months.map(k=>`<th>${wishYM(k)}</th>`).join('')}</tr></thead><tbody>
-    ${rows.map(({m,total})=>`<tr class="${m.active?'':'wp-off'}"><td><b>${esc(m.name)}</b></td><td><b>${total}</b></td>${months.map(k=>{
-      const key=m.id+'|'+k,v=cnt[key]||0;const cls=v>=W.threshold?'c3':v>=2?'c2':'c1';
-      return`<td class="${openSet.has(key)?'wp-open':''}" onclick="wishView('${m.id}','${k}')">${v?`<span class="wp-c ${cls}">${v}</span>`:'<span class="wp-zero">·</span>'}${sent.has(key)?'<span class="wp-sent">已通知</span>':''}</td>`}).join('')}</tr>`).join('')}
+    ${rows.map(r=>`<tr class="${r.active?'':'wp-off'}"><td><b>${esc(r.name)}</b></td><td><b>${r.total}</b></td>${months.map(k=>{
+      const key=r.key+'|'+k,v=cnt[key]||0;const cls=v>=W.threshold?'c3':v>=2?'c2':'c1';
+      return`<td class="${openSet.has(key)?'wp-open':''}" onclick="wishView(${escAttr(JSON.stringify(r.key))},'${k}')">${v?`<span class="wp-c ${cls}">${v}</span>`:'<span class="wp-zero">·</span>'}${sent.has(key)?'<span class="wp-sent">已通知</span>':''}</td>`}).join('')}</tr>`).join('')}
     </tbody></table></div>`:'<div class="empty"><p>還沒有山，請到「山與梯次」新增</p></div>'}`;
 }
 function wishView(mid,ym){wishFMt=mid;wishFMonth=ym;setWishTab('wishes')}
@@ -2648,10 +2661,11 @@ function wishMountainsHTML(){
   return`<div class="mb-form">
       <div class="f-row span2"><label>山的名稱 *</label><input id="wn-name" list="wish-trip-names" placeholder="可直接選團務列表的活動名稱"></div>
       <div class="f-row span2"><label>別名（選填，用頓號分隔）</label><input id="wn-alias" placeholder="例：北大武、北大武山"></div>
-      <div class="f-row"><label>地區</label><input id="wn-region" placeholder="例：南投"></div>
+      <div class="f-row"><label>地區</label><input id="wn-region" list="wish-regions" placeholder="北部／中部／南部／東部"></div>
       <div class="f-row"><label>海拔（m）</label><input id="wn-ele" type="number" min="0"></div>
       <div class="f-row"><label>排序</label><input id="wn-sort" type="number" value="${W.mountains.length+1}"></div>
       <div class="f-row" style="display:flex;align-items:flex-end"><button class="btn btn-p" style="width:100%;justify-content:center" onclick="wishAddMountain()">新增</button></div>
+      <datalist id="wish-regions"><option value="北部"><option value="中部"><option value="南部"><option value="東部"></datalist>
       <datalist id="wish-trip-names">${allNames.map(n=>`<option value="${escAttr(n)}">`).join('')}</datalist>
       <div class="span4 wp-note">團務列表中名稱<b>包含</b>山名或別名的活動都會自動連動，例如「玉山主峰」會對應「玉山主峰兩天一夜」「玉山主峰2天2夜」。狀態是「報名中」且還沒過報名截止的梯次，會出現在前台讓消費者直接報名。</div>
       ${unmatched.length?`<div class="span4"><div class="wp-note" style="margin-bottom:6px">團務列表中還沒加入許願池的活動（點一下帶入）：</div><div class="filters">${unmatched.map(n=>`<button class="chip" onclick="document.getElementById('wn-name').value=${escAttr(JSON.stringify(n))};document.getElementById('wn-name').focus()">${esc(n)}</button>`).join('')}</div></div>`:''}
@@ -2660,15 +2674,17 @@ function wishMountainsHTML(){
       const ts=wishTripsOf(m),openN=ts.filter(wishTripOpen).length,isOpen=wishOpenIds.has(m.id);
       return`<div class="wp-mt ${isOpen?'open':''}" id="wmt-${m.id}">
         <div class="wp-mt-top" onclick="wishToggle('${m.id}')"><div><b class="${m.active?'':'wp-off'}">${esc(m.name)}</b>${(m.aliases||[]).length?`<span class="wp-note">（${esc(m.aliases.join('、'))}）</span>`:''}${m.active?'':' <span class="wp-pill no">不開放</span>'}</div>
-          <div class="wp-note">前台可報名 ${openN} 梯・${wc[m.id]||0} 筆許願</div></div>
+          <div class="wp-note">${esc(m.region||'未設地區')}・${(m.tags||[]).length?esc(m.tags.join('、'))+'・':''}前台可報名 ${openN} 梯・${wc[m.id]||0} 筆許願</div></div>
         <div class="wp-mt-body">
           <div class="mb-form">
             <div class="f-row span2"><label>山的名稱</label><input id="wm-name-${m.id}" list="wish-trip-names" value="${escAttr(m.name)}"></div>
             <div class="f-row span2"><label>別名（用頓號分隔）</label><input id="wm-alias-${m.id}" value="${escAttr((m.aliases||[]).join('、'))}"></div>
-            <div class="f-row"><label>地區</label><input id="wm-region-${m.id}" value="${escAttr(m.region||'')}"></div>
+            <div class="f-row"><label>地區</label><input id="wm-region-${m.id}" list="wish-regions" value="${escAttr(m.region||'')}"></div>
             <div class="f-row"><label>海拔（m）</label><input id="wm-ele-${m.id}" type="number" value="${m.elevation??''}"></div>
             <div class="f-row"><label>排序</label><input id="wm-sort-${m.id}" type="number" value="${m.sort}"></div>
             <div class="f-row"><label>前台</label><select id="wm-active-${m.id}"><option value="1" ${m.active?'selected':''}>開放許願</option><option value="0" ${m.active?'':'selected'}>不開放</option></select></div>
+            <div class="f-row span4"><label>前台介紹（「我想探索看看」會顯示）</label><textarea id="wm-intro-${m.id}" rows="3" maxlength="1000">${esc(m.intro||'')}</textarea></div>
+            <div class="f-row span4"><label>體驗分類（「我想探索看看」選到這些體驗時推薦這座山）</label><div class="filters" id="wm-tags-${m.id}">${WISH_EXPS.map(t=>`<label class="chip wp-tag ${(m.tags||[]).includes(t)?'on':''}"><input type="checkbox" value="${t}" ${(m.tags||[]).includes(t)?'checked':''} onchange="this.parentNode.classList.toggle('on',this.checked)">${t}</label>`).join('')}</div></div>
             <div class="mb-form-acts"><button class="btn btn-g" style="color:var(--red)" onclick="wishDelMountain('${m.id}')">刪除</button><button class="btn btn-p" onclick="wishSaveMountain('${m.id}')">儲存</button></div>
           </div>
           <div class="wp-note" style="margin:4px 0 6px;font-weight:600">團務列表中對應的梯次（未結束）</div>
@@ -2686,7 +2702,8 @@ function wishAddMountain(){
   wishAct('admin:saveMountain',{name:wv('wn-name'),aliases:wv('wn-alias'),region:wv('wn-region'),elevation:wv('wn-ele'),sort:wv('wn-sort')},'已新增');
 }
 function wishSaveMountain(id){
-  wishAct('admin:saveMountain',{id,name:wv('wm-name-'+id),aliases:wv('wm-alias-'+id),region:wv('wm-region-'+id),elevation:wv('wm-ele-'+id),sort:wv('wm-sort-'+id),active:wv('wm-active-'+id)==='1'},'已儲存');
+  wishAct('admin:saveMountain',{id,name:wv('wm-name-'+id),aliases:wv('wm-alias-'+id),region:wv('wm-region-'+id),elevation:wv('wm-ele-'+id),sort:wv('wm-sort-'+id),active:wv('wm-active-'+id)==='1',
+    intro:wv('wm-intro-'+id),tags:[...document.querySelectorAll('#wm-tags-'+id+' input:checked')].map(x=>x.value)},'已儲存');
 }
 async function wishDelMountain(id){
   const m=wishData.mountains.find(x=>x.id===id);
@@ -2700,24 +2717,25 @@ async function wishDelMountain(id){
   wishOpenIds.delete(id);toast('已刪除');loadWish();
 }
 
-function wishFiltered(){return wishData.wishes.filter(w=>(!wishFMt||w.mountain_id===wishFMt)&&(!wishFMonth||w.wish_month.startsWith(wishFMonth)))}
+function wishFiltered(){return wishData.wishes.filter(w=>(!wishFMt||wishKeyOf(w)===wishFMt)&&(!wishFMonth||w.wish_month.startsWith(wishFMonth)))}
 function wishListHTML(){
   const W=wishData,list=wishFiltered();
   const months=[...new Set(W.wishes.map(w=>w.wish_month.slice(0,7)))].sort();
-  const sentAlert=wishFMt&&wishFMonth&&W.alerts.some(a=>a.mountain_id===wishFMt&&a.wish_month.startsWith(wishFMonth));
+  const sentAlert=wishFMt&&wishFMonth&&W.alerts.some(a=>wishKeyOf(a)===wishFMt&&a.wish_month.startsWith(wishFMonth));
+  const customKeys=[...new Set(W.wishes.filter(w=>!w.mountain_id).map(wishKeyOf))];
   return`<div class="mb-bar">
-      <select class="wp-sel" onchange="wishFMt=this.value;renderWish()"><option value="">全部的山</option>${W.mountains.map(m=>`<option value="${m.id}" ${m.id===wishFMt?'selected':''}>${esc(m.name)}</option>`).join('')}</select>
+      <select class="wp-sel" onchange="wishFMt=this.value;renderWish()"><option value="">全部的山</option>${W.mountains.map(m=>`<option value="${m.id}" ${m.id===wishFMt?'selected':''}>${esc(m.name)}</option>`).join('')}${customKeys.map(k=>`<option value="${escAttr(k)}" ${k===wishFMt?'selected':''}>${esc(wishTargetName(k))}</option>`).join('')}</select>
       <select class="wp-sel" onchange="wishFMonth=this.value;renderWish()"><option value="">全部月份</option>${months.map(k=>`<option value="${k}" ${k===wishFMonth?'selected':''}>${wishYM(k)}</option>`).join('')}</select>
       <span class="wp-note">共 ${list.length} 筆</span>
       ${sentAlert?`<button class="btn btn-o" style="margin-left:auto" onclick="wishResetAlert()" title="之後再達門檻時會再寄一次">重新開放門檻通知</button>`:''}
       <button class="btn btn-o" ${sentAlert?'style="margin-left:0"':''} onclick="wishExport()">匯出 CSV</button>
     </div>
     <div class="fin-tbl-wrap"><table class="fin-tbl wp-x wp-tbl"><thead><tr><th>許願時間</th><th>山</th><th>月份</th><th>姓名</th><th>Email</th><th>手機</th><th>想說的話</th><th></th></tr></thead><tbody>
-    ${list.map(w=>`<tr><td>${wishTime(w.created_at)}</td><td>${esc(wishMName(w.mountain_id))}</td><td>${wishYM(w.wish_month)}</td><td>${esc(w.name)}</td><td>${esc(w.email)}</td><td>${esc(w.phone||'')}</td><td class="wp-wrap">${esc(w.note||'')}</td><td><button class="mb-del" title="刪除" onclick="wishDel('${w.id}')">&times;</button></td></tr>`).join('')||'<tr><td colspan="8" class="mb-none">沒有許願</td></tr>'}
+    ${list.map(w=>`<tr><td>${wishTime(w.created_at)}</td><td>${esc(wishTargetName(wishKeyOf(w)))}</td><td>${wishYM(w.wish_month)}</td><td>${esc(w.name)}</td><td>${esc(w.email)}</td><td>${esc(w.phone||'')}</td><td class="wp-wrap">${esc(w.note||'')}</td><td><button class="mb-del" title="刪除" onclick="wishDel('${w.id}')">&times;</button></td></tr>`).join('')||'<tr><td colspan="8" class="mb-none">沒有許願</td></tr>'}
     </tbody></table></div>`;
 }
 function wishDel(id){if(confirm('確定刪除這筆許願？'))wishAct('admin:deleteWish',{id},'已刪除')}
-function wishResetAlert(){if(confirm('重新開放後，下一位許願時若仍達門檻會再寄一次通知。確定？'))wishAct('admin:resetAlert',{mountain_id:wishFMt,wish_month:wishFMonth+'-01'},'已重新開放')}
+function wishResetAlert(){if(confirm('重新開放後，下一位許願時若仍達門檻會再寄一次通知。確定？'))wishAct('admin:resetAlert',wishFMt.startsWith('c:')?{custom_name:wishTargetName(wishFMt).replace(/（自填）$/,''),wish_month:wishFMonth+'-01'}:{mountain_id:wishFMt,wish_month:wishFMonth+'-01'},'已重新開放')}
 
 function wishSignupsHTML(){
   const list=wishData.signups;
@@ -2732,7 +2750,7 @@ function wishCsv(name,head,rows){
   const q=v=>{let s=String(v??'');if(/^[=+\-@]/.test(s))s="'"+s;return/[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+[head,...rows].map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download=name;a.click();
 }
-function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份','姓名','Email','手機','想說的話'],wishFiltered().map(w=>[new Date(w.created_at).toLocaleString('zh-TW'),wishMName(w.mountain_id),wishYM(w.wish_month),w.name,w.email,w.phone,w.note]))}
+function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份','姓名','Email','手機','想說的話'],wishFiltered().map(w=>[new Date(w.created_at).toLocaleString('zh-TW'),wishTargetName(wishKeyOf(w)),wishYM(w.wish_month),w.name,w.email,w.phone,w.note]))}
 function wishExportSignups(){wishCsv('報名名單.csv',['報名時間','梯次','出發','回程','姓名','人數','手機','Email','備註'],wishData.signups.map(s=>[new Date(s.created_at).toLocaleString('zh-TW'),s.mountain_name,s.start_date,s.end_date,s.name,s.party_size,s.phone,s.email,s.note]))}
 
 const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members','wish'];
