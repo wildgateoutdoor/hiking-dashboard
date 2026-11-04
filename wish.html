@@ -9,7 +9,9 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600&text=%E5%85%A5%E9%87%8E%E9%96%80%E8%A8%B1%E9%A1%98%E6%B1%A0%E6%8E%A8%E9%96%80%EF%BC%8C%E8%B5%B0%E5%90%91%E9%81%BC%E9%97%8A&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="images/photos/home.webp">
 <style>
 /* 只做手機版：電腦上也維持手機寬度置中
    色票：深綠 #2e3c26、米白 #f5f1e8；輔助：黃 #dfac10、綠 #3d542e、淺綠 #5c754b */
@@ -33,20 +35,46 @@ button{-webkit-tap-highlight-color:transparent}
 .spin{width:28px;height:28px;border:3px solid var(--soft);border-top-color:var(--brand);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* ── 開場：滿版照片，往上滑後水波紋，再進入統計圖 ── */
+.intro{position:fixed;inset:0;z-index:30;display:flex;justify-content:center;background:var(--brand);touch-action:none;overflow:hidden}
+.intro-in{position:relative;width:100%;max-width:var(--w);height:100%;overflow:hidden;color:var(--cream)}
+.intro-bg{position:absolute;inset:0;background:url(images/photos/home.webp) center/cover no-repeat;transform-origin:50% 60%}
+.intro-in::after{content:'';position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(180deg,rgba(46,60,38,0),rgba(46,60,38,.55) 45%,#2e3c26 92%);pointer-events:none}
+.intro-logo{position:absolute;top:calc(22px + env(safe-area-inset-top));left:0;right:0;display:flex;justify-content:center;z-index:2}
+.intro-logo img{height:24px;width:auto}
+.intro-text{position:absolute;top:18%;left:0;right:0;padding:0 24px;text-align:center;z-index:2;text-shadow:0 2px 18px rgba(0,0,0,.28)}
+.intro-text h1{font-family:'Noto Serif TC','Songti TC',serif;font-weight:600;font-size:36px;letter-spacing:.12em;line-height:1.3}
+.intro-text .lines{margin-top:28px;font-size:16.5px;line-height:2.05;letter-spacing:.16em}
+.intro-text .motto{margin-top:30px;font-family:'Noto Serif TC','Songti TC',serif;font-weight:600;font-size:19px;letter-spacing:.2em}
+.intro-text .en{margin-top:4px;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;font-size:21px;letter-spacing:.18em}
+.swipe{position:absolute;left:50%;bottom:calc(34px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:3;border:none;background:none;padding:10px 20px;cursor:pointer;color:var(--cream);display:flex;flex-direction:column;align-items:center;gap:6px}
+.swipe svg{width:46px;height:16px;display:block;opacity:.25;animation:chev 1.8s ease-in-out infinite}
+.swipe svg:nth-child(1){animation-delay:.4s}.swipe svg:nth-child(2){animation-delay:.2s}.swipe svg:nth-child(3){animation-delay:0s}
+.swipe span{font-size:11px;letter-spacing:.3em;opacity:.75;margin-top:4px}
+@keyframes chev{0%,100%{opacity:.2;transform:translateY(4px)}40%{opacity:1;transform:translateY(-4px)}}
+/* 水波紋：同心圓擴散＋畫面扭曲（SVG 濾鏡），結束後整個開場往上滑走 */
+.ripple-ring{position:absolute;z-index:4;width:900px;height:900px;margin:-450px 0 0 -450px;border-radius:50%;border:4px solid rgba(255,255,255,.85);pointer-events:none;opacity:0;animation:ring 1.7s cubic-bezier(.25,.6,.35,1) forwards}
+@keyframes ring{0%{transform:scale(.02);opacity:0}12%{opacity:1}100%{transform:scale(1);opacity:0}}
+.water-sheen{position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(circle at var(--cx) var(--cy),rgba(255,255,255,.22),rgba(120,170,200,.12) 35%,transparent 70%);opacity:0;animation:sheen 1.6s ease forwards}
+@keyframes sheen{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
+.intro.rippling .intro-bg{filter:url(#water);animation:sway 1.5s ease-in-out}
+.intro.rippling .intro-text,.intro.rippling .swipe,.intro.rippling .intro-logo{transition:opacity .8s ease;opacity:0}
+@keyframes sway{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1.03)}}
+.intro.leave{transition:transform .7s cubic-bezier(.6,0,.3,1),opacity .7s ease;transform:translateY(-100%);opacity:.6}
+@media (prefers-reduced-motion:reduce){.swipe svg{animation:none;opacity:.8}.ripple-ring{display:none}.intro.rippling .intro-bg{filter:none;animation:none}}
+
 /* ── 首頁：深綠主視覺＋體驗照片 ── */
-.hero{background:linear-gradient(180deg,rgba(31,42,25,.30) 0%,rgba(31,42,25,.10) 22%,rgba(46,60,38,.55) 44%,#2e3c26 62%),url(images/photos/ridge-clouds.webp) center top/auto 62% no-repeat,var(--brand);color:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl);padding:calc(18px + env(safe-area-inset-top)) 0 26px;position:relative;overflow:hidden}
+.hero{background:var(--brand);color:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl);padding:calc(16px + env(safe-area-inset-top)) 0 16px;position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;right:-60px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(223,172,16,.18),transparent 70%);pointer-events:none}
 .hero-logo{display:flex;justify-content:center}
 .hero-logo img{height:24px;width:auto;display:block}
 .hero-text{padding:110px 20px 0;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.35)}
 .hero h1{font-size:34px;font-weight:900;letter-spacing:.06em;line-height:1.2}
 .hero p{margin-top:10px;font-size:14.5px;color:rgba(245,241,232,.82)}
-.rail-h{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px}
-.rail-h b{font-size:15px;letter-spacing:.06em}
-.rail-h span{font-size:12px;color:rgba(245,241,232,.6)}
+
 .rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;padding:0 20px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .rail::-webkit-scrollbar{display:none}
-.rail button{flex:0 0 46%;aspect-ratio:1/1;scroll-snap-align:start;border:none;padding:0;border-radius:var(--r-lg);overflow:hidden;background:var(--green);cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.rail button{flex:0 0 46%;aspect-ratio:1/1;scroll-snap-align:start;border:none;padding:0;border-radius:var(--r-lg);overflow:hidden;background:var(--green);cursor:pointer;box-shadow:var(--shadow)}
 .rail img{width:100%;height:100%;object-fit:cover;display:block}
 .rail button:active{transform:scale(.97)}
 
@@ -241,6 +269,20 @@ button{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
 <body>
+<div class="intro" id="intro" role="region" aria-label="入野門許願池">
+  <div class="intro-in" id="intro-in">
+    <div class="intro-bg"></div>
+    <div class="intro-logo"><img src="images/logo-wide.png" alt="入野門 Wild Gate" width="194" height="24"></div>
+    <div class="intro-text">
+      <h1>入野門許願池</h1>
+      <p class="lines">你有想去哪一座山？<br>哪一座湖泊嗎？<br>儘管許願吧！<br>我們會儘可能地協助你達成</p>
+      <p class="motto">推門，走向遼闊</p>
+      <p class="en">STEP IN , LIVE OUT</p>
+    </div>
+    <button class="swipe" id="swipe" aria-label="往上滑，進入許願池"><svg viewBox="0 0 46 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14L23 3l20 11"/></svg><svg viewBox="0 0 46 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14L23 3l20 11"/></svg><svg viewBox="0 0 46 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14L23 3l20 11"/></svg><span>往上滑</span></button>
+  </div>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="water" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="water-noise" type="fractalNoise" baseFrequency="0.008 0.024" numOctaves="1" seed="3" result="n"/><feDisplacementMap id="water-map" in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 <div class="phone">
   <div id="main"><div class="center"><div class="spin"></div></div></div>
 </div>
@@ -325,20 +367,18 @@ function render(){
   const total=D.mountains.reduce((a,m)=>a+m.total,0)+(D.custom||[]).reduce((a,c)=>a+c.total,0);
   main.innerHTML=`<header class="hero">
       <div class="hero-logo"><img src="images/logo-wide.png" alt="入野門 Wild Gate" width="194" height="24"></div>
-      <div class="hero-text"><h1>入野門許願池</h1><p>推開門吧！讓我們帶你看見更遼闊的世界🤩</p></div>
-      <div class="rail-h"><b>依體驗找靈感</b><span>左右滑動 →</span></div>
-      <div class="rail">${EXPS.map(x=>`<button onclick="startExplore('${x.key}')" aria-label="${escAttr(x.key)}"><img src="${x.img}" alt="${escAttr(x.key)}" width="400" height="400" decoding="async"></button>`).join('')}</div>
     </header>
     <section class="sec"><div class="panel">
       <div class="panel-h"><div><h2>大家想去哪？</h2><p>依許願人數排序</p></div><div class="total"><b>${total}</b><small>個願望</small></div></div>
       <div id="chart-box"></div>
       <div class="rule">同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>
     </div></section>
+    <div class="sec-h"><h2>依體驗找靈感</h2><span>左右滑動 →</span></div>
+    <div class="rail">${EXPS.map(x=>`<button onclick="startExplore('${x.key}')" aria-label="${escAttr(x.key)}"><img src="${x.img}" alt="${escAttr(x.key)}" width="400" height="400" loading="lazy" decoding="async"></button>`).join('')}</div>
     <div class="sec-h"><h2>和入野門一起出發</h2><span>左右滑動 →</span></div>
     <div class="gallery">${GALLERY.map(([f,c])=>`<figure><img src="images/photos/${f}.webp" alt="${escAttr(c)}" loading="lazy" decoding="async"><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>`;
-  document.getElementById('cta-bar').hidden=false;
-
-  drawChart();
+  // 開場還在的話，等滑上去之後才顯示按鈕、播放山形長出來的動畫
+  if(introDone){document.getElementById('cta-bar').hidden=false;drawChart()}
 }
 
 // ── 山形統計圖（參考「SO OLD SO HIGH」，手機版）──
@@ -553,6 +593,45 @@ function goWish(id){
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&F)closeSheet()});
+
+// ── 開場：往上滑（或點箭頭、滾輪、方向鍵）→ 水波紋 → 進入統計圖 ──
+let introDone=false,introBusy=false;
+(function(){
+  const intro=document.getElementById('intro');
+  document.body.style.overflow='hidden';
+  let y0=null;
+  intro.addEventListener('touchstart',e=>{y0=e.touches[0].clientY},{passive:true});
+  intro.addEventListener('touchmove',e=>{if(y0!=null&&y0-e.touches[0].clientY>50){const t=e.touches[0];y0=null;leaveIntro(t.clientX,t.clientY)}},{passive:true});
+  intro.addEventListener('wheel',e=>{if(e.deltaY>15)leaveIntro()},{passive:true});
+  document.getElementById('swipe').addEventListener('click',e=>leaveIntro(e.clientX,e.clientY));
+  document.addEventListener('keydown',e=>{if(!introDone&&['ArrowDown','ArrowUp','PageDown',' ','Enter'].includes(e.key))leaveIntro()});
+})();
+function leaveIntro(x,y){
+  if(introBusy||introDone)return;introBusy=true;
+  const intro=document.getElementById('intro'),box=document.getElementById('intro-in');
+  const r=box.getBoundingClientRect();
+  const cx=(x==null?r.width/2:x-r.left),cy=(y==null?r.height*.72:y-r.top);
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 同心圓一圈一圈擴散
+  [0,230,460,690].forEach(d=>setTimeout(()=>{const o=document.createElement('i');o.className='ripple-ring';o.style.left=cx+'px';o.style.top=cy+'px';box.appendChild(o)},d));
+  const sh=document.createElement('i');sh.className='water-sheen';sh.style.setProperty('--cx',cx+'px');sh.style.setProperty('--cy',cy+'px');box.appendChild(sh);
+  intro.classList.add('rippling');
+  // 畫面像水面一樣晃動：扭曲強度先變大再變小
+  const map=document.getElementById('water-map'),noise=document.getElementById('water-noise');
+  const T=reduce?1:1600,t0=performance.now();
+  (function tick(now){
+    const k=Math.min(1,(now-t0)/T),amp=Math.sin(Math.PI*k)*46;
+    map.setAttribute('scale',amp.toFixed(1));
+    noise.setAttribute('baseFrequency',`${(0.008+0.004*k).toFixed(4)} ${(0.024-0.008*k).toFixed(4)}`);
+    if(k<1)requestAnimationFrame(tick);
+    else{
+      intro.classList.add('leave');
+      introDone=true;document.body.style.overflow='';
+      if(D&&D.mountains.length){document.getElementById('cta-bar').hidden=false;drawChart()}
+      setTimeout(()=>intro.remove(),720);
+    }
+  })(t0);
+}
 // 只有寬度改變（例如旋轉螢幕）才重畫；手機網址列收合也會觸發 resize，不重畫以免打斷動畫
 let rt,lastW=window.innerWidth;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(window.innerWidth===lastW)return;lastW=window.innerWidth;if(D&&D.mountains.length)drawChart()},150)});
 load();
