@@ -34,22 +34,44 @@ button{-webkit-tap-highlight-color:transparent}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* ── 首頁：深綠主視覺＋體驗照片 ── */
-.hero{background:var(--brand);color:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl);padding:calc(18px + env(safe-area-inset-top)) 0 26px;position:relative;overflow:hidden}
+.hero{background:linear-gradient(180deg,rgba(31,42,25,.30) 0%,rgba(31,42,25,.10) 22%,rgba(46,60,38,.55) 44%,#2e3c26 62%),url(images/photos/ridge-clouds.webp) center top/auto 62% no-repeat,var(--brand);color:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl);padding:calc(18px + env(safe-area-inset-top)) 0 26px;position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;right:-60px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(223,172,16,.18),transparent 70%);pointer-events:none}
 .hero-logo{display:flex;justify-content:center}
 .hero-logo img{height:24px;width:auto;display:block}
-.hero-text{padding:26px 20px 0;text-align:center}
+.hero-text{padding:110px 20px 0;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.35)}
 .hero h1{font-size:34px;font-weight:900;letter-spacing:.06em;line-height:1.2}
 .hero p{margin-top:10px;font-size:14.5px;color:rgba(245,241,232,.82)}
 .rail-h{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px}
 .rail-h b{font-size:15px;letter-spacing:.06em}
 .rail-h span{font-size:12px;color:rgba(245,241,232,.6)}
-.rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;padding:0 20px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .rail::-webkit-scrollbar{display:none}
 .rail button{flex:0 0 46%;aspect-ratio:1/1;scroll-snap-align:start;border:none;padding:0;border-radius:var(--r-lg);overflow:hidden;background:var(--green);cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.25)}
 .rail img{width:100%;height:100%;object-fit:cover;display:block}
 .rail button:active{transform:scale(.97)}
 
+/* 照片牆 */
+.gallery{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;padding:4px 16px 4px;scrollbar-width:none}
+.gallery::-webkit-scrollbar{display:none}
+.gallery figure{flex:0 0 62%;aspect-ratio:3/4;scroll-snap-align:start;margin:0;border-radius:var(--r-xl);overflow:hidden;position:relative;box-shadow:var(--shadow);background:var(--soft)}
+.gallery img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery figcaption{position:absolute;left:14px;bottom:12px;right:14px;color:var(--cream);font-size:13px;font-weight:700;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;padding:26px 20px 12px}
+.sec-h h2{font-size:20px;font-weight:900;color:var(--brand);letter-spacing:.04em}
+.sec-h span{font-size:12px;color:var(--muted)}
+/* 流程頁的照片橫幅 */
+.banner{position:relative;height:160px;border-radius:var(--r-xl);overflow:hidden;margin-bottom:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:flex-end;padding:18px;color:var(--cream)}
+.banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.banner::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(31,42,25,0) 25%,rgba(31,42,25,.78));z-index:1}
+.banner b{position:relative;z-index:2;font-size:24px;font-weight:900;letter-spacing:.05em;line-height:1.3}
+.banner small{position:relative;z-index:2;font-size:13px;color:rgba(245,241,232,.85);margin-top:4px}
+/* 景點小檔案 */
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:14px 0 0;border-radius:var(--r-md);background:var(--brand);color:var(--cream);overflow:hidden}
+.facts div{padding:10px 4px;text-align:center;border-right:1px solid rgba(245,241,232,.14)}
+.facts div:last-child{border-right:none}
+.facts b{display:block;font-family:var(--num);font-size:13.5px;font-weight:700;line-height:1.25;word-break:keep-all}
+.facts b.star{color:var(--gold);font-size:11px;letter-spacing:-.5px}
+.facts small{display:block;font-size:10.5px;color:rgba(245,241,232,.65);margin-top:2px}
 /* 統計卡 */
 .sec{padding:22px 16px 0}
 .panel{background:var(--card);border-radius:var(--r-xl);padding:20px 16px 18px;box-shadow:var(--shadow)}
@@ -111,9 +133,11 @@ button{-webkit-tap-highlight-color:transparent}
 .choice small{display:block;font-size:13px;color:rgba(245,241,232,.78);margin-top:4px;position:relative;z-index:1}
 .choice .arrow{position:absolute;right:16px;bottom:16px;width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--brand);display:flex;align-items:center;justify-content:center;z-index:1}
 .choice .arrow svg{width:20px;height:20px}
-.choice .ridge{position:absolute;inset:0;width:100%;height:100%}
+.choice .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.choice::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(31,42,25,.05) 20%,rgba(31,42,25,.82));z-index:0}
+.choice{min-height:190px}
 .choice.explore{background:var(--green)}
-.choice .fan{position:absolute;right:14px;top:16px;width:58%;height:104px}
+.choice .fan{position:absolute;right:14px;top:16px;z-index:1;width:58%;height:104px}
 .choice .fan img{position:absolute;top:0;width:86px;height:86px;object-fit:cover;border-radius:18px;border:3px solid rgba(245,241,232,.9);box-shadow:0 6px 16px rgba(0,0,0,.25)}
 .choice .fan img:nth-child(1){right:96px;transform:rotate(-9deg);top:10px}
 .choice .fan img:nth-child(2){right:46px;transform:rotate(2deg)}
@@ -200,8 +224,10 @@ button{-webkit-tap-highlight-color:transparent}
 .wish-this{width:100%;padding:14px;border-radius:999px;border:none;background:var(--brand);color:var(--cream);font-weight:800;cursor:pointer;font-size:15px}
 
 /* 完成 */
-.done{text-align:center;padding:20px 0 6px}
-.done .badge{width:84px;height:84px;margin:0 auto;border-radius:50%;background:var(--gold);color:var(--brand);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(223,172,16,.35)}
+.done{text-align:center;padding:0 0 6px}
+.done-photo{height:200px;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow)}
+.done-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.done .badge{position:relative;margin:-42px auto 0;border:5px solid var(--paper);width:84px;height:84px;border-radius:50%;background:var(--gold);color:var(--brand);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(223,172,16,.35)}
 .done .badge svg{width:40px;height:40px}
 .done h3{font-size:26px;font-weight:900;color:var(--brand);margin:16px 0 4px}
 .done p{color:var(--ink-2);font-size:15px}
@@ -231,6 +257,9 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const API=SB_URL+'/functions/v1/wish-api';
 // 山形圖配色：品牌綠色系＋黃色
 const PALETTE=['#2e3c26','#dfac10','#5c754b','#3d542e','#a9b98f','#c99a12','#7d9168','#e8c75a','#4a6139','#c4cfaf','#93a67c','#b48a0e'];
+// 首頁照片牆（入野門的出團照片）
+const GALLERY=[['forest-hikers','森林裡的笑聲'],['tunnel-friends','穿過隧道的另一頭'],['ridge-clouds','站上稜線看雲海'],['stairs-group','一步一步往上走'],['rail-tunnel','沿著舊鐵道前進'],['starry-night','山上的滿天星斗'],['forest-trail','和夥伴一起出發']];
+function banner(img,title,sub){return`<div class="banner"><img src="images/photos/${img}.webp" alt="" decoding="async"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>`}
 const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const DAYS=['日','一','二','三','四','五','六'];
 const REGION_ORDER=['北部','中部','南部','東部'];
@@ -304,7 +333,9 @@ function render(){
       <div class="panel-h"><div><h2>大家想去哪？</h2><p>依許願人數排序</p></div><div class="total"><b>${total}</b><small>個願望</small></div></div>
       <div id="chart-box"></div>
       <div class="rule">同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>
-    </div></section>`;
+    </div></section>
+    <div class="sec-h"><h2>和入野門一起出發</h2><span>左右滑動 →</span></div>
+    <div class="gallery">${GALLERY.map(([f,c])=>`<figure><img src="images/photos/${f}.webp" alt="${escAttr(c)}" loading="lazy" decoding="async"><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>`;
   document.getElementById('cta-bar').hidden=false;
 
   drawChart();
@@ -374,12 +405,11 @@ function renderStep(){
   body.scrollTop=0;
 }
 
-const RIDGE='<svg class="ridge" viewBox="0 0 400 170" preserveAspectRatio="none" aria-hidden="true"><path d="M0 120 L70 62 L110 92 L175 30 L235 88 L280 58 L340 100 L400 70 L400 170 L0 170Z" fill="#3d542e"/><path d="M0 150 L60 112 L120 138 L190 96 L260 140 L320 118 L400 140 L400 170 L0 170Z" fill="#5c754b" opacity=".55"/><circle cx="330" cy="38" r="16" fill="#dfac10" opacity=".9"/></svg>';
 function chooseHTML(){
   const fan=['family','alpine-lake','meteor'].map(n=>`<img src="images/explore/${n}.webp" alt="" width="86" height="86">`).join('');
   return`<div class="q">你想怎麼許願？</div><div class="q-sub">已經有想去的山，或還在找靈感都可以</div>
-    <button class="choice" onclick="go('direct')">${RIDGE}<b>我要直接許願</b><small>選地區、選地方、選月份</small><span class="arrow" aria-hidden="true">${ARROW}</span></button>
-    <button class="choice explore" onclick="go('explore')"><span class="fan" aria-hidden="true">${fan}</span><b>我想探索看看</b><small>從喜歡的體驗找到適合的地方</small><span class="arrow" aria-hidden="true">${ARROW}</span></button>`;
+    <button class="choice" onclick="go('direct')"><img class="bg" src="images/photos/stone-steps.webp" alt="" decoding="async"><b>我要直接許願</b><small>選地區、選地方、選月份</small><span class="arrow" aria-hidden="true">${ARROW}</span></button>
+    <button class="choice explore" onclick="go('explore')"><img class="bg" src="images/photos/forest-light.webp" alt="" decoding="async"><span class="fan" aria-hidden="true">${fan}</span><b>我想探索看看</b><small>從喜歡的體驗找到適合的地方</small><span class="arrow" aria-hidden="true">${ARROW}</span></button>`;
 }
 
 function regions(){
@@ -393,7 +423,7 @@ function directHTML(){
   const target=m?m.name:F.custom.trim();
   const cnt=k=>m?(m.months[k]||0):0;
   return`<form onsubmit="submitWish(event)" novalidate>
-    <div class="q">許下你的願望</div><div class="q-sub">選好地方和月份，湊滿人我們就開團</div>
+    ${banner('stairs-group','許下你的願望','選好地方和月份，湊滿人我們就開團')}
     <div class="fcard"><div class="f"><div class="lb"><span class="no">1</span>想去哪個地區？</div>
       <div class="chips">${regions().map(r=>`<button type="button" class="chip ${F.region===r?'on':''}" onclick="pickRegion(${js(r)})">${esc(r)}</button>`).join('')}</div></div>
     <div class="f"><label for="w-mt"><span class="no">2</span>想去哪個地方？</label>
@@ -471,7 +501,7 @@ async function submitWish(e){
     const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,months:F.months,name:c.name,email:c.email,phone:c.phone,note:c.note,ranges:ranges.map(x=>({start:x.start,end:x.end||x.start})),website:val('c-web')});
     F.dirty=true;
     const target=m?m.name:custom;
-    F.doneHTML=`<div class="done"><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>願望收到了！</h3>
+    F.doneHTML=`<div class="done"><div class="done-photo"><img src="images/photos/starry-night.webp" alt="" decoding="async"></div><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>願望收到了！</h3>
       <p><b>${esc(target)}</b></p>
       <div class="res-list">${r.results.map(x=>`<div class="res-row"><div class="res-top"><b>${fmtYM(x.month)}</b><span>${x.dup?'之前已許過・':''}${x.count} 人想去</span></div>
         <div class="meter"><i style="width:${Math.min(100,x.count/r.threshold*100)}%"></i></div>
@@ -486,7 +516,7 @@ function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',cust
 
 // 探索
 function exploreHTML(){
-  return`<div class="q">請問哪一個體驗最吸引你？</div><div class="q-sub">選一個，我們推薦適合的山給你</div>
+  return`${banner('ridge-clouds','請問哪一個體驗最吸引你？','選一個，我們推薦適合的地方給你')}
     <div class="exp-grid">${EXPS.map(x=>`<button class="exp" onclick="pickExp('${x.key}')" aria-label="${escAttr(x.key)}">${x.img
       ?`<img src="${x.img}" alt="${escAttr(x.key)}" width="400" height="400" decoding="async">`
       :`<span class="em">${x.em}</span>${esc(x.key)}`}</button>`).join('')}</div>`;
@@ -501,12 +531,19 @@ function resultHTML(){
     ${list.map(m=>`<div class="mt-card">
       ${m.photo_url?`<div class="mt-photo"><img src="${escAttr(m.photo_url)}" alt="${escAttr(m.name)}" loading="lazy" decoding="async"></div>`:''}
       <div class="mt-name">${esc(m.name)}</div>
-      <div class="tags">${m.region?`<span>${esc(m.region)}</span>`:''}${m.elevation?`<span>${m.elevation.toLocaleString()} m</span>`:''}${m.dates.length?`<span class="y">報名中 ${m.dates.length} 梯</span>`:''}</div>
+      <div class="tags">${m.region?`<span>${esc(m.region)}</span>`:''}${m.dates.length?`<span class="y">報名中 ${m.dates.length} 梯</span>`:''}</div>
+      ${factsHTML(m.facts)}
       ${m.intro?`<p class="mt-intro">${esc(m.intro)}</p>`:'<div style="height:12px"></div>'}
       ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${tripsBlock(m,m.form_url?0:3)}</div>`:''}
       <button class="wish-this" onclick="wishThis(${js(m.id)})">沒找到喜歡的日期嗎？來許願吧！</button>
     </div>`).join('')}
     <button class="submit ghost" onclick="back()">看看其他體驗</button>`;
+}
+function factsHTML(f){
+  if(!f)return'';
+  const cell=(v,l,cls='')=>v?`<div><b class="${cls}">${esc(v)}</b><small>${l}</small></div>`:'';
+  const a=(f.altitude||'').split('→').pop().trim();
+  return`<div class="facts">${cell(f.difficulty,'困難度','star')}${cell(a,'最高海拔')}${cell(f.distance,'來回距離')}${cell(f.duration,'總時間')}</div>`;
 }
 function wishThis(id){const m=mt(id);F.mid=id;F.region=m.region||'其他';F.custom='';F.months=[];go('direct')}
 // 沒有報名表單的山：到「直接許願」，地方已選好，捲到月份讓她選

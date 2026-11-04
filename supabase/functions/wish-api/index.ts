@@ -89,6 +89,12 @@ function photoUrl(v: unknown) {
   if (u.protocol !== "https:") throw new HttpError(400, "景點照片請用 https 開頭的網址");
   return u.toString();
 }
+// 景點小檔案：困難度、海拔、來回距離、總時間（都是顯示用的文字）
+function facts(v: unknown) {
+  const o = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
+  const f = { difficulty: str(o.difficulty, 30), altitude: str(o.altitude, 30), distance: str(o.distance, 30), duration: str(o.duration, 30) };
+  return Object.values(f).some(Boolean) ? f : null;
+}
 const uuid = (v: unknown) => {
   const s = str(v, 40);
   if (!/^[0-9a-f-]{36}$/i.test(s)) throw new HttpError(400, "資料不正確，請重新整理");
@@ -171,7 +177,7 @@ const tripDate = (t: Trip) => {
 async function list() {
   const today = todayTW();
   const thisMonth = monthStart(today);
-  const mountains = must(await db.from("wish_mountains").select("id,name,aliases,region,elevation,sort,intro,tags,form_url,photo_url")
+  const mountains = must(await db.from("wish_mountains").select("id,name,aliases,region,elevation,sort,intro,tags,form_url,photo_url,facts")
     .eq("active", true).order("sort").order("created_at"));
   const ids = mountains.map((m: any) => m.id);
   const open = (await loadTrips()).filter((t) => tripOpen(t, today)).sort((a, b) => a.date.localeCompare(b.date));
@@ -360,6 +366,7 @@ async function admin(action: string, b: Record<string, any>) {
         intro: strOrNull(b.intro, 1000),
         form_url: formUrl(b.form_url),
         photo_url: photoUrl(b.photo_url),
+        facts: facts(b.facts),
         tags: (Array.isArray(b.tags) ? b.tags : []).map((x: unknown) => str(x, 20)).filter(Boolean).slice(0, 20),
       };
       if (b.id) must(await db.from("wish_mountains").update(f).eq("id", uuid(b.id)));
