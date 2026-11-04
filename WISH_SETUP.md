@@ -34,7 +34,7 @@
 
 **報名**：每座山可以設定一張 Google 報名表單（日期在表單內選）。有設定的山，前台只列出報名中的日期給客人參考，整座山一個「前往報名」按鈕，直接打開 Google 表單；沒設定的山，日期按鈕按下去會回到「我要直接許願」，地方已經選好，客人只要選月份送出許願。
 
-山的**地區、前台介紹、體驗分類、Google 報名表單連結**都在團務系統「許願池」→「山與梯次」修改。預設的 16 座山與介紹是先寫好的草稿，請再確認內容。
+山的**地區、前台介紹、景點小檔案（困難度、海拔、距離、時間）、景點照片、體驗分類、Google 報名表單連結**都在團務系統「許願池」→「山與梯次」修改。13 座有報名表單的山，介紹與小檔案取自表單的「行程介紹」。前台用到的照片放在 `images/photos/`（入野門出團照片，已壓縮成 WebP）。預設的 16 座山與介紹是先寫好的草稿，請再確認內容。
 
 ## 通知
 
@@ -45,7 +45,7 @@
 
 ## 1. 資料表（已完成）
 
-`supabase/migrations/20261103000000_wish_pool.sql`、`20261103120000_wish_link_trips.sql`、`20261103180000_wish_explore.sql`、`20261103181000_wish_seed_mountains.sql`、`20261104000000_wish_preferred_date.sql`、`20261104120000_wish_form_url.sql`、`20261104180000_wish_preferred_ranges.sql` 已套用。
+`supabase/migrations/20261103000000_wish_pool.sql`、`20261103120000_wish_link_trips.sql`、`20261103180000_wish_explore.sql`、`20261103181000_wish_seed_mountains.sql`、`20261104000000_wish_preferred_date.sql`、`20261104120000_wish_form_url.sql`、`20261104180000_wish_preferred_ranges.sql`、`20261104200000_wish_photo_url.sql`、`20261104210000_wish_facts.sql`、`20261104211000_wish_intros_from_forms.sql` 已套用。
 
 ## 2. Edge Function（已完成）
 
