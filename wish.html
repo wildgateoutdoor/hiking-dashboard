@@ -9,41 +9,65 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-/* 只做手機版：電腦上也維持手機寬度置中 */
+/* 只做手機版：電腦上也維持手機寬度置中
+   色票：深綠 #2e3c26、米白 #f5f1e8；輔助：黃 #dfac10、綠 #3d542e、淺綠 #5c754b */
 :root{
-  --brand:#2e3c26;--cream:#f5f1e8;
-  --paper:#ECEAE3;--paper-2:#E3E0D7;--ink:#1F1D1A;--ink-2:#4A4741;--muted:#86827A;
-  --card:#F7F5F0;--border:#D6D2C8;--red:#B5443A;--ok:#4F6B45;--gold:#dfac10;
-  --serif:'Noto Serif TC','Songti TC',serif;
+  --brand:#2e3c26;--green:#3d542e;--leaf:#5c754b;--gold:#dfac10;--cream:#f5f1e8;
+  --paper:#f5f1e8;--card:#ffffff;--soft:#ece7da;--mist:#e7ecdf;
+  --ink:#1f2a19;--ink-2:#4b5843;--muted:#8a9180;--border:#e2dccd;--red:#b5443a;
+  --r-xl:28px;--r-lg:22px;--r-md:16px;
+  --shadow:0 8px 24px rgba(46,60,38,.10);
   --sans:'PingFang TC','Microsoft JhengHei','Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --num:'Outfit','PingFang TC',-apple-system,sans-serif;
   --w:480px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0}
 html{-webkit-text-size-adjust:100%}
-body{background:#D9D5CB;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{background:#e4dfd3;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
 button{-webkit-tap-highlight-color:transparent}
-.phone{max-width:var(--w);margin:0 auto;min-height:100vh;background:var(--paper);position:relative;padding:0 16px calc(110px + env(safe-area-inset-bottom))}
-.top{margin:0 -16px;background:var(--brand);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top)) 16px 16px}
-.top img{height:24px;width:auto;display:block}
-/* 2. 大標題與說明 */
-.hero{text-align:center;padding:26px 0 4px}
-.hero h1{font-family:var(--serif);font-weight:900;font-size:32px;letter-spacing:.08em;line-height:1.25;color:var(--ink)}
-.hero p{font-size:14px;color:var(--ink-2);margin-top:8px;line-height:1.6}
+.phone{max-width:var(--w);margin:0 auto;min-height:100vh;background:var(--paper);position:relative;padding-bottom:calc(112px + env(safe-area-inset-bottom));overflow-x:hidden}
+.center{padding:80px 16px;text-align:center;color:var(--muted)}
+.spin{width:28px;height:28px;border:3px solid var(--soft);border-top-color:var(--brand);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-/* 統計圖 */
+/* ── 首頁：深綠主視覺＋體驗照片 ── */
+.hero{background:var(--brand);color:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl);padding:calc(18px + env(safe-area-inset-top)) 0 26px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-60px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(223,172,16,.18),transparent 70%);pointer-events:none}
+.hero-logo{display:flex;justify-content:center}
+.hero-logo img{height:24px;width:auto;display:block}
+.hero-text{padding:26px 20px 0;text-align:center}
+.hero h1{font-size:34px;font-weight:900;letter-spacing:.06em;line-height:1.2}
+.hero p{margin-top:10px;font-size:14.5px;color:rgba(245,241,232,.82)}
+.rail-h{display:flex;align-items:center;justify-content:space-between;padding:26px 20px 12px}
+.rail-h b{font-size:15px;letter-spacing:.06em}
+.rail-h span{font-size:12px;color:rgba(245,241,232,.6)}
+.rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.rail::-webkit-scrollbar{display:none}
+.rail button{flex:0 0 46%;aspect-ratio:1/1;scroll-snap-align:start;border:none;padding:0;border-radius:var(--r-lg);overflow:hidden;background:var(--green);cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.rail img{width:100%;height:100%;object-fit:cover;display:block}
+.rail button:active{transform:scale(.97)}
+
+/* 統計卡 */
+.sec{padding:22px 16px 0}
+.panel{background:var(--card);border-radius:var(--r-xl);padding:20px 16px 18px;box-shadow:var(--shadow)}
+.panel-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.panel-h h2{font-size:21px;font-weight:900;color:var(--brand);letter-spacing:.04em}
+.panel-h p{font-size:12.5px;color:var(--muted);margin-top:2px}
+.total{flex-shrink:0;text-align:center;background:var(--gold);color:var(--brand);border-radius:var(--r-md);padding:8px 12px;line-height:1.1}
+.total b{display:block;font-family:var(--num);font-size:24px;font-weight:800}
+.total small{font-size:11px;font-weight:700}
 #chart{width:100%;display:block}
-#chart .mono{font-family:var(--mono)}
-.chart-foot{text-align:center;border-top:1.5px solid var(--ink);padding:8px 0 0;margin-bottom:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--ink-2);line-height:1.7}
-.chart-foot b{font-family:var(--sans);letter-spacing:.1em;color:var(--ink)}
-.m-legend{list-style:none;padding:0;margin:4px 0 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
-.m-legend li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.3}
-.m-legend i{flex-shrink:0;width:18px;height:18px;border-radius:50%;color:#fff;font:500 10px/18px var(--mono);text-align:center;font-style:normal}
+#chart .num{font-family:var(--num)}
+.m-legend{list-style:none;padding:0;margin:6px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.m-legend li{display:flex;gap:8px;align-items:center;font-size:13px;line-height:1.3;background:var(--paper);border-radius:14px;padding:8px 10px}
+.m-legend i{flex-shrink:0;width:22px;height:22px;border-radius:50%;color:#fff;font:700 11px/22px var(--num);text-align:center;font-style:normal}
 .m-legend b{display:block;font-weight:800}
-.m-legend small{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.m-legend small{font-family:var(--num);font-size:11.5px;color:var(--ink-2)}
+.rule{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 12px;border-radius:var(--r-md);background:var(--mist);font-size:12.5px;color:var(--green)}
+.rule::before{content:'';flex-shrink:0;width:8px;height:8px;border-radius:50%;background:var(--gold)}
 /* 載入時山形由下往上長出來，之後編號針再淡入 */
 #chart.anim .pk{transform-box:fill-box;transform-origin:50% 100%;animation:grow .9s cubic-bezier(.2,.8,.25,1) both}
 #chart.anim .pin{animation:fade .35s ease both}
@@ -51,141 +75,153 @@ button{-webkit-tap-highlight-color:transparent}
 @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){#chart.anim .pk,#chart.anim .pin,.m-legend.anim li{animation:none}}
-.center{padding:80px 0;text-align:center;color:var(--muted)}
 
-/* 主要按鈕 */
+/* 主要按鈕（膠囊＋黃色箭頭） */
 .cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none}
-.cta-in{max-width:var(--w);margin:0 auto;padding:12px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--paper) 70%,rgba(236,234,227,0));pointer-events:auto}
-.cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border:none;border-radius:16px;background:var(--brand);color:var(--cream);font-size:18px;font-weight:800;letter-spacing:.12em;cursor:pointer;box-shadow:0 6px 18px rgba(46,60,38,.35)}
-.cta:active{transform:scale(.98)}
+.cta-in{max-width:var(--w);margin:0 auto;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--paper) 62%,rgba(245,241,232,0));pointer-events:auto}
+.cta,.submit{display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 8px 8px 26px;border:none;border-radius:999px;background:var(--brand);color:var(--cream);font-size:17px;font-weight:800;letter-spacing:.12em;cursor:pointer;box-shadow:0 10px 24px rgba(46,60,38,.3);min-height:60px}
+.cta .arrow,.submit .arrow{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cta .arrow svg,.submit .arrow svg{width:20px;height:20px}
+.cta:active,.submit:active{transform:scale(.98)}
+.submit:disabled{opacity:.55}
+.submit.ghost{background:none;color:var(--brand);border:1.5px solid var(--brand);box-shadow:none;justify-content:center;padding:8px 20px;margin-top:10px;min-height:54px}
+.submit.plain{justify-content:center;padding:8px 20px}
 
-/* 全螢幕流程 */
-.sheet{position:fixed;inset:0;z-index:40;display:none;background:rgba(31,29,26,.45)}
+/* ── 流程全螢幕頁 ── */
+.sheet{position:fixed;inset:0;z-index:40;display:none;background:rgba(31,42,25,.45)}
 .sheet.show{display:block}
 .sheet-in{max-width:var(--w);margin:0 auto;height:100%;background:var(--paper);display:flex;flex-direction:column;animation:up .22s ease}
 @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
-.sh-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;background:var(--brand);color:var(--cream)}
-.sh-head b{font-size:16px;font-weight:800;letter-spacing:.06em}
-.ic-btn{width:40px;height:40px;border:none;background:none;border-radius:50%;font-size:26px;line-height:1;cursor:pointer;color:var(--cream);display:flex;align-items:center;justify-content:center}
-.ic-btn:active{background:rgba(245,241,232,.15)}
+.sh-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 12px 12px;background:var(--brand);color:var(--cream);border-radius:0 0 var(--r-lg) var(--r-lg);position:relative;z-index:2}
+.sh-head b{font-size:15px;font-weight:800;letter-spacing:.08em}
+.sh-left{display:flex;align-items:center;gap:8px;justify-self:start;min-width:0}
+.sh-logo{height:30px;width:auto;display:block}
+.ic-btn{width:38px;height:38px;border:none;border-radius:50%;background:rgba(245,241,232,.14);color:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ic-btn svg{width:18px;height:18px}
 .ic-btn.hide{display:none}
-.sh-left{display:flex;align-items:center;gap:2px;justify-self:start;min-width:0}
-.sh-logo{height:30px;width:auto;display:block;margin-left:6px}
-.sh-head .home-btn{justify-self:end}
-.home-btn{border:none;background:none;font-size:13px;font-weight:700;color:var(--cream);padding:8px 10px;cursor:pointer;min-width:40px;text-decoration:underline;text-underline-offset:3px}
-.sh-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px calc(28px + env(safe-area-inset-bottom))}
-.q{font-family:var(--serif);font-size:24px;font-weight:900;line-height:1.35;margin-bottom:6px}
-.q-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
+.home-btn{justify-self:end;border:none;background:none;font-size:13px;font-weight:700;color:var(--cream);padding:8px 6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.sh-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px 16px calc(32px + env(safe-area-inset-bottom))}
+.q{font-size:26px;font-weight:900;line-height:1.3;color:var(--brand);letter-spacing:.03em}
+.q-sub{font-size:14px;color:var(--muted);margin:6px 0 20px}
 
-.choice{display:flex;align-items:center;gap:14px;width:100%;padding:20px 18px;margin-bottom:12px;border-radius:16px;border:none;background:var(--brand);color:var(--cream);text-align:left;cursor:pointer}
+/* 選擇：直接許願／探索看看 */
+.choice{position:relative;display:flex;flex-direction:column;justify-content:flex-end;width:100%;min-height:168px;padding:20px;margin-bottom:14px;border:none;border-radius:var(--r-xl);overflow:hidden;text-align:left;cursor:pointer;color:var(--cream);background:var(--brand);box-shadow:var(--shadow)}
 .choice:active{transform:scale(.98)}
-.choice .em{font-size:30px;line-height:1}
-.choice b{display:block;font-size:18px;font-weight:800}
-.choice small{display:block;font-size:13px;color:#C9D1C1;margin-top:2px}
+.choice b{display:block;font-size:22px;font-weight:900;letter-spacing:.06em;position:relative;z-index:1}
+.choice small{display:block;font-size:13px;color:rgba(245,241,232,.78);margin-top:4px;position:relative;z-index:1}
+.choice .arrow{position:absolute;right:16px;bottom:16px;width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--brand);display:flex;align-items:center;justify-content:center;z-index:1}
+.choice .arrow svg{width:20px;height:20px}
+.choice .ridge{position:absolute;inset:0;width:100%;height:100%}
+.choice.explore{background:var(--green)}
+.choice .fan{position:absolute;right:14px;top:16px;width:58%;height:104px}
+.choice .fan img{position:absolute;top:0;width:86px;height:86px;object-fit:cover;border-radius:18px;border:3px solid rgba(245,241,232,.9);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.choice .fan img:nth-child(1){right:96px;transform:rotate(-9deg);top:10px}
+.choice .fan img:nth-child(2){right:46px;transform:rotate(2deg)}
+.choice .fan img:nth-child(3){right:0;transform:rotate(10deg);top:12px}
 
-.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-/* 體驗按鈕：正方形圓角，有圖片的直接用圖片（圖上已有文字） */
-.exp{aspect-ratio:1/1;padding:0;border:none;border-radius:18px;overflow:hidden;background:#3a3631;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#fff;font-family:var(--serif);font-weight:900;font-size:22px;letter-spacing:.08em;box-shadow:0 2px 8px rgba(31,29,26,.18);transition:transform .12s}
-.exp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.exp .em{font-size:34px;line-height:1;font-family:var(--sans)}
-.exp:active{transform:scale(.96)}
-
-/* 表單 */
-.f{margin-bottom:20px}
-.f>label,.f .lb{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:800;margin-bottom:8px}
-.f .no{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:var(--cream);font:500 12px var(--mono);flex-shrink:0}
+/* 表單：每一題一張白色圓角卡 */
+.fcard{background:var(--card);border-radius:var(--r-lg);padding:18px 16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(46,60,38,.05)}
+.f{margin-bottom:18px}
+.fcard>.f:last-child{margin-bottom:0}
+.f>label,.f .lb{display:flex;align-items:center;gap:8px;font-size:15.5px;font-weight:800;margin-bottom:10px;color:var(--ink)}
+.f .no{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--brand);font:800 13px var(--num);flex-shrink:0}
 .f small{font-weight:400;color:var(--muted);font-size:12px}
-.f input,.f select,.f textarea{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:#fff;font-size:16px;-webkit-appearance:none;appearance:none}
-.f select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A4741' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:36px}
-.f select:disabled{background-color:var(--paper-2);color:var(--muted)}
-.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--ink)}
-.f textarea{min-height:72px;resize:vertical}
+.f input,.f select,.f textarea{width:100%;padding:13px 16px;border-radius:var(--r-md);border:1.5px solid transparent;background:var(--paper);font-size:16px;-webkit-appearance:none;appearance:none}
+.f select{background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%232e3c26' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 16px center;padding-right:40px}
+.f select:disabled{color:var(--muted);opacity:.7}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--leaf);background-color:#fff}
+.f textarea{min-height:80px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:10px 20px;border-radius:999px;border:none;background:var(--paper);font-weight:700;font-size:15px;cursor:pointer;color:var(--ink-2)}
+.chip.on{background:var(--brand);color:var(--cream)}
+.months{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.m-btn{position:relative;padding:10px 4px;border-radius:var(--r-md);border:none;background:var(--paper);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:64px;justify-content:center}
+.m-btn .y{font-family:var(--num);font-size:11px;color:var(--muted)}
+.m-btn .m{font-weight:800;font-size:17px}
+.m-btn .n{font-size:10.5px;color:var(--muted)}
+.m-btn .n.open{color:var(--leaf);font-weight:700}
+.m-btn.on{background:var(--brand);color:var(--cream)}
+.m-btn.on .y,.m-btn.on .n,.m-btn.on .n.open{color:rgba(245,241,232,.75)}
+.m-btn.on::after{content:'✓';position:absolute;top:6px;right:8px;width:16px;height:16px;border-radius:50%;background:var(--gold);color:var(--brand);font-size:10px;font-weight:900;line-height:16px;text-align:center}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:2px 0 12px}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--border)}
 .date-pick{position:relative}
 .date-pick span{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:15px}
 .date-pick.has span,.date-pick input:focus+span{display:none}
-.date-pick input{min-height:48px}
+.date-pick input{min-height:50px}
+.date-pick:not(.has) input:not(:focus){color:transparent}
 .range-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .range-row .date-pick{flex:1;min-width:0}
 .range-row .date-pick input{padding:10px 8px;font-size:15px}
-.range-row .date-pick span{left:10px;font-size:14px}
+.range-row .date-pick span{left:12px;font-size:14px}
 .tilde{color:var(--muted);flex-shrink:0}
 .rm-range{flex-shrink:0;width:30px;height:30px;border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer}
-.add-range{display:flex;align-items:center;justify-content:center;width:30px;height:30px;margin:2px auto 0;border-radius:50%;border:1.5px solid var(--brand);background:none;color:var(--brand);font-size:18px;font-weight:700;line-height:1;cursor:pointer}
-.date-pick:not(.has) input:not(:focus){color:transparent}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:9px 16px;border-radius:22px;border:1.5px solid var(--border);background:#fff;font-weight:700;font-size:15px;cursor:pointer}
-.chip.on{background:var(--brand);border-color:var(--brand);color:var(--cream)}
-.months{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.m-btn{padding:10px 4px;border-radius:12px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:62px;justify-content:center}
-.m-btn .y{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.m-btn .m{font-weight:800;font-size:16px}
-.m-btn .n{font-size:10.5px;color:var(--muted)}
-.m-btn .n.open{color:var(--ok);font-weight:700}
-.m-btn.on{border-color:var(--brand);background:var(--brand);color:var(--cream)}
-.m-btn.on .y,.m-btn.on .n{color:#CFCBC2}
-.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:-6px 0 14px}
-.or::before,.or::after{content:'';flex:1;height:1px;background:var(--border)}
-.trips{background:#F1F5EE;border:1.5px solid #C9D6C2;border-radius:14px;padding:12px;margin:0}
-.date-list{list-style:none;padding:0;margin:0 0 10px}
-.date-list li{padding:8px 2px;border-bottom:1px dashed #C9D6C2;display:flex;flex-direction:column}
-.date-list li:last-child{border-bottom:none}
-.date-list b{font-size:14px}
-.date-list small{font-size:12px;color:var(--muted)}
-.form-btn{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:12px;border-radius:12px;background:var(--ok);color:#fff;font-weight:800;font-size:16px;text-decoration:none;letter-spacing:.05em}
-.form-btn small,.f .form-btn small{font-size:11.5px;font-weight:400;color:#E3EBDD;letter-spacing:0}
-.trip-hint{font-size:13.5px;color:var(--ok);font-weight:700;line-height:1.6;margin:12px 0 8px}
-.trips p{font-size:13px;color:var(--ok);font-weight:700;margin-bottom:8px}
-.date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1.5px solid var(--brand);background:#fff;cursor:pointer;text-align:left}
-.date-btn:last-child{margin-bottom:0}
-.date-btn b{font-weight:700;font-size:14px}
-.date-btn small{color:var(--muted);font-size:12px;display:block}
-.date-btn .go{flex-shrink:0;font-size:12px;font-weight:700;color:var(--cream);background:var(--brand);padding:5px 12px;border-radius:20px}
-.divider{border:none;border-top:1px dashed var(--border);margin:6px 0 20px}
+.add-range{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:4px auto 0;border-radius:50%;border:none;background:var(--mist);color:var(--brand);font-size:20px;font-weight:700;line-height:1;cursor:pointer}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.err{color:var(--red);font-size:14px;min-height:20px;margin-bottom:8px}
-.submit{width:100%;padding:15px;border-radius:14px;border:none;background:var(--brand);color:var(--cream);font-weight:800;font-size:17px;cursor:pointer;letter-spacing:.08em}
-.submit:disabled{opacity:.5}
-.submit.ghost{background:none;color:var(--brand);border:1.5px solid var(--brand);margin-top:10px}
+.err{color:var(--red);font-size:14px;min-height:20px;margin:6px 0 8px;text-align:center}
+.picked{background:var(--mist);border-radius:var(--r-md);padding:12px 14px;font-size:14px;margin-bottom:12px;line-height:1.7;color:var(--green)}
+.picked b{font-weight:800;color:var(--brand)}
 
-/* 探索結果 */
-.res-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-.res-h .em{font-size:34px}
-.mt-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
-.mt-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
-.mt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.mt-name{font-size:19px;font-weight:800}
-.mt-meta{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.mt-intro{font-size:14px;color:var(--ink-2);line-height:1.75;margin:10px 0 12px}
-.mt-card .trips{margin:0 0 12px}
-.mt-card .wish-this{width:100%;padding:12px;border-radius:12px;border:none;background:var(--brand);color:var(--cream);font-weight:800;cursor:pointer}
+/* 梯次 */
+.trip-hint{font-size:13.5px;color:var(--green);font-weight:700;line-height:1.6;margin:14px 0 10px}
+.trips{background:var(--mist);border-radius:var(--r-md);padding:12px}
+.trips p{font-size:13px;color:var(--green);font-weight:800;margin-bottom:8px}
+.date-list{list-style:none;padding:0;margin:0 0 10px}
+.date-list li{padding:9px 4px;border-bottom:1px dashed #c9d3bd;display:flex;flex-direction:column}
+.date-list li:last-child{border-bottom:none}
+.date-list b{font-size:14px;font-family:var(--num);font-weight:700}
+.date-list small{font-size:12px;color:var(--muted)}
+.form-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;border-radius:999px;background:var(--leaf);color:#fff;font-weight:800;font-size:16px;text-decoration:none;letter-spacing:.05em}
+.form-btn small{font-size:11.5px;font-weight:400;opacity:.85;letter-spacing:0}
+.date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 12px;margin-bottom:6px;border-radius:14px;border:none;background:#fff;cursor:pointer;text-align:left}
+.date-btn:last-child{margin-bottom:0}
+.date-btn b{font-weight:700;font-size:14px;font-family:var(--num)}
+.date-btn small{color:var(--muted);font-size:12px;display:block}
+.date-btn .go{flex-shrink:0;font-size:12px;font-weight:800;color:var(--cream);background:var(--brand);padding:6px 12px;border-radius:999px}
+
+/* 探索 */
+.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.exp{aspect-ratio:1/1;padding:0;border:none;border-radius:var(--r-lg);overflow:hidden;background:var(--green);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:900;font-size:20px;box-shadow:var(--shadow);transition:transform .12s}
+.exp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.exp .em{font-size:34px;line-height:1}
+.exp:active{transform:scale(.96)}
+.res-banner{position:relative;height:190px;border-radius:var(--r-xl);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow)}
+.res-banner img{width:100%;height:100%;object-fit:cover;display:block}
+.res-count{font-size:14px;color:var(--muted);margin:0 2px 14px}
+.mt-card{background:var(--card);border-radius:var(--r-xl);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.mt-photo{margin:-18px -18px 14px;height:180px;overflow:hidden;border-radius:var(--r-xl) var(--r-xl) 0 0}
+.mt-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.mt-name{font-size:21px;font-weight:900;color:var(--brand);letter-spacing:.04em}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tags span{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--mist);color:var(--green)}
+.tags span.y{background:#f7ecc6;color:#7a5d00}
+.mt-intro{font-size:14px;color:var(--ink-2);line-height:1.8;margin:12px 0 14px}
+.mt-card .trips{margin-bottom:12px}
+.wish-this{width:100%;padding:14px;border-radius:999px;border:none;background:var(--brand);color:var(--cream);font-weight:800;cursor:pointer;font-size:15px}
 
 /* 完成 */
-.done{text-align:center;padding:30px 0 10px}
-.done .big{font-size:56px}
-.done h3{font-family:var(--serif);font-size:24px;margin:10px 0 8px}
+.done{text-align:center;padding:20px 0 6px}
+.done .badge{width:84px;height:84px;margin:0 auto;border-radius:50%;background:var(--gold);color:var(--brand);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(223,172,16,.35)}
+.done .badge svg{width:40px;height:40px}
+.done h3{font-size:26px;font-weight:900;color:var(--brand);margin:16px 0 4px}
 .done p{color:var(--ink-2);font-size:15px}
-.meter{height:10px;border-radius:5px;background:var(--paper-2);overflow:hidden;margin:6px 0 4px}
-.res-list{text-align:left;margin-top:16px;display:flex;flex-direction:column;gap:12px}
-.res-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px}
+.meter{height:10px;border-radius:5px;background:var(--soft);overflow:hidden;margin:8px 0 4px}
+.meter i{display:block;height:100%;background:var(--gold);border-radius:5px}
+.res-list{text-align:left;margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.res-row{background:var(--card);border-radius:var(--r-md);padding:12px 16px;box-shadow:0 2px 10px rgba(46,60,38,.05)}
 .res-top{display:flex;justify-content:space-between;gap:8px;font-size:14px}
-.res-top span{color:var(--ink-2)}
+.res-top span{color:var(--ink-2);font-family:var(--num)}
 .res-row small{font-size:12px;color:var(--muted)}
-.meter i{display:block;height:100%;background:var(--gold)}
-.picked{background:var(--paper-2);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:18px;line-height:1.6}
-.picked b{font-weight:800}
-.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto}
-@keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <div class="phone">
-  <div class="top"><img src="images/logo-wide.png" alt="入野門 Wild Gate" width="194" height="24"></div>
   <div id="main"><div class="center"><div class="spin"></div></div></div>
 </div>
-<div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><button class="cta" onclick="startFlow()">我要許願</button></div></div>
+<div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><button class="cta" onclick="startFlow()"><span>我要許願</span><span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div></div>
 
 <div class="sheet" id="sheet"><div class="sheet-in">
-  <div class="sh-head"><div class="sh-left"><button class="ic-btn" id="sh-back" onclick="back()" aria-label="上一步">‹</button><img class="sh-logo" src="images/logo-square.png" alt="入野門" width="29" height="30"></div><b id="sh-title">許願</b><button class="home-btn" onclick="closeSheet()">回首頁</button></div>
+  <div class="sh-head"><div class="sh-left"><button class="ic-btn" id="sh-back" onclick="back()" aria-label="上一步"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><img class="sh-logo" src="images/logo-square.png" alt="入野門" width="29" height="30"></div><b id="sh-title">許願</b><button class="home-btn" onclick="closeSheet()">回首頁</button></div>
   <div class="sh-body" id="sh-body"></div>
 </div></div>
 
@@ -193,8 +229,9 @@ button{-webkit-tap-highlight-color:transparent}
 const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
 const API=SB_URL+'/functions/v1/wish-api';
-// 參考圖的大地色系
-const PALETTE=['#5B3A24','#B9774B','#8E3E1C','#E2B44A','#4F6B45','#9EB0B3','#CF574D','#A8AD83','#E6C46A','#77735D','#6E8C8A','#C49A6C'];
+// 山形圖配色：品牌綠色系＋黃色
+const PALETTE=['#2e3c26','#dfac10','#5c754b','#3d542e','#a9b98f','#c99a12','#7d9168','#e8c75a','#4a6139','#c4cfaf','#93a67c','#b48a0e'];
+const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const DAYS=['日','一','二','三','四','五','六'];
 const REGION_ORDER=['北部','中部','南部','東部'];
 // 「我想探索看看」的選項；key 對應後台「體驗分類」
@@ -253,17 +290,23 @@ async function load(){
   catch(e){document.getElementById('main').innerHTML=`<div class="center">讀取失敗：${esc(e.message)}<br><br><button class="submit" style="width:auto;padding:10px 24px" onclick="location.reload()">重新整理</button></div>`;return}
   render();
 }
-// 首頁載入後先在背景下載體驗圖片，點進「我想探索看看」時就不用等
-function preloadExploreImages(){const go=()=>EXPS.forEach(x=>{if(x.img){const i=new Image();i.src=x.img}});('requestIdleCallback' in window)?requestIdleCallback(go,{timeout:2500}):setTimeout(go,1200)}
 function render(){
   const main=document.getElementById('main');
   if(!D.mountains.length){main.innerHTML='<div class="center">許願池準備中，請稍後再來</div>';return}
   const total=D.mountains.reduce((a,m)=>a+m.total,0)+(D.custom||[]).reduce((a,c)=>a+c.total,0);
-  main.innerHTML=`<div class="hero"><h1>入野門許願池</h1><p>推開門吧！讓我們帶你看見更遼闊的世界🤩</p></div>
-    <div id="chart-box"></div>
-    <div class="chart-foot"><b>入野門許願池</b>　｜　共 ${total} 個願望<br>依許願人數排序・同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>`;
+  main.innerHTML=`<header class="hero">
+      <div class="hero-logo"><img src="images/logo-wide.png" alt="入野門 Wild Gate" width="194" height="24"></div>
+      <div class="hero-text"><h1>入野門許願池</h1><p>推開門吧！讓我們帶你看見更遼闊的世界🤩</p></div>
+      <div class="rail-h"><b>依體驗找靈感</b><span>左右滑動 →</span></div>
+      <div class="rail">${EXPS.map(x=>`<button onclick="startExplore('${x.key}')" aria-label="${escAttr(x.key)}"><img src="${x.img}" alt="${escAttr(x.key)}" width="400" height="400" decoding="async"></button>`).join('')}</div>
+    </header>
+    <section class="sec"><div class="panel">
+      <div class="panel-h"><div><h2>大家想去哪？</h2><p>依許願人數排序</p></div><div class="total"><b>${total}</b><small>個願望</small></div></div>
+      <div id="chart-box"></div>
+      <div class="rule">同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>
+    </div></section>`;
   document.getElementById('cta-bar').hidden=false;
-  preloadExploreImages();
+
   drawChart();
 }
 
@@ -273,6 +316,8 @@ function chartItems(){
     ...(D.custom||[]).map((c,i)=>({name:c.name,total:c.total,months:c.months,c:PALETTE[(D.mountains.length+i)%PALETTE.length],o:999+i}))];
   return items.sort((a,b)=>b.total-a.total||a.o-b.o).slice(0,10);
 }
+// 淺色（黃、淺綠）上的編號用深綠字
+function lightColor(c){const n=parseInt(c.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return(r*299+g*587+b*114)/1000>150}
 let chartAnimated=false;
 function drawChart(){
   const box=document.getElementById('chart-box');if(!box)return;
@@ -281,7 +326,7 @@ function drawChart(){
   const W=Math.max(300,box.clientWidth);
   const list=chartItems();const n=list.length;
   const max=Math.max(1,...list.map(m=>m.total));
-  const rowH=20,labelTop=24,baseY=labelTop+n*rowH+120,H=baseY+4,minPeak=26,peakMaxTop=labelTop+rowH*0.9;
+  const rowH=20,labelTop=14,baseY=labelTop+n*rowH+120,H=baseY+4,minPeak=26,peakMaxTop=labelTop+rowH*0.9;
   const left=20,right=W-20;
   const step=n>1?(right-left)/(n-1)*0.86:0;
   const halfBase=Math.max(46,(right-left)/n*1.1);
@@ -297,8 +342,8 @@ function drawChart(){
       [x+hb*shR,baseY-h*(0.52+r(5)*0.12)],[x+hb*shR+6,baseY-h*(0.48+r(5)*0.12)],[x+hb,baseY]].map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
     const grow=(i*0.09).toFixed(2),pinAt=(0.75+i*0.09).toFixed(2);
     peaks=`<g class="pk" style="animation-delay:${grow}s"><polygon points="${pts}" fill="${m.c}" opacity=".93" filter="url(#grain)"/></g>`+peaks;
-    pins+=`<g class="pin" style="animation-delay:${pinAt}s"><line x1="${x}" y1="${ly+8}" x2="${x}" y2="${top}" stroke="#7d796f" stroke-width="1"/><circle cx="${x}" cy="${ly}" r="8" fill="${m.c}"/>`
-      +`<text x="${x}" y="${ly+3.6}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" class="mono">${i+1}</text></g>`;
+    pins+=`<g class="pin" style="animation-delay:${pinAt}s"><line x1="${x}" y1="${ly+8}" x2="${x}" y2="${top}" stroke="#b8bfae" stroke-width="1"/><circle cx="${x}" cy="${ly}" r="9" fill="${m.c}"/>`
+      +`<text x="${x}" y="${ly+3.8}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${lightColor(m.c)?'#2e3c26':'#fff'}" class="num">${i+1}</text></g>`;
   });
   box.innerHTML=`<svg id="chart" class="${anim?'anim':''}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="各山許願人數">
     <defs><filter id="grain" x="0" y="0" width="100%" height="100%">
@@ -308,11 +353,12 @@ function drawChart(){
       <feBlend in="SourceGraphic" in2="s2" mode="multiply"/>
     </filter></defs>
     ${peaks}${pins}</svg>
-    <ol class="m-legend ${anim?'anim':''}">${list.map((m,i)=>{const tm=topMonth(m);return`<li style="animation-delay:${(0.9+i*0.05).toFixed(2)}s"><i style="background:${m.c}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>`;
+    <ol class="m-legend ${anim?'anim':''}">${list.map((m,i)=>{const tm=topMonth(m);return`<li style="animation-delay:${(0.9+i*0.05).toFixed(2)}s"><i style="background:${m.c};color:${lightColor(m.c)?'#2e3c26':'#fff'}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>`;
 }
 
 // ── 許願流程 ──
 function startFlow(){F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:''};showSheet();renderStep()}
+function startExplore(k){F={stack:['choose','explore','result'],region:'',mid:'',custom:'',months:[],exp:k};showSheet();renderStep()}
 function showSheet(){document.getElementById('sheet').classList.add('show');document.body.style.overflow='hidden'}
 function closeSheet(){document.getElementById('sheet').classList.remove('show');document.body.style.overflow='';if(F&&F.dirty){F=null;load()}else F=null}
 function go(step){F.stack.push(step);renderStep()}
@@ -328,10 +374,12 @@ function renderStep(){
   body.scrollTop=0;
 }
 
+const RIDGE='<svg class="ridge" viewBox="0 0 400 170" preserveAspectRatio="none" aria-hidden="true"><path d="M0 120 L70 62 L110 92 L175 30 L235 88 L280 58 L340 100 L400 70 L400 170 L0 170Z" fill="#3d542e"/><path d="M0 150 L60 112 L120 138 L190 96 L260 140 L320 118 L400 140 L400 170 L0 170Z" fill="#5c754b" opacity=".55"/><circle cx="330" cy="38" r="16" fill="#dfac10" opacity=".9"/></svg>';
 function chooseHTML(){
+  const fan=['family','alpine-lake','meteor'].map(n=>`<img src="images/explore/${n}.webp" alt="" width="86" height="86">`).join('');
   return`<div class="q">你想怎麼許願？</div><div class="q-sub">已經有想去的山，或還在找靈感都可以</div>
-    <button class="choice" onclick="go('direct')"><span class="em">✍️</span><span><b>我要直接許願</b><small>選地區、選山、選月份</small></span></button>
-    <button class="choice" onclick="go('explore')"><span class="em">🧭</span><span><b>我想探索看看</b><small>從喜歡的體驗找到適合的山</small></span></button>`;
+    <button class="choice" onclick="go('direct')">${RIDGE}<b>我要直接許願</b><small>選地區、選地方、選月份</small><span class="arrow" aria-hidden="true">${ARROW}</span></button>
+    <button class="choice explore" onclick="go('explore')"><span class="fan" aria-hidden="true">${fan}</span><b>我想探索看看</b><small>從喜歡的體驗找到適合的地方</small><span class="arrow" aria-hidden="true">${ARROW}</span></button>`;
 }
 
 function regions(){
@@ -345,7 +393,8 @@ function directHTML(){
   const target=m?m.name:F.custom.trim();
   const cnt=k=>m?(m.months[k]||0):0;
   return`<form onsubmit="submitWish(event)" novalidate>
-    <div class="f"><div class="lb"><span class="no">1</span>想去哪個地區？</div>
+    <div class="q">許下你的願望</div><div class="q-sub">選好地方和月份，湊滿人我們就開團</div>
+    <div class="fcard"><div class="f"><div class="lb"><span class="no">1</span>想去哪個地區？</div>
       <div class="chips">${regions().map(r=>`<button type="button" class="chip ${F.region===r?'on':''}" onclick="pickRegion(${js(r)})">${esc(r)}</button>`).join('')}</div></div>
     <div class="f"><label for="w-mt"><span class="no">2</span>想去哪個地方？</label>
       <select id="w-mt" ${F.region?'':'disabled'} onchange="pickMountain(this.value)">
@@ -357,15 +406,14 @@ function directHTML(){
         :`<p class="trip-hint">${esc(m.name)}目前還沒有開團日期，可以往下拉，在下方選擇想要出發的月份</p>`):''}</div>
     <div class="or">或</div>
     <div class="f"><label for="w-custom"><span class="no">3</span>找不到想去的山/水景點嗎？請直接填寫</label>
-      <input id="w-custom" maxlength="30" placeholder="例：武陵四秀" value="${escAttr(F.custom)}" oninput="typeCustom(this.value)"></div>
-    <div class="f" id="w-months"><div class="lb"><span class="no">4</span>想去的月份 <small>可複選</small></div>
+      <input id="w-custom" maxlength="30" placeholder="例：武陵四秀" value="${escAttr(F.custom)}" oninput="typeCustom(this.value)"></div></div>
+    <div class="fcard" id="w-months"><div class="f"><div class="lb"><span class="no">4</span>想去的月份 <small>可複選</small></div>
       <div class="months">${months.map(k=>{const t=datesInMonth(m,k).length,v=cnt(k);
-        return`<button type="button" class="m-btn ${F.months.includes(k)?'on':''}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n ${t?'open':''}">${t?'有梯次':v?`${v} 人想去`:''}</span></button>`}).join('')}</div></div>
-    <hr class="divider">
+        return`<button type="button" class="m-btn ${F.months.includes(k)?'on':''}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n ${t?'open':''}">${t?'有梯次':v?`${v} 人想去`:''}</span></button>`}).join('')}</div></div></div>
     ${target&&F.months.length?`<div class="picked">許願：<b>${esc(target)}</b><br>${F.months.map(k=>`<b>${fmtYM(k)}</b>${m?`（目前 ${cnt(k)} 人想去）`:''}`).join('<br>')}${m?`<br><small style="color:var(--muted)">同一個月滿 ${D.threshold} 人，我們就評估開團</small>`:''}</div>`:''}
-    ${contactFields()}
+    <div class="fcard">${contactFields()}</div>
     <div class="err" id="w-err"></div>
-    <button class="submit" id="w-sub">丟進許願池</button>
+    <button class="submit" id="w-sub"><span>丟進許願池</span><span class="arrow" aria-hidden="true">${ARROW}</span></button>
   </form>`;
 }
 function contactFields(){
@@ -418,21 +466,21 @@ async function submitWish(e){
   if(ranges.some(r=>!r.start)){err.textContent='想出發的日期請先選第一天';return}
   if(!c.name.trim()){err.textContent='請填寫你的名字';return}
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email.trim())){err.textContent='請填寫正確的 Email';return}
-  btn.disabled=true;btn.textContent='送出中…';
+  btn.disabled=true;btn.firstElementChild.textContent='送出中…';
   try{
     const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,months:F.months,name:c.name,email:c.email,phone:c.phone,note:c.note,ranges:ranges.map(x=>({start:x.start,end:x.end||x.start})),website:val('c-web')});
     F.dirty=true;
     const target=m?m.name:custom;
-    F.doneHTML=`<div class="done"><div class="big">⛰️</div><h3>願望收到了！</h3>
+    F.doneHTML=`<div class="done"><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>願望收到了！</h3>
       <p><b>${esc(target)}</b></p>
       <div class="res-list">${r.results.map(x=>`<div class="res-row"><div class="res-top"><b>${fmtYM(x.month)}</b><span>${x.dup?'之前已許過・':''}${x.count} 人想去</span></div>
         <div class="meter"><i style="width:${Math.min(100,x.count/r.threshold*100)}%"></i></div>
         <small>${x.count>=r.threshold?'已達開團門檻，我們會盡快評估！':`再 ${r.threshold-x.count} 人就達到門檻`}</small></div>`).join('')}</div>
       <p style="font-size:13px;color:var(--muted);margin:16px 0 24px">揪朋友一起許願，更快成團</p>
-      <button class="submit" onclick="closeSheet()">完成</button>
+      <button class="submit plain" onclick="closeSheet()">完成</button>
       <button class="submit ghost" onclick="againWish()">再許一個願</button></div>`;
     go('done');
-  }catch(x){err.textContent=x.message;btn.disabled=false;btn.textContent='丟進許願池'}
+  }catch(x){err.textContent=x.message;btn.disabled=false;btn.firstElementChild.textContent='丟進許願池'}
 }
 function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:'',contact:c,dirty:true};renderStep()}
 
@@ -447,11 +495,13 @@ function pickExp(k){F.exp=k;go('result')}
 function resultHTML(){
   const x=EXPS.find(e=>e.key===F.exp);
   const list=D.mountains.filter(m=>(m.tags||[]).includes(F.exp));
-  return`<div class="res-h"><span class="em">${x.em}</span><div class="q" style="margin:0">${esc(x.title)}</div></div>
-    <div class="q-sub">${list.length?`推薦 ${list.length} 個地方給你`:'這個分類的推薦整理中'}</div>
-    ${list.map(m=>`<div class="mt-card" style="--c:${colorOf(m)}">
-      <div class="mt-top"><div><div class="mt-name">${esc(m.name)}</div><div class="mt-meta">${[m.region,m.elevation?m.elevation.toLocaleString()+' m':''].filter(Boolean).map(esc).join('・')}</div></div>
-</div>
+  return`<div class="res-banner"><img src="${x.img}" alt="${escAttr(x.key)}" width="400" height="400"></div>
+    <div class="q">${esc(x.title)}</div>
+    <div class="res-count">${list.length?`推薦 ${list.length} 個地方給你`:'這個分類的推薦整理中'}</div>
+    ${list.map(m=>`<div class="mt-card">
+      ${m.photo_url?`<div class="mt-photo"><img src="${escAttr(m.photo_url)}" alt="${escAttr(m.name)}" loading="lazy" decoding="async"></div>`:''}
+      <div class="mt-name">${esc(m.name)}</div>
+      <div class="tags">${m.region?`<span>${esc(m.region)}</span>`:''}${m.elevation?`<span>${m.elevation.toLocaleString()} m</span>`:''}${m.dates.length?`<span class="y">報名中 ${m.dates.length} 梯</span>`:''}</div>
       ${m.intro?`<p class="mt-intro">${esc(m.intro)}</p>`:'<div style="height:12px"></div>'}
       ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${tripsBlock(m,m.form_url?0:3)}</div>`:''}
       <button class="wish-this" onclick="wishThis(${js(m.id)})">沒找到喜歡的日期嗎？來許願吧！</button>
