@@ -39,6 +39,13 @@ button{-webkit-tap-highlight-color:transparent}
 .m-legend i{flex-shrink:0;width:18px;height:18px;border-radius:50%;color:#fff;font:500 10px/18px var(--mono);text-align:center;font-style:normal}
 .m-legend b{display:block;font-weight:800}
 .m-legend small{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+/* 載入時山形由下往上長出來，之後編號針再淡入 */
+#chart.anim .pk{transform-box:fill-box;transform-origin:50% 100%;animation:grow .9s cubic-bezier(.2,.8,.25,1) both}
+#chart.anim .pin{animation:fade .35s ease both}
+.m-legend.anim li{animation:fade .35s ease both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#chart.anim .pk,#chart.anim .pin,.m-legend.anim li{animation:none}}
 .hint-line{font-size:13px;color:var(--muted);text-align:center;margin:6px 0 0}
 .center{padding:80px 0;text-align:center;color:var(--muted)}
 
@@ -58,6 +65,7 @@ button{-webkit-tap-highlight-color:transparent}
 .ic-btn{width:40px;height:40px;border:none;background:none;border-radius:50%;font-size:22px;line-height:1;cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
 .ic-btn:active{background:var(--paper-2)}
 .ic-btn.hide{visibility:hidden}
+.home-btn{border:none;background:none;font-size:13px;font-weight:700;color:var(--ink-2);padding:8px 10px;cursor:pointer;min-width:40px;text-decoration:underline;text-underline-offset:3px}
 .sh-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px calc(28px + env(safe-area-inset-bottom))}
 .q{font-family:var(--serif);font-size:24px;font-weight:900;line-height:1.35;margin-bottom:6px}
 .q-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
@@ -85,6 +93,11 @@ button{-webkit-tap-highlight-color:transparent}
 .f select:disabled{background-color:var(--paper-2);color:var(--muted)}
 .f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--ink)}
 .f textarea{min-height:72px;resize:vertical}
+.date-pick{position:relative}
+.date-pick span{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:15px}
+.date-pick.has span,.date-pick input:focus+span{display:none}
+.date-pick input{min-height:48px}
+.date-pick:not(.has) input:not(:focus){color:transparent}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{padding:9px 16px;border-radius:22px;border:1.5px solid var(--border);background:#fff;font-weight:700;font-size:15px;cursor:pointer}
 .chip.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
@@ -98,7 +111,8 @@ button{-webkit-tap-highlight-color:transparent}
 .m-btn.on .y,.m-btn.on .n{color:#CFCBC2}
 .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:-6px 0 14px}
 .or::before,.or::after{content:'';flex:1;height:1px;background:var(--border)}
-.trips{background:#F1F5EE;border:1.5px solid #C9D6C2;border-radius:14px;padding:12px;margin:-8px 0 20px}
+.trips{background:#F1F5EE;border:1.5px solid #C9D6C2;border-radius:14px;padding:12px;margin:0}
+.trip-hint{font-size:13.5px;color:var(--ok);font-weight:700;line-height:1.6;margin:12px 0 8px}
 .trips p{font-size:13px;color:var(--ok);font-weight:700;margin-bottom:8px}
 .date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1.5px solid var(--ok);background:#fff;cursor:pointer;text-align:left}
 .date-btn:last-child{margin-bottom:0}
@@ -148,7 +162,7 @@ button{-webkit-tap-highlight-color:transparent}
 <div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><button class="cta" onclick="startFlow()">⛰️ 我要許願</button></div></div>
 
 <div class="sheet" id="sheet"><div class="sheet-in">
-  <div class="sh-head"><button class="ic-btn" id="sh-back" onclick="back()" aria-label="上一步">‹</button><b id="sh-title">許願</b><button class="ic-btn" onclick="closeSheet()" aria-label="關閉">&times;</button></div>
+  <div class="sh-head"><button class="ic-btn" id="sh-back" onclick="back()" aria-label="上一步">‹</button><b id="sh-title">許願</b><button class="home-btn" onclick="closeSheet()">回首頁</button></div>
   <div class="sh-body" id="sh-body"></div>
 </div></div>
 
@@ -225,8 +239,11 @@ function chartItems(){
     ...(D.custom||[]).map((c,i)=>({name:c.name,total:c.total,months:c.months,c:PALETTE[(D.mountains.length+i)%PALETTE.length],o:999+i}))];
   return items.sort((a,b)=>b.total-a.total||a.o-b.o).slice(0,10);
 }
+let chartAnimated=false;
 function drawChart(){
   const box=document.getElementById('chart-box');if(!box)return;
+  // 只有第一次載入播放動畫，旋轉螢幕重畫時不再播
+  const anim=!chartAnimated;chartAnimated=true;
   const W=Math.max(300,box.clientWidth);
   const list=chartItems();const n=list.length;
   const max=Math.max(1,...list.map(m=>m.total));
@@ -244,11 +261,12 @@ function drawChart(){
     const shL=0.35+r(1)*0.25,shR=0.3+r(2)*0.3,flat=Math.min(hb*0.12,8+r(3)*10);
     const pts=[[x-hb,baseY],[x-hb*shL-hb*0.1,baseY-h*(0.55+r(4)*0.1)],[x-hb*shL+4,baseY-h*(0.6+r(4)*0.1)],[x-flat,top],[x+flat,top],
       [x+hb*shR,baseY-h*(0.52+r(5)*0.12)],[x+hb*shR+6,baseY-h*(0.48+r(5)*0.12)],[x+hb,baseY]].map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
-    peaks=`<polygon points="${pts}" fill="${m.c}" opacity=".93" filter="url(#grain)"/>`+peaks;
-    pins+=`<line x1="${x}" y1="${ly+8}" x2="${x}" y2="${top}" stroke="#7d796f" stroke-width="1"/><circle cx="${x}" cy="${ly}" r="8" fill="${m.c}"/>`
-      +`<text x="${x}" y="${ly+3.6}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" class="mono">${i+1}</text>`;
+    const grow=(i*0.09).toFixed(2),pinAt=(0.75+i*0.09).toFixed(2);
+    peaks=`<g class="pk" style="animation-delay:${grow}s"><polygon points="${pts}" fill="${m.c}" opacity=".93" filter="url(#grain)"/></g>`+peaks;
+    pins+=`<g class="pin" style="animation-delay:${pinAt}s"><line x1="${x}" y1="${ly+8}" x2="${x}" y2="${top}" stroke="#7d796f" stroke-width="1"/><circle cx="${x}" cy="${ly}" r="8" fill="${m.c}"/>`
+      +`<text x="${x}" y="${ly+3.6}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" class="mono">${i+1}</text></g>`;
   });
-  box.innerHTML=`<svg id="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="各山許願人數">
+  box.innerHTML=`<svg id="chart" class="${anim?'anim':''}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="各山許願人數">
     <defs><filter id="grain" x="0" y="0" width="100%" height="100%">
       <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" result="t"/>
       <feColorMatrix in="t" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -.9 .55" result="spk"/>
@@ -258,7 +276,7 @@ function drawChart(){
     <text x="4" y="44" font-family="'Noto Serif TC',serif" font-weight="700" font-size="30" fill="#4A4741">想去哪</text>
     <text x="4" y="86" font-family="'Noto Serif TC',serif" font-weight="900" font-size="40" fill="#1F1D1A">許個願</text>
     ${peaks}${pins}</svg>
-    <ol class="m-legend">${list.map((m,i)=>{const tm=topMonth(m);return`<li><i style="background:${m.c}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>`;
+    <ol class="m-legend ${anim?'anim':''}">${list.map((m,i)=>{const tm=topMonth(m);return`<li style="animation-delay:${(0.9+i*0.05).toFixed(2)}s"><i style="background:${m.c}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>`;
 }
 
 // ── 許願流程 ──
@@ -292,24 +310,25 @@ function directHTML(){
   const m=mt(F.mid);
   const inRegion=D.mountains.filter(x=>(x.region||'其他')===F.region);
   const months=nextMonths();
-  const trips=datesInMonth(m,F.month);
   const target=m?m.name:F.custom.trim();
   const cnt=k=>m?(m.months[k]||0):0;
   return`<form onsubmit="submitWish(event)" novalidate>
     <div class="f"><div class="lb"><span class="no">1</span>想去哪個地區？</div>
       <div class="chips">${regions().map(r=>`<button type="button" class="chip ${F.region===r?'on':''}" onclick="pickRegion(${js(r)})">${esc(r)}</button>`).join('')}</div></div>
-    <div class="f"><label for="w-mt"><span class="no">2</span>想去哪座山？</label>
+    <div class="f"><label for="w-mt"><span class="no">2</span>想去哪個地方？</label>
       <select id="w-mt" ${F.region?'':'disabled'} onchange="pickMountain(this.value)">
-        <option value="">${F.region?'請選擇山':'請先選擇地區'}</option>
+        <option value="">${F.region?'請選擇地方':'請先選擇地區'}</option>
         ${inRegion.map(x=>`<option value="${escAttr(x.id)}" ${x.id===F.mid?'selected':''}>${esc(x.name)}</option>`).join('')}
-      </select></div>
+      </select>
+      ${m?(m.dates.length
+        ?`<p class="trip-hint">下方是目前開團日期，如果有想要的時間可以直接前往報名，如果沒有可以往下拉，在下方選擇想要出發的月份</p><div class="trips">${m.dates.map(d=>dateBtn(m,d)).join('')}</div>`
+        :`<p class="trip-hint">${esc(m.name)}目前還沒有開團日期，可以往下拉，在下方選擇想要出發的月份</p>`):''}</div>
     <div class="or">或</div>
-    <div class="f"><label for="w-custom"><span class="no">3</span>找不到想去的山嗎？請直接填寫</label>
+    <div class="f"><label for="w-custom"><span class="no">3</span>找不到想去的山/水景點嗎？請直接填寫</label>
       <input id="w-custom" maxlength="30" placeholder="例：武陵四秀" value="${escAttr(F.custom)}" oninput="typeCustom(this.value)"></div>
     <div class="f"><div class="lb"><span class="no">4</span>想去的月份</div>
       <div class="months">${months.map(k=>{const t=datesInMonth(m,k).length,v=cnt(k);
         return`<button type="button" class="m-btn ${k===F.month?'on':''}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n ${t?'open':''}">${t?'有梯次':v?`${v} 人想去`:''}</span></button>`}).join('')}</div></div>
-    ${trips.length?`<div class="trips"><p>${fmtYM(F.month)}已經有開團，可以直接報名 👇</p>${trips.map(d=>dateBtn(m,d)).join('')}</div>`:''}
     <hr class="divider">
     ${target&&F.month?`<div class="picked">許願：<b>${esc(target)}</b>・<b>${fmtYM(F.month)}</b><br>目前 ${m?cnt(F.month):'—'} 人想去${m?`，滿 ${D.threshold} 人我們就評估開團`:''}</div>`:''}
     ${contactFields()}
@@ -322,11 +341,15 @@ function contactFields(){
   return`<div class="f"><label for="c-name">你的名字</label><input id="c-name" maxlength="50" autocomplete="name" value="${escAttr(c.name||'')}" oninput="saveContact()"></div>
     <div class="f"><label for="c-email">Email <small>開團時通知你</small></label><input id="c-email" type="email" inputmode="email" autocomplete="email" value="${escAttr(c.email||'')}" oninput="saveContact()"></div>
     <div class="f"><label for="c-phone">手機 <small>選填</small></label><input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" value="${escAttr(c.phone||'')}" oninput="saveContact()"></div>
+    <div class="f"><label for="c-date">如果你有確切想出發的日期，也歡迎讓我們知道 <small>選填</small></label>
+      <div class="date-pick ${c.date?'has':''}"><input id="c-date" type="date" min="${D.today}" max="${lastWishDay()}" value="${escAttr(c.date||'')}" onchange="saveContact();this.parentNode.classList.toggle('has',!!this.value)"><span>📅 選擇日期</span></div></div>
     <div class="f"><label for="c-note">想說的話 <small>選填</small></label><textarea id="c-note" maxlength="500" placeholder="例：想走兩天一夜、希望週末出發" oninput="saveContact()">${esc(c.note||'')}</textarea></div>
     <div class="hp"><input id="c-web" tabindex="-1" autocomplete="off"></div>`;
 }
 const val=id=>{const e=document.getElementById(id);return e?e.value:''};
-function saveContact(){F.contact={name:val('c-name'),email:val('c-email'),phone:val('c-phone'),note:val('c-note')}}
+function saveContact(){F.contact={name:val('c-name'),email:val('c-email'),phone:val('c-phone'),note:val('c-note'),date:val('c-date')}}
+// 可選的最後一天：12 個可許願月份的最後一天
+function lastWishDay(){const ms=nextMonths(),[y,m]=ms[ms.length-1].split('-').map(Number);const d=new Date(y,m,0);return`${y}-${String(m).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function rerender(){saveContact();const b=document.getElementById('sh-body'),y=b.scrollTop;renderStep();b.scrollTop=y}
 function pickRegion(r){F.region=r;if(F.mid&&(mt(F.mid).region||'其他')!==r)F.mid='';rerender()}
 function pickMountain(id){F.mid=id;if(id)F.custom='';rerender()}
@@ -348,7 +371,7 @@ async function submitWish(e){
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email.trim())){err.textContent='請填寫正確的 Email';return}
   btn.disabled=true;btn.textContent='送出中…';
   try{
-    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,month:F.month,name:c.name,email:c.email,phone:c.phone,note:c.note,website:val('c-web')});
+    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,month:F.month,name:c.name,email:c.email,phone:c.phone,note:c.note,preferred_date:c.date||'',website:val('c-web')});
     F.dirty=true;
     const target=m?m.name:custom,pct=Math.min(100,r.count/D.threshold*100);
     F.doneHTML=`<div class="done"><div class="big">⛰️</div><h3>願望收到了！</h3>
@@ -424,8 +447,8 @@ function signedHTML(){
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&F)closeSheet()});
-let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(D&&D.mountains.length)drawChart()},150)});
-if(document.fonts)document.fonts.ready.then(()=>{if(D&&D.mountains.length)drawChart()});
+// 只有寬度改變（例如旋轉螢幕）才重畫；手機網址列收合也會觸發 resize，不重畫以免打斷動畫
+let rt,lastW=window.innerWidth;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(window.innerWidth===lastW)return;lastW=window.innerWidth;if(D&&D.mountains.length)drawChart()},150)});
 load();
 </script>
 </body>
