@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>入野門許願池</title>
 <meta name="description" content="想去哪座山？許個願，湊滿人我們就開團。">
-<meta name="theme-color" content="#ECEAE3">
+<meta name="theme-color" content="#2e3c26">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +13,7 @@
 <style>
 /* 只做手機版：電腦上也維持手機寬度置中 */
 :root{
+  --brand:#2e3c26;--cream:#f5f1e8;
   --paper:#ECEAE3;--paper-2:#E3E0D7;--ink:#1F1D1A;--ink-2:#4A4741;--muted:#86827A;
   --card:#F7F5F0;--border:#D6D2C8;--red:#B5443A;--ok:#4F6B45;--gold:#dfac10;
   --serif:'Noto Serif TC','Songti TC',serif;
@@ -26,13 +27,17 @@ body{background:#D9D5CB;color:var(--ink);font-family:var(--sans);font-size:15px;
 button,input,select,textarea{font:inherit;color:inherit}
 button{-webkit-tap-highlight-color:transparent}
 .phone{max-width:var(--w);margin:0 auto;min-height:100vh;background:var(--paper);position:relative;padding:0 16px calc(110px + env(safe-area-inset-bottom))}
-.top{display:flex;align-items:center;gap:8px;padding:16px 0 4px;font-weight:700;letter-spacing:.08em;font-size:13px;color:var(--ink-2)}
-.top img{width:24px;height:24px;border-radius:50%}
+.top{margin:0 -16px;background:var(--brand);display:flex;align-items:center;justify-content:center;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+.top img{width:40px;height:40px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(245,241,232,.55);display:block}
+/* 2. 大標題與說明 */
+.hero{text-align:center;padding:26px 0 4px}
+.hero h1{font-family:var(--serif);font-weight:900;font-size:32px;letter-spacing:.08em;line-height:1.25;color:var(--ink)}
+.hero p{font-size:14px;color:var(--ink-2);margin-top:8px;line-height:1.6}
 
 /* 統計圖 */
 #chart{width:100%;display:block}
 #chart .mono{font-family:var(--mono)}
-.chart-foot{border-top:1.5px solid var(--ink);padding:8px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--ink-2);line-height:1.7}
+.chart-foot{text-align:center;border-top:1.5px solid var(--ink);padding:8px 0 0;margin-bottom:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--ink-2);line-height:1.7}
 .chart-foot b{font-family:var(--sans);letter-spacing:.1em;color:var(--ink)}
 .m-legend{list-style:none;padding:0;margin:4px 0 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
 .m-legend li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.3}
@@ -46,13 +51,12 @@ button{-webkit-tap-highlight-color:transparent}
 @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){#chart.anim .pk,#chart.anim .pin,.m-legend.anim li{animation:none}}
-.hint-line{font-size:13px;color:var(--muted);text-align:center;margin:6px 0 0}
 .center{padding:80px 0;text-align:center;color:var(--muted)}
 
 /* 主要按鈕 */
 .cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none}
 .cta-in{max-width:var(--w);margin:0 auto;padding:12px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--paper) 70%,rgba(236,234,227,0));pointer-events:auto}
-.cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border:none;border-radius:16px;background:var(--ink);color:var(--paper);font-size:18px;font-weight:800;letter-spacing:.12em;cursor:pointer;box-shadow:0 6px 18px rgba(31,29,26,.25)}
+.cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border:none;border-radius:16px;background:var(--brand);color:var(--cream);font-size:18px;font-weight:800;letter-spacing:.12em;cursor:pointer;box-shadow:0 6px 18px rgba(46,60,38,.35)}
 .cta:active{transform:scale(.98)}
 
 /* 全螢幕流程 */
@@ -60,12 +64,12 @@ button{-webkit-tap-highlight-color:transparent}
 .sheet.show{display:block}
 .sheet-in{max-width:var(--w);margin:0 auto;height:100%;background:var(--paper);display:flex;flex-direction:column;animation:up .22s ease}
 @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
-.sh-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;border-bottom:1px solid var(--border)}
-.sh-head b{font-size:16px;font-weight:800}
-.ic-btn{width:40px;height:40px;border:none;background:none;border-radius:50%;font-size:22px;line-height:1;cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
-.ic-btn:active{background:var(--paper-2)}
+.sh-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;background:var(--brand);color:var(--cream)}
+.sh-head b{font-size:16px;font-weight:800;letter-spacing:.06em}
+.ic-btn{width:40px;height:40px;border:none;background:none;border-radius:50%;font-size:26px;line-height:1;cursor:pointer;color:var(--cream);display:flex;align-items:center;justify-content:center}
+.ic-btn:active{background:rgba(245,241,232,.15)}
 .ic-btn.hide{visibility:hidden}
-.home-btn{border:none;background:none;font-size:13px;font-weight:700;color:var(--ink-2);padding:8px 10px;cursor:pointer;min-width:40px;text-decoration:underline;text-underline-offset:3px}
+.home-btn{border:none;background:none;font-size:13px;font-weight:700;color:var(--cream);padding:8px 10px;cursor:pointer;min-width:40px;text-decoration:underline;text-underline-offset:3px}
 .sh-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px calc(28px + env(safe-area-inset-bottom))}
 .q{font-family:var(--serif);font-size:24px;font-weight:900;line-height:1.35;margin-bottom:6px}
 .q-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
@@ -165,10 +169,10 @@ button{-webkit-tap-highlight-color:transparent}
 </head>
 <body>
 <div class="phone">
-  <div class="top"><img src="favicon.png" alt="">入野門 WILDGATE</div>
+  <div class="top"><img src="images/logo.png" alt="入野門 Wildgate"></div>
   <div id="main"><div class="center"><div class="spin"></div></div></div>
 </div>
-<div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><button class="cta" onclick="startFlow()">⛰️ 我要許願</button></div></div>
+<div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><button class="cta" onclick="startFlow()">我要許願</button></div></div>
 
 <div class="sheet" id="sheet"><div class="sheet-in">
   <div class="sh-head"><button class="ic-btn" id="sh-back" onclick="back()" aria-label="上一步">‹</button><b id="sh-title">許願</b><button class="home-btn" onclick="closeSheet()">回首頁</button></div>
@@ -243,9 +247,9 @@ function render(){
   const main=document.getElementById('main');
   if(!D.mountains.length){main.innerHTML='<div class="center">許願池準備中，請稍後再來</div>';return}
   const total=D.mountains.reduce((a,m)=>a+m.total,0)+(D.custom||[]).reduce((a,c)=>a+c.total,0);
-  main.innerHTML=`<div id="chart-box"></div>
-    <div class="chart-foot"><b>入野門許願池</b>　｜　共 ${total} 個願望<br>依許願人數排序・同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>
-    ${total?'':'<p class="hint-line">還沒有人許願，搶先許下第一個願望吧！</p>'}`;
+  main.innerHTML=`<div class="hero"><h1>入野門許願池</h1><p>推開門吧！讓我們帶你看見更遼闊的世界🤩</p></div>
+    <div id="chart-box"></div>
+    <div class="chart-foot"><b>入野門許願池</b>　｜　共 ${total} 個願望<br>依許願人數排序・同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>`;
   document.getElementById('cta-bar').hidden=false;
   drawChart();
 }
@@ -264,7 +268,7 @@ function drawChart(){
   const W=Math.max(300,box.clientWidth);
   const list=chartItems();const n=list.length;
   const max=Math.max(1,...list.map(m=>m.total));
-  const rowH=20,labelTop=118,baseY=labelTop+n*rowH+120,H=baseY+4,minPeak=26,peakMaxTop=labelTop+rowH*0.9;
+  const rowH=20,labelTop=24,baseY=labelTop+n*rowH+120,H=baseY+4,minPeak=26,peakMaxTop=labelTop+rowH*0.9;
   const left=20,right=W-20;
   const step=n>1?(right-left)/(n-1)*0.86:0;
   const halfBase=Math.max(46,(right-left)/n*1.1);
@@ -290,8 +294,6 @@ function drawChart(){
       <feComposite in="spk" in2="SourceGraphic" operator="in" result="s2"/>
       <feBlend in="SourceGraphic" in2="s2" mode="multiply"/>
     </filter></defs>
-    <text x="4" y="44" font-family="'Noto Serif TC',serif" font-weight="700" font-size="30" fill="#4A4741">想去哪</text>
-    <text x="4" y="86" font-family="'Noto Serif TC',serif" font-weight="900" font-size="40" fill="#1F1D1A">許個願</text>
     ${peaks}${pins}</svg>
     <ol class="m-legend ${anim?'anim':''}">${list.map((m,i)=>{const tm=topMonth(m);return`<li style="animation-delay:${(0.9+i*0.05).toFixed(2)}s"><i style="background:${m.c}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>`;
 }
