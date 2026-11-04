@@ -223,14 +223,14 @@ function topMonth(x){let best=null;for(const[k,v]of Object.entries(x.months||{})
 function datesInMonth(m,ym){return m?m.dates.filter(d=>d.start_date.slice(0,7)===ym):[]}
 function dateSub(d){return[d.title,d.full?'額滿・可候補':d.seats!=null?`剩 ${d.seats} 位`:''].filter(Boolean).join('・')}
 // 有設定 Google 報名表單的山：日期只列出來參考，整座山一個「前往報名」按鈕（日期在表單內選）
-// 還沒有表單的山：每個日期一個按鈕，用內建的報名表單
+// 還沒有表單的山：日期按鈕按下去回到「直接許願」，地方已選好，只要選月份
 function tripsBlock(m,limit){
   const ds=limit?m.dates.slice(0,limit):m.dates;
   if(!m.form_url)return ds.map(d=>dateBtn(m,d)).join('');
   return`<ul class="date-list">${ds.map(d=>`<li><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></li>`).join('')}</ul>
     <a class="form-btn" href="${escAttr(m.form_url)}" target="_blank" rel="noopener">前往報名 ↗<small>日期請在報名表單中選擇</small></a>`;
 }
-function dateBtn(m,d){return`<button type="button" class="date-btn" onclick="openSignup(${js(m.id)},${js(d.id)})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">${d.full?'候補':'報名'}</span></button>`}
+function dateBtn(m,d){return`<button type="button" class="date-btn" onclick="goWish(${js(m.id)})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">前往許願</span></button>`}
 
 async function load(){
   try{D=await api('list')}
@@ -303,11 +303,11 @@ function back(){if(F.stack.length>1){F.stack.pop();renderStep()}else closeSheet(
 function cur(){return F.stack[F.stack.length-1]}
 function renderStep(){
   const s=cur();
-  const titles={choose:'我要許願',direct:'我要直接許願',explore:'我想探索看看',result:'我想探索看看',done:'許願完成',signup:'報名',signed:'報名完成'};
+  const titles={choose:'我要許願',direct:'我要直接許願',explore:'我想探索看看',result:'我想探索看看',done:'許願完成'};
   document.getElementById('sh-title').textContent=titles[s]||'許願';
-  document.getElementById('sh-back').classList.toggle('hide',F.stack.length<2||s==='done'||s==='signed');
+  document.getElementById('sh-back').classList.toggle('hide',F.stack.length<2||s==='done');
   const body=document.getElementById('sh-body');
-  body.innerHTML={choose:chooseHTML,direct:directHTML,explore:exploreHTML,result:resultHTML,signup:signupHTML,done:()=>F.doneHTML,signed:signedHTML}[s]();
+  body.innerHTML={choose:chooseHTML,direct:directHTML,explore:exploreHTML,result:resultHTML,done:()=>F.doneHTML}[s]();
   body.scrollTop=0;
 }
 
@@ -336,12 +336,12 @@ function directHTML(){
         ${inRegion.map(x=>`<option value="${escAttr(x.id)}" ${x.id===F.mid?'selected':''}>${esc(x.name)}</option>`).join('')}
       </select>
       ${m?(m.dates.length
-        ?`<p class="trip-hint">下方是目前開團日期，如果有想要的時間可以直接前往報名，如果沒有可以往下拉，在下方選擇想要出發的月份</p><div class="trips">${tripsBlock(m)}</div>`
+        ?`<p class="trip-hint">${m.form_url?'下方是目前開團日期，如果有想要的時間可以直接前往報名，如果沒有可以往下拉，在下方選擇想要出發的月份':'下方是目前開團日期，有想要的時間請在下方選擇想要出發的月份，送出許願後我們會跟你聯絡'}</p><div class="trips">${tripsBlock(m)}</div>`
         :`<p class="trip-hint">${esc(m.name)}目前還沒有開團日期，可以往下拉，在下方選擇想要出發的月份</p>`):''}</div>
     <div class="or">或</div>
     <div class="f"><label for="w-custom"><span class="no">3</span>找不到想去的山/水景點嗎？請直接填寫</label>
       <input id="w-custom" maxlength="30" placeholder="例：武陵四秀" value="${escAttr(F.custom)}" oninput="typeCustom(this.value)"></div>
-    <div class="f"><div class="lb"><span class="no">4</span>想去的月份</div>
+    <div class="f" id="w-months"><div class="lb"><span class="no">4</span>想去的月份</div>
       <div class="months">${months.map(k=>{const t=datesInMonth(m,k).length,v=cnt(k);
         return`<button type="button" class="m-btn ${k===F.month?'on':''}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n ${t?'open':''}">${t?'有梯次':v?`${v} 人想去`:''}</span></button>`}).join('')}</div></div>
     <hr class="divider">
@@ -421,44 +421,10 @@ function resultHTML(){
     <button class="submit ghost" onclick="back()">看看其他體驗</button>`;
 }
 function wishThis(id){const m=mt(id);F.mid=id;F.region=m.region||'其他';F.custom='';F.month='';go('direct')}
-
-// 報名（已有梯次）
-function openSignup(mid,did){F.sign={mid,did};saveContact();go('signup')}
-function signupHTML(){
-  const m=mt(F.sign.mid),d=m&&m.dates.find(x=>x.id===F.sign.did);if(!d)return'<div class="center">這個梯次已不開放報名</div>';
-  const c=F.contact||{};
-  return`<div class="q">${esc(m.name)}</div><div class="q-sub">${fmtRange(d.start_date,d.end_date)}・${esc(dateSub(d))}</div>
-    ${d.full?'<div class="picked">這個梯次目前額滿，送出後會列入<b>候補</b>，有名額時我們會通知你</div>':''}
-    <form onsubmit="submitSignup(event)" novalidate>
-      <div class="f"><label for="s-name">姓名</label><input id="s-name" maxlength="50" autocomplete="name" value="${escAttr(c.name||'')}"></div>
-      <div class="f"><label for="s-phone">手機</label><input id="s-phone" type="tel" inputmode="tel" autocomplete="tel" value="${escAttr(c.phone||'')}"></div>
-      <div class="f"><label for="s-email">Email</label><input id="s-email" type="email" inputmode="email" autocomplete="email" value="${escAttr(c.email||'')}"></div>
-      <div class="f"><label for="s-party">人數</label><select id="s-party">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1} 人</option>`).join('')}</select></div>
-      <div class="f"><label for="s-note">備註 <small>選填</small></label><textarea id="s-note" maxlength="500" placeholder="例：同行者姓名、飲食需求、想租裝備"></textarea></div>
-      <div class="hp"><input id="s-web" tabindex="-1" autocomplete="off"></div>
-      <div class="err" id="s-err"></div>
-      <button class="submit green" id="s-sub">送出報名</button>
-    </form>`;
-}
-async function submitSignup(e){
-  e.preventDefault();
-  const err=document.getElementById('s-err'),btn=document.getElementById('s-sub');
-  const name=val('s-name').trim(),phone=val('s-phone').trim(),email=val('s-email').trim();
-  err.textContent='';
-  if(!name){err.textContent='請填寫姓名';return}
-  if(!phone){err.textContent='請填寫手機';return}
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){err.textContent='請填寫正確的 Email';return}
-  btn.disabled=true;btn.textContent='送出中…';
-  try{
-    await api('signup',{trip_id:F.sign.did,name,phone,email,party_size:val('s-party'),note:val('s-note'),website:val('s-web')});
-    F.contact={...(F.contact||{}),name,phone,email};
-    go('signed');
-  }catch(x){err.textContent=x.message;btn.disabled=false;btn.textContent='送出報名'}
-}
-function signedHTML(){
-  return`<div class="done"><div class="big">🎒</div><h3>報名已送出</h3>
-    <p>我們收到你的報名了，會盡快以電話或 Email 跟你確認細節與匯款資訊。</p><br>
-    <button class="submit green" onclick="closeSheet()">完成</button></div>`;
+// 沒有報名表單的山：到「直接許願」，地方已選好，捲到月份讓她選
+function goWish(id){
+  if(cur()!=='direct'||F.mid!==id)wishThis(id);
+  const el=document.getElementById('w-months');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&F)closeSheet()});
