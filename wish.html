@@ -112,6 +112,13 @@ button{-webkit-tap-highlight-color:transparent}
 .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:-6px 0 14px}
 .or::before,.or::after{content:'';flex:1;height:1px;background:var(--border)}
 .trips{background:#F1F5EE;border:1.5px solid #C9D6C2;border-radius:14px;padding:12px;margin:0}
+.date-list{list-style:none;padding:0;margin:0 0 10px}
+.date-list li{padding:8px 2px;border-bottom:1px dashed #C9D6C2;display:flex;flex-direction:column}
+.date-list li:last-child{border-bottom:none}
+.date-list b{font-size:14px}
+.date-list small{font-size:12px;color:var(--muted)}
+.form-btn{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:12px;border-radius:12px;background:var(--ok);color:#fff;font-weight:800;font-size:16px;text-decoration:none;letter-spacing:.05em}
+.form-btn small,.f .form-btn small{font-size:11.5px;font-weight:400;color:#E3EBDD;letter-spacing:0}
 .trip-hint{font-size:13.5px;color:var(--ok);font-weight:700;line-height:1.6;margin:12px 0 8px}
 .trips p{font-size:13px;color:var(--ok);font-weight:700;margin-bottom:8px}
 .date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1.5px solid var(--ok);background:#fff;cursor:pointer;text-align:left}
@@ -215,6 +222,14 @@ function colorOf(m){return PALETTE[Math.max(0,D.mountains.indexOf(m))%PALETTE.le
 function topMonth(x){let best=null;for(const[k,v]of Object.entries(x.months||{}))if(!best||v>best[1]||(v===best[1]&&k<best[0]))best=[k,v];return best}
 function datesInMonth(m,ym){return m?m.dates.filter(d=>d.start_date.slice(0,7)===ym):[]}
 function dateSub(d){return[d.title,d.full?'額滿・可候補':d.seats!=null?`剩 ${d.seats} 位`:''].filter(Boolean).join('・')}
+// 有設定 Google 報名表單的山：日期只列出來參考，整座山一個「前往報名」按鈕（日期在表單內選）
+// 還沒有表單的山：每個日期一個按鈕，用內建的報名表單
+function tripsBlock(m,limit){
+  const ds=limit?m.dates.slice(0,limit):m.dates;
+  if(!m.form_url)return ds.map(d=>dateBtn(m,d)).join('');
+  return`<ul class="date-list">${ds.map(d=>`<li><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></li>`).join('')}</ul>
+    <a class="form-btn" href="${escAttr(m.form_url)}" target="_blank" rel="noopener">前往報名 ↗<small>日期請在報名表單中選擇</small></a>`;
+}
 function dateBtn(m,d){return`<button type="button" class="date-btn" onclick="openSignup(${js(m.id)},${js(d.id)})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">${d.full?'候補':'報名'}</span></button>`}
 
 async function load(){
@@ -321,7 +336,7 @@ function directHTML(){
         ${inRegion.map(x=>`<option value="${escAttr(x.id)}" ${x.id===F.mid?'selected':''}>${esc(x.name)}</option>`).join('')}
       </select>
       ${m?(m.dates.length
-        ?`<p class="trip-hint">下方是目前開團日期，如果有想要的時間可以直接前往報名，如果沒有可以往下拉，在下方選擇想要出發的月份</p><div class="trips">${m.dates.map(d=>dateBtn(m,d)).join('')}</div>`
+        ?`<p class="trip-hint">下方是目前開團日期，如果有想要的時間可以直接前往報名，如果沒有可以往下拉，在下方選擇想要出發的月份</p><div class="trips">${tripsBlock(m)}</div>`
         :`<p class="trip-hint">${esc(m.name)}目前還沒有開團日期，可以往下拉，在下方選擇想要出發的月份</p>`):''}</div>
     <div class="or">或</div>
     <div class="f"><label for="w-custom"><span class="no">3</span>找不到想去的山/水景點嗎？請直接填寫</label>
@@ -400,7 +415,7 @@ function resultHTML(){
       <div class="mt-top"><div><div class="mt-name">${esc(m.name)}</div><div class="mt-meta">${[m.region,m.elevation?m.elevation.toLocaleString()+' m':''].filter(Boolean).map(esc).join('・')}</div></div>
         <div class="mt-count"><b>${m.total}</b>人想去</div></div>
       ${m.intro?`<p class="mt-intro">${esc(m.intro)}</p>`:'<div style="height:12px"></div>'}
-      ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${m.dates.slice(0,3).map(d=>dateBtn(m,d)).join('')}</div>`:''}
+      ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${tripsBlock(m,m.form_url?0:3)}</div>`:''}
       <button class="wish-this" onclick="wishThis(${js(m.id)})">許願這座山</button>
     </div>`).join('')}
     <button class="submit ghost" onclick="back()">看看其他體驗</button>`;

@@ -68,6 +68,17 @@ function dateStr(v: unknown, field = "日期") {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || isNaN(Date.parse(s))) throw new HttpError(400, `${field}格式不正確`);
   return s;
 }
+// 報名表單連結：只接受 Google 表單（docs.google.com/forms、forms.gle）
+function formUrl(v: unknown) {
+  const s = str(v, 500);
+  if (!s) return null;
+  let u: URL;
+  try { u = new URL(s); } catch { throw new HttpError(400, "報名表單連結格式不正確"); }
+  const ok = u.protocol === "https:" &&
+    ((u.hostname === "docs.google.com" && u.pathname.startsWith("/forms/")) || u.hostname === "forms.gle");
+  if (!ok) throw new HttpError(400, "報名表單連結請貼 Google 表單的網址（docs.google.com/forms 或 forms.gle）");
+  return u.toString();
+}
 const uuid = (v: unknown) => {
   const s = str(v, 40);
   if (!/^[0-9a-f-]{36}$/i.test(s)) throw new HttpError(400, "資料不正確，請重新整理");
@@ -144,7 +155,7 @@ const tripDate = (t: Trip) => {
 async function list() {
   const today = todayTW();
   const thisMonth = monthStart(today);
-  const mountains = must(await db.from("wish_mountains").select("id,name,aliases,region,elevation,sort,intro,tags")
+  const mountains = must(await db.from("wish_mountains").select("id,name,aliases,region,elevation,sort,intro,tags,form_url")
     .eq("active", true).order("sort").order("created_at"));
   const ids = mountains.map((m: any) => m.id);
   const open = (await loadTrips()).filter((t) => tripOpen(t, today)).sort((a, b) => a.date.localeCompare(b.date));
@@ -309,6 +320,7 @@ async function admin(action: string, b: Record<string, any>) {
         elevation: b.elevation === "" || b.elevation == null ? null : Math.round(Number(b.elevation)) || null,
         sort: Math.round(Number(b.sort)) || 0, active: b.active !== false,
         intro: strOrNull(b.intro, 1000),
+        form_url: formUrl(b.form_url),
         tags: (Array.isArray(b.tags) ? b.tags : []).map((x: unknown) => str(x, 20)).filter(Boolean).slice(0, 20),
       };
       if (b.id) must(await db.from("wish_mountains").update(f).eq("id", uuid(b.id)));
