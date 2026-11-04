@@ -2674,7 +2674,7 @@ function wishMountainsHTML(){
       const ts=wishTripsOf(m),openN=ts.filter(wishTripOpen).length,isOpen=wishOpenIds.has(m.id);
       return`<div class="wp-mt ${isOpen?'open':''}" id="wmt-${m.id}">
         <div class="wp-mt-top" onclick="wishToggle('${m.id}')"><div><b class="${m.active?'':'wp-off'}">${esc(m.name)}</b>${(m.aliases||[]).length?`<span class="wp-note">（${esc(m.aliases.join('、'))}）</span>`:''}${m.active?'':' <span class="wp-pill no">不開放</span>'}</div>
-          <div class="wp-note">${esc(m.region||'未設地區')}・${(m.tags||[]).length?esc(m.tags.join('、'))+'・':''}前台可報名 ${openN} 梯・${wc[m.id]||0} 筆許願</div></div>
+          <div class="wp-note">${m.form_url?'<span class="wp-pill ok">有報名表單</span> ':''}${esc(m.region||'未設地區')}・${(m.tags||[]).length?esc(m.tags.join('、'))+'・':''}前台可報名 ${openN} 梯・${wc[m.id]||0} 筆許願</div></div>
         <div class="wp-mt-body">
           <div class="mb-form">
             <div class="f-row span2"><label>山的名稱</label><input id="wm-name-${m.id}" list="wish-trip-names" value="${escAttr(m.name)}"></div>
@@ -2683,6 +2683,7 @@ function wishMountainsHTML(){
             <div class="f-row"><label>海拔（m）</label><input id="wm-ele-${m.id}" type="number" value="${m.elevation??''}"></div>
             <div class="f-row"><label>排序</label><input id="wm-sort-${m.id}" type="number" value="${m.sort}"></div>
             <div class="f-row"><label>前台</label><select id="wm-active-${m.id}"><option value="1" ${m.active?'selected':''}>開放許願</option><option value="0" ${m.active?'':'selected'}>不開放</option></select></div>
+            <div class="f-row span4"><label>Google 報名表單連結（前台「前往報名」會直接打開；沒填的話用內建報名表單）</label><input id="wm-form-${m.id}" type="url" placeholder="https://docs.google.com/forms/…" value="${escAttr(m.form_url||'')}"></div>
             <div class="f-row span4"><label>前台介紹（「我想探索看看」會顯示）</label><textarea id="wm-intro-${m.id}" rows="3" maxlength="1000">${esc(m.intro||'')}</textarea></div>
             <div class="f-row span4"><label>體驗分類（「我想探索看看」選到這些體驗時推薦這座山）</label><div class="filters" id="wm-tags-${m.id}">${WISH_EXPS.map(t=>`<label class="chip wp-tag ${(m.tags||[]).includes(t)?'on':''}"><input type="checkbox" value="${t}" ${(m.tags||[]).includes(t)?'checked':''} onchange="this.parentNode.classList.toggle('on',this.checked)">${t}</label>`).join('')}</div></div>
             <div class="mb-form-acts"><button class="btn btn-g" style="color:var(--red)" onclick="wishDelMountain('${m.id}')">刪除</button><button class="btn btn-p" onclick="wishSaveMountain('${m.id}')">儲存</button></div>
@@ -2703,7 +2704,7 @@ function wishAddMountain(){
 }
 function wishSaveMountain(id){
   wishAct('admin:saveMountain',{id,name:wv('wm-name-'+id),aliases:wv('wm-alias-'+id),region:wv('wm-region-'+id),elevation:wv('wm-ele-'+id),sort:wv('wm-sort-'+id),active:wv('wm-active-'+id)==='1',
-    intro:wv('wm-intro-'+id),tags:[...document.querySelectorAll('#wm-tags-'+id+' input:checked')].map(x=>x.value)},'已儲存');
+    intro:wv('wm-intro-'+id),form_url:wv('wm-form-'+id),tags:[...document.querySelectorAll('#wm-tags-'+id+' input:checked')].map(x=>x.value)},'已儲存');
 }
 async function wishDelMountain(id){
   const m=wishData.mountains.find(x=>x.id===id);
