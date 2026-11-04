@@ -79,9 +79,11 @@ button{-webkit-tap-highlight-color:transparent}
 .choice.dark small{color:#BDB8AE}
 
 .exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.exp{padding:18px 10px;border-radius:14px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:15px}
-.exp .em{font-size:30px;line-height:1}
-.exp:active{border-color:var(--ink);background:var(--paper-2)}
+/* 體驗按鈕：正方形圓角，有圖片的直接用圖片（圖上已有文字） */
+.exp{aspect-ratio:1/1;padding:0;border:none;border-radius:18px;overflow:hidden;background:#3a3631;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#fff;font-family:var(--serif);font-weight:900;font-size:22px;letter-spacing:.08em;box-shadow:0 2px 8px rgba(31,29,26,.18);transition:transform .12s}
+.exp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.exp .em{font-size:34px;line-height:1;font-family:var(--sans)}
+.exp:active{transform:scale(.96)}
 
 /* 表單 */
 .f{margin-bottom:20px}
@@ -184,13 +186,13 @@ const REGION_ORDER=['北部','中部','南部','東部'];
 // 「我想探索看看」的選項；key 對應後台「體驗分類」
 const EXPS=[
   {key:'親子同樂',title:'親子首推',em:'👨‍👩‍👧'},
-  {key:'迷霧森林',title:'迷霧森林',em:'🌫️'},
-  {key:'百岳森林',title:'百岳森林',em:'🌲'},
+  {key:'迷霧森林',title:'迷霧森林',em:'🌫️',img:'images/explore/mist-forest.jpg'},
+  {key:'百岳森林',title:'百岳森林',em:'🌲',img:'images/explore/baiyue-forest.jpg'},
   {key:'大片草原',title:'大片草原',em:'🌾'},
-  {key:'高山湖泊',title:'高山湖泊',em:'🏞️'},
-  {key:'野地紮營',title:'野營首推',em:'⛺'},
+  {key:'高山湖泊',title:'高山湖泊',em:'🏞️',img:'images/explore/alpine-lake.jpg'},
+  {key:'野地紮營',title:'野營首推',em:'⛺',img:'images/explore/camping.jpg'},
   {key:'野溪溫泉',title:'野溪溫泉',em:'♨️'},
-  {key:'流星雨',title:'流星雨',em:'🌠'},
+  {key:'流星雨',title:'流星雨',em:'🌠',img:'images/explore/meteor.jpg'},
   {key:'百岳經典',title:'百岳首推',em:'⛰️'},
 ];
 
@@ -403,7 +405,9 @@ function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',cust
 // 探索
 function exploreHTML(){
   return`<div class="q">請問哪一個體驗最吸引你？</div><div class="q-sub">選一個，我們推薦適合的山給你</div>
-    <div class="exp-grid">${EXPS.map(x=>`<button class="exp" onclick="pickExp('${x.key}')"><span class="em">${x.em}</span>${esc(x.key)}</button>`).join('')}</div>`;
+    <div class="exp-grid">${EXPS.map(x=>`<button class="exp" onclick="pickExp('${x.key}')" aria-label="${escAttr(x.key)}">${x.img
+      ?`<img src="${x.img}" alt="${escAttr(x.key)}" loading="lazy" decoding="async">`
+      :`<span class="em">${x.em}</span>${esc(x.key)}`}</button>`).join('')}</div>`;
 }
 function pickExp(k){F.exp=k;go('result')}
 function resultHTML(){
