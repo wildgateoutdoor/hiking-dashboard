@@ -14,9 +14,9 @@
 <link rel="preload" as="image" href="images/photos/home.webp">
 <style>
 /* 只做手機版：電腦上也維持手機寬度置中
-   色票：深綠 #2e3c26、米白 #f5f1e8；輔助：黃 #dfac10、綠 #3d542e、淺綠 #5c754b */
+   色票：深綠 #2e3c26、米白 #f5f1e8；輔助：黃 #dfac10、綠 #3d542e、淺綠 #5c754b、藍 #2a7f8e、淺藍 #5aa7af */
 :root{
-  --brand:#2e3c26;--green:#3d542e;--leaf:#5c754b;--gold:#dfac10;--cream:#f5f1e8;
+  --brand:#2e3c26;--green:#3d542e;--leaf:#5c754b;--gold:#dfac10;--cream:#f5f1e8;--blue:#2a7f8e;--sky:#5aa7af;
   --paper:#f5f1e8;--card:#ffffff;--soft:#ece7da;--mist:#e7ecdf;
   --ink:#1f2a19;--ink-2:#4b5843;--muted:#8a9180;--border:#e2dccd;--red:#b5443a;
   --r-xl:28px;--r-lg:22px;--r-md:16px;
@@ -52,16 +52,14 @@ button{-webkit-tap-highlight-color:transparent}
 .swipe svg:nth-child(1){animation-delay:.4s}.swipe svg:nth-child(2){animation-delay:.2s}.swipe svg:nth-child(3){animation-delay:0s}
 .swipe span{font-size:11px;letter-spacing:.3em;opacity:.75;margin-top:4px}
 @keyframes chev{0%,100%{opacity:.2;transform:translateY(4px)}40%{opacity:1;transform:translateY(-4px)}}
-/* 水波紋：同心圓擴散＋畫面扭曲（SVG 濾鏡），結束後整個開場往上滑走 */
-.ripple-ring{position:absolute;z-index:4;width:900px;height:900px;margin:-450px 0 0 -450px;border-radius:50%;border:4px solid rgba(255,255,255,.85);pointer-events:none;opacity:0;animation:ring 1.7s cubic-bezier(.25,.6,.35,1) forwards}
-@keyframes ring{0%{transform:scale(.02);opacity:0}12%{opacity:1}100%{transform:scale(1);opacity:0}}
-.water-sheen{position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(circle at var(--cx) var(--cy),rgba(255,255,255,.22),rgba(120,170,200,.12) 35%,transparent 70%);opacity:0;animation:sheen 1.6s ease forwards}
-@keyframes sheen{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
-.intro.rippling .intro-bg{filter:url(#water);animation:sway 1.5s ease-in-out}
-.intro.rippling .intro-text,.intro.rippling .swipe,.intro.rippling .intro-logo{transition:opacity .8s ease;opacity:0}
-@keyframes sway{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1.03)}}
+/* 水波紋：用 WebGL 讓照片像蓋了一層透明的水，從手指的位置泛起漣漪（真實折射＋水面反光），結束後開場往上滑走 */
+.water{position:absolute;inset:0;width:100%;height:100%;z-index:1;opacity:0;transition:opacity .12s linear;pointer-events:none}
+.water.on{opacity:1}
+.intro-in::after{z-index:2}
+.intro-logo,.intro-text{z-index:3}
+.intro.rippling .intro-text,.intro.rippling .swipe,.intro.rippling .intro-logo{transition:opacity 1s ease .25s;opacity:0}
 .intro.leave{transition:transform .7s cubic-bezier(.6,0,.3,1),opacity .7s ease;transform:translateY(-100%);opacity:.6}
-@media (prefers-reduced-motion:reduce){.swipe svg{animation:none;opacity:.8}.ripple-ring{display:none}.intro.rippling .intro-bg{filter:none;animation:none}}
+@media (prefers-reduced-motion:reduce){.swipe svg{animation:none;opacity:.8}}
 
 /* ── 首頁：深綠主視覺＋體驗照片 ── */
 .hero{background:var(--brand);color:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl);padding:calc(16px + env(safe-area-inset-top)) 0 16px;position:relative;overflow:hidden}
@@ -282,7 +280,6 @@ button{-webkit-tap-highlight-color:transparent}
     <button class="swipe" id="swipe" aria-label="往上滑，進入許願池"><svg viewBox="0 0 46 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14L23 3l20 11"/></svg><svg viewBox="0 0 46 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14L23 3l20 11"/></svg><svg viewBox="0 0 46 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14L23 3l20 11"/></svg><span>往上滑</span></button>
   </div>
 </div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="water" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="water-noise" type="fractalNoise" baseFrequency="0.008 0.024" numOctaves="1" seed="3" result="n"/><feDisplacementMap id="water-map" in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 <div class="phone">
   <div id="main"><div class="center"><div class="spin"></div></div></div>
 </div>
@@ -297,8 +294,8 @@ button{-webkit-tap-highlight-color:transparent}
 const SB_URL='https://dygxochowbhmdftstgoz.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Z3hvY2hvd2JobWRmdHN0Z296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMzc4MjcsImV4cCI6MjEwMzkxMzgyN30.EVgYdDb4lxsj3Rb40uCZHt2x_6tyexGuVTVywjj2fHQ';
 const API=SB_URL+'/functions/v1/wish-api';
-// 山形圖配色：品牌綠色系＋黃色
-const PALETTE=['#2e3c26','#dfac10','#5c754b','#3d542e','#a9b98f','#c99a12','#7d9168','#e8c75a','#4a6139','#c4cfaf','#93a67c','#b48a0e'];
+// 山形圖配色：品牌綠色系＋黃色＋藍色（#2a7f8e、#5aa7af）
+const PALETTE=['#2e3c26','#dfac10','#2a7f8e','#5c754b','#5aa7af','#3d542e','#c99a12','#a9b98f','#2a7f8e','#7d9168','#5aa7af','#e8c75a'];
 // 首頁照片牆（入野門的出團照片）
 const GALLERY=[['forest-hikers','森林裡的笑聲'],['tunnel-friends','穿過隧道的另一頭'],['ridge-clouds','站上稜線看雲海'],['stairs-group','一步一步往上走'],['rail-tunnel','沿著舊鐵道前進'],['starry-night','山上的滿天星斗'],['forest-trail','和夥伴一起出發']];
 function banner(img,title,sub){return`<div class="banner"><img src="images/photos/${img}.webp" alt="" decoding="async"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>`}
@@ -610,28 +607,86 @@ function leaveIntro(x,y){
   if(introBusy||introDone)return;introBusy=true;
   const intro=document.getElementById('intro'),box=document.getElementById('intro-in');
   const r=box.getBoundingClientRect();
-  const cx=(x==null?r.width/2:x-r.left),cy=(y==null?r.height*.72:y-r.top);
+  const cx=(x==null?r.width/2:x-r.left)/r.width,cy=(y==null?r.height*.68:y-r.top)/r.height;
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // 同心圓一圈一圈擴散
-  [0,230,460,690].forEach(d=>setTimeout(()=>{const o=document.createElement('i');o.className='ripple-ring';o.style.left=cx+'px';o.style.top=cy+'px';box.appendChild(o)},d));
-  const sh=document.createElement('i');sh.className='water-sheen';sh.style.setProperty('--cx',cx+'px');sh.style.setProperty('--cy',cy+'px');box.appendChild(sh);
   intro.classList.add('rippling');
-  // 畫面像水面一樣晃動：扭曲強度先變大再變小
-  const map=document.getElementById('water-map'),noise=document.getElementById('water-noise');
-  const T=reduce?1:1600,t0=performance.now();
-  (function tick(now){
-    const k=Math.min(1,(now-t0)/T),amp=Math.sin(Math.PI*k)*46;
-    map.setAttribute('scale',amp.toFixed(1));
-    noise.setAttribute('baseFrequency',`${(0.008+0.004*k).toFixed(4)} ${(0.024-0.008*k).toFixed(4)}`);
-    if(k<1)requestAnimationFrame(tick);
-    else{
-      intro.classList.add('leave');
-      introDone=true;document.body.style.overflow='';
-      if(D&&D.mountains.length){document.getElementById('cta-bar').hidden=false;drawChart()}
-      setTimeout(()=>intro.remove(),720);
-    }
-  })(t0);
+  const finish=()=>{
+    intro.classList.add('leave');
+    introDone=true;document.body.style.overflow='';
+    if(D&&D.mountains.length){document.getElementById('cta-bar').hidden=false;drawChart()}
+    setTimeout(()=>intro.remove(),720);
+  };
+  if(reduce){setTimeout(finish,300);return}
+  waterRipple(box,cx,cy,2200).then(finish,finish);
 }
+
+// ── WebGL 水面漣漪 ──
+// 把首頁照片畫成貼圖，每個像素依漣漪的斜率偏移取樣位置（折射），斜率大的地方加一點反光，看起來像照片上蓋了一層水。
+const WATER_VS='attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
+const WATER_FS=`precision highp float;
+varying vec2 v;uniform sampler2D tex;uniform vec2 res,img,c;uniform float t;
+vec2 cover(vec2 p){float rs=res.x/res.y,ri=img.x/img.y;vec2 s=rs>ri?vec2(1.,ri/rs):vec2(rs/ri,1.);return(p-.5)*s+.5;}
+void main(){
+  float asp=res.x/res.y;
+  vec2 d=(v-c)*vec2(asp,1.);float r=length(d);vec2 dir=r>0.?d/r:vec2(0.);
+  float slope=0.;float h=0.;
+  for(int i=0;i<4;i++){
+    float ti=t-float(i)*.22;
+    if(ti>0.){
+      float front=ti*.62;            // 漣漪往外擴散的速度
+      float x=r-front;
+      float env=exp(-x*x*38.)*exp(-ti*1.15)*(1.-float(i)*.18)*smoothstep(0.,.12,front);  // 波包在前緣，越久越弱；剛碰到時先輕後強
+      float k=48.;
+      h+=sin(x*k)*env;
+      slope+=cos(x*k)*k*env;
+    }
+  }
+  float calm=smoothstep(0.,.25,t);                    // 一開始水面輕輕被碰到
+  vec2 off=dir*slope*.00058*calm;                     // 折射：沿著半徑方向偏移
+  off+=vec2(sin(v.y*18.+t*3.),cos(v.x*14.+t*2.6))*.0016*exp(-t*.6)*calm; // 整片水面的微微晃動
+  vec2 uv=cover(v-off*vec2(1.,asp));
+  vec3 col=texture2D(tex,clamp(uv,.001,.999)).rgb;
+  float spec=pow(max(0.,slope*.012),2.)*.35+max(0.,h)*.05; // 波峰反光
+  col+=vec3(spec)*vec3(.95,1.,1.05);
+  col=mix(col,col*vec3(.92,.98,1.04),.35*calm*exp(-t*.8));  // 一點點水的冷色調
+  gl_FragColor=vec4(col,1.);
+}`;
+function waterRipple(box,cx,cy,dur){
+  return new Promise((resolve,reject)=>{
+    const cv=document.createElement('canvas');cv.className='water';
+    const dpr=Math.min(2,window.devicePixelRatio||1),W=box.clientWidth,H=box.clientHeight;
+    cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+    const gl=cv.getContext('webgl',{premultipliedAlpha:false,antialias:false})||cv.getContext('experimental-webgl');
+    if(!gl)return reject(new Error('no webgl'));
+    const sh=(type,src)=>{const o=gl.createShader(type);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
+    let prog;
+    try{prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,WATER_VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,WATER_FS));gl.linkProgram(prog);if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw new Error('link')}catch(e){return reject(e)}
+    const im=new Image();im.src='images/photos/home.webp';
+    (im.decode?im.decode():new Promise((ok,no)=>{im.onload=ok;im.onerror=no})).then(()=>{
+      gl.useProgram(prog);
+      const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+      const loc=gl.getAttribLocation(prog,'a');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+      const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,im);
+      const U=n=>gl.getUniformLocation(prog,n);
+      gl.uniform2f(U('res'),cv.width,cv.height);gl.uniform2f(U('img'),im.naturalWidth,im.naturalHeight);gl.uniform2f(U('c'),cx,cy);gl.uniform1i(U('tex'),0);
+      gl.viewport(0,0,cv.width,cv.height);
+      const uT=U('t');
+      const draw=sec=>{gl.uniform1f(uT,sec);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)};
+      draw(0);
+      box.querySelector('.intro-bg').after(cv);
+      requestAnimationFrame(()=>cv.classList.add('on'));
+      const t0=performance.now();
+      (function loop(now){
+        const ms=now-t0;draw(ms/1000);
+        if(ms<dur)requestAnimationFrame(loop);else resolve();
+      })(t0);
+    }).catch(reject);
+  });
+}
+
 // 只有寬度改變（例如旋轉螢幕）才重畫；手機網址列收合也會觸發 resize，不重畫以免打斷動畫
 let rt,lastW=window.innerWidth;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(window.innerWidth===lastW)return;lastW=window.innerWidth;if(D&&D.mountains.length)drawChart()},150)});
 load();
