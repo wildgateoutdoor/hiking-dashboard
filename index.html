@@ -2732,8 +2732,13 @@ function wishListHTML(){
       <button class="btn btn-o" ${sentAlert?'style="margin-left:0"':''} onclick="wishExport()">匯出 CSV</button>
     </div>
     <div class="fin-tbl-wrap"><table class="fin-tbl wp-x wp-tbl"><thead><tr><th>許願時間</th><th>山</th><th>月份</th><th>想出發日期</th><th>姓名</th><th>Email</th><th>手機</th><th>想說的話</th><th></th></tr></thead><tbody>
-    ${list.map(w=>`<tr><td>${wishTime(w.created_at)}</td><td>${esc(wishTargetName(wishKeyOf(w)))}</td><td>${wishYM(w.wish_month)}</td><td>${w.preferred_date?fmtDate(w.preferred_date):'<span class="wp-zero">—</span>'}</td><td>${esc(w.name)}</td><td>${esc(w.email)}</td><td>${esc(w.phone||'')}</td><td class="wp-wrap">${esc(w.note||'')}</td><td><button class="mb-del" title="刪除" onclick="wishDel('${w.id}')">&times;</button></td></tr>`).join('')||'<tr><td colspan="9" class="mb-none">沒有許願</td></tr>'}
+    ${list.map(w=>`<tr><td>${wishTime(w.created_at)}</td><td>${esc(wishTargetName(wishKeyOf(w)))}</td><td>${wishYM(w.wish_month)}</td><td class="wp-wrap">${wishRangesText(w)||'<span class="wp-zero">—</span>'}</td><td>${esc(w.name)}</td><td>${esc(w.email)}</td><td>${esc(w.phone||'')}</td><td class="wp-wrap">${esc(w.note||'')}</td><td><button class="mb-del" title="刪除" onclick="wishDel('${w.id}')">&times;</button></td></tr>`).join('')||'<tr><td colspan="9" class="mb-none">沒有許願</td></tr>'}
     </tbody></table></div>`;
+}
+// 許願者填的想出發日期：多段區間（第一天～最後一天），或舊資料的單一日期
+function wishRangesText(w){
+  const rs=(w.preferred_ranges&&w.preferred_ranges.length)?w.preferred_ranges:(w.preferred_date?[{start:w.preferred_date,end:w.preferred_date}]:[]);
+  return rs.map(r=>r.end&&r.end!==r.start?`${fmtDate(r.start)} ~ ${fmtDate(r.end)}`:fmtDate(r.start)).join('、');
 }
 function wishDel(id){if(confirm('確定刪除這筆許願？'))wishAct('admin:deleteWish',{id},'已刪除')}
 function wishResetAlert(){if(confirm('重新開放後，下一位許願時若仍達門檻會再寄一次通知。確定？'))wishAct('admin:resetAlert',wishFMt.startsWith('c:')?{custom_name:wishTargetName(wishFMt).replace(/（自填）$/,''),wish_month:wishFMonth+'-01'}:{mountain_id:wishFMt,wish_month:wishFMonth+'-01'},'已重新開放')}
@@ -2751,7 +2756,7 @@ function wishCsv(name,head,rows){
   const q=v=>{let s=String(v??'');if(/^[=+\-@]/.test(s))s="'"+s;return/[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+[head,...rows].map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download=name;a.click();
 }
-function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份','想出發日期','姓名','Email','手機','想說的話'],wishFiltered().map(w=>[new Date(w.created_at).toLocaleString('zh-TW'),wishTargetName(wishKeyOf(w)),wishYM(w.wish_month),w.preferred_date||'',w.name,w.email,w.phone,w.note]))}
+function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份','想出發日期','姓名','Email','手機','想說的話'],wishFiltered().map(w=>[new Date(w.created_at).toLocaleString('zh-TW'),wishTargetName(wishKeyOf(w)),wishYM(w.wish_month),wishRangesText(w),w.name,w.email,w.phone,w.note]))}
 function wishExportSignups(){wishCsv('報名名單.csv',['報名時間','梯次','出發','回程','姓名','人數','手機','Email','備註'],wishData.signups.map(s=>[new Date(s.created_at).toLocaleString('zh-TW'),s.mountain_name,s.start_date,s.end_date,s.name,s.party_size,s.phone,s.email,s.note]))}
 
 const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members','wish'];

@@ -96,6 +96,12 @@ function addMonths(ym01: string, n: number) {
 }
 const fmtMonth = (s: string) => `${s.slice(0, 4)} 年 ${Number(s.slice(5, 7))} 月`;
 const fmtDate = (s: string | null) => s ? s.replaceAll("-", "/") : "";
+// 許願者填的想出發日期：多段區間，或舊資料的單一日期
+function fmtRanges(p: { preferred_ranges?: { start: string; end: string }[] | null; preferred_date?: string | null }) {
+  const rs = p.preferred_ranges?.length ? p.preferred_ranges : p.preferred_date ? [{ start: p.preferred_date, end: p.preferred_date }] : [];
+  if (!rs.length) return "";
+  return "想出發：" + rs.map((r) => r.end && r.end !== r.start ? `${fmtDate(r.start)}~${fmtDate(r.end).slice(5)}` : fmtDate(r.start)).join("、");
+}
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
 // ── 寄信（Resend）──
@@ -192,36 +198,58 @@ async function activeMountain(id: string) {
   return data;
 }
 
+// 想出發的日期區間（選填，最多 5 段）：[{ start, end }]
+function ranges(v: unknown) {
+  const arr = Array.isArray(v) ? v.slice(0, 5) : [];
+  const today = todayTW();
+  return arr.map((r: any) => {
+    const start = dateStr(r?.start, "想出發的第一天");
+    const end = r?.end ? dateStr(r.end, "想出發的最後一天") : start;
+    if (start < today) throw new HttpError(400, "想出發的日期不能早於今天");
+    if (end < start) throw new HttpError(400, "最後一天不能早於第一天");
+    return { start, end };
+  });
+}
+
+// 一次可以許願多個月份：每個月份各存一筆，各自計算人數與門檻通知
 async function wish(b: Record<string, any>) {
-  if (b.website) return { ok: true, count: 0 }; // 機器人陷阱欄位
+  if (b.website) return { ok: true, results: [] }; // 機器人陷阱欄位
   const custom = str(b.custom_name, 30);
   const m = b.mountain_id ? await activeMountain(uuid(b.mountain_id)) : null;
   if (!m && !custom) throw new HttpError(400, "請選擇想去的山，或直接填寫山名");
   const target = m ? m.name : custom;
-  const month = str(b.month, 7);
-  if (!/^\d{4}-\d{2}$/.test(month)) throw new HttpError(400, "請選擇月份");
-  const wishMonth = month + "-01";
+  const rawMonths = Array.isArray(b.months) ? b.months : (b.month ? [b.month] : []);
+  const months = [...new Set(rawMonths.map((x: unknown) => str(x, 7)))].slice(0, 12) as string[];
+  if (!months.length) throw new HttpError(400, "請選擇想去的月份");
   const thisMonth = monthStart(todayTW());
-  if (wishMonth < thisMonth || wishMonth > addMonths(thisMonth, 24)) throw new HttpError(400, "只能許願未來兩年內的月份");
-  const row = {
-    mountain_id: m?.id ?? null, custom_name: m ? null : custom, wish_month: wishMonth,
+  for (const mo of months) {
+    if (!/^\d{4}-\d{2}$/.test(mo)) throw new HttpError(400, "月份格式不正確");
+    const wm = mo + "-01";
+    if (wm < thisMonth || wm > addMonths(thisMonth, 24)) throw new HttpError(400, "只能許願未來兩年內的月份");
+  }
+  const base = {
+    mountain_id: m?.id ?? null, custom_name: m ? null : custom,
     name: reqStr(b.name, "姓名", 50), email: email(b.email), phone: phone(b.phone, false), note: strOrNull(b.note),
-    preferred_date: b.preferred_date ? dateStr(b.preferred_date, "想出發的日期") : null,
   };
-  if (row.preferred_date && row.preferred_date < todayTW()) throw new HttpError(400, "想出發的日期不能早於今天");
-  const { error } = await db.from("wishes").insert(row);
-  if (error?.code === "23505") throw new HttpError(409, `你已經許過 ${fmtMonth(wishMonth)} 的${target}了，我們收到囉！`);
-  if (error) throw new HttpError(500, error.message);
-
-  const people = await wishPeople(m?.id ?? null, custom, wishMonth);
-  const n = people.length;
-  if (n >= THRESHOLD) await maybeAlert(m?.id ?? null, m ? null : custom, target, wishMonth, people);
-  return { ok: true, count: n, threshold: THRESHOLD };
+  const rs = ranges(b.ranges);
+  const results: { month: string; count: number; dup: boolean }[] = [];
+  for (const mo of months.sort()) {
+    const wishMonth = mo + "-01";
+    const { error } = await db.from("wishes").insert({
+      ...base, wish_month: wishMonth, preferred_ranges: rs.length ? rs : null, preferred_date: rs[0]?.start ?? null,
+    });
+    if (error && error.code !== "23505") throw new HttpError(500, error.message);
+    const people = await wishPeople(m?.id ?? null, custom, wishMonth);
+    results.push({ month: mo, count: people.length, dup: !!error });
+    if (!error && people.length >= THRESHOLD) await maybeAlert(m?.id ?? null, m ? null : custom, target, wishMonth, people);
+  }
+  if (results.every((r) => r.dup)) throw new HttpError(409, `你已經許過這${months.length > 1 ? "些" : "個"}月份的${target}了，我們收到囉！`);
+  return { ok: true, results, threshold: THRESHOLD };
 }
 
 // 同一座山（或同名的自填山）同一個月的許願者
 async function wishPeople(mountainId: string | null, custom: string, wishMonth: string) {
-  let q = db.from("wishes").select("name,email,phone,note,preferred_date,custom_name,created_at").eq("wish_month", wishMonth).order("created_at");
+  let q = db.from("wishes").select("name,email,phone,note,preferred_date,preferred_ranges,custom_name,created_at").eq("wish_month", wishMonth).order("created_at");
   q = mountainId ? q.eq("mountain_id", mountainId) : q.is("mountain_id", null);
   const rows: any[] = must(await q);
   return mountainId ? rows : rows.filter((r) => norm(r.custom_name || "") === norm(custom));
@@ -238,7 +266,7 @@ async function maybeAlert(mountainId: string | null, custom: string | null, name
     `【許願池】${name}｜${fmtMonth(wishMonth)} 已有 ${n} 人許願`,
     [
       ["山", name + (custom ? "（消費者自填）" : "")], ["月份", fmtMonth(wishMonth)], ["許願人數", `${n} 人（門檻 ${THRESHOLD} 人）`],
-      ...people.map((p: any, i: number) => [`#${i + 1}`, [p.name, p.email, p.phone, p.preferred_date ? `想 ${fmtDate(p.preferred_date)} 出發` : "", p.note].filter(Boolean).join("｜")] as [string, unknown]),
+      ...people.map((p: any, i: number) => [`#${i + 1}`, [p.name, p.email, p.phone, fmtRanges(p), p.note].filter(Boolean).join("｜")] as [string, unknown]),
     ],
     `${name} 在 ${fmtMonth(wishMonth)} 的許願人數已達門檻，可以考慮開團了！`,
   );

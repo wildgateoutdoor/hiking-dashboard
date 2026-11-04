@@ -74,13 +74,11 @@ button{-webkit-tap-highlight-color:transparent}
 .q{font-family:var(--serif);font-size:24px;font-weight:900;line-height:1.35;margin-bottom:6px}
 .q-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
 
-.choice{display:flex;align-items:center;gap:14px;width:100%;padding:20px 18px;margin-bottom:12px;border-radius:16px;border:1.5px solid var(--border);background:#fff;text-align:left;cursor:pointer}
-.choice:active{border-color:var(--ink)}
+.choice{display:flex;align-items:center;gap:14px;width:100%;padding:20px 18px;margin-bottom:12px;border-radius:16px;border:none;background:var(--brand);color:var(--cream);text-align:left;cursor:pointer}
+.choice:active{transform:scale(.98)}
 .choice .em{font-size:30px;line-height:1}
 .choice b{display:block;font-size:18px;font-weight:800}
-.choice small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
-.choice.dark{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.choice.dark small{color:#BDB8AE}
+.choice small{display:block;font-size:13px;color:#C9D1C1;margin-top:2px}
 
 .exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 /* 體驗按鈕：正方形圓角，有圖片的直接用圖片（圖上已有文字） */
@@ -92,7 +90,7 @@ button{-webkit-tap-highlight-color:transparent}
 /* 表單 */
 .f{margin-bottom:20px}
 .f>label,.f .lb{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:800;margin-bottom:8px}
-.f .no{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--paper);font:500 12px var(--mono);flex-shrink:0}
+.f .no{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:var(--cream);font:500 12px var(--mono);flex-shrink:0}
 .f small{font-weight:400;color:var(--muted);font-size:12px}
 .f input,.f select,.f textarea{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:#fff;font-size:16px;-webkit-appearance:none;appearance:none}
 .f select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A4741' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:36px}
@@ -103,17 +101,24 @@ button{-webkit-tap-highlight-color:transparent}
 .date-pick span{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:15px}
 .date-pick.has span,.date-pick input:focus+span{display:none}
 .date-pick input{min-height:48px}
+.range-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.range-row .date-pick{flex:1;min-width:0}
+.range-row .date-pick input{padding:10px 8px;font-size:15px}
+.range-row .date-pick span{left:10px;font-size:14px}
+.tilde{color:var(--muted);flex-shrink:0}
+.rm-range{flex-shrink:0;width:30px;height:30px;border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer}
+.add-range{display:flex;align-items:center;justify-content:center;width:30px;height:30px;margin:2px auto 0;border-radius:50%;border:1.5px solid var(--brand);background:none;color:var(--brand);font-size:18px;font-weight:700;line-height:1;cursor:pointer}
 .date-pick:not(.has) input:not(:focus){color:transparent}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{padding:9px 16px;border-radius:22px;border:1.5px solid var(--border);background:#fff;font-weight:700;font-size:15px;cursor:pointer}
-.chip.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:var(--cream)}
 .months{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .m-btn{padding:10px 4px;border-radius:12px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:62px;justify-content:center}
 .m-btn .y{font-family:var(--mono);font-size:10px;color:var(--muted)}
 .m-btn .m{font-weight:800;font-size:16px}
 .m-btn .n{font-size:10.5px;color:var(--muted)}
 .m-btn .n.open{color:var(--ok);font-weight:700}
-.m-btn.on{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.m-btn.on{border-color:var(--brand);background:var(--brand);color:var(--cream)}
 .m-btn.on .y,.m-btn.on .n{color:#CFCBC2}
 .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:-6px 0 14px}
 .or::before,.or::after{content:'';flex:1;height:1px;background:var(--border)}
@@ -127,18 +132,17 @@ button{-webkit-tap-highlight-color:transparent}
 .form-btn small,.f .form-btn small{font-size:11.5px;font-weight:400;color:#E3EBDD;letter-spacing:0}
 .trip-hint{font-size:13.5px;color:var(--ok);font-weight:700;line-height:1.6;margin:12px 0 8px}
 .trips p{font-size:13px;color:var(--ok);font-weight:700;margin-bottom:8px}
-.date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1.5px solid var(--ok);background:#fff;cursor:pointer;text-align:left}
+.date-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1.5px solid var(--brand);background:#fff;cursor:pointer;text-align:left}
 .date-btn:last-child{margin-bottom:0}
 .date-btn b{font-weight:700;font-size:14px}
 .date-btn small{color:var(--muted);font-size:12px;display:block}
-.date-btn .go{flex-shrink:0;font-size:12px;font-weight:700;color:#fff;background:var(--ok);padding:5px 12px;border-radius:20px}
+.date-btn .go{flex-shrink:0;font-size:12px;font-weight:700;color:var(--cream);background:var(--brand);padding:5px 12px;border-radius:20px}
 .divider{border:none;border-top:1px dashed var(--border);margin:6px 0 20px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .err{color:var(--red);font-size:14px;min-height:20px;margin-bottom:8px}
-.submit{width:100%;padding:15px;border-radius:14px;border:none;background:var(--ink);color:var(--paper);font-weight:800;font-size:17px;cursor:pointer;letter-spacing:.08em}
+.submit{width:100%;padding:15px;border-radius:14px;border:none;background:var(--brand);color:var(--cream);font-weight:800;font-size:17px;cursor:pointer;letter-spacing:.08em}
 .submit:disabled{opacity:.5}
-.submit.green{background:var(--ok)}
-.submit.ghost{background:none;color:var(--ink);border:1.5px solid var(--ink);margin-top:10px}
+.submit.ghost{background:none;color:var(--brand);border:1.5px solid var(--brand);margin-top:10px}
 
 /* 探索結果 */
 .res-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
@@ -148,18 +152,21 @@ button{-webkit-tap-highlight-color:transparent}
 .mt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .mt-name{font-size:19px;font-weight:800}
 .mt-meta{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.mt-count{text-align:right;flex-shrink:0;font-size:11px;color:var(--muted)}
-.mt-count b{display:block;font-family:var(--serif);font-size:22px;line-height:1.1;color:var(--c)}
 .mt-intro{font-size:14px;color:var(--ink-2);line-height:1.75;margin:10px 0 12px}
 .mt-card .trips{margin:0 0 12px}
-.mt-card .wish-this{width:100%;padding:12px;border-radius:12px;border:none;background:var(--ink);color:var(--paper);font-weight:800;cursor:pointer}
+.mt-card .wish-this{width:100%;padding:12px;border-radius:12px;border:none;background:var(--brand);color:var(--cream);font-weight:800;cursor:pointer}
 
 /* 完成 */
 .done{text-align:center;padding:30px 0 10px}
 .done .big{font-size:56px}
 .done h3{font-family:var(--serif);font-size:24px;margin:10px 0 8px}
 .done p{color:var(--ink-2);font-size:15px}
-.meter{height:10px;border-radius:5px;background:var(--paper-2);overflow:hidden;margin:18px auto 8px;max-width:260px}
+.meter{height:10px;border-radius:5px;background:var(--paper-2);overflow:hidden;margin:6px 0 4px}
+.res-list{text-align:left;margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.res-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px}
+.res-top{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.res-top span{color:var(--ink-2)}
+.res-row small{font-size:12px;color:var(--muted)}
 .meter i{display:block;height:100%;background:var(--gold)}
 .picked{background:var(--paper-2);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:18px;line-height:1.6}
 .picked b{font-weight:800}
@@ -189,15 +196,15 @@ const DAYS=['日','一','二','三','四','五','六'];
 const REGION_ORDER=['北部','中部','南部','東部'];
 // 「我想探索看看」的選項；key 對應後台「體驗分類」
 const EXPS=[
-  {key:'親子同樂',title:'親子首推',em:'👨‍👩‍👧',img:'images/explore/family.jpg'},
-  {key:'迷霧森林',title:'迷霧森林',em:'🌫️',img:'images/explore/mist-forest.jpg'},
-  {key:'百岳森林',title:'百岳森林',em:'🌲',img:'images/explore/baiyue-forest.jpg'},
-  {key:'大片草原',title:'大片草原',em:'🌾',img:'images/explore/grassland.jpg'},
-  {key:'高山湖泊',title:'高山湖泊',em:'🏞️',img:'images/explore/alpine-lake.jpg'},
-  {key:'野地紮營',title:'野營首推',em:'⛺',img:'images/explore/camping.jpg'},
-  {key:'野溪溫泉',title:'野溪溫泉',em:'♨️',img:'images/explore/hot-spring.jpg'},
-  {key:'流星雨',title:'流星雨',em:'🌠',img:'images/explore/meteor.jpg'},
-  {key:'百岳經典',title:'百岳首推',em:'⛰️',img:'images/explore/baiyue-classic.jpg'},
+  {key:'親子同樂',title:'親子首推',em:'👨‍👩‍👧',img:'images/explore/family.webp'},
+  {key:'迷霧森林',title:'迷霧森林',em:'🌫️',img:'images/explore/mist-forest.webp'},
+  {key:'百岳森林',title:'百岳森林',em:'🌲',img:'images/explore/baiyue-forest.webp'},
+  {key:'大片草原',title:'大片草原',em:'🌾',img:'images/explore/grassland.webp'},
+  {key:'高山湖泊',title:'高山湖泊',em:'🏞️',img:'images/explore/alpine-lake.webp'},
+  {key:'野地紮營',title:'野營首推',em:'⛺',img:'images/explore/camping.webp'},
+  {key:'野溪溫泉',title:'野溪溫泉',em:'♨️',img:'images/explore/hot-spring.webp'},
+  {key:'流星雨',title:'流星雨',em:'🌠',img:'images/explore/meteor.webp'},
+  {key:'百岳經典',title:'百岳首推',em:'⛰️',img:'images/explore/baiyue-classic.webp'},
 ];
 
 let D=null;
@@ -243,6 +250,8 @@ async function load(){
   catch(e){document.getElementById('main').innerHTML=`<div class="center">讀取失敗：${esc(e.message)}<br><br><button class="submit" style="width:auto;padding:10px 24px" onclick="location.reload()">重新整理</button></div>`;return}
   render();
 }
+// 首頁載入後先在背景下載體驗圖片，點進「我想探索看看」時就不用等
+function preloadExploreImages(){const go=()=>EXPS.forEach(x=>{if(x.img){const i=new Image();i.src=x.img}});('requestIdleCallback' in window)?requestIdleCallback(go,{timeout:2500}):setTimeout(go,1200)}
 function render(){
   const main=document.getElementById('main');
   if(!D.mountains.length){main.innerHTML='<div class="center">許願池準備中，請稍後再來</div>';return}
@@ -251,6 +260,7 @@ function render(){
     <div id="chart-box"></div>
     <div class="chart-foot"><b>入野門許願池</b>　｜　共 ${total} 個願望<br>依許願人數排序・同一座山單月滿 ${D.threshold} 人，我們就評估開團</div>`;
   document.getElementById('cta-bar').hidden=false;
+  preloadExploreImages();
   drawChart();
 }
 
@@ -299,7 +309,7 @@ function drawChart(){
 }
 
 // ── 許願流程 ──
-function startFlow(){F={stack:['choose'],region:'',mid:'',custom:'',month:'',exp:''};showSheet();renderStep()}
+function startFlow(){F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:''};showSheet();renderStep()}
 function showSheet(){document.getElementById('sheet').classList.add('show');document.body.style.overflow='hidden'}
 function closeSheet(){document.getElementById('sheet').classList.remove('show');document.body.style.overflow='';if(F&&F.dirty){F=null;load()}else F=null}
 function go(step){F.stack.push(step);renderStep()}
@@ -317,7 +327,7 @@ function renderStep(){
 
 function chooseHTML(){
   return`<div class="q">你想怎麼許願？</div><div class="q-sub">已經有想去的山，或還在找靈感都可以</div>
-    <button class="choice dark" onclick="go('direct')"><span class="em">✍️</span><span><b>我要直接許願</b><small>選地區、選山、選月份</small></span></button>
+    <button class="choice" onclick="go('direct')"><span class="em">✍️</span><span><b>我要直接許願</b><small>選地區、選山、選月份</small></span></button>
     <button class="choice" onclick="go('explore')"><span class="em">🧭</span><span><b>我想探索看看</b><small>從喜歡的體驗找到適合的山</small></span></button>`;
 }
 
@@ -345,11 +355,11 @@ function directHTML(){
     <div class="or">或</div>
     <div class="f"><label for="w-custom"><span class="no">3</span>找不到想去的山/水景點嗎？請直接填寫</label>
       <input id="w-custom" maxlength="30" placeholder="例：武陵四秀" value="${escAttr(F.custom)}" oninput="typeCustom(this.value)"></div>
-    <div class="f" id="w-months"><div class="lb"><span class="no">4</span>想去的月份</div>
+    <div class="f" id="w-months"><div class="lb"><span class="no">4</span>想去的月份 <small>可複選</small></div>
       <div class="months">${months.map(k=>{const t=datesInMonth(m,k).length,v=cnt(k);
-        return`<button type="button" class="m-btn ${k===F.month?'on':''}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n ${t?'open':''}">${t?'有梯次':v?`${v} 人想去`:''}</span></button>`}).join('')}</div></div>
+        return`<button type="button" class="m-btn ${F.months.includes(k)?'on':''}" onclick="pickMonth('${k}')"><span class="y">${k.slice(0,4)}</span><span class="m">${Number(k.slice(5))}月</span><span class="n ${t?'open':''}">${t?'有梯次':v?`${v} 人想去`:''}</span></button>`}).join('')}</div></div>
     <hr class="divider">
-    ${target&&F.month?`<div class="picked">許願：<b>${esc(target)}</b>・<b>${fmtYM(F.month)}</b><br>目前 ${m?cnt(F.month):'—'} 人想去${m?`，滿 ${D.threshold} 人我們就評估開團`:''}</div>`:''}
+    ${target&&F.months.length?`<div class="picked">許願：<b>${esc(target)}</b><br>${F.months.map(k=>`<b>${fmtYM(k)}</b>${m?`（目前 ${cnt(k)} 人想去）`:''}`).join('<br>')}${m?`<br><small style="color:var(--muted)">同一個月滿 ${D.threshold} 人，我們就評估開團</small>`:''}</div>`:''}
     ${contactFields()}
     <div class="err" id="w-err"></div>
     <button class="submit" id="w-sub">丟進許願池</button>
@@ -360,16 +370,30 @@ function contactFields(){
   return`<div class="f"><label for="c-name">你的名字</label><input id="c-name" maxlength="50" autocomplete="name" value="${escAttr(c.name||'')}" oninput="saveContact()"></div>
     <div class="f"><label for="c-email">Email <small>開團時通知你</small></label><input id="c-email" type="email" inputmode="email" autocomplete="email" value="${escAttr(c.email||'')}" oninput="saveContact()"></div>
     <div class="f"><label for="c-phone">手機 <small>選填</small></label><input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" value="${escAttr(c.phone||'')}" oninput="saveContact()"></div>
-    <div class="f"><label for="c-date">如果你有確切想出發的日期，也歡迎讓我們知道 <small>選填</small></label>
-      <div class="date-pick ${c.date?'has':''}"><input id="c-date" type="date" min="${D.today}" max="${lastWishDay()}" value="${escAttr(c.date||'')}" onchange="saveContact();this.parentNode.classList.toggle('has',!!this.value)"><span>📅 選擇日期</span></div></div>
+    <div class="f"><div class="lb">如果你有確切想出發的日期，也歡迎讓我們知道 <small>選填</small></div>
+      <div id="ranges">${(c.ranges&&c.ranges.length?c.ranges:[{start:'',end:''}]).map((r,i,a)=>rangeRow(r,i,a.length)).join('')}</div>
+      ${(c.ranges||[]).length<5?`<button type="button" class="add-range" onclick="addRange()" aria-label="再加一段日期" title="再加一段日期">＋</button>`:''}</div>
     <div class="f"><label for="c-note">想說的話 <small>選填</small></label><textarea id="c-note" maxlength="500" placeholder="例：想走兩天一夜、希望週末出發" oninput="saveContact()">${esc(c.note||'')}</textarea></div>
     <div class="hp"><input id="c-web" tabindex="-1" autocomplete="off"></div>`;
 }
 const val=id=>{const e=document.getElementById(id);return e?e.value:''};
-function saveContact(){F.contact={name:val('c-name'),email:val('c-email'),phone:val('c-phone'),note:val('c-note'),date:val('c-date')}}
+function rangeRow(r,i,n){
+  const pick=(k,label,min)=>`<div class="date-pick ${r[k]?'has':''}"><input type="date" class="r-${k}" min="${min}" max="${lastWishDay()}" value="${escAttr(r[k]||'')}" onchange="rangeChanged(this)" aria-label="${label}"><span>${label}</span></div>`;
+  return`<div class="range-row">${pick('start','第一天',D.today)}<span class="tilde">～</span>${pick('end','最後一天',r.start||D.today)}${n>1?`<button type="button" class="rm-range" onclick="removeRange(${i})" aria-label="刪除這段日期">&times;</button>`:''}</div>`;
+}
+function readRanges(){return[...document.querySelectorAll('#ranges .range-row')].map(row=>({start:row.querySelector('.r-start').value,end:row.querySelector('.r-end').value}))}
+function rangeChanged(el){
+  el.parentNode.classList.toggle('has',!!el.value);
+  // 選了第一天：最後一天不能更早；還沒選最後一天就先帶同一天
+  if(el.classList.contains('r-start')&&el.value){const end=el.closest('.range-row').querySelector('.r-end');end.min=el.value;if(!end.value||end.value<el.value){end.value=el.value;end.parentNode.classList.add('has')}}
+  saveContact();
+}
+function addRange(){saveContact();const rs=F.contact.ranges.length?F.contact.ranges:[{start:'',end:''}];rs.push({start:'',end:''});F.contact.ranges=rs;rerender(true)}
+function removeRange(i){saveContact();F.contact.ranges.splice(i,1);rerender(true)}
+function saveContact(){F.contact={name:val('c-name'),email:val('c-email'),phone:val('c-phone'),note:val('c-note'),ranges:document.getElementById('ranges')?readRanges():((F.contact||{}).ranges||[])}}
 // 可選的最後一天：12 個可許願月份的最後一天
 function lastWishDay(){const ms=nextMonths(),[y,m]=ms[ms.length-1].split('-').map(Number);const d=new Date(y,m,0);return`${y}-${String(m).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function rerender(){saveContact();const b=document.getElementById('sh-body'),y=b.scrollTop;renderStep();b.scrollTop=y}
+function rerender(skipSave){if(!skipSave)saveContact();const b=document.getElementById('sh-body'),y=b.scrollTop;renderStep();b.scrollTop=y}
 function pickRegion(r){F.region=r;if(F.mid&&(mt(F.mid).region||'其他')!==r)F.mid='';rerender()}
 function pickMountain(id){F.mid=id;if(id)F.custom='';rerender()}
 function typeCustom(v){
@@ -377,7 +401,8 @@ function typeCustom(v){
   // 自己填山名時，清掉清單的選擇
   if(v.trim()&&F.mid){F.mid='';const s=document.getElementById('w-mt');if(s)s.value='';rerender();const i=document.getElementById('w-custom');i.focus();i.setSelectionRange(v.length,v.length)}
 }
-function pickMonth(k){F.month=k;rerender()}
+// 月份可複選：再點一次取消
+function pickMonth(k){const i=F.months.indexOf(k);if(i>=0)F.months.splice(i,1);else F.months.push(k);F.months.sort();rerender()}
 
 async function submitWish(e){
   e.preventDefault();saveContact();
@@ -385,30 +410,34 @@ async function submitWish(e){
   const m=mt(F.mid),custom=F.custom.trim(),c=F.contact;
   err.textContent='';
   if(!m&&!custom){err.textContent='請選擇想去的山，或直接填寫山名';return}
-  if(!F.month){err.textContent='請選擇想去的月份';return}
+  if(!F.months.length){err.textContent='請選擇想去的月份（可複選）';return}
+  const ranges=(c.ranges||[]).filter(r=>r.start||r.end);
+  if(ranges.some(r=>!r.start)){err.textContent='想出發的日期請先選第一天';return}
   if(!c.name.trim()){err.textContent='請填寫你的名字';return}
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email.trim())){err.textContent='請填寫正確的 Email';return}
   btn.disabled=true;btn.textContent='送出中…';
   try{
-    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,month:F.month,name:c.name,email:c.email,phone:c.phone,note:c.note,preferred_date:c.date||'',website:val('c-web')});
+    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,months:F.months,name:c.name,email:c.email,phone:c.phone,note:c.note,ranges:ranges.map(x=>({start:x.start,end:x.end||x.start})),website:val('c-web')});
     F.dirty=true;
-    const target=m?m.name:custom,pct=Math.min(100,r.count/D.threshold*100);
+    const target=m?m.name:custom;
     F.doneHTML=`<div class="done"><div class="big">⛰️</div><h3>願望收到了！</h3>
-      <p>${esc(target)}・${fmtYM(F.month)}<br>目前有 <b>${r.count}</b> 人想去${r.count>=D.threshold?'，已達開團門檻，我們會盡快評估！':`，再 ${D.threshold-r.count} 人就達到門檻`}</p>
-      <div class="meter"><i style="width:${pct}%"></i></div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:24px">揪朋友一起許願，更快成團</p>
+      <p><b>${esc(target)}</b></p>
+      <div class="res-list">${r.results.map(x=>`<div class="res-row"><div class="res-top"><b>${fmtYM(x.month)}</b><span>${x.dup?'之前已許過・':''}${x.count} 人想去</span></div>
+        <div class="meter"><i style="width:${Math.min(100,x.count/r.threshold*100)}%"></i></div>
+        <small>${x.count>=r.threshold?'已達開團門檻，我們會盡快評估！':`再 ${r.threshold-x.count} 人就達到門檻`}</small></div>`).join('')}</div>
+      <p style="font-size:13px;color:var(--muted);margin:16px 0 24px">揪朋友一起許願，更快成團</p>
       <button class="submit" onclick="closeSheet()">完成</button>
       <button class="submit ghost" onclick="againWish()">再許一個願</button></div>`;
     go('done');
   }catch(x){err.textContent=x.message;btn.disabled=false;btn.textContent='丟進許願池'}
 }
-function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',custom:'',month:'',exp:'',contact:c,dirty:true};renderStep()}
+function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:'',contact:c,dirty:true};renderStep()}
 
 // 探索
 function exploreHTML(){
   return`<div class="q">請問哪一個體驗最吸引你？</div><div class="q-sub">選一個，我們推薦適合的山給你</div>
     <div class="exp-grid">${EXPS.map(x=>`<button class="exp" onclick="pickExp('${x.key}')" aria-label="${escAttr(x.key)}">${x.img
-      ?`<img src="${x.img}" alt="${escAttr(x.key)}" loading="lazy" decoding="async">`
+      ?`<img src="${x.img}" alt="${escAttr(x.key)}" width="400" height="400" decoding="async">`
       :`<span class="em">${x.em}</span>${esc(x.key)}`}</button>`).join('')}</div>`;
 }
 function pickExp(k){F.exp=k;go('result')}
@@ -419,14 +448,14 @@ function resultHTML(){
     <div class="q-sub">${list.length?`推薦 ${list.length} 個地方給你`:'這個分類的推薦整理中'}</div>
     ${list.map(m=>`<div class="mt-card" style="--c:${colorOf(m)}">
       <div class="mt-top"><div><div class="mt-name">${esc(m.name)}</div><div class="mt-meta">${[m.region,m.elevation?m.elevation.toLocaleString()+' m':''].filter(Boolean).map(esc).join('・')}</div></div>
-        <div class="mt-count"><b>${m.total}</b>人想去</div></div>
+</div>
       ${m.intro?`<p class="mt-intro">${esc(m.intro)}</p>`:'<div style="height:12px"></div>'}
       ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${tripsBlock(m,m.form_url?0:3)}</div>`:''}
-      <button class="wish-this" onclick="wishThis(${js(m.id)})">許願這座山</button>
+      <button class="wish-this" onclick="wishThis(${js(m.id)})">沒找到喜歡的日期嗎？來許願吧！</button>
     </div>`).join('')}
     <button class="submit ghost" onclick="back()">看看其他體驗</button>`;
 }
-function wishThis(id){const m=mt(id);F.mid=id;F.region=m.region||'其他';F.custom='';F.month='';go('direct')}
+function wishThis(id){const m=mt(id);F.mid=id;F.region=m.region||'其他';F.custom='';F.months=[];go('direct')}
 // 沒有報名表單的山：到「直接許願」，地方已選好，捲到月份讓她選
 function goWish(id){
   if(cur()!=='direct'||F.mid!==id)wishThis(id);
