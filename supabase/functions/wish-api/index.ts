@@ -195,7 +195,9 @@ async function wish(b: Record<string, any>) {
   const row = {
     mountain_id: m?.id ?? null, custom_name: m ? null : custom, wish_month: wishMonth,
     name: reqStr(b.name, "姓名", 50), email: email(b.email), phone: phone(b.phone, false), note: strOrNull(b.note),
+    preferred_date: b.preferred_date ? dateStr(b.preferred_date, "想出發的日期") : null,
   };
+  if (row.preferred_date && row.preferred_date < todayTW()) throw new HttpError(400, "想出發的日期不能早於今天");
   const { error } = await db.from("wishes").insert(row);
   if (error?.code === "23505") throw new HttpError(409, `你已經許過 ${fmtMonth(wishMonth)} 的${target}了，我們收到囉！`);
   if (error) throw new HttpError(500, error.message);
@@ -208,7 +210,7 @@ async function wish(b: Record<string, any>) {
 
 // 同一座山（或同名的自填山）同一個月的許願者
 async function wishPeople(mountainId: string | null, custom: string, wishMonth: string) {
-  let q = db.from("wishes").select("name,email,phone,note,custom_name,created_at").eq("wish_month", wishMonth).order("created_at");
+  let q = db.from("wishes").select("name,email,phone,note,preferred_date,custom_name,created_at").eq("wish_month", wishMonth).order("created_at");
   q = mountainId ? q.eq("mountain_id", mountainId) : q.is("mountain_id", null);
   const rows: any[] = must(await q);
   return mountainId ? rows : rows.filter((r) => norm(r.custom_name || "") === norm(custom));
@@ -225,7 +227,7 @@ async function maybeAlert(mountainId: string | null, custom: string | null, name
     `【許願池】${name}｜${fmtMonth(wishMonth)} 已有 ${n} 人許願`,
     [
       ["山", name + (custom ? "（消費者自填）" : "")], ["月份", fmtMonth(wishMonth)], ["許願人數", `${n} 人（門檻 ${THRESHOLD} 人）`],
-      ...people.map((p: any, i: number) => [`#${i + 1}`, [p.name, p.email, p.phone, p.note].filter(Boolean).join("｜")] as [string, unknown]),
+      ...people.map((p: any, i: number) => [`#${i + 1}`, [p.name, p.email, p.phone, p.preferred_date ? `想 ${fmtDate(p.preferred_date)} 出發` : "", p.note].filter(Boolean).join("｜")] as [string, unknown]),
     ],
     `${name} 在 ${fmtMonth(wishMonth)} 的許願人數已達門檻，可以考慮開團了！`,
   );
