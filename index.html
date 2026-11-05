@@ -552,110 +552,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .fin-tbl tfoot td{background:var(--surface-alt);font-weight:700;border-top:2px solid var(--border)}
 @media(max-width:900px){.fin-charts{grid-template-columns:1fr}}
 @media(max-width:600px){.fin-tbl{font-size:12px}.fin-tbl th,.fin-tbl td{padding:8px 8px}}
-
-/* 許願池 */
-.wp-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--text-2);margin-bottom:12px}
-.wp-pill{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:700;background:var(--surface-alt);color:var(--text-muted);white-space:nowrap}
-.wp-pill.ok{background:var(--accent-bg);color:var(--accent)}.wp-pill.no{background:var(--red-bg);color:var(--red)}.wp-pill.g{background:var(--amber-bg);color:var(--amber-on)}
-.wp-note{font-size:12px;color:var(--text-muted)}
-.wp-off{opacity:.55}
-.wp-grid td{text-align:center;cursor:pointer;min-width:52px}
-.wp-grid td:first-child,.wp-grid td:nth-child(2){cursor:default}
-.wp-grid th{text-align:center}
-.wp-grid td:hover{background:var(--surface-hover)}
-.wp-c{display:inline-block;min-width:26px;padding:2px 6px;border-radius:12px;font-weight:700;font-size:12px}
-.wp-c.c1{background:var(--accent-bg);color:var(--accent)}.wp-c.c2{background:var(--accent);color:var(--accent-on)}.wp-c.c3{background:#dfac10;color:#3b2d00}
-.wp-sent{display:block;font-size:10px;color:var(--amber-on)}
-.wp-zero{color:var(--border)}
-.wp-open{box-shadow:inset 0 -3px 0 var(--accent)}
-.wp-mt{border:1px solid var(--border-sub);border-radius:var(--r);background:var(--surface);margin-bottom:8px;overflow:hidden}
-.wp-mt-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;flex-wrap:wrap}
-.wp-mt-top:hover{background:var(--surface-hover)}
-.wp-mt-body{display:none;border-top:1px solid var(--border-sub);padding:12px 14px}
-.wp-mt.open .wp-mt-body{display:block}
-.wp-mt .mb-row{flex-wrap:wrap}
-.wp-tag{display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px}
-.wp-tag input{display:none}
-.wp-sel{padding:7px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font:400 14px var(--font);color:var(--text)}
-.wp-tbl th,.wp-tbl td{text-align:left}
-.wp-tbl a{color:var(--accent);font-weight:600}
-.wp-tbl td.wp-wrap{white-space:normal;min-width:140px}
-/* 蓋掉團務表格的「最後一欄固定在右側」與欄寬設定 */
-.fin-tbl.wp-x thead th{position:sticky;top:0;right:auto;min-width:0;background:var(--surface-alt);z-index:2}
-.fin-tbl.wp-x tbody tr:not(.wp-none) td{position:static;right:auto;min-width:0;font-weight:inherit;background:transparent}
-.fin-tbl.wp-x tbody tr:not(.wp-none):hover td{background:var(--surface-hover)}
-.fin-tbl.wp-grid thead th:first-child,.fin-tbl.wp-grid tbody tr:not(.wp-none) td:first-child{position:sticky;left:0;z-index:3;background:var(--surface)}
-.fin-tbl.wp-grid thead th:first-child{background:var(--surface-alt)}
-.fin-tbl.wp-grid tbody tr:not(.wp-none) td{min-width:58px}
-
-/* 會員管理 */
-.mb-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.mb-bar input{flex:1;min-width:180px;max-width:320px;padding:7px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font:400 14px var(--font);color:var(--text)}
-.mb-bar input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
-.mb-bar .btn{margin-left:auto}
-.mb-who{display:flex;align-items:center;gap:10px;text-align:left}
-.mb-ava{width:32px;height:32px;border-radius:50%;object-fit:cover;background:var(--surface-alt);flex-shrink:0}
-.mb-name{font-weight:600}
-.mb-sub{font-size:12px;color:var(--text-muted)}
-.mb-tier{display:inline-block;padding:2px 10px;border-radius:12px;background:var(--amber-bg);color:var(--amber-on);font-size:12px;font-weight:700}
-.mb-tbl tbody tr{cursor:pointer}
-.mb-tbl th,.mb-tbl td{text-align:left}
-.mb-tbl th:last-child,.mb-tbl td:last-child{position:static;background:var(--surface-alt)}
-.mb-tbl td:last-child{background:inherit}
-.mb-tbl td.num,.mb-tbl th.num{text-align:right}
-.mb-unlock{max-width:360px;margin:40px auto;text-align:center}
-.mb-unlock p{font-size:14px;color:var(--text-muted);margin-bottom:14px}
-.mb-unlock input{width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font:400 15px var(--font);color:var(--text);margin-bottom:12px}
-.mb-unlock .btn{width:100%;justify-content:center;padding:10px}
-.mb-sec{margin-top:22px}
-.mb-sec h3{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:baseline;gap:10px}
-.mb-sec h3 span{font-size:13px;font-weight:600;color:var(--text-muted)}
-.mb-form{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;background:var(--bg);border:1px solid var(--border-sub);border-radius:var(--r);margin-bottom:10px}
-.mb-form .f-row{margin-bottom:0}
-.mb-form .span2{grid-column:span 2}.mb-form .span4{grid-column:1/-1}
-.mb-form .f-row input,.mb-form .f-row select{background:var(--surface)}
-.mb-form-acts{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:12px}
-.mb-form-acts label{font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:6px;cursor:pointer}
-.mb-rows{display:flex;flex-direction:column;border:1px solid var(--border-sub);border-radius:var(--r)}
-.mb-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border-bottom:1px solid var(--border-sub);font-size:14px}
-.mb-row:last-child{border-bottom:none}
-.mb-row-main{flex:1;min-width:0}
-.mb-row-amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-.mb-del{border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:4px}
-.mb-del:hover{color:var(--red);background:var(--red-bg)}
-.mb-none{padding:14px;text-align:center;font-size:13px;color:var(--text-muted)}
-.mb-exp-row{display:flex;gap:6px;align-items:center}
-.mb-exp-row input{flex:1;min-width:0}
-.mb-exp-row .btn{padding:7px 12px;white-space:nowrap}
-.mb-exp-hint{font-size:12px;color:var(--accent);margin-top:4px;min-height:16px}
-.mb-exp-out,.mb-exp-hint.mb-exp-out{color:var(--red)!important;font-weight:600}
-.mb-exp-soon,.mb-exp-hint.mb-exp-soon{color:var(--amber)!important;font-weight:600}
-.mb-ok{font-size:12px!important;color:var(--accent)!important;background:var(--accent-bg);padding:2px 8px;border-radius:10px}
-.mb-bad{font-size:12px!important;color:var(--red)!important;background:var(--red-bg);padding:2px 8px;border-radius:10px}
-.mb-bal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.mb-bal-card{padding:12px 16px;border-radius:var(--r);border:1px solid var(--border-sub);background:var(--surface)}
-.mb-bal-card .fc-label{font-size:11px;color:var(--text-muted);margin-bottom:2px}
-.mb-bal-card .fc-val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
-.mb-ledger-wrap{border:1px solid var(--border-sub);border-radius:var(--r);overflow:auto;max-height:360px}
-.mb-ledger{width:100%;border-collapse:collapse;font-size:13px}
-.mb-ledger th{position:sticky;top:0;background:var(--surface-alt);font-size:11px;font-weight:700;color:var(--text-muted);padding:8px 10px;text-align:left;white-space:nowrap}
-.mb-ledger th:last-child{background:var(--surface-alt);position:sticky}
-.mb-ledger td{padding:8px 10px;border-top:1px solid var(--border-sub);white-space:nowrap;font-variant-numeric:tabular-nums}
-.mb-ledger td:last-child{position:static;background:none}
-.mb-ledger .num{text-align:right}
-.mb-ledger .mb-note{white-space:normal;min-width:120px;color:var(--text-2)}
-.mb-reversed{opacity:.55}
-.mb-reversed .mb-row-main{text-decoration:line-through}
-.mb-acc{font-size:11px;font-weight:700;padding:1px 7px;border-radius:9px}
-.mb-acc-stored{background:var(--accent-bg);color:var(--accent)}
-.mb-acc-rebate{background:var(--amber-bg);color:var(--amber-on)}
-.mb-rev{padding:3px 10px;font-size:12px}
-.mb-form label a{color:var(--accent);font-weight:600;margin-left:4px}
-.mb-tag-x{font-size:11px;font-weight:700;color:var(--red);background:var(--red-bg);padding:1px 7px;border-radius:9px}
-@media(max-width:700px){
-  .mb-form{grid-template-columns:1fr 1fr}
-  .mb-hide-sm{display:none}
-}
 </style>
 
 <div class="login-gate" id="login-gate">
@@ -683,8 +579,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <button class="nav-link" id="nav-mktg" onclick="setView('mktgview')">行銷列表</button>
       <button class="nav-link" id="nav-cal" onclick="setView('calendar')">日曆總覽</button>
       <button class="nav-link" id="nav-finance" onclick="setView('finance')">收支總覽</button>
-      <button class="nav-link" id="nav-members" onclick="setView('members')">會員管理</button>
-      <button class="nav-link" id="nav-wish" onclick="setView('wish')">許願池</button>
     </div>
     <div class="nav-sep"></div>
     <div class="nav-util">
@@ -714,8 +608,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <button class="mob-tab" id="mtab-mktg" onclick="setView('mktgview')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>行銷列表</span></button>
   <button class="mob-tab" id="mtab-cal" onclick="setView('calendar')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日曆</span></button>
   <button class="mob-tab" id="mtab-finance" onclick="setView('finance')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span>收支</span></button>
-  <button class="mob-tab" id="mtab-members" onclick="setView('members')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>會員</span></button>
-  <button class="mob-tab" id="mtab-wish" onclick="setView('wish')"><svg viewBox="0 0 24 24"><path d="M8 3l4 8 5-5 5 15H2L8 3z"/></svg><span>許願池</span></button>
 </div>
 
 <div class="nav-mobile-menu" id="nav-mobile-menu" onclick="closeMobileMenu()">
@@ -725,8 +617,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <button class="nav-mob-link" id="mob-mktg" onclick="setView('mktgview');closeMobileMenu()">行銷列表</button>
     <button class="nav-mob-link" id="mob-cal" onclick="setView('calendar');closeMobileMenu()">日曆總覽</button>
     <button class="nav-mob-link" id="mob-finance" onclick="setView('finance');closeMobileMenu()">收支總覽</button>
-    <button class="nav-mob-link" id="mob-members" onclick="setView('members');closeMobileMenu()">會員管理</button>
-    <button class="nav-mob-link" id="mob-wish" onclick="setView('wish');closeMobileMenu()">許願池</button>
     <div class="nav-mob-sep"></div>
     <button class="nav-mob-link" onclick="logout();closeMobileMenu()">登出</button>
     <button class="nav-mob-link" onclick="showReport();closeMobileMenu()">產生 LINE 日報</button>
@@ -806,14 +696,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
   <div id="view-finance" style="display:none">
     <div id="finance-body"></div>
-  </div>
-
-  <div id="view-members" style="display:none">
-    <div id="members-body"></div>
-  </div>
-
-  <div id="view-wish" style="display:none">
-    <div id="wish-body"></div>
   </div>
 </div>
 
@@ -1124,46 +1006,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   </div>
 </div>
 
-<!-- Member detail modal -->
-<div class="overlay" id="ov-member">
-  <div class="modal lg">
-    <div class="modal-h"><h2 id="mbd-title">會員資料</h2><button class="close-btn" onclick="closeMember()">&times;</button></div>
-    <div class="modal-body" id="mbd-body"></div>
-  </div>
-</div>
-
-<!-- New member modal -->
-<div class="overlay" id="ov-newmember">
-  <div class="modal">
-    <div class="modal-h"><h2>新增會員</h2><button class="close-btn" onclick="hideOv('ov-newmember')">&times;</button></div>
-    <div class="modal-body">
-      <div class="f-row"><label for="nm-email">Gmail（會員登入用的 Google 帳號）</label><input id="nm-email" type="email" placeholder="example@gmail.com"></div>
-      <div class="f-pair">
-        <div class="f-row"><label for="nm-name">姓名</label><input id="nm-name"></div>
-        <div class="f-row"><label for="nm-tier">會員等級</label><select id="nm-tier"></select></div>
-      </div>
-      <div class="f-actions">
-        <button type="button" class="btn btn-g" onclick="hideOv('ov-newmember')">取消</button>
-        <button type="button" class="btn btn-p" onclick="saveNewMember()">新增</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Member tiers modal -->
-<div class="overlay" id="ov-tiers">
-  <div class="modal">
-    <div class="modal-h"><h2>會員等級設定</h2><button class="close-btn" onclick="hideOv('ov-tiers')">&times;</button></div>
-    <div class="modal-body">
-      <div class="f-row"><label for="tiers-input">等級名稱（一行一個；新會員預設為「一般會員」）</label><textarea id="tiers-input" rows="6"></textarea></div>
-      <div class="f-actions">
-        <button type="button" class="btn btn-g" onclick="hideOv('ov-tiers')">取消</button>
-        <button type="button" class="btn btn-p" onclick="saveTiers()">儲存</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Posts (發文排程) modal -->
 <div class="overlay" id="ov-posts">
   <div class="modal">
@@ -1243,7 +1085,6 @@ const DEF_TASK_REMINDERS=[
   {id:'tr3',name:'天氣提醒',daysBefore:[7,3,1]},
   {id:'tr4',name:'行前手冊發放',daysBefore:[14]},
 ];
-let memberTiers=[];
 let trips=[],deadlineRules=[],applyRules=[],lodgeRules=[],mealRules=[],mktgRules=[],minGroupRules=[],mktgEvents=[],taskReminders=[],equipPricing=[],porterPricing=[];
 let sb=null,dlCap=null,store=null,rulesReady=false;
 // 標籤顏色選項
@@ -1311,9 +1152,8 @@ const DEF_MINGROUP=[
   {id:'mg1',minPax:3,names:['合歡群峰','戒茂斯上嘉明湖','高島縱走','加里山','水漾森林','郡大山','玉山','嘉明湖','北大武','奇萊南華','眠月線','大小霸','雪山主東']},
 ];
 const DEF_LODGE=[];
-const DEF_MEMBER_TIERS=['一般會員','銀卡會員','金卡會員'];
 const DEF_MEAL=[];
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing','hk-member-tiers':'memberTiers'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -1337,7 +1177,6 @@ async function loadAllRules(){
   if(!taskReminders)taskReminders=JSON.parse(JSON.stringify(DEF_TASK_REMINDERS));
   equipPricing=m.equipPricing||localGet('hk-equip-pricing',[]);
   porterPricing=m.porterPricing||localGet('hk-porter-pricing',[]);
-  memberTiers=m.memberTiers||localGet('hk-member-tiers',DEF_MEMBER_TIERS);
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
@@ -2212,562 +2051,11 @@ function showDayPopup(evt,ds){
 }
 document.addEventListener('click',()=>{document.getElementById('cal-popup').style.display='none'});
 
-// ── 會員管理 ──
-// 會員資料不放在 anon 可讀的表，一律經過 member-api（後台密碼驗證）
-const MEMBER_API=SB_URL+'/functions/v1/member-api';
-let membersList=null,memberSearch='',memberTierFilter='all',memberDetail=null,membersErr='';
-function adminPw(){try{return localStorage.getItem('hk-admin-pw')||''}catch{return''}}
-async function memberApi(action,body={}){
-  const res=await fetch(MEMBER_API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'x-admin-pw':adminPw()},body:JSON.stringify({action,...body})});
-  const j=await res.json().catch(()=>({}));
-  if(res.status===401){try{localStorage.removeItem('hk-admin-pw')}catch{}membersList=null;renderMembers();throw new Error(j.error||'後台密碼錯誤')}
-  if(!res.ok)throw new Error(j.error||'連線失敗（'+res.status+'）');
-  return j;
-}
-function fmtMoney(n){n=Number(n)||0;return(n<0?'−$':'$')+Math.abs(n).toLocaleString()}
-// 金額只做顯示；所有加減與餘額檢查都在資料庫裡完成
-const ACCOUNT_LABEL={stored:'儲值金',rebate:'點數'};
-// 儲值金以元計（$1,000），點數以點計（300 點）
-function fmtPoints(n){n=Number(n)||0;return(n<0?'−':'')+Math.abs(n).toLocaleString()+' 點'}
-function fmtAmt(n,acc){return acc==='rebate'?fmtPoints(n):fmtMoney(n)}
-function fmtUnsigned(n,acc){n=Math.abs(Number(n)||0);return acc==='rebate'?n.toLocaleString()+' 點':'$'+n.toLocaleString()}
-const TXN_LABEL={topup:'儲值',spend:'扣款',grant:'發放',deduct:'扣除',reversal:'沖正'};
-// 每次送出交易都帶一個唯一識別碼；同一筆重送（網路重試、連點）會沿用同一個碼，資料庫只會入帳一次
-function newIdemKey(){
-  try{return crypto.randomUUID()}catch{}
-  const b=crypto.getRandomValues(new Uint8Array(16));return[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
-}
-let memberKeys={txn:newIdemKey(),trip:newIdemKey()},memberBusy=false;
-function isAmountStr(v){return/^[0-9]{1,10}$/.test(v)&&!/^0+$/.test(v)}
-function expiryInfo(d){
-  if(!d)return{label:'未設定',cls:'',sort:'9999'};
-  const left=daysUntil(d);
-  if(left<0)return{label:`${d.replace(/-/g,'/')} 已過期`,cls:'mb-exp-out',sort:d};
-  if(left<=30)return{label:`${d.replace(/-/g,'/')}（剩 ${left} 天）`,cls:'mb-exp-soon',sort:d};
-  return{label:d.replace(/-/g,'/'),cls:'',sort:d};
-}
-async function loadMembers(){
-  if(!adminPw()){renderMembers();return}
-  try{membersList=(await memberApi('admin:list')).members;membersErr=''}
-  catch(e){membersErr=e.message}
-  renderMembers();
-}
-async function unlockMembers(){
-  const el=document.getElementById('mb-pw');const pw=el.value.trim().normalize('NFKC');
-  if(!pw)return;
-  if(await sha256hex(pw)!==EDIT_PW_HASH){toast('密碼錯誤');el.select();return}
-  try{localStorage.setItem('hk-admin-pw',pw)}catch{}
-  loadMembers();
-}
-function setMemberSearch(v){memberSearch=v;renderMemberRows()}
-function setMemberTierFilter(v){memberTierFilter=v;renderMembers()}
-function filteredMembers(){
-  const q=memberSearch.trim().toLowerCase();
-  return(membersList||[]).filter(m=>{
-    if(memberTierFilter==='expired'){if(!m.expires_at||daysUntil(m.expires_at)>=0)return false}
-    else if(memberTierFilter!=='all'&&m.tier!==memberTierFilter)return false;
-    if(!q)return true;
-    return[m.email,m.google_name,m.real_name,m.phone,m.note].some(x=>x&&x.toLowerCase().includes(q));
-  });
-}
-async function auditLedger(){
-  try{
-    const{mismatches}=await memberApi('admin:audit');
-    if(!mismatches.length)alert('對帳結果：全部正確 ✓\n\n每位會員的儲值金與點數餘額，都和流水帳逐筆加總一致。');
-    else alert('⚠️ 對帳發現 '+mismatches.length+' 個帳戶不一致，請聯絡系統管理者：\n\n'+mismatches.map(x=>`${x.member_id}（${ACCOUNT_LABEL[x.account]}）快照 ${x.snapshot} / 流水帳 ${x.ledger_sum}`).join('\n'));
-  }catch(e){toast(e.message)}
-}
-function renderMembers(){
-  const el=document.getElementById('members-body');if(!el)return;
-  if(!adminPw()){
-    el.innerHTML=`<div class="mb-unlock"><div class="fin-header" style="justify-content:center"><h3>會員管理</h3></div>
-      <p>請再輸入一次後台密碼以讀取會員資料</p>
-      <input type="password" id="mb-pw" placeholder="密碼" onkeydown="if(event.key==='Enter')unlockMembers()">
-      <button class="btn btn-p" onclick="unlockMembers()">確認</button></div>`;
-    return;
-  }
-  if(membersErr&&!membersList){
-    el.innerHTML=`<div class="empty"><p>讀取會員資料失敗：${esc(membersErr)}</p><button class="btn btn-o" onclick="loadMembers()" style="margin-top:12px">重試</button></div>`;
-    return;
-  }
-  if(!membersList){el.innerHTML='<div class="empty"><p>讀取中…</p></div>';return}
-  const totStored=membersList.reduce((s,m)=>s+Number(m.balances.stored),0);
-  const totRebate=membersList.reduce((s,m)=>s+Number(m.balances.rebate),0);
-  const expired=membersList.filter(m=>m.expires_at&&daysUntil(m.expires_at)<0).length;
-  const soon=membersList.filter(m=>m.expires_at&&daysUntil(m.expires_at)>=0&&daysUntil(m.expires_at)<=30).length;
-  const tierCounts=memberTiers.map(t=>`${esc(t)} ${membersList.filter(m=>m.tier===t).length}`).join('・');
-  const tierChips=['all',...memberTiers,'expired'].map(t=>`<button class="chip ${memberTierFilter===t?'on':''}" onclick="setMemberTierFilter(${escAttr(JSON.stringify(t))})">${t==='all'?'全部':t==='expired'?'已過期':esc(t)}</button>`).join('');
-  el.innerHTML=`
-    <div class="fin-header"><h3>會員管理</h3></div>
-    <div class="fin-summary">
-      <div class="fin-card"><div class="fc-label">會員數</div><div class="fc-val">${membersList.length}</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${tierCounts}</div></div>
-      <div class="fin-card"><div class="fc-label">儲值金總餘額</div><div class="fc-val">${fmtMoney(totStored)}</div></div>
-      <div class="fin-card"><div class="fc-label">點數總餘額</div><div class="fc-val">${fmtPoints(totRebate)}</div></div>
-      <div class="fin-card"><div class="fc-label">會員期限</div><div class="fc-val ${expired?'fc-exp':''}">${expired} 已過期</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">30 天內到期 ${soon} 位</div></div>
-    </div>
-    <div class="mb-bar">
-      <input type="search" placeholder="搜尋 Email、姓名、電話、備註" value="${escAttr(memberSearch)}" oninput="setMemberSearch(this.value)">
-      <div class="filters">${tierChips}</div>
-      <button class="btn btn-o" onclick="auditLedger()" title="檢查每個帳戶的餘額是否等於流水帳加總">對帳檢查</button>
-      <button class="btn btn-o" style="margin-left:0" onclick="openTiers()">等級設定</button>
-      <button class="btn btn-p" style="margin-left:0" onclick="openNewMember()">新增會員</button>
-    </div>
-    <div class="fin-tbl-wrap">
-      <table class="fin-tbl mb-tbl">
-        <thead><tr><th>會員</th><th>等級</th><th>會員期限</th><th class="num">儲值金</th><th class="num">點數</th><th class="num mb-hide-sm">行程數</th><th class="mb-hide-sm">最後登入</th></tr></thead>
-        <tbody id="mb-tbody"></tbody>
-      </table>
-    </div>`;
-  renderMemberRows();
-}
-function renderMemberRows(){
-  const tb=document.getElementById('mb-tbody');if(!tb)return;
-  const list=filteredMembers();
-  if(!list.length){tb.innerHTML=`<tr><td colspan="7" class="mb-none">${membersList.length?'沒有符合的會員':'還沒有會員。可以先用 Gmail 新增，或等會員用 Google 登入會員頁後自動出現'}</td></tr>`;return}
-  tb.innerHTML=list.map(m=>{const ex=expiryInfo(m.expires_at);return`<tr onclick="openMember('${m.id}')">
-    <td><div class="mb-who">${m.google_picture?`<img class="mb-ava" src="${escAttr(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:'<span class="mb-ava"></span>'}
-      <div><div class="mb-name">${esc(m.real_name||m.google_name||'（未命名）')}</div><div class="mb-sub">${esc(m.email)}</div></div></div></td>
-    <td><span class="mb-tier">${esc(m.tier)}</span></td>
-    <td class="${ex.cls}" style="${m.expires_at?'':'color:var(--text-muted)'}">${esc(ex.label)}</td>
-    <td class="num" style="font-weight:600">${fmtMoney(m.balances.stored)}</td>
-    <td class="num" style="font-weight:600">${fmtPoints(m.balances.rebate)}</td>
-    <td class="num mb-hide-sm">${m.trip_count}</td>
-    <td class="mb-hide-sm" style="color:var(--text-muted)">${m.last_login_at?fmtShort(m.last_login_at.slice(0,10)):'尚未登入'}</td>
-  </tr>`}).join('');
-}
-
-// 會員詳細資料
-async function openMember(id){
-  memberDetail=null;memberKeys={txn:newIdemKey(),trip:newIdemKey()};
-  document.getElementById('mbd-title').textContent='會員資料';
-  document.getElementById('mbd-body').innerHTML='<div class="mb-none">讀取中…</div>';
-  showOv('ov-member');
-  try{memberDetail=await memberApi('admin:get',{id})}
-  catch(e){document.getElementById('mbd-body').innerHTML=`<div class="mb-none">讀取失敗：${esc(e.message)}</div>`;return}
-  renderMemberDetail();
-}
-function closeMember(){hideOv('ov-member');memberDetail=null;loadMembers()}
-async function reloadMemberDetail(){
-  memberDetail=await memberApi('admin:get',{id:memberDetail.member.id});
-  renderMemberDetail();
-}
-// 會員期限 +1 年：還沒到期就從原到期日往後延一年，已過期或未設定就從今天起算
-function extendMemberYear(){
-  const el=document.getElementById('mbd-exp');
-  const cur=el.value&&daysUntil(el.value)>=0?parseD(el.value):today();
-  const d=new Date(cur);d.setFullYear(d.getFullYear()+1);
-  el.value=dateStr(d);updateExpHint();
-}
-function updateExpHint(){
-  const v=document.getElementById('mbd-exp').value;const ex=expiryInfo(v);
-  const h=document.getElementById('mbd-exp-hint');
-  h.textContent=v?(ex.cls==='mb-exp-out'?'已過期':ex.cls==='mb-exp-soon'?ex.label.replace(/^.*（|）$/g,''):'有效'):'未設定期限';
-  h.className='mb-exp-hint '+ex.cls;
-}
-function renderMemberDetail(){
-  const{member:m,balances,ledger,trips:mt,verified}=memberDetail;
-  document.getElementById('mbd-title').textContent=m.real_name||m.google_name||'會員資料';
-  const tierOpts=[...new Set([...memberTiers,m.tier])].map(t=>`<option ${t===m.tier?'selected':''}>${esc(t)}</option>`).join('');
-  const tripOpts=[...trips].filter(t=>t.date).sort((a,b)=>a.date<b.date?1:-1)
-    .map(t=>`<option value="${escAttr(t.id)}">${esc(fmtShort(t.date))} ${esc(t.name)}</option>`).join('');
-  const reversed=new Set(ledger.filter(l=>l.reverses_id).map(l=>l.reverses_id));
-  const ledgerRows=ledger.map(l=>{
-    const isRev=reversed.has(l.id);
-    const act=l.txn_type==='reversal'?`<span class="mb-sub">沖正 #${l.reverses_id}</span>`
-      :isRev?'<span class="mb-sub">已沖正</span>'
-      :`<button class="btn btn-s mb-rev" onclick="reverseLedger(${l.id})">沖正</button>`;
-    return`<tr class="${isRev?'mb-reversed':''}">
-      <td class="mb-sub">#${l.id}</td><td>${esc(l.txn_date)}</td>
-      <td><span class="mb-acc mb-acc-${l.account}">${ACCOUNT_LABEL[l.account]}</span></td>
-      <td>${TXN_LABEL[l.txn_type]}</td>
-      <td class="num ${l.amount>0?'fin-pos':'fin-neg'}" style="font-weight:700">${l.amount>0?'+':''}${fmtAmt(l.amount,l.account)}</td>
-      <td class="num mb-hide-sm mb-sub">${fmtAmt(l.balance_before,l.account)} → </td><td class="num" style="font-weight:600">${fmtAmt(l.balance_after,l.account)}</td>
-      <td class="mb-note">${esc(l.note||'')}</td><td>${act}</td></tr>`}).join('');
-  const tripRows=mt.map(t=>{
-    const paid=ledger.filter(l=>l.trip_ref===t.id&&l.txn_type!=='reversal').map(l=>`${ACCOUNT_LABEL[l.account]} ${fmtUnsigned(l.amount,l.account)}`).join('、');
-    const cancelled=t.status==='cancelled';
-    return`<div class="mb-row ${cancelled?'mb-reversed':''}"><div class="mb-row-main">${esc(t.trip_name)}${cancelled?' <span class="mb-tag-x">已取消</span>':''}
-      <div class="mb-sub">${t.trip_date?esc(fmtRange(t.trip_date,t.trip_date_end)):'未填日期'}${paid?'・支付：'+paid:''}${t.note?'・'+esc(t.note):''}</div></div>
-      ${t.price!=null?`<div class="mb-row-amt">${fmtMoney(t.price)}</div>`:''}
-      ${cancelled?'':`<button class="btn btn-s mb-rev" onclick="cancelMemberTrip('${t.id}')">取消</button>`}</div>`}).join('');
-  const ex=expiryInfo(m.expires_at);
-  document.getElementById('mbd-body').innerHTML=`
-    <div class="mb-who" style="margin-bottom:16px">${m.google_picture?`<img class="mb-ava" style="width:44px;height:44px" src="${escAttr(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:''}
-      <div><div class="mb-name">${esc(m.email)}${m.google_name?`<span class="mb-sub">（Google：${esc(m.google_name)}）</span>`:''}</div><div class="mb-sub">加入 ${esc(m.created_at.slice(0,10))}・${m.last_login_at?'最後登入 '+esc(m.last_login_at.slice(0,10)):'尚未登入過'}</div></div></div>
-    <div class="f-pair">
-      <div class="f-row"><label for="mbd-tier">會員等級</label><select id="mbd-tier">${tierOpts}</select></div>
-      <div class="f-row"><label for="mbd-exp">會員期限</label>
-        <div class="mb-exp-row"><input id="mbd-exp" type="date" value="${escAttr(m.expires_at||'')}" oninput="updateExpHint()">
-          <button type="button" class="btn btn-o" onclick="extendMemberYear()" title="未到期：從原到期日延一年；已過期或未設定：從今天起算一年">+1 年</button>
-          <button type="button" class="btn btn-g" onclick="document.getElementById('mbd-exp').value='';updateExpHint()">清除</button></div>
-        <div id="mbd-exp-hint" class="mb-exp-hint ${ex.cls}"></div></div>
-    </div>
-    <div class="f-pair">
-      <div class="f-row"><label for="mbd-name">姓名</label><input id="mbd-name" value="${escAttr(m.real_name||'')}"></div>
-      <div class="f-row"><label for="mbd-phone">電話</label><input id="mbd-phone" type="tel" value="${escAttr(m.phone||'')}"></div>
-    </div>
-    <div class="f-row"><label for="mbd-note">內部備註（會員看不到）</label><input id="mbd-note" value="${escAttr(m.note||'')}"></div>
-    <div class="f-actions"><button class="btn btn-p" onclick="saveMemberProfile()">儲存會員資料</button></div>
-
-    <div class="mb-sec">
-      <h3>儲值金與點數 ${verified?'<span class="mb-ok">✓ 對帳正確</span>':'<span class="mb-bad">⚠ 對帳異常，請勿再操作並聯絡管理者</span>'}</h3>
-      <div class="mb-bal">
-        <div class="mb-bal-card"><div class="fc-label">儲值金餘額</div><div class="fc-val">${fmtMoney(balances.stored)}</div></div>
-        <div class="mb-bal-card"><div class="fc-label">入野門點數</div><div class="fc-val">${fmtPoints(balances.rebate)}</div></div>
-      </div>
-      <div class="mb-form">
-        <div class="f-row"><label for="mbw-type">類型</label><select id="mbw-type">
-          <option value="topup">儲值金・儲值</option><option value="spend">儲值金・扣款</option>
-          <option value="grant">點數・發放</option><option value="deduct">點數・扣除</option></select></div>
-        <div class="f-row"><label for="mbw-amt">金額／點數（整數）</label><input id="mbw-amt" inputmode="numeric" autocomplete="off" placeholder="例：5000"></div>
-        <div class="f-row"><label for="mbw-date">日期</label><input id="mbw-date" type="date" value="${dateStr(new Date())}"></div>
-        <div class="f-row"><label for="mbw-note">說明（會員看得到）</label><input id="mbw-note" placeholder="例：匯款儲值"></div>
-        <div class="mb-form-acts"><button class="btn btn-p" id="mbw-btn" onclick="addMemberTxn()">入帳</button></div>
-      </div>
-      <div class="mb-ledger-wrap"><table class="mb-ledger">
-        <thead><tr><th>流水號</th><th>日期</th><th>帳戶</th><th>類型</th><th class="num">金額</th><th class="num mb-hide-sm">交易前</th><th class="num">交易後</th><th>說明</th><th></th></tr></thead>
-        <tbody>${ledgerRows||'<tr><td colspan="9" class="mb-none">尚無紀錄</td></tr>'}</tbody></table></div>
-      <div class="mb-sub" style="margin-top:6px">流水帳不可刪改；記錯請按「沖正」，系統會新增一筆反向紀錄抵銷。</div>
-    </div>
-
-    <div class="mb-sec">
-      <h3>購買行程 <span>${mt.filter(t=>t.status==='active').length} 筆</span></h3>
-      <div class="mb-form">
-        <div class="f-row span4"><label for="mbt-pick">從團務列表帶入（可不選，直接手動填）</label>
-          <select id="mbt-pick" onchange="pickMemberTrip(this.value)"><option value="">— 手動輸入 —</option>${tripOpts}</select></div>
-        <div class="f-row span2"><label for="mbt-name">行程名稱</label><input id="mbt-name"></div>
-        <div class="f-row"><label for="mbt-date">出發日</label><input id="mbt-date" type="date"></div>
-        <div class="f-row"><label for="mbt-end">回程日</label><input id="mbt-end" type="date"></div>
-        <div class="f-row"><label for="mbt-price">行程金額</label><input id="mbt-price" inputmode="numeric" autocomplete="off"></div>
-        <div class="f-row"><label for="mbt-stored">用儲值金支付 <a href="#" onclick="event.preventDefault();document.getElementById('mbt-stored').value=document.getElementById('mbt-price').value">全額</a></label><input id="mbt-stored" inputmode="numeric" autocomplete="off" placeholder="0"></div>
-        <div class="f-row"><label for="mbt-rebate">用點數折抵（1 點 = 1 元）</label><input id="mbt-rebate" inputmode="numeric" autocomplete="off" placeholder="0"></div>
-        <div class="f-row"><label for="mbt-note">備註（會員看得到）</label><input id="mbt-note"></div>
-        <div class="mb-form-acts"><span class="mb-sub">餘額不足會整筆不成立；取消行程會自動退回已扣的金額</span>
-          <button class="btn btn-p" id="mbt-btn" onclick="addMemberTrip()">新增行程</button></div>
-      </div>
-      <div class="mb-rows">${tripRows||'<div class="mb-none">尚無行程紀錄</div>'}</div>
-    </div>
-    <div class="f-actions" style="margin-top:24px;justify-content:flex-start"><button class="btn btn-s" style="color:var(--red)" onclick="deleteMember()">刪除會員</button></div>`;
-  updateExpHint();
-}
-function pickMemberTrip(id){
-  const t=trips.find(x=>x.id===id);if(!t)return;
-  document.getElementById('mbt-name').value=t.name||'';
-  document.getElementById('mbt-date').value=t.date||'';
-  document.getElementById('mbt-end').value=t.dateEnd||'';
-  const fee=(t.tripFees&&t.tripFees.length)?t.tripFees[0].fee:0;
-  document.getElementById('mbt-price').value=fee?String(fee):'';
-}
-// 送出期間鎖住按鈕；成功才換新的識別碼，失敗重試時沿用舊碼（資料庫會擋掉重複）
-async function memberAct(action,body,okMsg,keyName){
-  if(memberBusy)return;memberBusy=true;
-  document.querySelectorAll('#mbd-body .btn').forEach(b=>b.disabled=true);
-  try{
-    await memberApi(action,body);
-    if(keyName)memberKeys[keyName]=newIdemKey();
-    await reloadMemberDetail();if(okMsg)toast(okMsg);
-  }catch(e){toast(e.message);document.querySelectorAll('#mbd-body .btn').forEach(b=>b.disabled=false)}
-  finally{memberBusy=false}
-}
-function saveMemberProfile(){
-  memberAct('admin:update',{id:memberDetail.member.id,fields:{
-    tier:document.getElementById('mbd-tier').value,
-    real_name:document.getElementById('mbd-name').value,
-    phone:document.getElementById('mbd-phone').value,
-    note:document.getElementById('mbd-note').value,
-    expires_at:document.getElementById('mbd-exp').value,
-  }},'已儲存');
-}
-function addMemberTxn(){
-  const amt=document.getElementById('mbw-amt').value.trim();
-  if(!isAmountStr(amt)){toast('金額請輸入正整數');return}
-  const type=document.getElementById('mbw-type').value;
-  const label=document.getElementById('mbw-type').selectedOptions[0].textContent;
-  if(!confirm(`確定入帳？\n\n${label}　${fmtUnsigned(amt,type==='grant'||type==='deduct'?'rebate':'stored')}`))return;
-  memberAct('admin:txn',{member_id:memberDetail.member.id,type,amount:amt,
-    txn_date:document.getElementById('mbw-date').value,
-    note:document.getElementById('mbw-note').value,key:memberKeys.txn},'已入帳','txn');
-}
-function reverseLedger(id){
-  const l=memberDetail.ledger.find(x=>x.id===id);if(!l)return;
-  if(!confirm(`沖正 #${id}？\n\n會新增一筆 ${ACCOUNT_LABEL[l.account]} ${l.amount>0?'−':'+'}${fmtUnsigned(l.amount,l.account)} 的反向紀錄，原紀錄保留。`))return;
-  memberAct('admin:reverse',{id},'已沖正');
-}
-function addMemberTrip(){
-  const name=document.getElementById('mbt-name').value.trim();
-  if(!name){toast('請填行程名稱');return}
-  const price=document.getElementById('mbt-price').value.trim();
-  const ps=document.getElementById('mbt-stored').value.trim(),pr=document.getElementById('mbt-rebate').value.trim();
-  for(const[v,lbl]of[[price,'行程金額'],[ps,'儲值金支付'],[pr,'點數折抵']])
-    if(v&&v!=='0'&&!isAmountStr(v)){toast(lbl+'請輸入正整數');return}
-  const pays=[ps&&ps!=='0'?`儲值金 $${Number(ps).toLocaleString()}`:'',pr&&pr!=='0'?`點數 ${Number(pr).toLocaleString()} 點`:''].filter(Boolean);
-  if(pays.length&&!confirm(`新增行程「${name}」並扣款：\n\n${pays.join('\n')}`))return;
-  memberAct('admin:addTrip',{member_id:memberDetail.member.id,
-    trip_id:document.getElementById('mbt-pick').value,trip_name:name,
-    trip_date:document.getElementById('mbt-date').value,trip_date_end:document.getElementById('mbt-end').value,
-    price,pay_stored:ps,pay_rebate:pr,note:document.getElementById('mbt-note').value,key:memberKeys.trip},'已新增','trip');
-}
-function cancelMemberTrip(id){
-  const t=memberDetail.trips.find(x=>x.id===id);if(!t)return;
-  const reversed=new Set(memberDetail.ledger.filter(l=>l.reverses_id).map(l=>l.reverses_id));
-  const refunds=memberDetail.ledger.filter(l=>l.trip_ref===id&&l.txn_type!=='reversal'&&!reversed.has(l.id))
-    .map(l=>`${ACCOUNT_LABEL[l.account]} +${fmtUnsigned(l.amount,l.account)}`);
-  if(!confirm(`取消行程「${t.trip_name}」？\n\n${refunds.length?'會自動退回：\n'+refunds.join('\n'):'這個行程沒有扣款紀錄。'}`))return;
-  memberAct('admin:cancelTrip',{id},'已取消');
-}
-
-function deleteMember(){
-  const m=memberDetail.member;
-  if(!confirm(`確定刪除會員 ${m.real_name||m.email}？\n（已有儲值金或點數紀錄的會員不能刪除）`))return;
-  memberApi('admin:delete',{id:m.id}).then(()=>{toast('已刪除');closeMember()},e=>toast(e.message));
-}
-
-// 新增會員：先用 Gmail 建好，會員之後用同一個 Google 帳號登入就會接上
-function openNewMember(){
-  document.getElementById('nm-email').value='';document.getElementById('nm-name').value='';
-  document.getElementById('nm-tier').innerHTML=memberTiers.map(t=>`<option>${esc(t)}</option>`).join('');
-  showOv('ov-newmember');setTimeout(()=>document.getElementById('nm-email').focus(),50);
-}
-async function saveNewMember(){
-  const email=document.getElementById('nm-email').value.trim();
-  if(!email){toast('請填 Email');return}
-  try{
-    const{id}=await memberApi('admin:create',{email,real_name:document.getElementById('nm-name').value,tier:document.getElementById('nm-tier').value});
-    hideOv('ov-newmember');toast('已新增');loadMembers();openMember(id);
-  }catch(e){toast(e.message)}
-}
-
-// 會員等級（存在 settings 表，大家共用）
-function openTiers(){document.getElementById('tiers-input').value=memberTiers.join('\n');showOv('ov-tiers')}
-function saveTiers(){
-  const list=[...new Set(document.getElementById('tiers-input').value.split('\n').map(x=>x.trim()).filter(Boolean))];
-  if(!list.length){toast('至少要有一個等級');return}
-  memberTiers=list;saveToLS('hk-member-tiers',memberTiers);
-  hideOv('ov-tiers');renderMembers();toast('已儲存');
-}
-
 // ── View switching ──
-// ── 許願池 ──
-// 許願與報名資料經過 wish-api（後台密碼驗證）；山的開團日期直接取自團務列表：
-// 活動名稱包含山名（或別名）、狀態「報名中」、還沒出發也沒過報名截止 → 前台可以報名
-const WISH_API=SB_URL+'/functions/v1/wish-api';
-let wishData=null,wishErr='',wishTab='stats',wishFMt='',wishFMonth='',wishOpenIds=new Set();
-try{const t=localStorage.getItem('hk-wish-tab');if(['stats','mountains','wishes','signups'].includes(t))wishTab=t}catch{}
-async function wishApi(action,body={}){
-  const res=await fetch(WISH_API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'x-admin-pw':adminPw()},body:JSON.stringify({action,...body})});
-  const j=await res.json().catch(()=>({}));
-  if(res.status===401){try{localStorage.removeItem('hk-admin-pw')}catch{}wishData=null;renderWish();throw new Error(j.error||'後台密碼錯誤')}
-  if(!res.ok)throw new Error(j.error||'連線失敗（'+res.status+'）');
-  return j;
-}
-async function loadWish(){
-  if(!adminPw()){renderWish();return}
-  try{wishData=await wishApi('admin:list');wishErr=''}catch(e){wishErr=e.message}
-  renderWish();
-}
-async function unlockWish(){
-  const el=document.getElementById('wish-pw');const pw=el.value.trim().normalize('NFKC');
-  if(!pw)return;
-  if(await sha256hex(pw)!==EDIT_PW_HASH){toast('密碼錯誤');el.select();return}
-  try{localStorage.setItem('hk-admin-pw',pw)}catch{}
-  loadWish();
-}
-async function wishAct(action,body,ok){
-  try{await wishApi(action,body);if(ok)toast(ok);await loadWish()}catch(e){toast(e.message)}
-}
-function setWishTab(t){wishTab=t;try{localStorage.setItem('hk-wish-tab',t)}catch{}renderWish()}
-
-// 與 wish-api 相同的對應規則
-const wishNorm=s=>String(s||'').replace(/\s+/g,'').toLowerCase();
-function wishMatch(m,t){const n=wishNorm(t.name);return[m.name,...(m.aliases||[])].map(wishNorm).some(k=>k&&n.includes(k))}
-function wishTripOpen(t){const td=dateStr(today());return t.status==='reg'&&t.date&&t.date>=td&&(!t.deadline||t.deadline>=td)}
-function wishTripsOf(m){const td=dateStr(today());return trips.filter(t=>t.date&&(t.dateEnd||t.date)>=td&&wishMatch(m,t)).sort((a,b)=>a.date.localeCompare(b.date))}
-const wishYM=k=>`${k.slice(0,4)}/${Number(k.slice(5,7))}`;
-// 許願的對象：清單裡的山（mountain_id），或消費者自填的山名（依名稱合併，key 為「c:名稱」）
-const wishKeyOf=w=>w.mountain_id||('c:'+wishNorm(w.custom_name));
-function wishTargetName(key){
-  if(!key.startsWith('c:'))return((wishData.mountains.find(m=>m.id===key)||{}).name)||'（已刪除）';
-  const w=wishData.wishes.find(x=>!x.mountain_id&&wishKeyOf(x)===key)||wishData.alerts.find(x=>!x.mountain_id&&wishKeyOf(x)===key);
-  return(w?w.custom_name:key.slice(2))+'（自填）';
-}
-const wishMName=wishTargetName;
-// 「我想探索看看」的體驗分類（與前台 wish.html 的 EXPS 相同）
-const WISH_EXPS=['親子同樂','迷霧森林','百岳森林','大片草原','高山湖泊','野地紮營','野溪溫泉','流星雨','百岳經典'];
-function wishTime(s){const d=new Date(s);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
-function wishRange(s,e){return!e||e===s?fmtDate(s):`${fmtDate(s)} ~ ${fmtDate(e)}`}
-
-function renderWish(){
-  const el=document.getElementById('wish-body');if(!el)return;
-  if(!adminPw()){
-    el.innerHTML=`<div class="mb-unlock"><div class="fin-header" style="justify-content:center"><h3>許願池</h3></div>
-      <p>請再輸入一次後台密碼以讀取許願資料</p>
-      <input type="password" id="wish-pw" placeholder="密碼" onkeydown="if(event.key==='Enter')unlockWish()">
-      <button class="btn btn-p" onclick="unlockWish()">確認</button></div>`;
-    return;
-  }
-  if(wishErr&&!wishData){el.innerHTML=`<div class="empty"><p>讀取許願池失敗：${esc(wishErr)}</p><button class="btn btn-o" onclick="loadWish()" style="margin-top:12px">重試</button></div>`;return}
-  if(!wishData){el.innerHTML='<div class="empty"><p>讀取中…</p></div>';return}
-  const pub=location.href.replace(/[^/]*([?#].*)?$/,'')+'wish.html';
-  const tabs=[['stats','許願統計'],['mountains','山與梯次'],['wishes',`許願名單（${wishData.wishes.length}）`],['signups',`報名名單（${wishData.signups.length}）`]];
-  el.innerHTML=`<div class="fin-header"><h3>許願池</h3><div class="filters">${tabs.map(([k,l])=>`<button class="chip ${wishTab===k?'on':''}" onclick="setWishTab('${k}')">${l}</button>`).join('')}</div>
-      <span style="flex:1"></span><a class="btn btn-o" href="${escAttr(pub)}" target="_blank" rel="noopener">開啟前台 ↗</a><button class="btn btn-s" onclick="loadWish()">重新整理</button></div>
-    <div id="wish-tab"></div>`;
-  document.getElementById('wish-tab').innerHTML={stats:wishStatsHTML,mountains:wishMountainsHTML,wishes:wishListHTML,signups:wishSignupsHTML}[wishTab]();
-}
-
-function wishMonths(){
-  const n=today();const out=[];
-  for(let i=0;i<12;i++){const d=new Date(n.getFullYear(),n.getMonth()+i,1);out.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`)}
-  const extra=[...new Set(wishData.wishes.map(w=>w.wish_month.slice(0,7)))].filter(k=>k>=out[0]&&!out.includes(k));
-  return[...out,...extra].sort();
-}
-function wishStatsHTML(){
-  const W=wishData,thisM=dateStr(today()).slice(0,7);
-  const upcoming=W.wishes.filter(w=>w.wish_month.slice(0,7)>=thisM);
-  const months=wishMonths();
-  const cnt={};upcoming.forEach(w=>{const k=wishKeyOf(w)+'|'+w.wish_month.slice(0,7);cnt[k]=(cnt[k]||0)+1});
-  const sent=new Set(W.alerts.map(a=>wishKeyOf(a)+'|'+a.wish_month.slice(0,7)));
-  const reached=Object.values(cnt).filter(v=>v>=W.threshold).length;
-  const openSet=new Set();W.mountains.forEach(m=>trips.filter(t=>wishTripOpen(t)&&wishMatch(m,t)).forEach(t=>openSet.add(m.id+'|'+t.date.slice(0,7))));
-  const customKeys=[...new Set(upcoming.filter(w=>!w.mountain_id).map(wishKeyOf))];
-  const rows=[...W.mountains.map(m=>({key:m.id,name:m.name,active:m.active})),...customKeys.map(k=>({key:k,name:wishTargetName(k),active:true}))]
-    .map(r=>({...r,total:months.reduce((s,k)=>s+(cnt[r.key+'|'+k]||0),0)})).sort((a,b)=>b.total-a.total);
-  const signupPax=W.signups.filter(s=>(s.start_date||'')>=dateStr(today())).reduce((s,x)=>s+x.party_size,0);
-  return`
-    <div class="wp-status">寄信通知：${W.mail?'<span class="wp-pill ok">已設定</span> <button class="btn btn-s" onclick="wishTestMail()">寄測試信</button>':'<span class="wp-pill no">尚未設定，不會寄信</span><span class="wp-note">請在 Supabase → Edge Functions → Secrets 設定 RESEND_API_KEY 與 NOTIFY_EMAIL（見 WISH_SETUP.md）</span>'}
-      <span class="wp-pill g">門檻：同山同月 ${W.threshold} 人</span></div>
-    <div class="fin-summary">
-      <div class="fin-card"><div class="fc-label">未來的許願</div><div class="fc-val">${upcoming.length}</div></div>
-      <div class="fin-card"><div class="fc-label">達門檻的山・月</div><div class="fc-val">${reached}</div></div>
-      <div class="fin-card"><div class="fc-label">開放許願的山</div><div class="fc-val">${W.mountains.filter(m=>m.active).length}</div></div>
-      <div class="fin-card"><div class="fc-label">即將出發的報名人數</div><div class="fc-val">${signupPax}</div></div>
-    </div>
-    <p class="wp-note" style="margin-bottom:8px">黃色＝達門檻（寄過信會標「已通知」）；綠色底線＝那個月團務列表有「報名中」的梯次；標「自填」的是消費者自己填的山名。點格子看許願名單。</p>
-    ${W.mountains.length?`<div class="fin-tbl-wrap"><table class="fin-tbl wp-x wp-grid"><thead><tr><th>山</th><th>合計</th>${months.map(k=>`<th>${wishYM(k)}</th>`).join('')}</tr></thead><tbody>
-    ${rows.map(r=>`<tr class="${r.active?'':'wp-off'}"><td><b>${esc(r.name)}</b></td><td><b>${r.total}</b></td>${months.map(k=>{
-      const key=r.key+'|'+k,v=cnt[key]||0;const cls=v>=W.threshold?'c3':v>=2?'c2':'c1';
-      return`<td class="${openSet.has(key)?'wp-open':''}" onclick="wishView(${escAttr(JSON.stringify(r.key))},'${k}')">${v?`<span class="wp-c ${cls}">${v}</span>`:'<span class="wp-zero">·</span>'}${sent.has(key)?'<span class="wp-sent">已通知</span>':''}</td>`}).join('')}</tr>`).join('')}
-    </tbody></table></div>`:'<div class="empty"><p>還沒有山，請到「山與梯次」新增</p></div>'}`;
-}
-function wishView(mid,ym){wishFMt=mid;wishFMonth=ym;setWishTab('wishes')}
-async function wishTestMail(){try{await wishApi('admin:testMail');toast('測試信已寄出，請查看內部信箱')}catch(e){toast(e.message)}}
-
-function wishMountainsHTML(){
-  const W=wishData;const wc={};W.wishes.forEach(w=>wc[w.mountain_id]=(wc[w.mountain_id]||0)+1);
-  // 團務列表中還沒對應到任何山的活動名稱（未來的梯次），點一下就能加入
-  const td=dateStr(today());
-  const unmatched=[...new Set(trips.filter(t=>t.date&&t.date>=td&&!W.mountains.some(m=>wishMatch(m,t))).map(t=>t.name))].sort();
-  const allNames=[...new Set(trips.map(t=>t.name))].sort();
-  return`<div class="mb-form">
-      <div class="f-row span2"><label>山的名稱 *</label><input id="wn-name" list="wish-trip-names" placeholder="可直接選團務列表的活動名稱"></div>
-      <div class="f-row span2"><label>別名（選填，用頓號分隔）</label><input id="wn-alias" placeholder="例：北大武、北大武山"></div>
-      <div class="f-row"><label>地區</label><input id="wn-region" list="wish-regions" placeholder="北部／中部／南部／東部"></div>
-      <div class="f-row"><label>海拔（m）</label><input id="wn-ele" type="number" min="0"></div>
-      <div class="f-row"><label>排序</label><input id="wn-sort" type="number" value="${W.mountains.length+1}"></div>
-      <div class="f-row" style="display:flex;align-items:flex-end"><button class="btn btn-p" style="width:100%;justify-content:center" onclick="wishAddMountain()">新增</button></div>
-      <datalist id="wish-regions"><option value="北部"><option value="中部"><option value="南部"><option value="東部"></datalist>
-      <datalist id="wish-trip-names">${allNames.map(n=>`<option value="${escAttr(n)}">`).join('')}</datalist>
-      <div class="span4 wp-note">團務列表中名稱<b>包含</b>山名或別名的活動都會自動連動，例如「玉山主峰」會對應「玉山主峰兩天一夜」「玉山主峰2天2夜」。狀態是「報名中」且還沒過報名截止的梯次，會出現在前台讓消費者直接報名。</div>
-      ${unmatched.length?`<div class="span4"><div class="wp-note" style="margin-bottom:6px">團務列表中還沒加入許願池的活動（點一下帶入）：</div><div class="filters">${unmatched.map(n=>`<button class="chip" onclick="document.getElementById('wn-name').value=${escAttr(JSON.stringify(n))};document.getElementById('wn-name').focus()">${esc(n)}</button>`).join('')}</div></div>`:''}
-    </div>
-    ${W.mountains.map(m=>{
-      const ts=wishTripsOf(m),openN=ts.filter(wishTripOpen).length,isOpen=wishOpenIds.has(m.id);
-      return`<div class="wp-mt ${isOpen?'open':''}" id="wmt-${m.id}">
-        <div class="wp-mt-top" onclick="wishToggle('${m.id}')"><div><b class="${m.active?'':'wp-off'}">${esc(m.name)}</b>${(m.aliases||[]).length?`<span class="wp-note">（${esc(m.aliases.join('、'))}）</span>`:''}${m.active?'':' <span class="wp-pill no">不開放</span>'}</div>
-          <div class="wp-note">${m.form_url?'<span class="wp-pill ok">有報名表單</span> ':''}${esc(m.region||'未設地區')}・${(m.tags||[]).length?esc(m.tags.join('、'))+'・':''}前台可報名 ${openN} 梯・${wc[m.id]||0} 筆許願</div></div>
-        <div class="wp-mt-body">
-          <div class="mb-form">
-            <div class="f-row span2"><label>山的名稱</label><input id="wm-name-${m.id}" list="wish-trip-names" value="${escAttr(m.name)}"></div>
-            <div class="f-row span2"><label>別名（用頓號分隔）</label><input id="wm-alias-${m.id}" value="${escAttr((m.aliases||[]).join('、'))}"></div>
-            <div class="f-row"><label>地區</label><input id="wm-region-${m.id}" list="wish-regions" value="${escAttr(m.region||'')}"></div>
-            <div class="f-row"><label>海拔（m）</label><input id="wm-ele-${m.id}" type="number" value="${m.elevation??''}"></div>
-            <div class="f-row"><label>排序</label><input id="wm-sort-${m.id}" type="number" value="${m.sort}"></div>
-            <div class="f-row"><label>前台</label><select id="wm-active-${m.id}"><option value="1" ${m.active?'selected':''}>開放許願</option><option value="0" ${m.active?'':'selected'}>不開放</option></select></div>
-            <div class="f-row span4"><label>Google 報名表單連結（前台「前往報名」會直接打開；沒填的話用內建報名表單）</label><input id="wm-form-${m.id}" type="url" placeholder="https://docs.google.com/forms/…" value="${escAttr(m.form_url||'')}"></div>
-            <div class="f-row"><label>困難度</label><input id="wm-fd-${m.id}" placeholder="★★★☆☆☆" value="${escAttr((m.facts||{}).difficulty||'')}"></div>
-            <div class="f-row"><label>海拔</label><input id="wm-fa-${m.id}" placeholder="2,600 → 3,952m" value="${escAttr((m.facts||{}).altitude||'')}"></div>
-            <div class="f-row"><label>來回距離</label><input id="wm-fk-${m.id}" placeholder="21.8km" value="${escAttr((m.facts||{}).distance||'')}"></div>
-            <div class="f-row"><label>總時間</label><input id="wm-ft-${m.id}" placeholder="2天2夜" value="${escAttr((m.facts||{}).duration||'')}"></div>
-            <div class="f-row span4"><label>景點照片網址（「我想探索看看」卡片最上方顯示；https 網址或網站內的 images/… 路徑）</label><input id="wm-photo-${m.id}" placeholder="https://… 或 images/mountains/…" value="${escAttr(m.photo_url||'')}"></div>
-            <div class="f-row span4"><label>前台介紹（「我想探索看看」會顯示）</label><textarea id="wm-intro-${m.id}" rows="3" maxlength="1000">${esc(m.intro||'')}</textarea></div>
-            <div class="f-row span4"><label>體驗分類（「我想探索看看」選到這些體驗時推薦這座山）</label><div class="filters" id="wm-tags-${m.id}">${WISH_EXPS.map(t=>`<label class="chip wp-tag ${(m.tags||[]).includes(t)?'on':''}"><input type="checkbox" value="${t}" ${(m.tags||[]).includes(t)?'checked':''} onchange="this.parentNode.classList.toggle('on',this.checked)">${t}</label>`).join('')}</div></div>
-            <div class="mb-form-acts"><button class="btn btn-g" style="color:var(--red)" onclick="wishDelMountain('${m.id}')">刪除</button><button class="btn btn-p" onclick="wishSaveMountain('${m.id}')">儲存</button></div>
-          </div>
-          <div class="wp-note" style="margin:4px 0 6px;font-weight:600">團務列表中對應的梯次（未結束）</div>
-          ${ts.length?`<div class="mb-rows">${ts.map(t=>{const st=STATUS_OPTS.find(s=>s.key===t.status)||STATUS_OPTS[0];const op=wishTripOpen(t);
-            return`<div class="mb-row"><div class="mb-row-main"><b>${esc(t.name)}</b> <span class="wp-note">${wishRange(t.date,t.dateEnd)}・報名 ${t.registered||0}/${t.capacity||0}</span></div>
-              <span class="pill ${st.cls}">${st.label}</span>${op?'<span class="wp-pill ok">前台可報名</span>':'<span class="wp-pill">前台不顯示</span>'}
-              <button class="btn btn-s" style="padding:3px 8px;font-size:12px" onclick="jumpToCard('${t.id}')">團務 ↗</button></div>`}).join('')}</div>`
-            :'<div class="mb-none">團務列表中沒有對應的梯次。新增活動時，名稱包含「'+esc(m.name)+'」就會自動連動</div>'}
-        </div></div>`}).join('')||'<div class="empty"><p>還沒有山</p></div>'}`;
-}
-function wishToggle(id){wishOpenIds.has(id)?wishOpenIds.delete(id):wishOpenIds.add(id);document.getElementById('wmt-'+id).classList.toggle('open')}
-const wv=id=>document.getElementById(id).value.trim();
-function wishAddMountain(){
-  if(!wv('wn-name'))return toast('請填山的名稱');
-  wishAct('admin:saveMountain',{name:wv('wn-name'),aliases:wv('wn-alias'),region:wv('wn-region'),elevation:wv('wn-ele'),sort:wv('wn-sort')},'已新增');
-}
-function wishSaveMountain(id){
-  wishAct('admin:saveMountain',{id,name:wv('wm-name-'+id),aliases:wv('wm-alias-'+id),region:wv('wm-region-'+id),elevation:wv('wm-ele-'+id),sort:wv('wm-sort-'+id),active:wv('wm-active-'+id)==='1',
-    intro:wv('wm-intro-'+id),form_url:wv('wm-form-'+id),photo_url:wv('wm-photo-'+id),facts:{difficulty:wv('wm-fd-'+id),altitude:wv('wm-fa-'+id),distance:wv('wm-fk-'+id),duration:wv('wm-ft-'+id)},tags:[...document.querySelectorAll('#wm-tags-'+id+' input:checked')].map(x=>x.value)},'已儲存');
-}
-async function wishDelMountain(id){
-  const m=wishData.mountains.find(x=>x.id===id);
-  if(!confirm(`確定從許願池刪除「${m.name}」？（團務列表的活動不受影響）`))return;
-  try{await wishApi('admin:deleteMountain',{id})}
-  catch(e){
-    if(!/筆許願/.test(e.message)){toast(e.message);return}
-    if(!confirm(e.message+'\n\n仍然要連同許願一起刪除嗎？'))return;
-    try{await wishApi('admin:deleteMountain',{id,force:true})}catch(x){toast(x.message);return}
-  }
-  wishOpenIds.delete(id);toast('已刪除');loadWish();
-}
-
-function wishFiltered(){return wishData.wishes.filter(w=>(!wishFMt||wishKeyOf(w)===wishFMt)&&(!wishFMonth||w.wish_month.startsWith(wishFMonth)))}
-function wishListHTML(){
-  const W=wishData,list=wishFiltered();
-  const months=[...new Set(W.wishes.map(w=>w.wish_month.slice(0,7)))].sort();
-  const sentAlert=wishFMt&&wishFMonth&&W.alerts.some(a=>wishKeyOf(a)===wishFMt&&a.wish_month.startsWith(wishFMonth));
-  const customKeys=[...new Set(W.wishes.filter(w=>!w.mountain_id).map(wishKeyOf))];
-  return`<div class="mb-bar">
-      <select class="wp-sel" onchange="wishFMt=this.value;renderWish()"><option value="">全部的山</option>${W.mountains.map(m=>`<option value="${m.id}" ${m.id===wishFMt?'selected':''}>${esc(m.name)}</option>`).join('')}${customKeys.map(k=>`<option value="${escAttr(k)}" ${k===wishFMt?'selected':''}>${esc(wishTargetName(k))}</option>`).join('')}</select>
-      <select class="wp-sel" onchange="wishFMonth=this.value;renderWish()"><option value="">全部月份</option>${months.map(k=>`<option value="${k}" ${k===wishFMonth?'selected':''}>${wishYM(k)}</option>`).join('')}</select>
-      <span class="wp-note">共 ${list.length} 筆</span>
-      ${sentAlert?`<button class="btn btn-o" style="margin-left:auto" onclick="wishResetAlert()" title="之後再達門檻時會再寄一次">重新開放門檻通知</button>`:''}
-      <button class="btn btn-o" ${sentAlert?'style="margin-left:0"':''} onclick="wishExport()">匯出 CSV</button>
-    </div>
-    <div class="fin-tbl-wrap"><table class="fin-tbl wp-x wp-tbl"><thead><tr><th>許願時間</th><th>山</th><th>月份</th><th>想出發日期</th><th>姓名</th><th>Email</th><th>手機</th><th>想說的話</th><th></th></tr></thead><tbody>
-    ${list.map(w=>`<tr><td>${wishTime(w.created_at)}</td><td>${esc(wishTargetName(wishKeyOf(w)))}</td><td>${wishYM(w.wish_month)}</td><td class="wp-wrap">${wishRangesText(w)||'<span class="wp-zero">—</span>'}</td><td>${esc(w.name)}</td><td>${esc(w.email)}</td><td>${esc(w.phone||'')}</td><td class="wp-wrap">${esc(w.note||'')}</td><td><button class="mb-del" title="刪除" onclick="wishDel('${w.id}')">&times;</button></td></tr>`).join('')||'<tr><td colspan="9" class="mb-none">沒有許願</td></tr>'}
-    </tbody></table></div>`;
-}
-// 許願者填的想出發日期：多段區間（第一天～最後一天），或舊資料的單一日期
-function wishRangesText(w){
-  const rs=(w.preferred_ranges&&w.preferred_ranges.length)?w.preferred_ranges:(w.preferred_date?[{start:w.preferred_date,end:w.preferred_date}]:[]);
-  return rs.map(r=>r.end&&r.end!==r.start?`${fmtDate(r.start)} ~ ${fmtDate(r.end)}`:fmtDate(r.start)).join('、');
-}
-function wishDel(id){if(confirm('確定刪除這筆許願？'))wishAct('admin:deleteWish',{id},'已刪除')}
-function wishResetAlert(){if(confirm('重新開放後，下一位許願時若仍達門檻會再寄一次通知。確定？'))wishAct('admin:resetAlert',wishFMt.startsWith('c:')?{custom_name:wishTargetName(wishFMt).replace(/（自填）$/,''),wish_month:wishFMonth+'-01'}:{mountain_id:wishFMt,wish_month:wishFMonth+'-01'},'已重新開放')}
-
-function wishSignupsHTML(){
-  const list=wishData.signups;
-  return`<div class="mb-bar"><span class="wp-note">共 ${list.length} 筆・${list.reduce((a,s)=>a+s.party_size,0)} 人。報名不會自動改團務列表的報名人數，確認後請手動更新</span><button class="btn btn-o" onclick="wishExportSignups()">匯出 CSV</button></div>
-    <div class="fin-tbl-wrap"><table class="fin-tbl wp-x wp-tbl"><thead><tr><th>報名時間</th><th>梯次</th><th>日期</th><th>姓名</th><th>人數</th><th>手機</th><th>Email</th><th>備註</th><th>通知信</th><th></th></tr></thead><tbody>
-    ${list.map(s=>`<tr><td>${wishTime(s.created_at)}</td><td>${trips.some(t=>t.id===s.trip_id)?`<a href="#" onclick="event.preventDefault();jumpToCard(${escAttr(JSON.stringify(s.trip_id))})">${esc(s.mountain_name)}</a>`:esc(s.mountain_name)}</td><td>${s.start_date?wishRange(s.start_date,s.end_date):''}</td><td>${esc(s.name)}</td><td>${s.party_size}</td><td>${esc(s.phone)}</td><td>${esc(s.email)}</td><td class="wp-wrap">${esc(s.note||'')}</td><td>${s.mailed_at?'<span class="wp-pill ok">已寄</span>':'<span class="wp-pill no">未寄</span>'}</td><td><button class="mb-del" title="刪除" onclick="wishDelSignup('${s.id}')">&times;</button></td></tr>`).join('')||'<tr><td colspan="10" class="mb-none">還沒有報名</td></tr>'}
-    </tbody></table></div>`;
-}
-function wishDelSignup(id){if(confirm('確定刪除這筆報名？'))wishAct('admin:deleteSignup',{id},'已刪除')}
-
-function wishCsv(name,head,rows){
-  const q=v=>{let s=String(v??'');if(/^[=+\-@]/.test(s))s="'"+s;return/[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+[head,...rows].map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download=name;a.click();
-}
-function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份','想出發日期','姓名','Email','手機','想說的話'],wishFiltered().map(w=>[new Date(w.created_at).toLocaleString('zh-TW'),wishTargetName(wishKeyOf(w)),wishYM(w.wish_month),wishRangesText(w),w.name,w.email,w.phone,w.note]))}
-function wishExportSignups(){wishCsv('報名名單.csv',['報名時間','梯次','出發','回程','姓名','人數','手機','Email','備註'],wishData.signups.map(s=>[new Date(s.created_at).toLocaleString('zh-TW'),s.mountain_name,s.start_date,s.end_date,s.name,s.party_size,s.phone,s.email,s.note]))}
-
-const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members','wish'];
-const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance',members:'nav-members',wish:'nav-wish'};
-const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance',members:'mob-members',wish:'mob-wish'};
-const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance',members:'mtab-members',wish:'mtab-wish'};
+const VIEW_IDS=['schedule','list','calendar','mktgview','finance'];
+const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance'};
+const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance'};
+const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance'};
 function setView(mode){
   viewMode=mode;
   try{localStorage.setItem('hk-view',mode)}catch{}
@@ -2780,8 +2068,6 @@ function setView(mode){
   if(mode==='calendar')renderCal();
   if(mode==='mktgview')renderMktgView();
   if(mode==='finance')renderFinance();
-  if(mode==='members')loadMembers();
-  if(mode==='wish')loadWish();
 }
 function toggleMobileMenu(){document.getElementById('nav-mobile-menu').classList.add('open')}
 function closeMobileMenu(){document.getElementById('nav-mobile-menu').classList.remove('open')}
@@ -3003,7 +2289,6 @@ async function loadTrips(){
   if(error){console.error('load trips',error);toast('讀取資料失敗');return}
   trips=(data||[]).map(r=>({id:r.id,...r.data}));
   render();
-  if(viewMode==='wish'&&wishData)renderWish();
 }
 
 async function initDB(){
@@ -3012,7 +2297,6 @@ async function initDB(){
   if(sb){
     store=SupaStore;
     await loadAllRules();
-    if(viewMode==='members')renderMembers();  // 會員等級來自 settings，載入後補畫
     await loadTrips();
     // 即時同步：任何人改動 → 重新讀取
     sb.channel('trips-rt')
@@ -3051,7 +2335,7 @@ async function tryLogin(){
   let h;
   try{h=await sha256hex(pw)}
   catch(e){err.textContent='此瀏覽器無法驗證，請用 Chrome/Safari 並確認網址是 https';return}
-  if(h===EDIT_PW_HASH){try{localStorage.setItem('hk-auth','1');localStorage.setItem('hk-admin-pw',pw)}catch{}enterApp()}
+  if(h===EDIT_PW_HASH){try{localStorage.setItem('hk-auth','1')}catch{}enterApp()}
   else{err.textContent='密碼錯誤';el.select()}
 }
 let appStarted=false;
@@ -3061,16 +2345,17 @@ function enterApp(){
   loadTaskReminders();initCal();render();initDB();
   try{const sv=localStorage.getItem('hk-view');if(sv&&VIEW_IDS.includes(sv))setView(sv)}catch{}
 }
-function logout(){try{localStorage.removeItem('hk-auth');localStorage.removeItem('hk-admin-pw')}catch{}location.reload()}
+function logout(){try{localStorage.removeItem('hk-auth')}catch{}location.reload()}
 
 // ── Render ──
 function filtered(){
   let list=[...trips];
-  if(filter==='done')list=list.filter(t=>t.status==='done'||t.status==='collapsed');
-  else if(filter==='promo')list=list.filter(t=>t.promoted>0&&t.status!=='done'&&t.status!=='collapsed');
-  else if(filter==='soon')list=list.filter(t=>{const d=daysUntil(t.deadline);return d>=0&&d<=7&&t.status!=='done'&&t.status!=='collapsed'});
-  else if(filter==='almost')list=list.filter(t=>t.capacity>0&&t.registered/t.capacity>=0.8&&t.status!=='done'&&t.status!=='collapsed');
-  else list=list.filter(t=>t.status!=='done'&&t.status!=='collapsed');
+  const ended=s=>s==='done'||s==='collapsed'||s==='notFormed';
+  if(filter==='done')list=list.filter(t=>ended(t.status));
+  else if(filter==='promo')list=list.filter(t=>t.promoted>0&&!ended(t.status));
+  else if(filter==='soon')list=list.filter(t=>{const d=daysUntil(t.deadline);return d>=0&&d<=7&&!ended(t.status)});
+  else if(filter==='almost')list=list.filter(t=>t.capacity>0&&t.registered/t.capacity>=0.8&&!ended(t.status));
+  else list=list.filter(t=>!ended(t.status));
   if(dateFrom)list=list.filter(t=>t.date>=dateFrom);
   if(dateTo)list=list.filter(t=>t.date<=dateTo);
   return list;
