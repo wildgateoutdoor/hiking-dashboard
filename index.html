@@ -2350,11 +2350,12 @@ function logout(){try{localStorage.removeItem('hk-auth')}catch{}location.reload(
 // ── Render ──
 function filtered(){
   let list=[...trips];
-  if(filter==='done')list=list.filter(t=>t.status==='done'||t.status==='collapsed');
-  else if(filter==='promo')list=list.filter(t=>t.promoted>0&&t.status!=='done'&&t.status!=='collapsed');
-  else if(filter==='soon')list=list.filter(t=>{const d=daysUntil(t.deadline);return d>=0&&d<=7&&t.status!=='done'&&t.status!=='collapsed'});
-  else if(filter==='almost')list=list.filter(t=>t.capacity>0&&t.registered/t.capacity>=0.8&&t.status!=='done'&&t.status!=='collapsed');
-  else list=list.filter(t=>t.status!=='done'&&t.status!=='collapsed');
+  const ended=s=>s==='done'||s==='collapsed'||s==='notFormed';
+  if(filter==='done')list=list.filter(t=>ended(t.status));
+  else if(filter==='promo')list=list.filter(t=>t.promoted>0&&!ended(t.status));
+  else if(filter==='soon')list=list.filter(t=>{const d=daysUntil(t.deadline);return d>=0&&d<=7&&!ended(t.status)});
+  else if(filter==='almost')list=list.filter(t=>t.capacity>0&&t.registered/t.capacity>=0.8&&!ended(t.status));
+  else list=list.filter(t=>!ended(t.status));
   if(dateFrom)list=list.filter(t=>t.date>=dateFrom);
   if(dateTo)list=list.filter(t=>t.date<=dateTo);
   return list;
