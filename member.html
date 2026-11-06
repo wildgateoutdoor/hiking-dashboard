@@ -62,11 +62,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .hint{font-size:13px;color:var(--text-muted);line-height:1.7;max-width:300px}
 .foot{text-align:center;margin-top:24px}
 .foot button{background:none;border:none;color:var(--text-muted);font:13px var(--font);text-decoration:underline;cursor:pointer}
+/* 登入與提示畫面：整頁品牌綠底 */
+body.auth{background:var(--brand);color:#F3EFE6}
+.auth .center h1{color:#F3EFE6}
+.auth .center p,.auth .hint{color:rgba(243,239,230,.75)}
+.auth .brand-tile{background:none;width:auto;height:auto}
+.auth .brand-tile img{height:72px}
+.auth .p-btn{background:#F3EFE6;color:var(--brand)}
+.auth .g-btn{border-color:transparent}
+.auth .spin{border-color:rgba(243,239,230,.25);border-top-color:#F3EFE6}
 .spin{width:28px;height:28px;border:3px solid var(--border-sub);border-top-color:var(--brand);border-radius:50%;animation:sp 0.8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+<script>document.body.classList.add('auth')</script>
 <div id="app"><div class="center"><div class="spin"></div></div></div>
 
 <script>
@@ -96,6 +106,7 @@ function fmtRange(s,e){
 function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function showMsg(title,msg,btn){
+  document.body.classList.add('auth');
   app.innerHTML=`<div class="center"><div class="brand-tile"><img src="images/logo-square.png" alt="入野門"></div><h1>${esc(title)}</h1><p>${esc(msg)}</p>${btn||''}</div>`;
 }
 const RELOAD_BTN='<button class="p-btn" onclick="location.reload()">重新整理</button>';
@@ -138,6 +149,7 @@ async function load(session){
 function setTab(t){tab=t;render()}
 
 function render(){
+  document.body.classList.remove('auth');
   const{member:m,balances,ledger,trips}=data;
   const today=todayStr();
   const tripItems=trips.map(t=>{
