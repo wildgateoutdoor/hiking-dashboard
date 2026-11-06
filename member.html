@@ -133,7 +133,7 @@ function showMsg(title,msg,btn){
 const RELOAD_BTN='<button class="p-btn" onclick="location.reload()">重新整理</button>';
 function pageUrl(){return location.origin+location.pathname}
 function showLogin(){
-  showMsg('會員中心',['使用 Google 帳號登入','查看儲值金、點數與參加過的行程'],
+  showMsg('會員中心','查看儲值金、點數與參加過的行程',
     `<button class="g-btn" onclick="login()">${G_ICON}使用 Google 登入</button>`);
 }
 async function login(){
