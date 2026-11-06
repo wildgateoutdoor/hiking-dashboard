@@ -744,7 +744,12 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .qt-acts{display:flex;gap:2px;justify-content:flex-end}
 .qt-none{padding:40px 14px!important;text-align:center!important;color:var(--text-muted)!important}
 /* 分類列 */
-.qt-grp td{padding-top:18px!important;border-bottom:1px solid var(--border-sub)}
+.qt-grp td{padding-top:12px!important;border-bottom:1px solid var(--border-sub)}
+.qt-table tbody tr.qt-subtot td,.qt-table tbody tr.qt-subtot:not(.detail-row) td:last-child,.qt-table tbody tr.qt-subtot:not(.detail-row):hover td:last-child{background:color-mix(in srgb,var(--qc) 16%,transparent);border-bottom:none;padding:11px 14px;color:var(--text-2);font-size:13px;font-weight:600}
+.qt-table tbody tr.qt-subtot td.b{color:var(--text);font-size:15px;font-weight:700}
+.qt-table tbody tr.qt-subtot td:first-child{border-radius:0 0 0 12px}
+.qt-table tbody tr.qt-subtot td:last-child{border-radius:0 0 12px 0}
+.qt-table tbody tr.qt-gap td{height:28px;padding:0;border:none}
 .qt-grp-tag{display:inline-flex;align-items:center;gap:8px;padding:4px 6px 4px 12px;border-radius:999px;background:color-mix(in srgb,var(--qc) 30%,transparent)}
 .qt-grp-tag i{width:10px;height:10px;border-radius:50%;background:var(--qc);flex-shrink:0;box-shadow:0 0 0 2px color-mix(in srgb,var(--qc) 45%,transparent)}
 .qt-grp-tag input[type=text]{height:28px;width:110px;font-weight:700;padding:0 8px}
@@ -3189,10 +3194,9 @@ function quoteRenderDetail(el){
   const typeSel=(c,it)=>`<select class="qt-select sm" onchange="quoteItemSet('${c.id}','${it.id}','type',this.value,false,true)">${Object.entries(QUOTE_TYPES).map(([k,v])=>`<option value="${k}"${it.type===k?' selected':''}>${v}</option>`).join('')}</select>`;
   const numIn=(c,it,f,cls)=>`<input class="qt-cell ${cls}" type="number" step="any" inputmode="decimal" value="${escAttr(String(it[f]??0))}" oninput="quoteItemSet('${c.id}','${it.id}','${f}',this.value,true)">`;
   const rowsH=q.cats.map(c=>{
-    const grp=`<tr class="qt-grp"><td colspan="4">
+    const grp=`<tr class="qt-grp"><td colspan="5">
         <span class="qt-grp-tag" style="--qc:${tc(c)}"><i></i><input type="text" class="qt-cell" value="${escAttr(c.name)}" placeholder="類別名稱" oninput="quoteCatSet('${c.id}','name',this.value)"></span>
         <span class="qt-grp-cnt">${c.items.length} 項</span></td>
-      <td class="r b" data-qc="${c.id}"></td>
       <td colspan="2"><div class="qt-acts">
         <label class="qt-color" title="類別顏色" style="--qc:${tc(c)}"><span></span><input type="color" value="${tc(c)}" onchange="quoteCatSet('${c.id}','color',this.value,true)"></label>
         <button class="qt-btn sm" onclick="quoteAddItem('${c.id}')">${QI.plus}項目</button>
@@ -3212,8 +3216,10 @@ function quoteRenderDetail(el){
         <td class="r"><button class="qt-icon del" title="刪除項目" onclick="quoteDelItem('${c.id}','${it.id}')">${QI.trash}</button></td>
       </tr>`;
     }).join('');
-    return grp+items;
-  }).join('');
+    // 每個類別底下自己的小計，類別之間留空隔開，避免小計看起來像下一個類別的
+    const sub=`<tr class="qt-subtot" style="--qc:${tc(c)}"><td colspan="4" class="r"><span data-qcn="${c.id}">${esc(c.name||'未命名')}</span> 小計</td><td class="r b" data-qc="${c.id}"></td><td colspan="2"></td></tr>`;
+    return grp+items+sub;
+  }).join('<tr class="qt-gap"><td colspan="7"></td></tr>');
   el.innerHTML=`
     <div class="qt-tabs">
       ${sib.map(x=>`<button class="qt-tab${x.id===q.id?' on':''}" data-qtab="${x.id}" onclick="quoteSelect('${x.id}')">${esc(x.origin||'未填出發地')}</button>`).join('')}
@@ -3307,7 +3313,7 @@ function quoteItemSet(cid,iid,f,v,isNum,rerender){
   quoteTouch();
   if(rerender)renderQuote();else quoteRecalc();
 }
-function quoteCatSet(cid,f,v,rerender){const{c}=quoteFind(cid);if(!c)return;c[f]=v;quoteTouch();if(rerender)renderQuote()}
+function quoteCatSet(cid,f,v,rerender){const{c}=quoteFind(cid);if(!c)return;c[f]=v;quoteTouch();if(rerender)renderQuote();else if(f==='name')document.querySelectorAll(`[data-qcn="${cid}"]`).forEach(n=>n.textContent=v||'未命名')}
 function quoteAddItem(cid){const{c}=quoteFind(cid);if(!c)return;c.items.push(quoteItem('','fixed',0,0));quoteTouch();renderQuote()}
 function quoteDelItem(cid,iid){
   const{c,it}=quoteFind(cid,iid);if(!c||!it)return;
