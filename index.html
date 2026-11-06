@@ -3051,7 +3051,7 @@ function quoteRoutes(){
 function quotePersist(){try{localStorage.setItem('hk-quote-sel',quoteSel||'');localStorage.setItem('hk-quote-route',quoteRoute==null?'':'r:'+quoteRoute)}catch{}}
 function quoteSelect(id){quoteFlush();const q=quoteSheets.find(x=>x.id===id);if(!q)return;quoteSel=id;quoteRoute=quoteRouteKey(q);quotePersist();renderQuote()}
 function quoteShowRoute(name){quoteFlush();quoteRoute=name;const qs=quoteSheets.filter(q=>quoteRouteKey(q)===name);if(!qs.some(q=>q.id===quoteSel))quoteSel=qs[0]?qs[0].id:null;quotePersist();renderQuote();window.scrollTo({top:0})}
-function quoteShowAll(){quoteFlush();quoteRoute=null;quotePersist();renderQuote()}
+function quoteShowAll(){quoteFlush();quoteRoute=null;quotePersist();renderQuote();window.scrollTo({top:0})}
 const QI={
   plus:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
   search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
@@ -3088,6 +3088,8 @@ function quotePagerHTML(page,pages,fn){
 
 function renderQuote(){
   const el=document.getElementById('quote-body');if(!el)return;
+  // 整頁重畫會讓頁面瞬間變短，先記住捲動位置，畫完再放回去（新增項目、改計算方式時畫面才不會跳回最上面）
+  const keepY=window.scrollY;
   if(!rulesReady){el.innerHTML='<div class="qt-card qt-none">載入中…</div>';return}
   if(quoteRoute!=null){
     const qs=quoteSheets.filter(q=>quoteRouteKey(q)===quoteRoute);
@@ -3106,9 +3108,10 @@ function renderQuote(){
       </aside>
       <section class="qt-body" id="qt-body"></section>
     </div>`;
-  quoteRenderNavList();
   const body=document.getElementById('qt-body');
   if(quoteRoute==null)quoteRenderOverview(body);else quoteRenderDetail(body);
+  quoteRenderNavList();
+  if(window.scrollY!==keepY)window.scrollTo(0,keepY);
 }
 function quoteRenderNavList(){
   const el=document.getElementById('qt-nav-list');if(!el)return;
@@ -3135,7 +3138,7 @@ function quoteAddRoute(){
   if(!name){toast('請輸入山名');if(inp)inp.focus();return}
   if(quoteSheets.some(q=>quoteRouteKey(q)===name)){quoteShowRoute(name);return}
   const q=quoteDefault(name,'台北出發',false);
-  quoteSheets.push(q);quoteSel=q.id;quoteRoute=name;quoteNavSearch='';quoteSave();quotePersist();renderQuote();
+  quoteSheets.push(q);quoteSel=q.id;quoteRoute=name;quoteNavSearch='';quoteSave();quotePersist();renderQuote();window.scrollTo({top:0});
   toast(`已新增「${name}」，請填入成本`);
 }
 function quoteAddOrigin(){
