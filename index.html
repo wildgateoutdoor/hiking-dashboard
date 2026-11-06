@@ -656,6 +656,66 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .mb-form{grid-template-columns:1fr 1fr}
   .mb-hide-sm{display:none}
 }
+/* 報價系統 */
+.qt-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:start}
+.qt-side{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:12px;position:sticky;top:72px}
+.qt-side .btn{width:100%;justify-content:center;margin-bottom:10px}
+.qt-search{width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font:14px var(--font);margin-bottom:8px}
+.qt-list{display:flex;flex-direction:column;gap:2px;max-height:calc(100vh - 220px);overflow:auto}
+.qt-grp{font-size:11px;font-weight:700;color:var(--text-muted);padding:8px 8px 2px}
+.qt-li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border:none;border-radius:var(--r);background:none;color:var(--text);font:14px var(--font);cursor:pointer;text-align:left;width:100%}
+.qt-li:hover{background:var(--surface-hover)}
+.qt-li.on{background:var(--accent-bg);color:var(--accent);font-weight:700}
+.qt-li small{font-size:11px;color:var(--text-muted);font-weight:400;white-space:nowrap}
+.qt-main{min-width:0}
+.qt-empty{padding:40px;text-align:center;color:var(--text-muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-lg)}
+.qt-titlebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.qt-in{padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);font:14px var(--font);min-width:0}
+.qt-in:focus,.qt-cell:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(61,139,102,.15)}
+.qt-route{font-size:17px;font-weight:700;flex:1 1 180px}
+.qt-origin{flex:0 1 140px}
+.qt-acts{display:flex;gap:6px}
+.qt-cards .fin-card input{width:100%;box-sizing:border-box;font:700 20px var(--font);border:1px solid var(--border);border-radius:6px;padding:2px 8px;background:var(--bg);color:var(--text);-moz-appearance:textfield}
+.qt-cards .fin-card.qt-key{border-color:#e9a25b;background:color-mix(in srgb,#f4a259 14%,var(--surface))}
+.qt-cards .fc-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.qt-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.qt-tbl th{background:var(--surface-alt);font-size:11px;font-weight:700;color:var(--text-muted);padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border-sub)}
+.qt-tbl th.qt-l,.qt-tbl td.qt-l{text-align:left}
+.qt-tbl .qt-band{background:#F4CBA0;color:#4a2c0c;font-size:14px;text-align:center;letter-spacing:.05em}
+.qt-tbl td{padding:4px 8px;border-bottom:1px solid var(--border-sub);text-align:right;white-space:nowrap;vertical-align:middle}
+.qt-tbl .qt-cat{background:var(--qc);color:#1d2620;text-align:center;vertical-align:middle;min-width:96px;border-right:1px solid var(--border-sub)}
+.qt-tbl .qt-iname{background:color-mix(in srgb,var(--qc) 38%,transparent)}
+.qt-cat input[type=text]{width:84px;text-align:center;font-weight:700;color:#1d2620;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.12)}
+.qt-cat-tools{display:flex;gap:4px;justify-content:center;align-items:center;margin-top:4px}
+.qt-cat-tools input[type=color]{width:22px;height:22px;padding:0;border:1px solid rgba(0,0,0,.2);border-radius:4px;background:none;cursor:pointer}
+.qt-mini{border:1px solid rgba(0,0,0,.18);background:rgba(255,255,255,.45);color:#1d2620;font:600 11px var(--font);border-radius:4px;padding:2px 6px;cursor:pointer}
+.qt-cell{padding:4px 6px;border:1px solid transparent;border-radius:4px;background:transparent;color:inherit;font:13px var(--font);box-sizing:border-box;-moz-appearance:textfield}
+.qt-cell:hover{border-color:var(--border)}
+.qt-cell::-webkit-inner-spin-button,.qt-cell::-webkit-outer-spin-button,.qt-cards input::-webkit-inner-spin-button,.qt-cards input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.qt-name{width:130px;text-align:center}
+.qt-num{width:80px;text-align:right}
+.qt-sm{width:52px;text-align:right}
+.qt-note{width:140px}
+.qt-type{padding:3px 4px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font:12px var(--font)}
+.qt-calc{display:flex;align-items:center;gap:4px;justify-content:flex-start}
+.qt-calc span{font-size:12px;color:var(--text-muted)}
+.qt-auto{color:var(--text-muted)}
+.qt-total{font-weight:700;font-variant-numeric:tabular-nums}
+.qt-sum td{background:var(--surface-alt);font-weight:700;font-size:14px}
+.qt-sum .qt-pos{color:var(--green,#27ae60)}.qt-sum .qt-neg{color:var(--red,#c0392b)}
+.qt-sim{margin-top:20px}
+.qt-sim-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;font-size:13px;color:var(--text-2)}
+.qt-sim-h h4{margin:0 8px 0 0;font-size:14px;color:var(--text)}
+.qt-sim-h input{width:56px}
+/* 蓋掉團務列表表格的最後一欄固定樣式 */
+.qt-tbl thead tr:last-child th:last-child,#qt-sim thead th:last-child{background:var(--surface-alt);position:static}
+.qt-tbl tbody td:last-child,#qt-sim tbody td:last-child{position:static;background:transparent}
+#qt-sim tbody tr.on td{background:var(--accent-bg)}
+@media(max-width:760px){
+  .qt-layout{grid-template-columns:1fr}
+  .qt-side{position:static}
+  .qt-list{max-height:220px}
+}
 </style>
 
 <div class="login-gate" id="login-gate">
@@ -685,6 +745,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <button class="nav-link" id="nav-finance" onclick="setView('finance')">收支總覽</button>
       <button class="nav-link" id="nav-members" onclick="setView('members')">會員管理</button>
       <button class="nav-link" id="nav-wish" onclick="setView('wish')">許願池</button>
+      <button class="nav-link" id="nav-quote" onclick="setView('quote')">報價系統</button>
     </div>
     <div class="nav-sep"></div>
     <div class="nav-util">
@@ -716,6 +777,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <button class="mob-tab" id="mtab-finance" onclick="setView('finance')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span>收支</span></button>
   <button class="mob-tab" id="mtab-members" onclick="setView('members')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>會員</span></button>
   <button class="mob-tab" id="mtab-wish" onclick="setView('wish')"><svg viewBox="0 0 24 24"><path d="M8 3l4 8 5-5 5 15H2L8 3z"/></svg><span>許願池</span></button>
+  <button class="mob-tab" id="mtab-quote" onclick="setView('quote')"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="10" y2="11"/><line x1="14" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="10" y2="15"/><line x1="14" y1="15" x2="16" y2="15"/><line x1="8" y1="19" x2="16" y2="19"/></svg><span>報價</span></button>
 </div>
 
 <div class="nav-mobile-menu" id="nav-mobile-menu" onclick="closeMobileMenu()">
@@ -727,6 +789,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
     <button class="nav-mob-link" id="mob-finance" onclick="setView('finance');closeMobileMenu()">收支總覽</button>
     <button class="nav-mob-link" id="mob-members" onclick="setView('members');closeMobileMenu()">會員管理</button>
     <button class="nav-mob-link" id="mob-wish" onclick="setView('wish');closeMobileMenu()">許願池</button>
+    <button class="nav-mob-link" id="mob-quote" onclick="setView('quote');closeMobileMenu()">報價系統</button>
     <div class="nav-mob-sep"></div>
     <button class="nav-mob-link" onclick="logout();closeMobileMenu()">登出</button>
     <button class="nav-mob-link" onclick="showReport();closeMobileMenu()">產生 LINE 日報</button>
@@ -814,6 +877,10 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
   <div id="view-wish" style="display:none">
     <div id="wish-body"></div>
+  </div>
+
+  <div id="view-quote" style="display:none">
+    <div id="quote-body"></div>
   </div>
 </div>
 
@@ -1313,7 +1380,7 @@ const DEF_MINGROUP=[
 const DEF_LODGE=[];
 const DEF_MEMBER_TIERS=['一般會員','銀卡會員','金卡會員'];
 const DEF_MEAL=[];
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing','hk-member-tiers':'memberTiers'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing','hk-member-tiers':'memberTiers','hk-quotes':'quoteSheets'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -1338,6 +1405,7 @@ async function loadAllRules(){
   equipPricing=m.equipPricing||localGet('hk-equip-pricing',[]);
   porterPricing=m.porterPricing||localGet('hk-porter-pricing',[]);
   memberTiers=m.memberTiers||localGet('hk-member-tiers',DEF_MEMBER_TIERS);
+  quoteSheets=m.quoteSheets||localGet('hk-quotes',null)||[quoteDefault('眠月線','台北出發',true)];
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
@@ -1349,6 +1417,7 @@ async function loadAllRules(){
     if(!m.porterPricing)saveToLS('hk-porter-pricing',porterPricing);
   }
   rulesReady=true;
+  if(viewMode==='quote')renderQuote();
 }
 
 function matchRuleIn(rules,name){
@@ -2764,10 +2833,232 @@ function wishCsv(name,head,rows){
 function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份','想出發日期','姓名','Email','手機','想說的話'],wishFiltered().map(w=>[new Date(w.created_at).toLocaleString('zh-TW'),wishTargetName(wishKeyOf(w)),wishYM(w.wish_month),wishRangesText(w),w.name,w.email,w.phone,w.note]))}
 function wishExportSignups(){wishCsv('報名名單.csv',['報名時間','梯次','出發','回程','姓名','人數','手機','Email','備註'],wishData.signups.map(s=>[new Date(s.created_at).toLocaleString('zh-TW'),s.mountain_name,s.start_date,s.end_date,s.name,s.party_size,s.phone,s.email,s.note]))}
 
-const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members','wish'];
-const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance',members:'nav-members',wish:'nav-wish'};
-const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance',members:'mob-members',wish:'mob-wish'};
-const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance',members:'mtab-members',wish:'mtab-wish'};
+// ── 報價系統：每個團的成本設定（存在 settings.quoteSheets）──
+let quoteSheets=[],quoteSel=null,quoteSearch='',_quoteSaveTimer=null;
+try{quoteSel=localStorage.getItem('hk-quote-sel')}catch{}
+const QUOTE_TYPES={fixed:'固定數量',pax:'依人數',pct_in:'% 內含',pct:'% 團費'};
+function quoteItem(name,type,unit,qty,extra){return Object.assign({id:genId(),name,type,unit,qty,offset:0,rate:0,note:''},extra||{})}
+// 預設結構（demo=true 帶入眠月線台北出發的範例數字）
+function quoteDefault(route,origin,demo){
+  const d=demo?1:0,v=(n)=>d?n:0;
+  const cat=(name,color,items)=>({id:genId(),name,color,items});
+  return{id:genId(),route:route||'',origin:origin||'台北出發',price:v(7200),pax:v(7),simFrom:3,simTo:12,note:'',updatedAt:Date.now(),cats:[
+    cat('嚮導','#7FA7AD',[quoteItem('嚮導費','fixed',v(5000),v(2)),quoteItem('交通','fixed',v(750),v(2)),quoteItem('門票','fixed',v(200),v(1))]),
+    cat('協作','#F7D57A',[quoteItem('協作費','fixed',0,0),quoteItem('交通','fixed',0,0),quoteItem('門票','fixed',0,0)]),
+    cat('交通','#9CC285',[quoteItem('車資','fixed',v(15000),v(1)),quoteItem('門票 / 停車費','fixed',v(100),v(1))]),
+    cat('餐費','#E6C7D2',[quoteItem('包餐','fixed',0,0),quoteItem('食材','pax',v(300),0,{offset:1,note:'團員＋嚮導'})]),
+    cat('禮品','#D6CDE6',[quoteItem('','fixed',0,0)]),
+    cat('保險','#C6DCEF',[quoteItem('旅平險','pax',v(40),0,{offset:1,note:'團員＋嚮導'})]),
+    cat('雜支','#EDC4C4',[quoteItem('山屋','fixed',0,0),quoteItem('門 / 車票','fixed',0,0)]),
+    cat('稅務','#C3D5F5',[quoteItem('5%營業稅','pct_in',0,0,{rate:5})]),
+    cat('平台','#AFA2D2',[quoteItem('3%手續費','pct_in',0,0,{rate:3})]),
+  ]};
+}
+const qNum=v=>{const n=Number(v);return isFinite(n)?n:0};
+const qFmt=n=>Math.round(n).toLocaleString();
+// 單一品項計算：fixed=單價×數量；pax=單價×(人數+加減)；pct_in=總團費×r/(1+r)（含在團費裡，例如營業稅）；pct=總團費×r
+function quoteItemCalc(it,price,pax){
+  if(it.type==='pax'){const unit=qNum(it.unit),qty=Math.max(0,pax+qNum(it.offset));return{unit,qty,total:Math.round(unit*qty)}}
+  if(it.type==='pct_in'||it.type==='pct'){const r=qNum(it.rate)/100,f=it.type==='pct_in'?r/(1+r):r;return{unit:Math.round(price*f),qty:pax,total:Math.round(price*pax*f),f}}
+  const unit=qNum(it.unit),qty=qNum(it.qty);return{unit,qty,total:Math.round(unit*qty)};
+}
+function quoteCalc(q,paxOverride){
+  const price=qNum(q.price),pax=paxOverride!=null?paxOverride:qNum(q.pax),gross=price*pax;
+  const rows={};let cost=0,pctF=0,nonPct=0;
+  q.cats.forEach(c=>c.items.forEach(it=>{const r=quoteItemCalc(it,price,pax);rows[it.id]=r;cost+=r.total;if(r.f!=null)pctF+=r.f;else nonPct+=r.total}));
+  const profit=gross-cost;
+  // 保本團費：在目前人數下，剩餘團費剛好為 0 的每人團費
+  const bePrice=pax>0&&pctF<1?Math.ceil(nonPct/(pax*(1-pctF))):null;
+  return{price,pax,gross,cost,profit,rows,margin:gross?profit/gross:0,bePrice};
+}
+function quoteBreakEvenPax(q){for(let n=1;n<=60;n++){if(quoteCalc(q,n).profit>=0)return n}return null}
+function quoteCur(){return quoteSheets.find(q=>q.id===quoteSel)||null}
+function quoteSave(){
+  clearTimeout(_quoteSaveTimer);
+  _quoteSaveTimer=setTimeout(()=>{_quoteSaveTimer=null;saveToLS('hk-quotes',quoteSheets)},600);
+}
+function quoteFlush(){if(_quoteSaveTimer){clearTimeout(_quoteSaveTimer);_quoteSaveTimer=null;saveToLS('hk-quotes',quoteSheets)}}
+window.addEventListener('pagehide',quoteFlush);
+function quoteTouch(){const q=quoteCur();if(q)q.updatedAt=Date.now();quoteSave()}
+function quoteSelect(id){quoteFlush();quoteSel=id;try{localStorage.setItem('hk-quote-sel',id)}catch{}renderQuote()}
+
+function renderQuote(){
+  const el=document.getElementById('quote-body');if(!el)return;
+  if(!rulesReady){el.innerHTML='<div class="qt-empty">載入中…</div>';return}
+  if(!quoteCur()&&quoteSheets.length)quoteSel=quoteSheets[0].id;
+  el.innerHTML=`
+    <div class="fin-header"><h3>報價系統</h3><span class="wp-note">每個團的成本設定，修改後自動存檔</span></div>
+    <div class="qt-layout">
+      <aside class="qt-side">
+        <button class="btn btn-p" onclick="quoteNew()">＋ 新增報價</button>
+        <input class="qt-search" type="search" placeholder="搜尋團名／出發地" value="${escAttr(quoteSearch)}" oninput="quoteSearch=this.value;quoteRenderList()">
+        <div class="qt-list" id="qt-list"></div>
+      </aside>
+      <section class="qt-main" id="qt-main"></section>
+    </div>`;
+  quoteRenderList();quoteRenderMain();
+}
+function quoteRenderList(){
+  const el=document.getElementById('qt-list');if(!el)return;
+  const kw=quoteSearch.trim().toLowerCase();
+  const list=quoteSheets.filter(q=>!kw||(q.route+' '+q.origin).toLowerCase().includes(kw))
+    .sort((a,b)=>(a.route||'￿').localeCompare(b.route||'￿','zh-Hant')||(a.origin||'').localeCompare(b.origin||'','zh-Hant'));
+  let last=null,h='';
+  list.forEach(q=>{
+    const g=q.route||'（未命名）';
+    if(g!==last){h+=`<div class="qt-grp">${esc(g)}</div>`;last=g}
+    h+=`<button class="qt-li${q.id===quoteSel?' on':''}" onclick="quoteSelect('${q.id}')"><span>${esc(q.origin||'—')}</span><small>$${qFmt(qNum(q.price))}</small></button>`;
+  });
+  el.innerHTML=h||'<div class="mb-none">沒有報價</div>';
+}
+function quoteRenderMain(){
+  const el=document.getElementById('qt-main');if(!el)return;
+  const q=quoteCur();
+  if(!q){el.innerHTML='<div class="qt-empty">還沒有報價，按左上「新增報價」開始</div>';return}
+  const tc=(c)=>/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#C9C9C9';
+  const typeSel=(c,it)=>`<select class="qt-type" onchange="quoteItemSet('${c.id}','${it.id}','type',this.value,false,true)">${Object.entries(QUOTE_TYPES).map(([k,v])=>`<option value="${k}"${it.type===k?' selected':''}>${v}</option>`).join('')}</select>`;
+  const numIn=(c,it,f,cls)=>`<input class="qt-cell ${cls}" type="number" step="any" inputmode="decimal" value="${escAttr(String(it[f]??0))}" oninput="quoteItemSet('${c.id}','${it.id}','${f}',this.value,true)">`;
+  const rowsH=q.cats.map(c=>{
+    const n=Math.max(1,c.items.length);
+    const catCell=`<td class="qt-cat" rowspan="${n}" style="--qc:${tc(c)}">
+        <input type="text" class="qt-cell" value="${escAttr(c.name)}" placeholder="類別" oninput="quoteCatSet('${c.id}','name',this.value)">
+        <div class="qt-cat-tools">
+          <input type="color" value="${tc(c)}" title="顏色" onchange="quoteCatSet('${c.id}','color',this.value,true)">
+          <button class="qt-mini" title="新增項目" onclick="quoteAddItem('${c.id}')">＋項目</button>
+          <button class="qt-mini" title="刪除類別" onclick="quoteDelCat('${c.id}')">&times;</button>
+        </div></td>`;
+    if(!c.items.length)return`<tr>${catCell}<td colspan="7" class="qt-l qt-auto">沒有項目</td></tr>`;
+    return c.items.map((it,i)=>{
+      const pct=it.type==='pct_in'||it.type==='pct';
+      const calc=it.type==='pax'?`<span>人數 +</span>${numIn(c,it,'offset','qt-sm')}`
+        :pct?`${numIn(c,it,'rate','qt-sm')}<span>%</span>`:'';
+      const unit=pct?`<span class="qt-auto" data-qr="${it.id}:unit"></span>`:numIn(c,it,'unit','qt-num');
+      const qty=it.type==='fixed'?numIn(c,it,'qty','qt-sm'):`<span class="qt-auto" data-qr="${it.id}:qty"></span>`;
+      return`<tr>${i===0?catCell:''}
+        <td class="qt-iname" style="--qc:${tc(c)}"><input type="text" class="qt-cell qt-name" value="${escAttr(it.name)}" placeholder="項目" oninput="quoteItemSet('${c.id}','${it.id}','name',this.value)"></td>
+        <td class="qt-l"><div class="qt-calc">${typeSel(c,it)}${calc}</div></td>
+        <td>${unit}</td><td>${qty}</td>
+        <td class="qt-total" data-qr="${it.id}:total"></td>
+        <td class="qt-l"><input type="text" class="qt-cell qt-note" value="${escAttr(it.note||'')}" placeholder="備註" oninput="quoteItemSet('${c.id}','${it.id}','note',this.value)"></td>
+        <td><button class="mb-del" title="刪除項目" onclick="quoteDelItem('${c.id}','${it.id}')">&times;</button></td>
+      </tr>`;
+    }).join('');
+  }).join('');
+  el.innerHTML=`
+    <div class="qt-titlebar">
+      <input class="qt-in qt-route" value="${escAttr(q.route)}" placeholder="團名（例：眠月線）" oninput="quoteSet('route',this.value)">
+      <input class="qt-in qt-origin" value="${escAttr(q.origin)}" placeholder="出發地" oninput="quoteSet('origin',this.value)">
+      <div class="qt-acts"><button class="btn btn-o" onclick="quoteDup()">複製</button><button class="btn btn-s" onclick="quoteDel()">刪除</button></div>
+    </div>
+    <div class="fin-summary qt-cards">
+      <div class="fin-card qt-key"><div class="fc-label">團費／人</div><input type="number" step="any" inputmode="decimal" value="${escAttr(String(q.price))}" oninput="quoteSet('price',this.value,true)"><div class="fc-sub" data-qs="be"></div></div>
+      <div class="fin-card"><div class="fc-label">人數</div><input type="number" step="1" inputmode="numeric" value="${escAttr(String(q.pax))}" oninput="quoteSet('pax',this.value,true)"><div class="fc-sub" data-qs="bepax"></div></div>
+      <div class="fin-card"><div class="fc-label">總團費</div><div class="fc-val" data-qs="gross"></div></div>
+      <div class="fin-card"><div class="fc-label">支出小計</div><div class="fc-val fc-exp" data-qs="cost"></div><div class="fc-sub" data-qs="cpp"></div></div>
+      <div class="fin-card"><div class="fc-label">剩餘團費</div><div class="fc-val" data-qs="profit"></div><div class="fc-sub" data-qs="margin"></div></div>
+    </div>
+    <div class="fin-tbl-wrap">
+      <table class="qt-tbl">
+        <thead>
+          <tr><th class="qt-band" colspan="8" data-qs="band"></th></tr>
+          <tr><th class="qt-l" style="text-align:center">類別</th><th style="text-align:center">項目</th><th class="qt-l">計算方式</th><th>單價</th><th>數量</th><th>總價</th><th class="qt-l">備註</th><th></th></tr>
+        </thead>
+        <tbody>${rowsH}</tbody>
+        <tfoot>
+          <tr class="qt-sum"><td colspan="2" class="qt-l"><button class="btn btn-o" style="padding:4px 12px;font-size:13px" onclick="quoteAddCat()">＋ 新增類別</button></td><td colspan="3" style="text-align:right">支出小計</td><td data-qs="cost2"></td><td colspan="2"></td></tr>
+          <tr class="qt-sum"><td colspan="5" style="text-align:right">剩餘團費</td><td data-qs="profit2"></td><td colspan="2"></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="qt-sim">
+      <div class="qt-sim-h"><h4>人數試算</h4>從 <input class="qt-in" type="number" min="1" value="${qNum(q.simFrom)||1}" oninput="quoteSet('simFrom',this.value,true)"> 到 <input class="qt-in" type="number" min="1" value="${qNum(q.simTo)||12}" oninput="quoteSet('simTo',this.value,true)"> 人<span class="wp-note">（「固定數量」的項目不隨人數變動，需要的話改成「依人數」）</span></div>
+      <div class="fin-tbl-wrap" id="qt-sim"></div>
+    </div>
+    <div class="qt-sim">
+      <div class="qt-sim-h"><h4>備註</h4></div>
+      <textarea class="qt-in" style="width:100%;box-sizing:border-box;min-height:70px;resize:vertical" placeholder="這團的報價說明、注意事項…" oninput="quoteSet('note',this.value)">${esc(q.note||'')}</textarea>
+    </div>`;
+  quoteRecalc();
+}
+// 只更新計算出來的格子，不重畫表格（輸入框才不會失焦）
+function quoteRecalc(){
+  const q=quoteCur();const el=document.getElementById('qt-main');if(!q||!el)return;
+  const r=quoteCalc(q);
+  el.querySelectorAll('[data-qr]').forEach(n=>{const[id,f]=n.dataset.qr.split(':');const v=r.rows[id];n.textContent=v?qFmt(v[f]):''});
+  const set=(k,t,cls)=>el.querySelectorAll(`[data-qs="${k}"]`).forEach(n=>{n.textContent=t;if(cls!=null)n.className=n.className.replace(/\b(qt-pos|qt-neg|fc-inc|fc-exp)\b/g,'').trim()+' '+cls});
+  const pos=r.profit>=0;
+  set('band',q.origin||'');
+  set('gross','$'+qFmt(r.gross));
+  set('cost','$'+qFmt(r.cost));set('cost2',qFmt(r.cost));
+  set('cpp',r.pax?`每人成本 $${qFmt(r.cost/r.pax)}`:'');
+  set('profit',(pos?'':'-')+'$'+qFmt(Math.abs(r.profit)),pos?'fc-inc':'fc-exp');
+  set('profit2',qFmt(r.profit),pos?'qt-pos':'qt-neg');
+  set('margin',r.gross?`毛利率 ${(r.margin*100).toFixed(1)}%`:'');
+  set('be',r.bePrice!=null?`保本團費 $${qFmt(r.bePrice)}（${r.pax} 人）`:'');
+  const bp=quoteBreakEvenPax(q);
+  set('bepax',bp?`最少 ${bp} 人不虧`:'60 人內無法打平');
+  const a=Math.max(1,Math.floor(qNum(q.simFrom))||1),b=Math.min(60,Math.max(a,Math.floor(qNum(q.simTo))||a));
+  let rows='';
+  for(let n=a;n<=b;n++){
+    const s=quoteCalc(q,n);const p=s.profit>=0;
+    rows+=`<tr class="${n===r.pax?'on':''}"><td>${n} 人</td><td>${qFmt(s.gross)}</td><td class="fin-exp">${qFmt(s.cost)}</td><td class="${p?'fin-pos':'fin-neg'}" style="font-weight:700">${qFmt(s.profit)}</td><td>${qFmt(s.profit/n)}</td><td>${s.gross?(s.margin*100).toFixed(1)+'%':'—'}</td></tr>`;
+  }
+  const sim=document.getElementById('qt-sim');
+  if(sim)sim.innerHTML=`<table class="fin-tbl"><thead><tr><th>人數</th><th>總團費</th><th>支出</th><th>剩餘團費</th><th>每人利潤</th><th>毛利率</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function quoteSet(f,v,isNum){
+  const q=quoteCur();if(!q)return;
+  q[f]=isNum?(v===''?0:qNum(v)):v;quoteTouch();
+  if(f==='route'||f==='origin'||f==='price')quoteRenderList();
+  quoteRecalc();
+}
+function quoteFind(cid,iid){const q=quoteCur();const c=q&&q.cats.find(x=>x.id===cid);return{q,c,it:c&&iid?c.items.find(x=>x.id===iid):null}}
+function quoteItemSet(cid,iid,f,v,isNum,rerender){
+  const{it}=quoteFind(cid,iid);if(!it)return;
+  it[f]=isNum?(v===''?0:qNum(v)):v;
+  if(f==='type'){
+    if(v==='pax'&&it.offset==null)it.offset=0;
+    if((v==='pct_in'||v==='pct')&&!it.rate)it.rate=0;
+  }
+  quoteTouch();
+  if(rerender)quoteRenderMain();else quoteRecalc();
+}
+function quoteCatSet(cid,f,v,rerender){const{c}=quoteFind(cid);if(!c)return;c[f]=v;quoteTouch();if(rerender)quoteRenderMain()}
+function quoteAddItem(cid){const{c}=quoteFind(cid);if(!c)return;c.items.push(quoteItem('','fixed',0,0));quoteTouch();quoteRenderMain()}
+function quoteDelItem(cid,iid){
+  const{c,it}=quoteFind(cid,iid);if(!c||!it)return;
+  if((it.name||qNum(it.unit)||qNum(it.rate))&&!confirm(`刪除項目「${it.name||'未命名'}」？`))return;
+  c.items=c.items.filter(x=>x.id!==iid);quoteTouch();quoteRenderMain();
+}
+function quoteAddCat(){const q=quoteCur();if(!q)return;q.cats.push({id:genId(),name:'',color:'#C9C9C9',items:[quoteItem('','fixed',0,0)]});quoteTouch();quoteRenderMain()}
+function quoteDelCat(cid){
+  const q=quoteCur();const{c}=quoteFind(cid);if(!c)return;
+  if(!confirm(`刪除類別「${c.name||'未命名'}」和裡面 ${c.items.length} 個項目？`))return;
+  q.cats=q.cats.filter(x=>x.id!==cid);quoteTouch();quoteRenderMain();
+}
+function quoteNew(){
+  const q=quoteDefault('', '台北出發',false);
+  quoteSheets.push(q);quoteSearch='';quoteSave();quoteSelect(q.id);
+  const inp=document.querySelector('.qt-route');if(inp)inp.focus();
+}
+function quoteDup(){
+  const src=quoteCur();if(!src)return;
+  const q=JSON.parse(JSON.stringify(src));
+  q.id=genId();q.updatedAt=Date.now();q.origin=(src.origin||'')+'（複製）';
+  q.cats.forEach(c=>{c.id=genId();c.items.forEach(it=>it.id=genId())});
+  quoteSheets.push(q);quoteSave();quoteSelect(q.id);
+  toast('已複製，請改出發地或團名');
+}
+function quoteDel(){
+  const q=quoteCur();if(!q)return;
+  if(!confirm(`確定刪除「${q.route||'未命名'}・${q.origin||''}」的報價？`))return;
+  quoteSheets=quoteSheets.filter(x=>x.id!==q.id);quoteSel=null;quoteSave();renderQuote();
+}
+
+const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members','wish','quote'];
+const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance',members:'nav-members',wish:'nav-wish',quote:'nav-quote'};
+const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance',members:'mob-members',wish:'mob-wish',quote:'mob-quote'};
+const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance',members:'mtab-members',wish:'mtab-wish',quote:'mtab-quote'};
 function setView(mode){
   viewMode=mode;
   try{localStorage.setItem('hk-view',mode)}catch{}
@@ -2782,6 +3073,7 @@ function setView(mode){
   if(mode==='finance')renderFinance();
   if(mode==='members')loadMembers();
   if(mode==='wish')loadWish();
+  if(mode==='quote')renderQuote();
 }
 function toggleMobileMenu(){document.getElementById('nav-mobile-menu').classList.add('open')}
 function closeMobileMenu(){document.getElementById('nav-mobile-menu').classList.remove('open')}
