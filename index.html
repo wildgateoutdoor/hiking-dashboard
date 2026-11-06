@@ -1,5 +1,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>入野門活動管理</title>
@@ -2832,7 +2833,7 @@ function renderWish(){
   }
   if(wishErr&&!wishData){el.innerHTML=`<div class="empty"><p>讀取許願池失敗：${esc(wishErr)}</p><button class="btn btn-o" onclick="loadWish()" style="margin-top:12px">重試</button></div>`;return}
   if(!wishData){el.innerHTML='<div class="empty"><p>讀取中…</p></div>';return}
-  const pub=location.href.replace(/[^/]*([?#].*)?$/,'')+'wish.html';
+  const pub='https://wish.wildgateoutdoor.com';
   const tabs=[['stats','許願統計'],['mountains','山與梯次'],['wishes',`許願名單（${wishData.wishes.length}）`],['signups',`報名名單（${wishData.signups.length}）`]];
   el.innerHTML=`<div class="fin-header"><h3>許願池</h3><div class="filters">${tabs.map(([k,l])=>`<button class="chip ${wishTab===k?'on':''}" onclick="setWishTab('${k}')">${l}</button>`).join('')}</div>
       <span style="flex:1"></span><a class="btn btn-o" href="${escAttr(pub)}" target="_blank" rel="noopener">開啟前台 ↗</a><button class="btn btn-s" onclick="loadWish()">重新整理</button></div>
