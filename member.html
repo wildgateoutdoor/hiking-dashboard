@@ -18,8 +18,8 @@
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
 .wrap{max-width:520px;margin:0 auto;padding:0 16px 40px}
 .hero{background:var(--brand);color:#F3EFE6;padding:28px 16px 64px;text-align:center}
-.hero-brand{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;letter-spacing:.08em;font-size:14px;opacity:.9}
-.hero-brand img{width:26px;height:26px;border-radius:50%}
+.hero-brand{display:flex;justify-content:center}
+.hero-brand img{height:24px;width:auto;display:block}
 .card{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
 .profile{margin-top:-44px;display:flex;align-items:center;gap:14px}
 .avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;background:var(--bg);flex-shrink:0;border:2px solid var(--surface)}
@@ -50,7 +50,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;vertical-align:2px;background:var(--gold-bg);color:#8A6A08}
 .empty{text-align:center;color:var(--text-muted);font-size:14px;padding:32px 0}
 .center{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:24px}
-.center img{width:72px;height:72px;border-radius:50%}
+.brand-tile{width:84px;height:84px;border-radius:20px;background:var(--brand);display:flex;align-items:center;justify-content:center}
+.brand-tile img{height:52px;width:auto;display:block}
 .center h1{font-size:20px}
 .center p{color:var(--text-muted);font-size:14px}
 .g-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 24px;border-radius:8px;border:1px solid #DADCE0;background:#fff;color:#3C4043;font:600 15px var(--font);cursor:pointer;text-decoration:none}
@@ -95,7 +96,7 @@ function fmtRange(s,e){
 function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function showMsg(title,msg,btn){
-  app.innerHTML=`<div class="center"><img src="favicon.png" alt=""><h1>${esc(title)}</h1><p>${esc(msg)}</p>${btn||''}</div>`;
+  app.innerHTML=`<div class="center"><div class="brand-tile"><img src="images/logo-square.png" alt="入野門"></div><h1>${esc(title)}</h1><p>${esc(msg)}</p>${btn||''}</div>`;
 }
 const RELOAD_BTN='<button class="p-btn" onclick="location.reload()">重新整理</button>';
 function pageUrl(){return location.origin+location.pathname}
@@ -164,7 +165,7 @@ function render(){
     rebate:ledgerItems('rebate')||'<div class="empty">還沒有點數紀錄</div>'};
 
   app.innerHTML=`
-    <div class="hero"><div class="hero-brand"><img src="favicon.png" alt="">入野門 WILDGATE</div></div>
+    <div class="hero"><div class="hero-brand"><img src="images/logo-wide.png" alt="入野門 Wild Gate" width="194" height="24"></div></div>
     <div class="wrap">
       <div class="card profile">
         ${m.google_picture?`<img class="avatar" src="${esc(m.google_picture)}" alt="" referrerpolicy="no-referrer">`:'<div class="avatar"></div>'}
