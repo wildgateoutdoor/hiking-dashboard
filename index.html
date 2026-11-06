@@ -3190,9 +3190,8 @@ function quoteRenderListBody(){
     <div class="qt-pager-row"><span class="qt-count">共 ${list.length} 筆</span>${quotePagerHTML(quotePage,pages,'quoteGoPage')}</div>`;
 }
 
-function quoteRenderDetail(el){
-  const q=quoteCur();if(!q){el.innerHTML='';return}
-  const sib=quoteSheets.filter(x=>quoteRouteKey(x)===quoteRoute);
+// 成本明細的表格列（新增／刪除項目時只重畫這一段，頁面才不會跳動）
+function quoteCostRowsHTML(q){
   const tc=(c)=>/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#C9C9C9';
   const typeSel=(c,it)=>`<select class="qt-select sm" onchange="quoteItemSet('${c.id}','${it.id}','type',this.value,false,true)">${Object.entries(QUOTE_TYPES).map(([k,v])=>`<option value="${k}"${it.type===k?' selected':''}>${v}</option>`).join('')}</select>`;
   const numIn=(c,it,f,cls)=>`<input class="qt-cell ${cls}" type="number" step="any" inputmode="decimal" value="${escAttr(String(it[f]??0))}" oninput="quoteItemSet('${c.id}','${it.id}','${f}',this.value,true)">`;
@@ -3223,6 +3222,20 @@ function quoteRenderDetail(el){
     const sub=`<tr class="qt-subtot" style="--qc:${tc(c)}"><td colspan="4" class="r"><span data-qcn="${c.id}">${esc(c.name||'未命名')}</span> 小計</td><td class="r b" data-qc="${c.id}"></td><td colspan="2"></td></tr>`;
     return grp+items+sub;
   }).join('<tr class="qt-gap"><td colspan="7"></td></tr>');
+  return rowsH||'<tr><td colspan="7" class="qt-none">還沒有類別，按「新增類別」開始</td></tr>';
+}
+function quoteRefreshCost(){
+  const tb=document.getElementById('qt-cost-body');const q=quoteCur();
+  if(!tb||!q){renderQuote();return}
+  const y=window.scrollY;
+  tb.innerHTML=quoteCostRowsHTML(q);
+  quoteRecalc();
+  if(window.scrollY!==y)window.scrollTo(0,y);
+}
+function quoteRenderDetail(el){
+  const q=quoteCur();if(!q){el.innerHTML='';return}
+  const sib=quoteSheets.filter(x=>quoteRouteKey(x)===quoteRoute);
+  const rowsH=quoteCostRowsHTML(q);
   el.innerHTML=`
     <div class="qt-tabs">
       ${sib.map(x=>`<button class="qt-tab${x.id===q.id?' on':''}" data-qtab="${x.id}" onclick="quoteSelect('${x.id}')">${esc(x.origin||'未填出發地')}</button>`).join('')}
@@ -3246,7 +3259,7 @@ function quoteRenderDetail(el){
       <div class="qt-card-h"><h4>成本明細</h4><span class="qt-pill tag" data-qs="band"></span><div class="qt-sp"></div><button class="qt-btn sm" onclick="quoteAddCat()">${QI.plus}新增類別</button></div>
       <div class="qt-tbl-wrap"><table class="qt-table">
         <thead><tr><th>項目</th><th>計算方式</th><th class="r">單價</th><th class="r">數量</th><th class="r">總價</th><th>備註</th><th></th></tr></thead>
-        <tbody>${rowsH||'<tr><td colspan="7" class="qt-none">還沒有類別，按「新增類別」開始</td></tr>'}</tbody>
+        <tbody id="qt-cost-body">${rowsH}</tbody>
       </table></div>
       <div class="qt-sum"><div class="qt-sum-box">
         <div class="qt-sum-row"><span>支出小計</span><b class="exp" data-qs="cost2"></b></div>
@@ -3314,20 +3327,20 @@ function quoteItemSet(cid,iid,f,v,isNum,rerender){
     if((v==='pct_in'||v==='pct')&&!it.rate)it.rate=0;
   }
   quoteTouch();
-  if(rerender)renderQuote();else quoteRecalc();
+  if(rerender)quoteRefreshCost();else quoteRecalc();
 }
-function quoteCatSet(cid,f,v,rerender){const{c}=quoteFind(cid);if(!c)return;c[f]=v;quoteTouch();if(rerender)renderQuote();else if(f==='name')document.querySelectorAll(`[data-qcn="${cid}"]`).forEach(n=>n.textContent=v||'未命名')}
-function quoteAddItem(cid){const{c}=quoteFind(cid);if(!c)return;c.items.push(quoteItem('','fixed',0,0));quoteTouch();renderQuote()}
+function quoteCatSet(cid,f,v,rerender){const{c}=quoteFind(cid);if(!c)return;c[f]=v;quoteTouch();if(rerender)quoteRefreshCost();else if(f==='name')document.querySelectorAll(`[data-qcn="${cid}"]`).forEach(n=>n.textContent=v||'未命名')}
+function quoteAddItem(cid){const{c}=quoteFind(cid);if(!c)return;c.items.push(quoteItem('','fixed',0,0));quoteTouch();quoteRefreshCost()}
 function quoteDelItem(cid,iid){
   const{c,it}=quoteFind(cid,iid);if(!c||!it)return;
   if((it.name||qNum(it.unit)||qNum(it.rate))&&!confirm(`刪除項目「${it.name||'未命名'}」？`))return;
-  c.items=c.items.filter(x=>x.id!==iid);quoteTouch();renderQuote();
+  c.items=c.items.filter(x=>x.id!==iid);quoteTouch();quoteRefreshCost();
 }
-function quoteAddCat(){const q=quoteCur();if(!q)return;q.cats.push({id:genId(),name:'',color:'#C9C9C9',items:[quoteItem('','fixed',0,0)]});quoteTouch();renderQuote()}
+function quoteAddCat(){const q=quoteCur();if(!q)return;q.cats.push({id:genId(),name:'',color:'#C9C9C9',items:[quoteItem('','fixed',0,0)]});quoteTouch();quoteRefreshCost()}
 function quoteDelCat(cid){
   const q=quoteCur();const{c}=quoteFind(cid);if(!c)return;
   if(!confirm(`刪除類別「${c.name||'未命名'}」和裡面 ${c.items.length} 個項目？`))return;
-  q.cats=q.cats.filter(x=>x.id!==cid);quoteTouch();renderQuote();
+  q.cats=q.cats.filter(x=>x.id!==cid);quoteTouch();quoteRefreshCost();
 }
 function quoteDup(id){
   const src=id?quoteSheets.find(x=>x.id===id):quoteCur();if(!src)return;
