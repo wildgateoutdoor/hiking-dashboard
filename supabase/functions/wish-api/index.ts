@@ -173,6 +173,17 @@ const tripDate = (t: Trip) => {
   };
 };
 
+// 同一座山、同一天出發又同一天回來的梯次只留一筆（團務列表有重複時）：留報名人數最多的那筆
+function dedupeTrips(list: Trip[]) {
+  const best = new Map<string, Trip>();
+  for (const t of list) {
+    const k = `${t.date}|${t.dateEnd || t.date}`;
+    const cur = best.get(k);
+    if (!cur || (t.registered || 0) > (cur.registered || 0)) best.set(k, t);
+  }
+  return [...best.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
 // ── 前台 ──
 async function list() {
   const today = todayTW();
@@ -199,7 +210,7 @@ async function list() {
     today,
     mountains: mountains.map(({ aliases, ...m }: any) => ({
       ...m,
-      dates: open.filter((t) => tripMatches({ name: m.name, aliases }, t)).map(tripDate),
+      dates: dedupeTrips(open.filter((t) => tripMatches({ name: m.name, aliases }, t))).map(tripDate),
       months: counts[m.id] || {},
       total: sum(counts[m.id]),
     })),
