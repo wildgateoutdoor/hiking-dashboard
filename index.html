@@ -65,6 +65,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .nav-link{padding:6px 14px;border-radius:var(--r);font:600 14px var(--font);background:none;border:none;color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
 .nav-link:hover{color:var(--text);background:var(--surface-hover)}
 .nav-link.on{color:var(--accent);background:var(--accent-bg)}
+.nav-dropdown{position:relative;display:flex;align-items:center}
+.nav-cat{padding:6px 14px;border-radius:var(--r);font:600 14px var(--font);background:none;border:none;color:var(--text-muted);cursor:default;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.nav-cat:hover,.nav-dropdown:hover .nav-cat{color:var(--text);background:var(--surface-hover)}
+.nav-cat.on{color:var(--accent)}
+.nav-cat::after{content:'';display:inline-block;width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-top:4px solid currentColor;opacity:.5}
+.nav-drop-menu{display:none;position:absolute;top:100%;left:0;min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);padding:4px;z-index:60}
+.nav-drop-menu::before{content:'';position:absolute;top:-8px;left:0;right:0;height:8px}
+.nav-dropdown:hover .nav-drop-menu{display:block}
+.nav-drop-item{display:block;width:100%;padding:8px 14px;border-radius:6px;font:500 13.5px var(--font);background:none;border:none;color:var(--text-2);cursor:pointer;text-align:left;transition:all .12s;white-space:nowrap}
+.nav-drop-item:hover{background:var(--surface-hover);color:var(--text)}
+.nav-drop-item.on{color:var(--accent);font-weight:600}
+.nav-mob-cat{padding:12px 24px 4px;font:700 11px var(--font);color:var(--text-muted);letter-spacing:.5px;opacity:.7}
 .nav-sep{width:1px;height:24px;background:var(--border);margin:0 6px;flex-shrink:0}
 .nav-util{display:flex;align-items:center;gap:4px}
 .nav-btn{width:34px;height:34px;border-radius:var(--r);border:none;background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;flex-shrink:0}
@@ -738,14 +750,35 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   <div class="nav-brand">入野門活動管理</div>
   <div class="nav-right">
     <div class="nav-main">
-      <button class="nav-link on" id="nav-schedule" onclick="setView('schedule')">時程提醒</button>
-      <button class="nav-link" id="nav-list" onclick="setView('list')">團務列表</button>
-      <button class="nav-link" id="nav-mktg" onclick="setView('mktgview')">行銷列表</button>
-      <button class="nav-link" id="nav-cal" onclick="setView('calendar')">日曆總覽</button>
-      <button class="nav-link" id="nav-finance" onclick="setView('finance')">收支總覽</button>
-      <button class="nav-link" id="nav-members" onclick="setView('members')">會員管理</button>
-      <button class="nav-link" id="nav-wish" onclick="setView('wish')">許願池</button>
-      <button class="nav-link" id="nav-quote" onclick="setView('quote')">報價系統</button>
+      <div class="nav-dropdown">
+        <button class="nav-cat on" data-cat="trip">團務管理</button>
+        <div class="nav-drop-menu">
+          <button class="nav-drop-item on" data-view="schedule" onclick="setView('schedule')">時程提醒</button>
+          <button class="nav-drop-item" data-view="list" onclick="setView('list')">團務列表</button>
+          <button class="nav-drop-item" data-view="calendar" onclick="setView('calendar')">日曆總覽</button>
+          <button class="nav-drop-item" onclick="openSettings()">團務規則設定</button>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <button class="nav-cat" data-cat="mktg">行銷管理</button>
+        <div class="nav-drop-menu">
+          <button class="nav-drop-item" data-view="mktgview" onclick="setView('mktgview')">行銷列表</button>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <button class="nav-cat" data-cat="fin">帳務管理</button>
+        <div class="nav-drop-menu">
+          <button class="nav-drop-item" data-view="quote" onclick="setView('quote')">報價系統</button>
+          <button class="nav-drop-item" data-view="finance" onclick="setView('finance')">收支總覽</button>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <button class="nav-cat" data-cat="member">會員資訊</button>
+        <div class="nav-drop-menu">
+          <button class="nav-drop-item" data-view="members" onclick="setView('members')">會員管理</button>
+          <button class="nav-drop-item" data-view="wish" onclick="setView('wish')">許願池</button>
+        </div>
+      </div>
     </div>
     <div class="nav-sep"></div>
     <div class="nav-util">
@@ -754,9 +787,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       </button>
       <button class="nav-btn" onclick="showReport()" title="產生 LINE 日報">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-      </button>
-      <button class="nav-btn" onclick="openSettings()" title="規則設定">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
     </div>
     <button class="nav-add" onclick="openAdd()">
@@ -782,18 +812,22 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
 <div class="nav-mobile-menu" id="nav-mobile-menu" onclick="closeMobileMenu()">
   <div class="nav-mobile-panel" onclick="event.stopPropagation()">
+    <div class="nav-mob-cat">團務管理</div>
     <button class="nav-mob-link on" id="mob-schedule" onclick="setView('schedule');closeMobileMenu()">時程提醒</button>
     <button class="nav-mob-link" id="mob-list" onclick="setView('list');closeMobileMenu()">團務列表</button>
-    <button class="nav-mob-link" id="mob-mktg" onclick="setView('mktgview');closeMobileMenu()">行銷列表</button>
     <button class="nav-mob-link" id="mob-cal" onclick="setView('calendar');closeMobileMenu()">日曆總覽</button>
+    <button class="nav-mob-link" onclick="openSettings();closeMobileMenu()">團務規則設定</button>
+    <div class="nav-mob-cat">行銷管理</div>
+    <button class="nav-mob-link" id="mob-mktg" onclick="setView('mktgview');closeMobileMenu()">行銷列表</button>
+    <div class="nav-mob-cat">帳務管理</div>
+    <button class="nav-mob-link" id="mob-quote" onclick="setView('quote');closeMobileMenu()">報價系統</button>
     <button class="nav-mob-link" id="mob-finance" onclick="setView('finance');closeMobileMenu()">收支總覽</button>
+    <div class="nav-mob-cat">會員資訊</div>
     <button class="nav-mob-link" id="mob-members" onclick="setView('members');closeMobileMenu()">會員管理</button>
     <button class="nav-mob-link" id="mob-wish" onclick="setView('wish');closeMobileMenu()">許願池</button>
-    <button class="nav-mob-link" id="mob-quote" onclick="setView('quote');closeMobileMenu()">報價系統</button>
     <div class="nav-mob-sep"></div>
     <button class="nav-mob-link" onclick="logout();closeMobileMenu()">登出</button>
     <button class="nav-mob-link" onclick="showReport();closeMobileMenu()">產生 LINE 日報</button>
-    <button class="nav-mob-link" onclick="openSettings();closeMobileMenu()">規則設定</button>
   </div>
 </div>
 
@@ -3056,7 +3090,7 @@ function quoteDel(){
 }
 
 const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members','wish','quote'];
-const NAV_MAP={schedule:'nav-schedule',list:'nav-list',calendar:'nav-cal',mktgview:'nav-mktg',finance:'nav-finance',members:'nav-members',wish:'nav-wish',quote:'nav-quote'};
+const VIEW_CAT={schedule:'trip',list:'trip',calendar:'trip',mktgview:'mktg',quote:'fin',finance:'fin',members:'member',wish:'member'};
 const MOB_MAP={schedule:'mob-schedule',list:'mob-list',calendar:'mob-cal',mktgview:'mob-mktg',finance:'mob-finance',members:'mob-members',wish:'mob-wish',quote:'mob-quote'};
 const MTAB_MAP={schedule:'mtab-schedule',list:'mtab-list',calendar:'mtab-cal',mktgview:'mtab-mktg',finance:'mtab-finance',members:'mtab-members',wish:'mtab-wish',quote:'mtab-quote'};
 function setView(mode){
@@ -3065,7 +3099,8 @@ function setView(mode){
   VIEW_IDS.forEach(v=>{
     const el=document.getElementById('view-'+v);if(el)el.style.display=v===mode?'block':'none';
   });
-  Object.entries(NAV_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
+  document.querySelectorAll('.nav-drop-item[data-view]').forEach(el=>el.classList.toggle('on',el.dataset.view===mode));
+  document.querySelectorAll('.nav-cat[data-cat]').forEach(el=>el.classList.toggle('on',el.dataset.cat===VIEW_CAT[mode]));
   Object.entries(MOB_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
   Object.entries(MTAB_MAP).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',k===mode)});
   if(mode==='calendar')renderCal();
