@@ -1,6 +1,10 @@
 # 會員系統設定步驟
 
-會員用 Google（Gmail）帳號登入 `member.html`，可以看到自己的會員等級、儲值金餘額、儲值紀錄、買過的行程。
+> **會員頁（前台）在另一個專案：[`wildgateoutdoor/member-portal`](https://github.com/wildgateoutdoor/member-portal)**，網址 https://member.wildgateoutdoor.com/ 。
+> 這個專案的 `member.html` 只會轉址過去，改會員頁請改 `member-portal`。
+> 這個專案負責：後台「會員管理」（`index.html`，https://admin.wildgateoutdoor.com/）與 Supabase 資料庫／後端。
+
+會員用 Google（Gmail）帳號登入會員頁 https://member.wildgateoutdoor.com/ ，可以看到自己的會員等級、儲值金餘額、儲值紀錄、買過的行程。
 後台在 `index.html` 的「會員管理」頁，可以新增會員、設定會員等級、手動新增儲值／扣款、新增購買行程。
 
 會員資料放在 Supabase 的 `members`、`member_wallet`、`member_trips` 三張表，都開啟 RLS 且沒有開放 anon，
@@ -28,8 +32,7 @@
 ## 3. 在 Supabase 開啟 Google 登入
 
 1. Supabase → Authentication → Sign In / Providers → **Google** → 開啟，貼上步驟 2 的用戶端 ID 和密鑰
-2. Authentication → URL Configuration → **Redirect URLs** 加入 `member.html` 的網址
-   （例如 `https://wildgateoutdoor.github.io/hiking-dashboard/member.html`）
+2. Authentication → URL Configuration → **Redirect URLs** 加入會員頁網址 `https://member.wildgateoutdoor.com/**`
 
 ## 4. 部署 Edge Function（已完成）
 
@@ -44,7 +47,7 @@ supabase functions deploy member-api --no-verify-jwt
 
 ## 5. 給會員的連結
 
-直接給 `member.html` 的網址。
+https://member.wildgateoutdoor.com/
 
 注意：Google 不允許在 App 內建的瀏覽器登入（LINE、Facebook、Instagram 裡點開的網頁）。
 
