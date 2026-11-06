@@ -809,6 +809,47 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
   .qt-sum-box{min-width:0;width:100%}
   .qt-hide-sm{display:none}
 }
+/* 報價系統：左側山名列表＋上方出發地分頁 */
+.qt-shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;align-items:start}
+.qt-nav{display:flex;flex-direction:column;gap:10px;position:sticky;top:72px}
+.qt-nav-item{display:flex;align-items:center;gap:12px;width:100%;height:52px;padding:0 14px 0 18px;border-radius:999px;border:1px solid var(--border-sub);background:var(--surface);color:var(--text);font:600 15px var(--font);cursor:pointer;box-shadow:var(--shadow-sm);text-align:left;transition:background .15s,color .15s,border-color .15s;flex-shrink:0}
+.qt-nav-item svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:.8}
+.qt-nav-item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qt-nav-item small{min-width:22px;height:22px;padding:0 7px;box-sizing:border-box;border-radius:999px;background:var(--surface-alt);color:var(--text-muted);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.qt-nav-item:hover{background:var(--surface-hover)}
+.qt-nav-item.on{background:var(--accent);border-color:var(--accent);color:var(--accent-on);box-shadow:0 3px 10px rgba(61,139,102,.28)}
+.qt-nav-item.on svg{opacity:1}
+.qt-nav-item.on small{background:rgba(255,255,255,.22);color:var(--accent-on)}
+.qt-nav-sep{font-size:12px;font-weight:700;color:var(--text-muted);padding:8px 10px 0;letter-spacing:.05em}
+.qt-nav .qt-search{min-width:0;height:42px;background:var(--surface);flex:none!important;order:0!important}
+.qt-nav-list{display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 360px);min-height:60px;overflow:auto;padding:2px 2px 4px;margin:0 -2px}
+.qt-nav-none{font-size:13px;color:var(--text-muted);padding:12px 10px}
+.qt-nav-add{display:flex;gap:6px;align-items:center}
+.qt-nav-add input{flex:1;min-width:0;height:44px;padding:0 16px;border-radius:999px;border:1px dashed var(--border);background:transparent;color:var(--text);font:14px var(--font)}
+.qt-nav-add input:focus{outline:none;border-style:solid;border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px rgba(61,139,102,.15)}
+.qt-nav-add button{width:44px;height:44px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-on);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.qt-nav-add button:hover{background:var(--accent-hover)}
+.qt-nav-add button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.qt-body,.qt-nav{min-width:0}
+.qt-tabs{display:flex;align-items:center;gap:4px;padding:6px 8px;margin-bottom:16px;border-radius:999px;background:var(--surface);border:1px solid var(--border-sub);box-shadow:var(--shadow-sm);overflow-x:auto;scrollbar-width:none}
+.qt-tabs::-webkit-scrollbar{display:none}
+.qt-tab{position:relative;height:42px;padding:0 18px;border:none;border-radius:999px;background:none;color:var(--text-2);font:500 15px var(--font);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+.qt-tab:hover{background:var(--surface-alt);color:var(--text)}
+.qt-tab.on{color:var(--text);font-weight:700}
+.qt-tab.on::after{content:'';position:absolute;left:18px;right:18px;bottom:7px;height:2px;border-radius:2px;background:var(--text)}
+.qt-tab.add{color:var(--accent);font-weight:600;margin-left:auto}
+.qt-tab.add svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+@media(max-width:1100px){.qt-shell{grid-template-columns:210px minmax(0,1fr)}}
+@media(max-width:860px){
+  .qt-shell{grid-template-columns:1fr;gap:12px}
+  .qt-nav{position:static;gap:8px}
+  .qt-nav>.qt-nav-item{height:42px;font-size:14px}
+  .qt-nav-sep{display:none}
+  .qt-nav-list{flex-direction:row;max-height:none;min-height:0;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+  .qt-nav-list::-webkit-scrollbar{display:none}
+  .qt-nav-list .qt-nav-item{width:auto;max-width:180px;height:42px;font-size:14px}
+  .qt-tab.add{margin-left:0}
+}
 </style>
 
 <div class="login-gate" id="login-gate">
@@ -2949,8 +2990,8 @@ function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份',
 function wishExportSignups(){wishCsv('報名名單.csv',['報名時間','梯次','出發','回程','姓名','人數','手機','Email','備註'],wishData.signups.map(s=>[new Date(s.created_at).toLocaleString('zh-TW'),s.mountain_name,s.start_date,s.end_date,s.name,s.party_size,s.phone,s.email,s.note]))}
 
 // ── 報價系統：每個團的成本設定（存在 settings.quoteSheets）──
-let quoteSheets=[],quoteSel=null,quoteOpen=false,quoteSearch='',quoteRouteF='',quotePage=1,_quoteSaveTimer=null;
-try{quoteSel=localStorage.getItem('hk-quote-sel')}catch{}
+let quoteSheets=[],quoteSel=null,quoteRoute=null,quoteSearch='',quoteNavSearch='',quotePage=1,_quoteSaveTimer=null;
+try{quoteSel=localStorage.getItem('hk-quote-sel')||null;const r=localStorage.getItem('hk-quote-route');if(r&&r.startsWith('r:'))quoteRoute=r.slice(2)}catch{}
 const QUOTE_TYPES={fixed:'固定數量',pax:'依人數',pct_in:'% 內含',pct:'% 團費'};
 function quoteItem(name,type,unit,qty,extra){return Object.assign({id:genId(),name,type,unit,qty,offset:0,rate:0,note:''},extra||{})}
 // 預設結構（demo=true 帶入眠月線台北出發的範例數字）
@@ -2995,14 +3036,24 @@ function quoteSave(){
 function quoteFlush(){if(_quoteSaveTimer){clearTimeout(_quoteSaveTimer);_quoteSaveTimer=null;saveToLS('hk-quotes',quoteSheets)}}
 window.addEventListener('pagehide',quoteFlush);
 function quoteTouch(){const q=quoteCur();if(q)q.updatedAt=Date.now();quoteSave()}
-function quoteSelect(id){quoteFlush();quoteSel=id;quoteOpen=!!id;try{localStorage.setItem('hk-quote-sel',id||'')}catch{}renderQuote();window.scrollTo({top:0})}
-function quoteBackToList(){quoteFlush();quoteOpen=false;renderQuote()}
+// quoteRoute：null＝總覽；字串＝左側選中的山（以 route 分組，同一座山的不同出發地是上方分頁）
+function quoteRouteKey(q){return q.route||''}
+function quoteRoutes(){
+  const m=new Map();quoteSheets.forEach(q=>{const k=quoteRouteKey(q);if(!m.has(k))m.set(k,[]);m.get(k).push(q)});
+  return[...m.entries()].sort((a,b)=>(a[0]||'￿').localeCompare(b[0]||'￿','zh-Hant')).map(([name,qs])=>({name,qs}));
+}
+function quotePersist(){try{localStorage.setItem('hk-quote-sel',quoteSel||'');localStorage.setItem('hk-quote-route',quoteRoute==null?'':'r:'+quoteRoute)}catch{}}
+function quoteSelect(id){quoteFlush();const q=quoteSheets.find(x=>x.id===id);if(!q)return;quoteSel=id;quoteRoute=quoteRouteKey(q);quotePersist();renderQuote()}
+function quoteShowRoute(name){quoteFlush();quoteRoute=name;const qs=quoteSheets.filter(q=>quoteRouteKey(q)===name);if(!qs.some(q=>q.id===quoteSel))quoteSel=qs[0]?qs[0].id:null;quotePersist();renderQuote();window.scrollTo({top:0})}
+function quoteShowAll(){quoteFlush();quoteRoute=null;quotePersist();renderQuote()}
 const QI={
   plus:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
   search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
   eye:'<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
   trash:'<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>',
+  grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  mtn:'<svg viewBox="0 0 24 24"><path d="M3 20l6-11 4 7 2-3 6 7z"/><circle cx="17" cy="6" r="2"/></svg>',
   back:'<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>',
   next:'<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>',
   ok:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>',
@@ -3032,31 +3083,75 @@ function quotePagerHTML(page,pages,fn){
 function renderQuote(){
   const el=document.getElementById('quote-body');if(!el)return;
   if(!rulesReady){el.innerHTML='<div class="qt-card qt-none">載入中…</div>';return}
-  if(quoteOpen&&quoteCur()){quoteRenderDetail(el);return}
-  quoteOpen=false;
-  const routes=[...new Set(quoteSheets.map(q=>q.route||'（未命名）'))].sort((a,b)=>a.localeCompare(b,'zh-Hant'));
-  if(quoteRouteF&&!routes.includes(quoteRouteF))quoteRouteF='';
+  if(quoteRoute!=null){
+    const qs=quoteSheets.filter(q=>quoteRouteKey(q)===quoteRoute);
+    if(!qs.length)quoteRoute=null;
+    else if(!qs.some(q=>q.id===quoteSel))quoteSel=qs[0].id;
+  }
   el.innerHTML=`
     <div class="qt-page-h"><h3>報價系統</h3><span>每個團的成本設定，修改後自動存檔</span></div>
+    <div class="qt-shell">
+      <aside class="qt-nav">
+        <button class="qt-nav-item${quoteRoute==null?' on':''}" onclick="quoteShowAll()">${QI.grid}<span>總覽</span><small>${quoteSheets.length}</small></button>
+        <div class="qt-nav-sep">山名</div>
+        <label class="qt-search">${QI.search}<input type="search" placeholder="搜尋山名" value="${escAttr(quoteNavSearch)}" oninput="quoteNavSearch=this.value;quoteRenderNavList()"></label>
+        <div class="qt-nav-list" id="qt-nav-list"></div>
+        <div class="qt-nav-add"><input id="qt-new-route" placeholder="新增山名，例：嘉明湖" onkeydown="if(event.key==='Enter'&&!event.isComposing)quoteAddRoute()"><button onclick="quoteAddRoute()" title="新增">${QI.plus}</button></div>
+      </aside>
+      <section class="qt-body" id="qt-body"></section>
+    </div>`;
+  quoteRenderNavList();
+  const body=document.getElementById('qt-body');
+  if(quoteRoute==null)quoteRenderOverview(body);else quoteRenderDetail(body);
+}
+function quoteRenderNavList(){
+  const el=document.getElementById('qt-nav-list');if(!el)return;
+  const kw=quoteNavSearch.trim().toLowerCase();
+  const rs=quoteRoutes().filter(r=>!kw||(r.name||'未命名').toLowerCase().includes(kw));
+  el.innerHTML=rs.map(r=>`<button class="qt-nav-item${r.name===quoteRoute?' on':''}" onclick="quoteShowRoute(${escAttr(JSON.stringify(r.name))})" title="${escAttr(r.name||'未命名')}">${QI.mtn}<span>${esc(r.name||'（未命名）')}</span><small>${r.qs.length}</small></button>`).join('')
+    ||`<div class="qt-nav-none">${quoteSheets.length?'沒有符合的山':'還沒有山，從下面新增'}</div>`;
+  const on=el.querySelector('.qt-nav-item.on');if(on&&el.scrollWidth>el.clientWidth)el.scrollLeft=Math.max(0,on.offsetLeft-el.offsetLeft-12);
+}
+function quoteRenderOverview(body){
+  body.innerHTML=`
     <div class="qt-card">
       <div class="qt-toolbar">
-        <button class="qt-btn pri" onclick="quoteNew()">新增報價 ${QI.plus}</button>
+        <h4 style="margin:0;font-size:16px">所有報價</h4>
         <div class="qt-sp"></div>
-        <label class="qt-search">${QI.search}<input type="search" placeholder="搜尋團名／出發地" value="${escAttr(quoteSearch)}" oninput="quoteSearch=this.value;quotePage=1;quoteRenderListBody()"></label>
-        <select class="qt-select" onchange="quoteRouteF=this.value;quotePage=1;quoteRenderListBody()">
-          <option value="">全部團名</option>${routes.map(r=>`<option${r===quoteRouteF?' selected':''}>${esc(r)}</option>`).join('')}
-        </select>
+        <label class="qt-search">${QI.search}<input type="search" placeholder="搜尋山名／出發地" value="${escAttr(quoteSearch)}" oninput="quoteSearch=this.value;quotePage=1;quoteRenderListBody()"></label>
       </div>
       <div id="qt-list-body"></div>
     </div>`;
   quoteRenderListBody();
+}
+function quoteAddRoute(){
+  const inp=document.getElementById('qt-new-route');const name=(inp&&inp.value||'').trim();
+  if(!name){toast('請輸入山名');if(inp)inp.focus();return}
+  if(quoteSheets.some(q=>quoteRouteKey(q)===name)){quoteShowRoute(name);return}
+  const q=quoteDefault(name,'台北出發',false);
+  quoteSheets.push(q);quoteSel=q.id;quoteRoute=name;quoteNavSearch='';quoteSave();quotePersist();renderQuote();
+  toast(`已新增「${name}」，請填入成本`);
+}
+function quoteAddOrigin(){
+  const src=quoteCur();if(!src)return;
+  const q=JSON.parse(JSON.stringify(src));
+  q.id=genId();q.updatedAt=Date.now();q.origin='';
+  q.cats.forEach(c=>{c.id=genId();c.items.forEach(it=>it.id=genId())});
+  quoteSheets.push(q);quoteSel=q.id;quoteSave();quotePersist();renderQuote();
+  const inp=document.getElementById('qt-origin');if(inp)inp.focus();
+  toast('已複製目前的成本，請填出發地再調整數字');
+}
+function quoteRenameRoute(v){
+  const old=quoteRoute;if(old==null)return;
+  quoteSheets.forEach(q=>{if(quoteRouteKey(q)===old){q.route=v;q.updatedAt=Date.now()}});
+  quoteRoute=v;quotePersist();quoteSave();quoteRenderNavList();
 }
 const QUOTE_PAGE_SIZE=10;
 function quoteGoPage(n){quotePage=n;quoteRenderListBody()}
 function quoteRenderListBody(){
   const el=document.getElementById('qt-list-body');if(!el)return;
   const kw=quoteSearch.trim().toLowerCase();
-  const list=quoteSheets.filter(q=>(!kw||(q.route+' '+q.origin).toLowerCase().includes(kw))&&(!quoteRouteF||(q.route||'（未命名）')===quoteRouteF))
+  const list=quoteSheets.filter(q=>(!kw||(q.route+' '+q.origin).toLowerCase().includes(kw)))
     .sort((a,b)=>(a.route||'￿').localeCompare(b.route||'￿','zh-Hant')||(a.origin||'').localeCompare(b.origin||'','zh-Hant'));
   const pages=Math.max(1,Math.ceil(list.length/QUOTE_PAGE_SIZE));
   quotePage=Math.min(Math.max(1,quotePage),pages);
@@ -3080,14 +3175,15 @@ function quoteRenderListBody(){
     </tr>`;
   }).join('');
   el.innerHTML=`<div class="qt-tbl-wrap"><table class="qt-table qt-list-tbl">
-      <thead><tr><th>團名</th><th>出發地</th><th class="r">團費／人</th><th class="r">人數</th><th class="r qt-hide-sm">總團費</th><th class="r qt-hide-sm">支出小計</th><th class="r">剩餘團費</th><th>狀態</th><th class="r">操作</th></tr></thead>
-      <tbody>${rows||`<tr><td colspan="9" class="qt-none">${quoteSheets.length?'沒有符合的報價':'還沒有報價，按「新增報價」開始'}</td></tr>`}</tbody>
+      <thead><tr><th>山名</th><th>出發地</th><th class="r">團費／人</th><th class="r">人數</th><th class="r qt-hide-sm">總團費</th><th class="r qt-hide-sm">支出小計</th><th class="r">剩餘團費</th><th>狀態</th><th class="r">操作</th></tr></thead>
+      <tbody>${rows||`<tr><td colspan="9" class="qt-none">${quoteSheets.length?'沒有符合的報價':'還沒有報價，從左邊新增山名開始'}</td></tr>`}</tbody>
     </table></div>
     <div class="qt-pager-row"><span class="qt-count">共 ${list.length} 筆</span>${quotePagerHTML(quotePage,pages,'quoteGoPage')}</div>`;
 }
 
 function quoteRenderDetail(el){
-  const q=quoteCur();
+  const q=quoteCur();if(!q){el.innerHTML='';return}
+  const sib=quoteSheets.filter(x=>quoteRouteKey(x)===quoteRoute);
   const tc=(c)=>/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#C9C9C9';
   const typeSel=(c,it)=>`<select class="qt-select sm" onchange="quoteItemSet('${c.id}','${it.id}','type',this.value,false,true)">${Object.entries(QUOTE_TYPES).map(([k,v])=>`<option value="${k}"${it.type===k?' selected':''}>${v}</option>`).join('')}</select>`;
   const numIn=(c,it,f,cls)=>`<input class="qt-cell ${cls}" type="number" step="any" inputmode="decimal" value="${escAttr(String(it[f]??0))}" oninput="quoteItemSet('${c.id}','${it.id}','${f}',this.value,true)">`;
@@ -3118,12 +3214,15 @@ function quoteRenderDetail(el){
     return grp+items;
   }).join('');
   el.innerHTML=`
-    <button class="qt-back" onclick="quoteBackToList()">${QI.back}報價列表</button>
+    <div class="qt-tabs">
+      ${sib.map(x=>`<button class="qt-tab${x.id===q.id?' on':''}" data-qtab="${x.id}" onclick="quoteSelect('${x.id}')">${esc(x.origin||'未填出發地')}</button>`).join('')}
+      <button class="qt-tab add" onclick="quoteAddOrigin()">${QI.plus}新增出發地</button>
+    </div>
     <div class="qt-card">
       <div class="qt-head-grid">
-        <div class="qt-field"><label>團名</label><input class="qt-input big" value="${escAttr(q.route)}" placeholder="例：眠月線" oninput="quoteSet('route',this.value)"></div>
-        <div class="qt-field"><label>出發地</label><input class="qt-input" value="${escAttr(q.origin)}" placeholder="例：台北出發" oninput="quoteSet('origin',this.value)"></div>
-        <div class="qt-head-acts"><button class="qt-btn" onclick="quoteDup()">${QI.copy}複製</button><button class="qt-btn danger" onclick="quoteDel()">${QI.trash}刪除</button></div>
+        <div class="qt-field"><label>山名（同一座山的所有出發地一起改）</label><input class="qt-input big" value="${escAttr(q.route)}" placeholder="例：眠月線" oninput="quoteRenameRoute(this.value)"></div>
+        <div class="qt-field"><label>出發地</label><input class="qt-input" id="qt-origin" value="${escAttr(q.origin)}" placeholder="例：台北出發" oninput="quoteSet('origin',this.value)"></div>
+        <div class="qt-head-acts"><button class="qt-btn danger" onclick="quoteDel()">${QI.trash}刪除此出發地</button></div>
       </div>
     </div>
     <div class="qt-stats">
@@ -3165,13 +3264,14 @@ function quoteStep(f,d){
 }
 // 只更新計算出來的格子，不重畫表格（輸入框才不會失焦）
 function quoteRecalc(){
-  const q=quoteCur();const el=document.getElementById('quote-body');if(!q||!el||!quoteOpen)return;
+  const q=quoteCur();const el=document.getElementById('quote-body');if(!q||!el||quoteRoute==null)return;
   const r=quoteCalc(q);
   el.querySelectorAll('[data-qr]').forEach(n=>{const[id,f]=n.dataset.qr.split(':');const v=r.rows[id];n.textContent=v?qFmt(v[f]):''});
   el.querySelectorAll('[data-qc]').forEach(n=>{const c=q.cats.find(x=>x.id===n.dataset.qc);n.textContent=c?qFmt(c.items.reduce((a,it)=>a+(r.rows[it.id]?r.rows[it.id].total:0),0)):''});
   const set=(k,t,html)=>el.querySelectorAll(`[data-qs="${k}"]`).forEach(n=>{if(html)n.innerHTML=t;else n.textContent=t});
   const pos=r.profit>=0,money=v=>(v<0?'-':'')+'$'+qFmt(Math.abs(v));
   set('band',q.origin||'未填出發地');
+  el.querySelectorAll(`[data-qtab="${q.id}"]`).forEach(n=>n.textContent=q.origin||'未填出發地');
   set('gross','$'+qFmt(r.gross));
   set('cost','$'+qFmt(r.cost));set('cost2','$'+qFmt(r.cost));
   set('cpp',r.pax?`每人成本 $${qFmt(r.cost/r.pax)}`:'');
@@ -3219,11 +3319,6 @@ function quoteDelCat(cid){
   if(!confirm(`刪除類別「${c.name||'未命名'}」和裡面 ${c.items.length} 個項目？`))return;
   q.cats=q.cats.filter(x=>x.id!==cid);quoteTouch();renderQuote();
 }
-function quoteNew(){
-  const q=quoteDefault('','台北出發',false);
-  quoteSheets.push(q);quoteSearch='';quoteRouteF='';quoteSave();quoteSelect(q.id);
-  const inp=document.querySelector('#view-quote .qt-input.big');if(inp)inp.focus();
-}
 function quoteDup(id){
   const src=id?quoteSheets.find(x=>x.id===id):quoteCur();if(!src)return;
   const q=JSON.parse(JSON.stringify(src));
@@ -3234,10 +3329,11 @@ function quoteDup(id){
 }
 function quoteDel(id){
   const q=id?quoteSheets.find(x=>x.id===id):quoteCur();if(!q)return;
-  if(!confirm(`確定刪除「${q.route||'未命名'}・${q.origin||''}」的報價？`))return;
+  const last=quoteSheets.filter(x=>quoteRouteKey(x)===quoteRouteKey(q)).length===1;
+  if(!confirm(`確定刪除「${q.route||'未命名'}・${q.origin||'未填出發地'}」的報價？${last?'\n這是這座山最後一個出發地，刪除後左側列表也會移除這座山。':''}`))return;
   quoteSheets=quoteSheets.filter(x=>x.id!==q.id);
-  if(quoteSel===q.id){quoteSel=null;quoteOpen=false}
-  quoteSave();renderQuote();
+  if(quoteSel===q.id)quoteSel=null;
+  quoteSave();quotePersist();renderQuote();
 }
 
 const VIEW_IDS=['schedule','list','calendar','mktgview','finance','members','wish','quote'];
