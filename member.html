@@ -50,8 +50,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;vertical-align:2px;background:var(--gold-bg);color:#8A6A08}
 .empty{text-align:center;color:var(--text-muted);font-size:14px;padding:32px 0}
 .center{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:24px}
-.brand-tile{width:84px;height:84px;border-radius:20px;background:var(--brand);display:flex;align-items:center;justify-content:center}
-.brand-tile img{height:52px;width:auto;display:block}
 .center h1{font-size:20px}
 .center p{color:var(--text-muted);font-size:14px}
 .g-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 24px;border-radius:8px;border:1px solid #DADCE0;background:#fff;color:#3C4043;font:600 15px var(--font);cursor:pointer;text-decoration:none}
@@ -64,13 +62,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 .foot button{background:none;border:none;color:var(--text-muted);font:13px var(--font);text-decoration:underline;cursor:pointer}
 /* 登入與提示畫面：整頁品牌綠底 */
 body.auth{background:var(--brand);color:#F3EFE6}
-.auth .center h1{color:#F3EFE6}
-.auth .center p,.auth .hint{color:rgba(243,239,230,.75)}
-.auth .brand-tile{background:none;width:auto;height:auto}
-.auth .brand-tile img{height:72px}
-.auth .p-btn{background:#F3EFE6;color:var(--brand)}
-.auth .g-btn{border-color:transparent}
+.auth .center{min-height:100vh;min-height:100dvh}
 .auth .spin{border-color:rgba(243,239,230,.25);border-top-color:#F3EFE6}
+.auth-wrap{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:0 28px calc(28px + env(safe-area-inset-bottom))}
+.auth-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 0 6vh}
+.auth-logo{height:88px;width:auto;display:block;margin-bottom:40px}
+.auth-wrap h1{font-size:22px;font-weight:700;letter-spacing:.14em;margin-bottom:14px}
+.auth-msg{font-size:14px;line-height:1.85;color:rgba(243,239,230,.72);max-width:290px;margin-bottom:40px}
+.auth-act{width:100%;max-width:300px;display:flex;flex-direction:column;gap:16px}
+.auth-act .g-btn,.auth-act .p-btn{width:100%;height:50px;justify-content:center;border-radius:12px;font-size:15px}
+.auth-act .g-btn{border-color:transparent}
+.auth-act .p-btn{background:#F3EFE6;color:var(--brand)}
+.auth-act .p-btn.ghost{background:none;color:#F3EFE6;border:1px solid rgba(243,239,230,.4)}
+.auth-steps{list-style:none;padding:16px 20px;margin:0 0 4px;border-radius:12px;background:rgba(243,239,230,.07);text-align:left;font-size:14px;line-height:1.7;color:rgba(243,239,230,.85)}
+.auth-steps li{display:flex;gap:12px;align-items:baseline}
+.auth-steps li+li{margin-top:8px}
+.auth-steps b{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:rgba(243,239,230,.16);font-size:12px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(-1px)}
+.auth-url{font-size:12px;line-height:1.6;color:rgba(243,239,230,.5);word-break:break-all}
+.auth-foot{text-align:center;font-size:12px;letter-spacing:.22em;color:rgba(243,239,230,.42);line-height:1.9}
+.auth-foot i{display:block;font-size:11px;letter-spacing:.3em}
+.auth-foot a{display:inline-block;margin-top:10px;color:rgba(243,239,230,.42);letter-spacing:.08em;font-size:11px}
 .spin{width:28px;height:28px;border:3px solid var(--border-sub);border-top-color:var(--brand);border-radius:50%;animation:sp 0.8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 </style>
@@ -105,14 +116,24 @@ function fmtRange(s,e){
 }
 function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
+// msg 可傳陣列，每一項一行
 function showMsg(title,msg,btn){
   document.body.classList.add('auth');
-  app.innerHTML=`<div class="center"><div class="brand-tile"><img src="images/logo-square.png" alt="入野門"></div><h1>${esc(title)}</h1><p>${esc(msg)}</p>${btn||''}</div>`;
+  const lines=(Array.isArray(msg)?msg:[msg]).map(esc).join('<br>');
+  app.innerHTML=`<div class="auth-wrap">
+    <div class="auth-main">
+      <img class="auth-logo" src="images/logo-square.png" alt="入野門">
+      <h1>${esc(title)}</h1>
+      <p class="auth-msg">${lines}</p>
+      <div class="auth-act">${btn||''}</div>
+    </div>
+    <div class="auth-foot">推門，走向遼闊<i>STEP IN, LIVE OUT</i><a href="privacy.html">隱私權政策</a></div>
+  </div>`;
 }
 const RELOAD_BTN='<button class="p-btn" onclick="location.reload()">重新整理</button>';
 function pageUrl(){return location.origin+location.pathname}
 function showLogin(){
-  showMsg('入野門會員中心','用 Google 帳號登入，查看儲值金與參加過的行程',
+  showMsg('會員中心',['使用 Google 帳號登入','查看儲值金、點數與參加過的行程'],
     `<button class="g-btn" onclick="login()">${G_ICON}使用 Google 登入</button>`);
 }
 async function login(){
@@ -125,8 +146,9 @@ async function logout(){await sb.auth.signOut();showLogin()}
 function inAppBrowser(){const ua=navigator.userAgent;return/Line\/|FBAN|FBAV|Instagram/i.test(ua)?(/Line\//i.test(ua)?'line':'other'):''}
 function showInAppHint(){
   const url=pageUrl();
-  showMsg('請用瀏覽器開啟','Google 登入不支援在 App 內開啟，請點右上角選單，選「用瀏覽器開啟」',
-    `<button class="p-btn" onclick="copyUrl()">複製網址</button><div class="hint" id="copy-hint">${esc(url)}</div>`);
+  showMsg('請用瀏覽器開啟',['Google 登入無法在 App 內使用','請改用 Safari 或 Chrome 開啟'],
+    `<ol class="auth-steps"><li><b>1</b>點右上角的「⋯」選單</li><li><b>2</b>選「用瀏覽器開啟」</li></ol>
+    <button class="p-btn ghost" onclick="copyUrl()">或複製網址</button><div class="auth-url" id="copy-hint">${esc(url)}</div>`);
 }
 function copyUrl(){
   const url=pageUrl();
