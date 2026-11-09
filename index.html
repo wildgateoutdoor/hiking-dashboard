@@ -4506,12 +4506,12 @@ async function exportCheckedToWord(){
     const eqRenters=t.equipRenters||[];
     if(eqRenters.length){
       children.push(new Paragraph({children:[new TextRun({text:'裝備租借',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
+      const eqTotals={};eqRenters.forEach(r=>(r.rentals||[]).forEach(ri=>{if(ri.item&&ri.qty)eqTotals[ri.item]=(eqTotals[ri.item]||0)+(ri.qty||0)}));
+      const eqSummary=Object.entries(eqTotals).map(([k,v])=>k+'×'+v).join('、');
+      if(eqSummary)children.push(new Paragraph({children:[new TextRun({text:'裝備總數統計：'+eqSummary,bold:true,size:20,font:'Microsoft JhengHei'})],spacing:{after:80}}));
       const eRows=[new TableRow({children:[hdrCell('租借人'),hdrCell('租借項目'),hdrCell('數量')]})];
       for(const r of eqRenters){for(const ri of(r.rentals||[])){eRows.push(new TableRow({children:[txtCell(r.name||''),txtCell(ri.item||''),txtCell(String(ri.qty||0))]}))}}
       children.push(new Table({rows:eRows,width:{size:100,type:WidthType.PERCENTAGE}}));
-      const eqTotals={};eqRenters.forEach(r=>(r.rentals||[]).forEach(ri=>{if(ri.item&&ri.qty)eqTotals[ri.item]=(eqTotals[ri.item]||0)+(ri.qty||0)}));
-      const eqSummary=Object.entries(eqTotals).map(([k,v])=>k+'×'+v).join('、');
-      if(eqSummary)children.push(new Paragraph({children:[new TextRun({text:'裝備總數統計：'+eqSummary,size:20,font:'Microsoft JhengHei'})],spacing:{before:80}}));
     }
     const ptBuyers=t.porterBuyers||[];const ptTotal=(t.porter||{}).weight||ptBuyers.reduce((s,b)=>s+b.weight,0);
     if(ptBuyers.length){
