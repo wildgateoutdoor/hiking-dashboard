@@ -105,6 +105,20 @@ function todayTW() {
   return d.toISOString().slice(0, 10);
 }
 const monthStart = (s: string) => s.slice(0, 7) + "-01";
+const MAX_RANGE_DAYS = 31;
+// 某段日期的每一天（YYYY-MM-DD），最多 MAX_RANGE_DAYS 天
+function eachDay(start: unknown, end: unknown) {
+  const s = String(start || ""), e = String(end || start || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}$/.test(e) || e < s) return [];
+  const out: string[] = [];
+  for (let d = new Date(s + "T00:00:00Z"); out.length < MAX_RANGE_DAYS; d.setUTCDate(d.getUTCDate() + 1)) {
+    const k = d.toISOString().slice(0, 10);
+    if (k > e) break;
+    out.push(k);
+  }
+  return out;
+}
+const monthEnd = (ym01: string) => { const [y, m] = ym01.split("-").map(Number); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); };
 function addMonths(ym01: string, n: number) {
   const [y, m] = ym01.split("-").map(Number);
   const d = new Date(Date.UTC(y, m - 1 + n, 1));
@@ -192,7 +206,7 @@ async function list() {
     .eq("active", true).order("sort").order("created_at"));
   const ids = mountains.map((m: any) => m.id);
   const open = (await loadTrips()).filter((t) => tripOpen(t, today)).sort((a, b) => a.date.localeCompare(b.date));
-  const wishes = must(await db.from("wishes").select("mountain_id,custom_name,wish_month").gte("wish_month", thisMonth));
+  const wishes = must(await db.from("wishes").select("mountain_id,custom_name,wish_month,preferred_ranges").gte("wish_month", thisMonth));
   // 只回傳統計數字；自填的山依名稱（不分大小寫、空白）合併
   const counts: Record<string, Record<string, number>> = {};
   const customName: Record<string, string> = {};
@@ -205,9 +219,26 @@ async function list() {
     m[k] = (m[k] || 0) + 1;
   }
   const sum = (o: Record<string, number> = {}) => Object.values(o).reduce((a, b) => a + b, 0);
+  // 月曆：每一天有幾個人想去哪裡（只有數字，沒有個資）。一筆許願的每段日期逐日展開
+  const nameOf: Record<string, string> = Object.fromEntries(mountains.map((m: any) => [m.id, m.name]));
+  const cal: Record<string, Record<string, number>> = {};
+  for (const w of wishes as any[]) {
+    const place = w.mountain_id ? nameOf[w.mountain_id] : w.custom_name;
+    if (!place || !Array.isArray(w.preferred_ranges)) continue;
+    for (const r of w.preferred_ranges) {
+      for (const day of eachDay(r?.start, r?.end)) {
+        if (day < today) continue;
+        const c = (cal[day] ||= {});
+        c[place] = (c[place] || 0) + 1;
+      }
+    }
+  }
+  const calendar = Object.fromEntries(Object.entries(cal).sort().map(([d, o]) =>
+    [d, Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))]));
   return {
     threshold: THRESHOLD,
     today,
+    calendar,
     mountains: mountains.map(({ aliases, ...m }: any) => ({
       ...m,
       dates: dedupeTrips(open.filter((t) => tripMatches({ name: m.name, aliases }, t))).map(tripDate),
@@ -234,6 +265,7 @@ function ranges(v: unknown) {
     const end = r?.end ? dateStr(r.end, "想出發的最後一天") : start;
     if (start < today) throw new HttpError(400, "想出發的日期不能早於今天");
     if (end < start) throw new HttpError(400, "最後一天不能早於第一天");
+    if ((Date.parse(end) - Date.parse(start)) / 864e5 + 1 > MAX_RANGE_DAYS) throw new HttpError(400, `每一段日期最多 ${MAX_RANGE_DAYS} 天`);
     return { start, end };
   });
 }
@@ -245,9 +277,13 @@ async function wish(b: Record<string, any>) {
   const m = b.mountain_id ? await activeMountain(uuid(b.mountain_id)) : null;
   if (!m && !custom) throw new HttpError(400, "請選擇想去的山，或直接填寫山名");
   const target = m ? m.name : custom;
+  const rs = ranges(b.ranges);
   const rawMonths = Array.isArray(b.months) ? b.months : (b.month ? [b.month] : []);
-  const months = [...new Set(rawMonths.map((x: unknown) => str(x, 7)))].slice(0, 12) as string[];
-  if (!months.length) throw new HttpError(400, "請選擇想去的月份");
+  // 前台改成選日期：沒有指定月份時，由想出發的日期推出月份
+  const byDates = !rawMonths.length && rs.length > 0;
+  const fromDates = [...new Set(rs.flatMap((r) => eachDay(r.start, r.end).map((d) => d.slice(0, 7))))];
+  const months = [...new Set((byDates ? fromDates : rawMonths).map((x: unknown) => str(x, 7)))].slice(0, 12) as string[];
+  if (!months.length) throw new HttpError(400, "請選擇想出發的日期");
   const thisMonth = monthStart(todayTW());
   for (const mo of months) {
     if (!/^\d{4}-\d{2}$/.test(mo)) throw new HttpError(400, "月份格式不正確");
@@ -258,12 +294,16 @@ async function wish(b: Record<string, any>) {
     mountain_id: m?.id ?? null, custom_name: m ? null : custom,
     name: reqStr(b.name, "姓名", 50), email: email(b.email), phone: phone(b.phone, false), note: strOrNull(b.note),
   };
-  const rs = ranges(b.ranges);
   const results: { month: string; count: number; dup: boolean }[] = [];
   for (const mo of months.sort()) {
     const wishMonth = mo + "-01";
+    // 用日期許願時，每個月份只存落在那個月的日期，月曆才不會重複計算
+    const mr = byDates
+      ? rs.filter((r) => r.start <= monthEnd(wishMonth) && r.end >= wishMonth)
+        .map((r) => ({ start: r.start < wishMonth ? wishMonth : r.start, end: r.end > monthEnd(wishMonth) ? monthEnd(wishMonth) : r.end }))
+      : rs;
     const { error } = await db.from("wishes").insert({
-      ...base, wish_month: wishMonth, preferred_ranges: rs.length ? rs : null, preferred_date: rs[0]?.start ?? null,
+      ...base, wish_month: wishMonth, preferred_ranges: mr.length ? mr : null, preferred_date: mr[0]?.start ?? null,
     });
     if (error && error.code !== "23505") throw new HttpError(500, error.message);
     const people = await wishPeople(m?.id ?? null, custom, wishMonth);
