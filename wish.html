@@ -257,7 +257,6 @@ button{-webkit-tap-highlight-color:transparent}
 .stepper b{font-family:var(--num);font-size:30px;font-weight:800;color:var(--brand);min-width:44px;text-align:center}
 .stepper span{font-size:15px;color:var(--ink-2);margin-left:-8px}
 .add-range{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:4px auto 0;border-radius:50%;border:none;background:var(--mist);color:var(--brand);font-size:20px;font-weight:700;line-height:1;cursor:pointer}
-.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .exp-head{padding:18px 4px 6px}
 .exp-head .q-sub{margin-bottom:22px}
 .mine-btn{display:block;width:100%;margin-top:4px;padding:15px;border:1.5px solid var(--brand);border-radius:999px;background:transparent;color:var(--brand);font-size:16px;font-weight:800;letter-spacing:.08em;cursor:pointer}
@@ -731,8 +730,7 @@ function contactFields(){
   return`<div class="f"><label for="c-name">你的名字</label><input id="c-name" maxlength="50" autocomplete="name" value="${escAttr(c.name||'')}" oninput="saveContact()"></div>
     <div class="f"><label for="c-email">Email <small>開團時通知你</small></label><input id="c-email" type="email" inputmode="email" autocomplete="email" value="${escAttr(c.email||'')}" oninput="saveContact()"></div>
     <div class="f"><label for="c-phone">手機 <small>選填</small></label><input id="c-phone" type="tel" inputmode="tel" autocomplete="tel" value="${escAttr(c.phone||'')}" oninput="saveContact()"></div>
-    <div class="f"><label for="c-note">想說的話 <small>選填</small></label><textarea id="c-note" maxlength="500" placeholder="例：想走兩天一夜、希望週末出發" oninput="saveContact()">${esc(c.note||'')}</textarea></div>
-    <div class="hp"><input id="c-web" tabindex="-1" autocomplete="off"></div>`;
+    <div class="f"><label for="c-note">想說的話 <small>選填</small></label><textarea id="c-note" maxlength="500" placeholder="例：想走兩天一夜、希望週末出發" oninput="saveContact()">${esc(c.note||'')}</textarea></div>`;
 }
 const val=id=>{const e=document.getElementById(id);return e?e.value:''};
 function rangeRow(r,i,n){
@@ -774,7 +772,7 @@ async function submitWish(e){
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email.trim())){err.textContent='請填寫正確的 Email';return}
   btn.disabled=true;btn.firstElementChild.textContent='送出中…';
   try{
-    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,party_size:F.party||1,name:c.name,email:c.email,phone:c.phone,note:c.note,ranges:ranges.map(x=>({start:x.start,end:x.end||x.start})),website:val('c-web')});
+    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,party_size:F.party||1,name:c.name,email:c.email,phone:c.phone,note:c.note,ranges:ranges.map(x=>({start:x.start,end:x.end||x.start}))});
     F.dirty=true;
     const target=m?m.name:custom;
     F.doneHTML=`<div class="done"><div class="done-photo"><img src="images/photos/starry-night.webp" alt="" decoding="async"></div><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>願望收到了！</h3>
