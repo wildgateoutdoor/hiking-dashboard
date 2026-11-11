@@ -139,6 +139,9 @@ button{-webkit-tap-highlight-color:transparent}
 .cal-wish{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px dashed #c9d3bd}
 .cal-wish b{display:block;color:var(--brand);font-size:15px}
 .cal-wish small{display:block;font-size:12.5px;color:var(--green);font-family:var(--num)}
+.cal-wish .cw-r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.plus1{width:36px;height:36px;border-radius:50%;border:none;background:var(--gold);color:var(--brand);font-family:var(--num);font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 8px rgba(223,172,16,.35);flex-shrink:0}
+.plus1:active{transform:scale(.92)}
 .cal-wish span{flex-shrink:0;font-family:var(--num);font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:3px 12px;font-size:13px}
 /* 載入時山形由下往上長出來，之後編號針再淡入 */
 #chart.anim .pk{transform-box:fill-box;transform-origin:50% 100%;animation:grow .9s cubic-bezier(.2,.8,.25,1) both}
@@ -518,6 +521,14 @@ function calMonths(){
 function calStep(n){const ms=calMonths(),i=ms.indexOf(calYM)+n;if(i>=0&&i<ms.length){calYM=ms[i];calSel=null;renderCal()}}
 function calPick(d){calSel=calSel===d?null:d;renderCal()}
 // 每筆許願：{start,end,place,people}；舊版後端只有每日統計時，轉成單日的許願
+// 月曆裡別人的許願按 +1：打開「我要直接許願」，地點和日期先幫忙填好（還是可以改）
+function plusOne(place,start,end){
+  startFlow();
+  const m=D.mountains.find(x=>x.name===place);
+  if(m){F.mid=m.id;F.region=m.region||'其他'}else F.custom=place;
+  F.contact={name:'',email:'',phone:'',note:'',ranges:[{start:start<D.today?D.today:start,end:end<D.today?D.today:end}]};
+  go('direct');
+}
 function calWishes(){
   if(Array.isArray(D.wishDays))return D.wishDays;
   return Object.entries(D.calendar||{}).flatMap(([d,arr])=>arr.map(([p,c])=>({start:d,end:d,place:p,people:c})));
@@ -540,7 +551,7 @@ function renderCal(){
   const list=calSel?on(calSel):[];
   const det=list.length
     ?`<div class="cal-detail"><div class="cal-det-h"><b>${fmtMD(calSel)}</b> 有 ${people(calSel)} 人許願</div>
-      ${list.map(w=>`<div class="cal-wish"><div><b>${esc(w.place)}</b><small>${w.end&&w.end!==w.start?`${fmtMD(w.start)} – ${fmtMD(w.end)}`:fmtMD(w.start)}</small></div><span>${w.people} 人</span></div>`).join('')}</div>`
+      ${list.map(w=>`<div class="cal-wish"><div><b>${esc(w.place)}</b><small>${w.end&&w.end!==w.start?`${fmtMD(w.start)} – ${fmtMD(w.end)}`:fmtMD(w.start)}</small></div><div class="cw-r"><span>${w.people} 人</span><button type="button" class="plus1" onclick="plusOne(${escAttr(JSON.stringify(w.place))},'${w.start}','${w.end||w.start}')" aria-label="我也想去${escAttr(w.place)}">+1</button></div></div>`).join('')}</div>`
     :`<div class="cal-detail">${monthTotal?'點有數字的日期，看看大家想去哪裡':'這個月還沒有人指定日期，搶先許願吧！'}</div>`;
   box.innerHTML=`<div class="cal-h"><button class="cal-nav" onclick="calStep(-1)" ${idx<=0?'disabled':''} aria-label="上個月">‹</button><b>${y} 年 ${m} 月</b><button class="cal-nav" onclick="calStep(1)" ${idx>=ms.length-1?'disabled':''} aria-label="下個月">›</button></div>
     <div class="cal-grid">${cells}</div>${det}`;
