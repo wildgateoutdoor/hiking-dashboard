@@ -369,7 +369,7 @@ galStart();
 // 左下角社群按鈕：疊在一起時點一下先展開成直排，展開後每一個都是連結；點其他地方收回
 function socialTap(e){const s=document.getElementById('social');if(!s.classList.contains('open')){e.preventDefault();s.classList.add('open')}}
 document.addEventListener('click',e=>{const s=document.getElementById('social');if(s&&!s.contains(e.target))s.classList.remove('open')});
-const GALLERY=[['g1','一步一步往上走｜眠月線'],['g2','森林裡的笑聲｜加里山'],['g3','沿著舊鐵道前進｜眠月線'],['g4','滿天星斗｜合歡群峰'],['g5','萬巒群峰美景｜郡大山'],['g6','隧道裡的野時光｜眠月線']];
+const GALLERY=[['g1','一步一步往上走｜眠月線'],['g2','森林裡的笑聲｜加里山'],['g3','沿著舊鐵道前進｜眠月線'],['g4','滿天星斗｜合歡群峰'],['g5','登頂紀念｜玉山主峰'],['g6','登頂美景｜玉山主峰'],['g7','登頂雲海｜加里山'],['g8','第一高峰日出｜玉山主峰'],['g9','萬巒群峰美景｜郡大山'],['g10','金黃大片草原｜奇萊南華'],['g11','隧道裡的野時光｜眠月線']];
 function banner(img,title,sub){return`<div class="banner"><img src="images/photos/${img}.webp" alt="" decoding="async"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>`}
 const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const DAYS=['日','一','二','三','四','五','六'];
