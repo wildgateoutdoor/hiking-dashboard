@@ -263,7 +263,7 @@ button{-webkit-tap-highlight-color:transparent}
 .mine-btn{display:block;width:100%;margin-top:4px;padding:15px;border:1.5px solid var(--brand);border-radius:999px;background:transparent;color:var(--brand);font-size:16px;font-weight:800;letter-spacing:.08em;cursor:pointer}
 .mine-btn:active{background:var(--mist)}
 .login-card{text-align:center;padding:26px 18px}
-.login-card h3{font-size:19px;color:var(--brand);line-height:1.6;margin-bottom:20px}
+.login-card h3{font-size:14px;font-weight:500;color:var(--brand);line-height:1.8;margin-bottom:20px}
 .login-card p{font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:18px}
 .login-card small{display:block;font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6}
 #g-btn{display:flex;justify-content:center;min-height:44px}
@@ -632,7 +632,7 @@ async function loadMine(){
 function logoutMine(){ME=null;MINE=null;try{google.accounts.id.disableAutoSelect()}catch{}rerender(true)}
 function mineHTML(){
   if(!D.google_client_id)return`<div class="fcard login-card"><h3>我的許願</h3><p>登入功能即將開放，敬請期待！</p></div>`;
-  if(!ME)return`<div class="fcard login-card"><h3>請用許願時填寫的 Gmail 登入，登入後可以查看/修改你許過的願～</h3>
+  if(!ME)return`<div class="fcard login-card"><h3>請用許願時填寫的 Gmail 登入<br>登入後可以查看/修改你許過的願望</h3>
       <div id="g-btn"></div><div class="err" id="m-err"></div></div>`;
   const bar=`<div class="me-bar"><span>已登入 <b>${esc(ME.email)}</b></span><button type="button" onclick="logoutMine()">登出</button></div>`;
   if(MINE===null)return bar+`<div class="mine-empty">讀取中…</div><div class="err" id="m-err"></div>`;
