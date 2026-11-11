@@ -560,7 +560,7 @@ function drawChart(){
       <feBlend in="SourceGraphic" in2="s2" mode="multiply"/>
     </filter></defs>
     ${peaks}${pins}</svg>
-    <ol class="m-legend ${anim?'anim':''} ${legendAll?'all':''}" id="m-legend">${list.map((m,i)=>{const tm=topMonth(m);return`<li class="${i>=4?'more':''}" style="animation-delay:${(0.9+i*0.05).toFixed(2)}s"><i style="background:${m.c};color:${lightColor(m.c)?'#2e3c26':'#fff'}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>
+    <ol class="m-legend ${anim?'anim':''} ${legendAll?'all':''}" id="m-legend">${list.map((m,i)=>{const tm=topMonth(m);return`<li class="${i>=4?'more':''}" style="animation-delay:${(0.9+i*0.05).toFixed(2)}s"><i style="background:${m.c};color:${lightColor(m.c)?'#2e3c26':'#fff'}">${i+1}</i><span><b>${esc(m.name)}</b><small>${m.total} 人許願${tm?`・最熱門 ${tm[0].replace('-','.')}`:''}</small></span></li>`}).join('')}</ol>
     ${list.length>4?`<button type="button" class="see-all" onclick="toggleLegend()">${legendAll?'收合':`觀看全部（${list.length}）`}</button>`:''}`;
 }
 
