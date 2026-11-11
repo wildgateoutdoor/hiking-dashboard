@@ -140,7 +140,13 @@ button{-webkit-tap-highlight-color:transparent}
 .cal-wish b{display:block;color:var(--brand);font-size:15px}
 .cal-wish small{display:block;font-size:12.5px;color:var(--green);font-family:var(--num)}
 .cal-wish .cw-r{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.plus1{width:36px;height:36px;border-radius:50%;border:none;background:var(--gold);color:var(--brand);font-family:var(--num);font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 8px rgba(223,172,16,.35);flex-shrink:0}
+.plus1{position:relative;overflow:hidden;width:36px;height:36px;border-radius:50%;border:none;background:var(--gold);color:#fff;font-family:var(--num);font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 8px rgba(223,172,16,.35);flex-shrink:0}
+/* +1：每 4 秒一道光斜斜掃過（像 LINE 社群管理員皇冠的閃光） */
+.plus1::after{content:'';position:absolute;top:-30%;left:-90%;width:45%;height:160%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95),rgba(255,255,255,0));transform:rotate(25deg);animation:plusShine 4s ease-in-out infinite;pointer-events:none}
+@keyframes plusShine{0%,78%{left:-90%}96%,100%{left:140%}}
+@keyframes plusGlow{0%,78%,100%{box-shadow:0 3px 8px rgba(223,172,16,.35)}88%{box-shadow:0 0 0 3px rgba(255,236,170,.55),0 3px 14px rgba(223,172,16,.6)}}
+.plus1{animation:plusGlow 4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.plus1,.plus1::after{animation:none}}
 .plus1:active{transform:scale(.92)}
 .cal-wish span{flex-shrink:0;font-family:var(--num);font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:3px 12px;font-size:13px}
 /* 載入時山形由下往上長出來，之後編號針再淡入 */
