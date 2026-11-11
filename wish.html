@@ -784,10 +784,13 @@ async function submitWish(e){
         <small>${x.count>=r.threshold?'已達開團門檻，我們會盡快評估！':`再 ${r.threshold-x.count} 人就達到門檻`}</small></div>`).join('')}</div>
       <p style="font-size:13px;color:var(--muted);margin:16px 0 24px">揪朋友一起許願，更快成團</p>
       <button class="submit plain" onclick="closeSheet()">完成</button>
-      <button class="submit ghost" onclick="againWish()">再許一個願</button></div>`;
+      <button class="submit ghost" onclick="againWish()">再許一個願</button>
+      <button class="mine-btn" style="margin-top:10px" onclick="editAfterWish()">修改編輯你的願望</button></div>`;
     go('done');
   }catch(x){err.textContent=x.message;btn.disabled=false;btn.firstElementChild.textContent='丟進許願池'}
 }
+// 許願完成 → 我的許願（回上一頁會回到「你想怎麼許願？」）
+function editAfterWish(){F.stack=['choose'];go('mine')}
 function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:'',party:1,contact:c,dirty:true};renderStep()}
 
 // 探索
