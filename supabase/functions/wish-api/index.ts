@@ -441,6 +441,21 @@ async function googleEmail(token: unknown) {
   return String(info.email).toLowerCase();
 }
 
+// Google 登入「跳轉模式」：Google 把登入結果（credential）用表單 POST 到這裡，
+// 確認是真的之後，把它放在網址 # 後面帶回許願池（# 後面的內容不會傳到任何伺服器）
+// 用在 App 內建瀏覽器等彈出視窗回不來的情況。只會轉回固定的許願池網址。
+const WISH_SITE = "https://wish.wildgateoutdoor.com/";
+async function googleRedirect(req: Request) {
+  let cred = "";
+  try { cred = String((await req.formData()).get("credential") || ""); } catch { /* 表單格式不對 */ }
+  let to = WISH_SITE + "#mine";
+  if (cred) {
+    try { await googleEmail(cred); to = WISH_SITE + "#cred=" + encodeURIComponent(cred); }
+    catch { to = WISH_SITE + "#mine-err"; }
+  }
+  return new Response(null, { status: 303, headers: { Location: to, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
+}
+
 // 這個 Email 還沒過期的許願（同一次送出、被月份拆開的幾筆合成一筆）
 async function mine(b: Record<string, any>) {
   const me = await googleEmail(b.id_token);
@@ -594,6 +609,7 @@ async function admin(action: string, b: Record<string, any>) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method === "POST" && (req.headers.get("content-type") || "").includes("application/x-www-form-urlencoded")) return googleRedirect(req);
   try {
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "");

@@ -474,7 +474,14 @@ async function load(){
   catch(e){document.getElementById('main').innerHTML=`<div class="center">讀取失敗：${esc(e.message)}<br><br><button class="submit" style="width:auto;padding:10px 24px" onclick="location.reload()">重新整理</button></div>`;return}
   render();
   // 從 App 內建瀏覽器跳出來的連結（#mine）：直接打開「我的許願」
-  if(location.hash==='#mine'){history.replaceState(null,'',location.pathname);skipIntro();startFlow();go('mine')}
+  // Google 登入（跳轉模式）回來時：#cred=… 是登入結果，#mine-err 是登入失敗
+  const h=location.hash;
+  if(h==='#mine'||h==='#mine-err'||h.startsWith('#cred=')){
+    history.replaceState(null,'',location.pathname);
+    if(h.startsWith('#cred=')){const t=decodeURIComponent(h.slice(6));ME={token:t,email:jwtEmail(t)};MINE=null}
+    skipIntro();startFlow();go('mine');
+    if(h==='#mine-err'){const x=document.getElementById('m-err');if(x)x.textContent='登入沒有成功，請再試一次'}
+  }
 }
 function render(){
   const main=document.getElementById('main');
@@ -621,7 +628,8 @@ function loadGIS(){return gisLoading||(gisLoading=new Promise((ok,no)=>{const sc
 async function initGoogle(){
   const el=document.getElementById('g-btn');if(!el)return;
   try{await loadGIS()}catch(e){document.getElementById('m-err').textContent=e.message;return}
-  google.accounts.id.initialize({client_id:D.google_client_id,callback:onGoogle,auto_select:false,cancel_on_tap_outside:true});
+  // 跳轉模式：登入完 Google 會把結果送到 API，再轉回許願池（手機上彈出視窗常常回不來，所以不用彈出視窗）
+  google.accounts.id.initialize({client_id:D.google_client_id,ux_mode:'redirect',login_uri:API,auto_select:false});
   google.accounts.id.renderButton(el,{theme:'outline',size:'large',shape:'pill',text:'signin_with',locale:'zh-TW',width:Math.min(320,el.clientWidth||300)});
 }
 function jwtEmail(t){try{const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(b)))).email||''}catch{return''}}
