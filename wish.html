@@ -276,6 +276,7 @@ button{-webkit-tap-highlight-color:transparent}
 .mine-card .acts button{flex:1;padding:10px;border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
 .mine-card .acts .ed{border:1.5px solid var(--brand);background:var(--brand);color:var(--cream)}
 .mine-card .acts .del{border:1.5px solid var(--border);background:#fff;color:var(--red)}
+.inapp-tip{font-size:13px!important;color:var(--muted)!important;margin-bottom:16px!important}
 .mine-empty{text-align:center;color:var(--muted);font-size:14px;padding:30px 0 10px}
 .place-fixed{font-size:18px;font-weight:800;color:var(--brand)}
 .err{color:var(--red);font-size:14px;min-height:20px;margin:6px 0 8px;text-align:center}
@@ -472,6 +473,8 @@ async function load(){
   try{D=await api('list')}
   catch(e){document.getElementById('main').innerHTML=`<div class="center">讀取失敗：${esc(e.message)}<br><br><button class="submit" style="width:auto;padding:10px 24px" onclick="location.reload()">重新整理</button></div>`;return}
   render();
+  // 從 App 內建瀏覽器跳出來的連結（#mine）：直接打開「我的許願」
+  if(location.hash==='#mine'){history.replaceState(null,'',location.pathname);skipIntro();startFlow();go('mine')}
 }
 function render(){
   const main=document.getElementById('main');
@@ -628,9 +631,24 @@ async function loadMine(){
   catch(e){if(/登入/.test(e.message))ME=null;MINE=null;if(F&&cur()==='mine'){rerender(true);const x=document.getElementById('m-err');if(x)x.textContent=e.message}return}
   if(F&&cur()==='mine')rerender(true);
 }
+// LINE、Facebook、Instagram、Threads 等 App 內建的瀏覽器，Google 不允許在裡面登入（會停在空白頁）
+function inAppBrowser(){const u=navigator.userAgent;return /\bLine\/|FBAN|FBAV|FB_IAB|Instagram|Barcelona|MicroMessenger|KAKAOTALK/i.test(u)}
+const mineLink=()=>location.origin+location.pathname+'#mine';
+function inAppHTML(){
+  const line=/\bLine\//i.test(navigator.userAgent);
+  return`<div class="fcard login-card"><h3>Google 不開放在 App 裡登入<br>請改用手機的瀏覽器開啟</h3>
+    ${line?`<button class="submit plain" onclick="location.href=location.origin+location.pathname+'?openExternalBrowser=1#mine'"><span>用瀏覽器開啟</span></button>`
+      :`<p class="inapp-tip">點右上角的「⋯」，選「用瀏覽器開啟」<br>或複製網址，貼到 Safari / Chrome</p>
+        <button class="submit plain" onclick="copyMineLink(this)"><span>複製網址</span></button>`}</div>`;
+}
+async function copyMineLink(b){
+  try{await navigator.clipboard.writeText(mineLink());b.firstElementChild.textContent='已複製，請貼到瀏覽器'}
+  catch{prompt('請複製這個網址，貼到瀏覽器',mineLink())}
+}
 function logoutMine(){ME=null;MINE=null;try{google.accounts.id.disableAutoSelect()}catch{}rerender(true)}
 function mineHTML(){
   if(!D.google_client_id)return`<div class="fcard login-card"><h3>我的許願</h3><p>登入功能即將開放，敬請期待！</p></div>`;
+  if(!ME&&inAppBrowser())return inAppHTML();
   if(!ME)return`<div class="fcard login-card"><h3>請用許願時填寫的 Gmail 登入<br>登入後可以查看/修改你許過的願望</h3>
       <div id="g-btn"></div><div class="err" id="m-err"></div></div>`;
   const bar=`<div class="me-bar"><span>已登入 <b>${esc(ME.email)}</b></span><button type="button" onclick="logoutMine()">登出</button></div>`;
@@ -842,6 +860,11 @@ let introDone=false,introBusy=false;
   document.getElementById('swipe').addEventListener('click',e=>leaveIntro(e.clientX,e.clientY));
   document.addEventListener('keydown',e=>{if(!introDone&&['ArrowDown','ArrowUp','PageDown',' ','Enter'].includes(e.key))leaveIntro()});
 })();
+function skipIntro(){
+  if(introDone)return;introDone=true;document.body.style.overflow='';
+  const intro=document.getElementById('intro');if(intro)intro.remove();
+  if(D&&D.mountains.length){document.getElementById('cta-bar').hidden=false;drawChart()}
+}
 function leaveIntro(x,y){
   if(introBusy||introDone)return;introBusy=true;
   const intro=document.getElementById('intro'),box=document.getElementById('intro-in');
