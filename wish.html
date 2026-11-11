@@ -158,6 +158,12 @@ button{-webkit-tap-highlight-color:transparent}
 /* 底部：左邊社群按鈕、右邊「我要許願」（原本的 2/3 長） */
 .cta-in{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
 .cta-in .cta{width:66.667%;flex-shrink:0}
+/* 我要許願：輕輕放大縮小，吸引點擊；按下時停住 */
+@keyframes ctaPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+@keyframes ctaGlow{0%,100%{box-shadow:0 10px 24px rgba(46,60,38,.3)}50%{box-shadow:0 14px 32px rgba(46,60,38,.42)}}
+.cta-in .cta{animation:ctaPulse 2.2s ease-in-out infinite,ctaGlow 2.2s ease-in-out infinite}
+.cta-in .cta:active{animation:none;transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){.cta-in .cta{animation:none}}
 .social{position:relative;width:82px;height:50px;flex-shrink:0;margin-bottom:5px}
 .social a{position:absolute;left:0;bottom:0;width:50px;height:50px;border-radius:50%;border:2.5px solid var(--paper);box-shadow:0 6px 14px rgba(0,0,0,.22);overflow:hidden;display:block;transition:transform .35s cubic-bezier(.3,1.3,.5,1)}
 .social a img{width:100%;height:100%;display:block}
