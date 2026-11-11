@@ -146,7 +146,11 @@ button{-webkit-tap-highlight-color:transparent}
 @keyframes plusShine{0%,78%{left:-90%}96%,100%{left:140%}}
 @keyframes plusGlow{0%,78%,100%{box-shadow:0 3px 8px rgba(223,172,16,.35)}88%{box-shadow:0 0 0 3px rgba(255,236,170,.55),0 3px 14px rgba(223,172,16,.6)}}
 .plus1{animation:plusGlow 4s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){.plus1,.plus1::after{animation:none}}
+/* 「我要直接許願」「我想探索看看」的黃色箭頭：同樣每 4 秒閃一次（第二個晚一點，比較活潑） */
+.choice .arrow{overflow:hidden;animation:plusGlow 4s ease-in-out infinite}
+.choice .arrow::after{content:'';position:absolute;top:-30%;left:-90%;width:45%;height:160%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95),rgba(255,255,255,0));transform:rotate(25deg);animation:plusShine 4s ease-in-out infinite;pointer-events:none}
+.choice.explore .arrow,.choice.explore .arrow::after{animation-delay:.5s}
+@media (prefers-reduced-motion:reduce){.plus1,.plus1::after,.choice .arrow,.choice .arrow::after{animation:none}}
 .plus1:active{transform:scale(.92)}
 .cal-wish span{flex-shrink:0;font-family:var(--num);font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:3px 12px;font-size:13px}
 /* 載入時山形由下往上長出來，之後編號針再淡入 */
