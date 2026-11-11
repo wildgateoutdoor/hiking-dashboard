@@ -244,6 +244,11 @@ button{-webkit-tap-highlight-color:transparent}
 /* 梯次 */
 .trip-hint{font-size:13.5px;color:var(--green);font-weight:700;line-height:1.6;margin:14px 0 10px}
 .trips{background:var(--mist);border-radius:var(--r-md);padding:12px}
+.more-btn{display:block;width:100%;margin-top:8px;padding:10px;border:1.5px dashed var(--leaf);border-radius:14px;background:transparent;color:var(--green);font-size:13px;font-weight:800;cursor:pointer}
+.tb [data-d][hidden],.more-btn[hidden]{display:none!important}
+.ym-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ym-chips button{padding:6px 12px;border-radius:999px;border:1.5px solid var(--leaf);background:#fff;color:var(--green);font-size:13px;font-weight:800;font-family:var(--num);cursor:pointer}
+.ym-chips button.on{background:var(--green);border-color:var(--green);color:var(--cream)}
 .trips p{font-size:13px;color:var(--green);font-weight:800;margin-bottom:8px}
 .date-list{list-style:none;padding:0;margin:0 0 10px}
 .date-list li{padding:9px 4px;border-bottom:1px dashed #c9d3bd;display:flex;flex-direction:column}
@@ -384,13 +389,35 @@ function datesInMonth(m,ym){return m?m.dates.filter(d=>d.start_date.slice(0,7)==
 function dateSub(d){return d.title||''}
 // 有設定 Google 報名表單的山：日期只列出來參考，整座山一個「前往報名」按鈕（日期在表單內選）
 // 還沒有表單的山：日期按鈕按下去回到「直接許願」，地方已選好，只要選月份
-function tripsBlock(m,limit){
-  const ds=limit?m.dates.slice(0,limit):m.dates;
-  if(!m.form_url)return ds.map(d=>dateBtn(m,d)).join('');
-  return`<ul class="date-list">${ds.map(d=>`<li><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></li>`).join('')}</ul>
+// 報名中的梯次：上方是月份按鈕（點了只看那個月，再點一次取消）；最多先顯示 5 梯，其餘收起來，按「查看所有日期」才展開
+const SHOW_DATES=5;
+function tripsBlock(m){
+  const ymOf=d=>d.start_date.slice(0,7);
+  const item=m.form_url
+    ?(d,i)=>`<li data-d="${ymOf(d)}" ${i>=SHOW_DATES?'hidden':''}><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></li>`
+    :(d,i)=>dateBtn(m,d,i>=SHOW_DATES);
+  const items=m.dates.map(item).join('');
+  const months=[...new Set(m.dates.map(ymOf))].sort();
+  const extra=m.dates.length-SHOW_DATES;
+  const block=`<div class="tb" data-ym="" data-all="0">
+    ${months.length>1?`<div class="ym-chips">${months.map(ym=>`<button type="button" data-ym="${ym}" onclick="tbMonth(this)">${ym.slice(0,4)}/${Number(ym.slice(5))}月</button>`).join('')}</div>`:''}
+    ${m.form_url?`<ul class="date-list">${items}</ul>`:items}
+    <button type="button" class="more-btn" onclick="moreDates(this)" ${extra>0?'':'hidden'}>查看所有日期（還有 ${extra} 梯）</button></div>`;
+  if(!m.form_url)return block;
+  return`${block}
     <a class="form-btn" href="${escAttr(m.form_url)}" target="_blank" rel="noopener">前往報名 ↗<small>日期請在報名表單中選擇</small></a>`;
 }
-function dateBtn(m,d){return`<button type="button" class="date-btn" onclick="goWish(${js(m.id)})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">前往許願</span></button>`}
+function tbApply(tb){
+  const ym=tb.dataset.ym,all=tb.dataset.all==='1';
+  const items=[...tb.querySelectorAll('[data-d]')],match=items.filter(i=>!ym||i.dataset.d===ym);
+  items.forEach(i=>i.hidden=true);match.forEach((i,k)=>i.hidden=!all&&k>=SHOW_DATES);
+  const extra=match.length-SHOW_DATES,btn=tb.querySelector('.more-btn');
+  btn.hidden=all||extra<=0;btn.textContent=`查看所有日期（還有 ${extra} 梯）`;
+  tb.querySelectorAll('.ym-chips button').forEach(b=>b.classList.toggle('on',b.dataset.ym===ym));
+}
+function tbMonth(b){const tb=b.closest('.tb');tb.dataset.ym=tb.dataset.ym===b.dataset.ym?'':b.dataset.ym;tb.dataset.all='0';tbApply(tb)}
+function moreDates(b){const tb=b.closest('.tb');tb.dataset.all='1';tbApply(tb)}
+function dateBtn(m,d,hide){return`<button type="button" class="date-btn" data-d="${d.start_date.slice(0,7)}" ${hide?'hidden':''} onclick="goWish(${js(m.id)})"><span><b>${fmtRange(d.start_date,d.end_date)}</b><small>${esc(dateSub(d))}</small></span><span class="go">前往許願</span></button>`}
 
 async function load(){
   try{D=await api('list')}
@@ -653,7 +680,7 @@ function resultHTML(){
       <div class="tags">${m.region?`<span>${esc(m.region)}</span>`:''}${m.dates.length?`<span class="y">報名中 ${m.dates.length} 梯</span>`:''}</div>
       ${factsHTML(m.facts)}
       ${m.intro?`<p class="mt-intro">${esc(m.intro)}</p>`:'<div style="height:12px"></div>'}
-      ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${tripsBlock(m,m.form_url?0:3)}</div>`:''}
+      ${m.dates.length?`<div class="trips"><p>報名中的梯次</p>${tripsBlock(m)}</div>`:''}
       <button class="wish-this" onclick="wishThis(${js(m.id)})">沒找到喜歡的日期嗎？來許願吧！</button>
     </div>`).join('')}
     <button class="submit ghost" onclick="back()">看看其他體驗</button>`;
