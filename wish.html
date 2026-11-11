@@ -164,9 +164,12 @@ button{-webkit-tap-highlight-color:transparent}
 .social .s-line{z-index:3}
 .social .s-ig{z-index:2;transform:translateX(16px)}
 .social .s-fb{z-index:1;transform:translateX(32px)}
-.social.open .s-line{transform:translateY(-120px)}
-.social.open .s-ig{transform:translateY(-60px)}
-.social.open .s-fb{transform:none}
+.social.open .s-line{transform:translateY(-180px)}
+.social.open .s-ig{transform:translateY(-120px)}
+.social.open .s-fb{transform:translateY(-60px)}
+.social .s-x{position:absolute;left:5px;bottom:5px;width:40px;height:40px;border-radius:50%;border:none;padding:0;background:var(--brand);color:var(--cream);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(0,0,0,.22);cursor:pointer;opacity:0;transform:scale(.4);pointer-events:none;transition:opacity .25s,transform .3s}
+.social .s-x svg{width:18px;height:18px}
+.social.open .s-x{opacity:1;transform:none;pointer-events:auto}
 .submit:disabled{opacity:.55}
 .submit.ghost{background:none;color:var(--brand);border:1.5px solid var(--brand);box-shadow:none;justify-content:center;padding:8px 20px;margin-top:10px;min-height:54px}
 .submit.plain{justify-content:center;padding:8px 20px}
@@ -332,6 +335,7 @@ button{-webkit-tap-highlight-color:transparent}
 <div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><div class="social" id="social" onclick="socialTap(event)">
 <a class="s-line" href="https://lin.ee/NFilTz8" target="_blank" rel="noopener" aria-label="LINE"><img src="images/social/line.webp" alt="" width="50" height="50"></a>
 <a class="s-ig" href="https://www.instagram.com/wildgate.outdoor/" target="_blank" rel="noopener" aria-label="Instagram"><img src="images/social/ig.webp" alt="" width="50" height="50"></a>
+<button type="button" class="s-x" aria-label="關閉" onclick="event.stopPropagation();this.parentNode.classList.remove('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
 <a class="s-fb" href="https://www.facebook.com/share/1JLiPZmvJX/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook"><img src="images/social/fb.webp" alt="" width="50" height="50"></a></div><button class="cta" onclick="startFlow()"><span>我要許願</span><span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div></div>
 
 <div class="sheet" id="sheet"><div class="sheet-in">
