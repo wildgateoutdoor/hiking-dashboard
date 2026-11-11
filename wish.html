@@ -72,11 +72,15 @@ button{-webkit-tap-highlight-color:transparent}
 
 
 /* 照片牆 */
-.gallery{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;padding:4px 16px 4px;scrollbar-width:none}
-.gallery::-webkit-scrollbar{display:none}
-.gallery figure{flex:0 0 62%;aspect-ratio:3/4;scroll-snap-align:start;margin:0;border-radius:var(--r-xl);overflow:hidden;position:relative;box-shadow:var(--shadow);background:var(--soft)}
+.gallery{position:relative;margin:4px 16px 0;aspect-ratio:4/5;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow);background:var(--soft)}
+.gallery figure{position:absolute;inset:0;margin:0;opacity:0;transition:opacity 1.2s ease}
+.gallery figure.on{opacity:1}
 .gallery img{width:100%;height:100%;object-fit:cover;display:block}
-.gallery figcaption{position:absolute;left:14px;bottom:12px;right:14px;color:var(--cream);font-size:13px;font-weight:700;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.gallery figure::after{content:'';position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.45))}
+.gallery figcaption{position:absolute;left:18px;bottom:34px;right:18px;z-index:1;color:var(--cream);font-size:16px;font-weight:700;letter-spacing:.04em;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.gal-dots{position:absolute;left:0;right:0;bottom:14px;z-index:2;display:flex;justify-content:center;gap:6px}
+.gal-dots button{width:7px;height:7px;padding:0;border:none;border-radius:4px;background:rgba(245,241,232,.5);cursor:pointer;transition:width .3s,background .3s}
+.gal-dots button.on{width:20px;background:var(--cream)}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;padding:26px 20px 12px}
 .sec-h h2{font-size:20px;font-weight:900;color:var(--brand);letter-spacing:.04em}
 .sec-h span{font-size:12px;color:var(--muted)}
@@ -322,6 +326,16 @@ const API=SB_URL+'/functions/v1/wish-api';
 // 山形圖配色：品牌綠色系＋黃色＋藍色（#2a7f8e、#5aa7af）
 const PALETTE=['#2e3c26','#dfac10','#2a7f8e','#5c754b','#5aa7af','#3d542e','#c99a12','#a9b98f','#2a7f8e','#7d9168','#5aa7af','#e8c75a'];
 // 首頁照片牆（入野門的出團照片）
+// 難忘的野時光：幻燈片，每 4 秒淡入淡出換下一張；點下方小點可以跳到那一張
+let galIdx=0,galTimer=null;
+function galShow(i,user){
+  galIdx=(i+GALLERY.length)%GALLERY.length;
+  document.querySelectorAll('.gallery figure').forEach((f,k)=>f.classList.toggle('on',k===galIdx));
+  document.querySelectorAll('.gal-dots button').forEach((b,k)=>b.classList.toggle('on',k===galIdx));
+  if(user)galStart();
+}
+function galStart(){clearInterval(galTimer);galTimer=setInterval(()=>{if(document.querySelector('.gallery')&&!document.hidden)galShow(galIdx+1)},4000)}
+galStart();
 const GALLERY=[['forest-hikers','森林裡的笑聲'],['tunnel-friends','穿過隧道的另一頭'],['ridge-clouds','站上稜線看雲海'],['stairs-group','一步一步往上走'],['rail-tunnel','沿著舊鐵道前進'],['starry-night','山上的滿天星斗'],['forest-trail','和夥伴一起出發']];
 function banner(img,title,sub){return`<div class="banner"><img src="images/photos/${img}.webp" alt="" decoding="async"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>`}
 const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
@@ -398,8 +412,9 @@ function render(){
       <div class="panel-h"><div><h2>大家想哪天出發？</h2><p>點日期，看看大家想去哪裡</p></div></div>
       <div id="cal-box"></div>
     </div></section>
-    <div class="sec-h"><h2>難忘的野時光</h2><span>左右滑動 →</span></div>
-    <div class="gallery">${GALLERY.map(([f,c])=>`<figure><img src="images/photos/${f}.webp" alt="${escAttr(c)}" loading="lazy" decoding="async"><figcaption>${esc(c)}</figcaption></figure>`).join('')}</div>`;
+    <div class="sec-h"><h2>難忘的野時光</h2></div>
+    <div class="gallery">${GALLERY.map(([f,c],i)=>`<figure class="${i===galIdx?'on':''}"><img src="images/photos/${f}.webp" alt="${escAttr(c)}" decoding="async"><figcaption>${esc(c)}</figcaption></figure>`).join('')}
+      <div class="gal-dots">${GALLERY.map((_,i)=>`<button type="button" class="${i===galIdx?'on':''}" aria-label="第 ${i+1} 張" onclick="galShow(${i},true)"></button>`).join('')}</div></div>`;
   // 開場還在的話，等滑上去之後才顯示按鈕、播放山形長出來的動畫
   calYM=calYM||D.today.slice(0,7);renderCal();
   if(introDone){document.getElementById('cta-bar').hidden=false;drawChart()}
@@ -433,7 +448,7 @@ function renderCal(){
   let monthTotal=0;
   for(let dd=1;dd<=days;dd++){
     const d=`${calYM}-${String(dd).padStart(2,'0')}`,n=people(d),past=d<D.today;monthTotal+=n;
-    const lv=n===1?'c1':n===2?'c2':n===3?'c3':'';
+    const lv=n===1?'c1':n===2?'c2':'c3';
     cells+=`<button type="button" class="cal-day ${n?'has '+lv:''} ${past?'past':''} ${d===D.today?'today':''} ${d===calSel?'sel':''}" ${n?`onclick="calPick('${d}')"`:'disabled'} aria-label="${m}月${dd}日${n?`，${n} 人許願`:''}"><span>${dd}</span>${n?`<span class="n">${n}</span>`:''}</button>`;
   }
   const list=calSel?on(calSel):[];
