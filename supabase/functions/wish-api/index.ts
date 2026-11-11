@@ -6,6 +6,7 @@
 //   { action:'list' }    → 可許願的山、開團日期、許願統計（只有數字，沒有個資）
 //   { action:'wish' }    → 許願某座山（或自己填的山名）某個月份；同一座山同一個月達到門檻時寄信到內部信箱（只寄一次）
 //   { action:'signup' }  → 報名已開的日期，寄信到內部信箱
+//   { action:'mine' | 'mine:update' | 'mine:delete', id_token } → 用 Google 登入，查看 / 修改 / 刪除自己的許願（依登入的 Email）
 // 後台（index.html 的「許願池」分頁）：{ action:'admin:*' } + header x-admin-pw
 //
 // 需要的 secrets（Supabase → Edge Functions → Secrets）：
@@ -14,6 +15,7 @@
 //   MAIL_FROM        寄件者，預設「入野門許願池 <onboarding@resend.dev>」
 //   WISH_THRESHOLD   門檻人數，預設 3
 //   WISH_ADMIN_PW_HASH  後台密碼的 SHA-256，預設與團務系統相同
+//   GOOGLE_CLIENT_ID    Google 登入用的 OAuth 用戶端 ID（「我的許願」需要；沒設定的話前台會顯示尚未開放）
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 由 Supabase 自動提供。
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -231,17 +233,9 @@ async function list() {
     for (const r of w.preferred_ranges) if (r?.start) s0.ranges.push({ start: r.start, end: r.end || r.start });
     subs.set(key, s0);
   }
-  const nextDay = (d: string) => { const x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
   const wishDays: { start: string; end: string; place: string; people: number }[] = [];
   for (const s0 of subs.values()) {
-    const rs = s0.ranges.sort((a, b) => a.start.localeCompare(b.start));
-    const merged: { start: string; end: string }[] = [];
-    for (const r of rs) {
-      const last = merged[merged.length - 1];
-      if (last && r.start <= nextDay(last.end)) { if (r.end > last.end) last.end = r.end; }
-      else merged.push({ ...r });
-    }
-    for (const r of merged) if (r.end >= today) wishDays.push({ start: r.start, end: r.end, place: s0.place, people: s0.n });
+    for (const r of mergeRanges(s0.ranges)) if (r.end >= today) wishDays.push({ start: r.start, end: r.end, place: s0.place, people: s0.n });
   }
   wishDays.sort((a, b) => a.start.localeCompare(b.start) || a.place.localeCompare(b.place));
   // 舊版前台用的每日統計（人數加總）
@@ -256,6 +250,7 @@ async function list() {
   return {
     threshold: THRESHOLD,
     today,
+    google_client_id: Deno.env.get("GOOGLE_CLIENT_ID") || null,
     calendar,
     wishDays,
     mountains: mountains.map(({ aliases, ...m }: any) => ({
@@ -267,6 +262,20 @@ async function list() {
     custom: Object.keys(customName).map((k) => ({ name: customName[k], months: counts[k], total: sum(counts[k]) }))
       .sort((a, b) => b.total - a.total),
   };
+}
+
+// 把被月份切開的日期接回完整的區間（相鄰或重疊的合併）
+type Range = { start: string; end: string };
+const nextDay = (d: string) => { const x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
+function mergeRanges(list: Range[]) {
+  const rs = [...list].sort((a, b) => a.start.localeCompare(b.start));
+  const merged: Range[] = [];
+  for (const r of rs) {
+    const last = merged[merged.length - 1];
+    if (last && r.start <= nextDay(last.end)) { if (r.end > last.end) last.end = r.end; }
+    else merged.push({ ...r });
+  }
+  return merged;
 }
 
 async function activeMountain(id: string) {
@@ -322,10 +331,17 @@ async function wish(b: Record<string, any>) {
     name: reqStr(b.name, "姓名", 50), email: email(b.email), phone: phone(b.phone, false), note: strOrNull(b.note),
     party_size: partySize(b.party_size), submission_id: crypto.randomUUID(),
   };
+  const results = await saveWishRows(base, m?.id ?? null, custom, target, rs, months, byDates);
+  if (results.every((r) => r.dup)) throw new HttpError(409, `你已經許過這${months.length > 1 ? "些" : "個"}月份的${target}了，我們收到囉！`);
+  return { ok: true, results, threshold: THRESHOLD };
+}
+
+// 每個月份各存一筆（用日期許願時，每筆只存落在那個月的日期，月曆才不會重複計算），並檢查門檻通知
+async function saveWishRows(base: Record<string, unknown>, mountainId: string | null, custom: string, target: string,
+  rs: Range[], months: string[], byDates: boolean) {
   const results: { month: string; count: number; dup: boolean }[] = [];
-  for (const mo of months.sort()) {
+  for (const mo of [...months].sort()) {
     const wishMonth = mo + "-01";
-    // 用日期許願時，每個月份只存落在那個月的日期，月曆才不會重複計算
     const mr = byDates
       ? rs.filter((r) => r.start <= monthEnd(wishMonth) && r.end >= wishMonth)
         .map((r) => ({ start: r.start < wishMonth ? wishMonth : r.start, end: r.end > monthEnd(wishMonth) ? monthEnd(wishMonth) : r.end }))
@@ -334,14 +350,14 @@ async function wish(b: Record<string, any>) {
       ...base, wish_month: wishMonth, preferred_ranges: mr.length ? mr : null, preferred_date: mr[0]?.start ?? null,
     });
     if (error && error.code !== "23505") throw new HttpError(500, error.message);
-    const people = await wishPeople(m?.id ?? null, custom, wishMonth);
+    const people = await wishPeople(mountainId, custom, wishMonth);
     const headcount = people.reduce((a: number, p: any) => a + (p.party_size || 1), 0);
     results.push({ month: mo, count: headcount, dup: !!error });
-    if (!error && headcount >= THRESHOLD) await maybeAlert(m?.id ?? null, m ? null : custom, target, wishMonth, people);
+    if (!error && headcount >= THRESHOLD) await maybeAlert(mountainId, mountainId ? null : custom, target, wishMonth, people);
   }
-  if (results.every((r) => r.dup)) throw new HttpError(409, `你已經許過這${months.length > 1 ? "些" : "個"}月份的${target}了，我們收到囉！`);
-  return { ok: true, results, threshold: THRESHOLD };
+  return results;
 }
+const monthsOf = (rs: Range[]) => [...new Set(rs.flatMap((r) => eachDay(r.start, r.end).map((d) => d.slice(0, 7))))];
 
 // 同一座山（或同名的自填山）同一個月的許願者
 async function wishPeople(mountainId: string | null, custom: string, wishMonth: string) {
@@ -402,6 +418,97 @@ async function signup(b: Record<string, any>) {
     row.email,
   );
   if (ok) await db.from("wish_signups").update({ mailed_at: new Date().toISOString() }).eq("id", ins.id);
+  return { ok: true };
+}
+
+// ── 我的許願（Google 登入）──
+// 前台用 Google 登入拿到 ID token，這裡向 Google 確認是真的、是發給我們網站的，再用裡面的 Email 找許願
+async function googleEmail(token: unknown) {
+  const cid = Deno.env.get("GOOGLE_CLIENT_ID");
+  if (!cid) throw new HttpError(503, "登入功能尚未開放");
+  const t = str(token, 4000);
+  if (!t) throw new HttpError(401, "請先登入");
+  let info: any = null;
+  try {
+    const res = await fetch("https://oauth2.googleapis.com/tokeninfo?id_token=" + encodeURIComponent(t));
+    if (res.ok) info = await res.json();
+  } catch (e) { console.error("tokeninfo", e); }
+  const ok = info && info.aud === cid && ["accounts.google.com", "https://accounts.google.com"].includes(info.iss) &&
+    String(info.email_verified) === "true" && Number(info.exp) * 1000 > Date.now() && info.email;
+  if (!ok) throw new HttpError(401, "登入已過期，請重新登入");
+  return String(info.email).toLowerCase();
+}
+
+// 這個 Email 還沒過期的許願（同一次送出、被月份拆開的幾筆合成一筆）
+async function mine(b: Record<string, any>) {
+  const me = await googleEmail(b.id_token);
+  const today = todayTW();
+  const rows: any[] = must(await db.from("wishes")
+    .select("id,mountain_id,custom_name,wish_month,preferred_ranges,preferred_date,party_size,submission_id,name,phone,note,created_at")
+    .eq("email", me).gte("wish_month", monthStart(today)).order("created_at", { ascending: false }));
+  const ids = [...new Set(rows.map((r) => r.mountain_id).filter(Boolean))];
+  const mts: any[] = ids.length ? must(await db.from("wish_mountains").select("id,name").in("id", ids)) : [];
+  const nameOf: Record<string, string> = Object.fromEntries(mts.map((m) => [m.id, m.name]));
+  const groups = new Map<string, any>();
+  for (const r of rows) {
+    const key = r.submission_id || r.id;
+    const g = groups.get(key) || {
+      key, place: r.mountain_id ? nameOf[r.mountain_id] || "（已下架的地方）" : r.custom_name, custom: !r.mountain_id,
+      party_size: r.party_size || 1, name: r.name, phone: r.phone, note: r.note, created_at: r.created_at, ranges: [] as Range[], months: [] as string[],
+    };
+    for (const x of (r.preferred_ranges || [])) if (x?.start) g.ranges.push({ start: x.start, end: x.end || x.start });
+    if (!r.preferred_ranges?.length && r.preferred_date) g.ranges.push({ start: r.preferred_date, end: r.preferred_date });
+    g.months.push(r.wish_month.slice(0, 7));
+    if (r.created_at < g.created_at) g.created_at = r.created_at;
+    groups.set(key, g);
+  }
+  const wishes = [...groups.values()].map((g) => ({ ...g, ranges: mergeRanges(g.ranges), months: [...new Set(g.months)].sort() }));
+  return { email: me, wishes };
+}
+
+async function myRows(me: string, key: unknown) {
+  const k = uuid(key);
+  const rows: any[] = must(await db.from("wishes").select("id,mountain_id,custom_name,wish_month,submission_id")
+    .eq("email", me).or(`submission_id.eq.${k},id.eq.${k}`));
+  if (!rows.length) throw new HttpError(404, "找不到這筆許願，請重新整理");
+  return { k, rows };
+}
+
+async function mineUpdate(b: Record<string, any>) {
+  const me = await googleEmail(b.id_token);
+  const { k, rows } = await myRows(me, b.key);
+  const mountainId: string | null = rows[0].mountain_id;
+  const custom: string = rows[0].custom_name || "";
+  const m = mountainId ? await activeMountain(mountainId) : null;
+  const target = m ? m.name : custom;
+  const rs = ranges(b.ranges);
+  if (!rs.length) throw new HttpError(400, "請選擇想出發的日期");
+  const months = monthsOf(rs);
+  const thisMonth = monthStart(todayTW());
+  if (months.some((mo) => mo + "-01" > addMonths(thisMonth, 24))) throw new HttpError(400, "只能許願未來兩年內的月份");
+  const base = {
+    mountain_id: mountainId, custom_name: mountainId ? null : custom,
+    name: reqStr(b.name, "姓名", 50), email: me, phone: phone(b.phone, false), note: strOrNull(b.note),
+    party_size: partySize(b.party_size), submission_id: rows[0].submission_id || k,
+  };
+  // 同一個地方、同一個月份，每個 Email 只能有一筆：先確認不會跟自己另一筆許願撞到
+  const own = new Set(rows.map((r) => r.id));
+  let q = db.from("wishes").select("id,wish_month,custom_name").eq("email", me).in("wish_month", months.map((x) => x + "-01"));
+  q = mountainId ? q.eq("mountain_id", mountainId) : q.is("mountain_id", null);
+  const clash = (must(await q) as any[]).filter((r) => !own.has(r.id) && (mountainId || norm(r.custom_name || "") === norm(custom)));
+  if (clash.length) {
+    const ym = clash.map((r) => fmtMonth(r.wish_month)).join("、");
+    throw new HttpError(409, `你在 ${ym} 已經有另一筆${target}的許願，請改那一筆，或換別的日期`);
+  }
+  must(await db.from("wishes").delete().in("id", rows.map((r) => r.id)));
+  await saveWishRows(base, mountainId, custom, target, rs, months, true);
+  return { ok: true };
+}
+
+async function mineDelete(b: Record<string, any>) {
+  const me = await googleEmail(b.id_token);
+  const { rows } = await myRows(me, b.key);
+  must(await db.from("wishes").delete().in("id", rows.map((r) => r.id)));
   return { ok: true };
 }
 
@@ -491,6 +598,9 @@ Deno.serve(async (req) => {
     if (action === "list") return json(await list());
     if (action === "wish") return json(await wish(body));
     if (action === "signup") return json(await signup(body));
+    if (action === "mine") return json(await mine(body));
+    if (action === "mine:update") return json(await mineUpdate(body));
+    if (action === "mine:delete") return json(await mineDelete(body));
     if (action.startsWith("admin:")) {
       await checkAdmin(req);
       return json(await admin(action, body));
