@@ -591,7 +591,7 @@ function startFlow(){F={stack:['choose'],region:'',mid:'',custom:'',months:[],ex
 function startExplore(k){F={stack:['choose','explore','result'],region:'',mid:'',custom:'',months:[],exp:k,party:1};showSheet();renderStep()}
 function showSheet(){document.getElementById('sheet').classList.add('show');document.body.style.overflow='hidden'}
 function closeSheet(){document.getElementById('sheet').classList.remove('show');document.body.style.overflow='';if(F&&F.dirty){F=null;load()}else F=null}
-function go(step){F.stack.push(step);renderStep()}
+function go(step){F.stack.push(step);renderStep();if(step==='mine'&&ME)loadMine()}  // 每次打開「我的許願」都重新讀取，剛許的願馬上看得到
 function back(){if(F.stack.length>1){F.stack.pop();renderStep()}else closeSheet()}
 function cur(){return F.stack[F.stack.length-1]}
 function renderStep(){
