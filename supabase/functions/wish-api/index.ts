@@ -32,6 +32,8 @@ const db = createClient(
   { auth: { persistSession: false } },
 );
 
+// 「我的許願」Google 登入用的 OAuth 用戶端 ID（公開資訊，可用 GOOGLE_CLIENT_ID secret 覆蓋）
+const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID") || "22776721346-0ctm7jsjkmi0cjokhnm0r3t0cpoa0e2r.apps.googleusercontent.com";
 const THRESHOLD = Math.max(1, parseInt(Deno.env.get("WISH_THRESHOLD") || "3") || 3);
 const TZ_OFFSET_H = 8; // 台灣時間
 
@@ -250,7 +252,7 @@ async function list() {
   return {
     threshold: THRESHOLD,
     today,
-    google_client_id: Deno.env.get("GOOGLE_CLIENT_ID") || null,
+    google_client_id: GOOGLE_CLIENT_ID,
     calendar,
     wishDays,
     mountains: mountains.map(({ aliases, ...m }: any) => ({
@@ -424,7 +426,7 @@ async function signup(b: Record<string, any>) {
 // ── 我的許願（Google 登入）──
 // 前台用 Google 登入拿到 ID token，這裡向 Google 確認是真的、是發給我們網站的，再用裡面的 Email 找許願
 async function googleEmail(token: unknown) {
-  const cid = Deno.env.get("GOOGLE_CLIENT_ID");
+  const cid = GOOGLE_CLIENT_ID;
   if (!cid) throw new HttpError(503, "登入功能尚未開放");
   const t = str(token, 4000);
   if (!t) throw new HttpError(401, "請先登入");
