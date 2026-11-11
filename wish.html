@@ -369,7 +369,7 @@ galStart();
 // 左下角社群按鈕：疊在一起時點一下先展開成直排，展開後每一個都是連結；點其他地方收回
 function socialTap(e){const s=document.getElementById('social');if(!s.classList.contains('open')){e.preventDefault();s.classList.add('open')}}
 document.addEventListener('click',e=>{const s=document.getElementById('social');if(s&&!s.contains(e.target))s.classList.remove('open')});
-const GALLERY=[['forest-hikers','森林裡的笑聲'],['tunnel-friends','穿過隧道的另一頭'],['ridge-clouds','站上稜線看雲海'],['stairs-group','一步一步往上走'],['rail-tunnel','沿著舊鐵道前進'],['starry-night','山上的滿天星斗'],['forest-trail','和夥伴一起出發']];
+const GALLERY=[['g1','一步一步往上走｜眠月線'],['g2','森林裡的笑聲｜加里山'],['g3','沿著舊鐵道前進｜眠月線'],['g4','滿天星斗｜合歡群峰'],['g5','萬巒群峰美景｜郡大山'],['g6','隧道裡的野時光｜眠月線']];
 function banner(img,title,sub){return`<div class="banner"><img src="images/photos/${img}.webp" alt="" decoding="async"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>`}
 const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const DAYS=['日','一','二','三','四','五','六'];
@@ -468,7 +468,7 @@ function render(){
       <div id="cal-box"></div>
     </div></section>
     <div class="sec-h"><h2>難忘的野時光</h2></div>
-    <div class="gallery">${GALLERY.map(([f,c],i)=>`<figure class="${i===galIdx?'on':''}"><img src="images/photos/${f}.webp" alt="${escAttr(c)}" decoding="async"><figcaption>${esc(c)}</figcaption></figure>`).join('')}
+    <div class="gallery">${GALLERY.map(([f,c],i)=>`<figure class="${i===galIdx?'on':''}"><img src="images/gallery/${f}.webp" alt="${escAttr(c)}" decoding="async"><figcaption>${esc(c)}</figcaption></figure>`).join('')}
       <div class="gal-dots">${GALLERY.map((_,i)=>`<button type="button" class="${i===galIdx?'on':''}" aria-label="第 ${i+1} 張" onclick="galShow(${i},true)"></button>`).join('')}</div></div>`;
   // 開場還在的話，等滑上去之後才顯示按鈕、播放山形長出來的動畫
   calYM=calYM||D.today.slice(0,7);renderCal();
