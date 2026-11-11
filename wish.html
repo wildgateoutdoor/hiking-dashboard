@@ -316,8 +316,6 @@ button{-webkit-tap-highlight-color:transparent}
 .res-count{font-size:14px;color:var(--muted);margin:0 2px 14px}
 .mt-card{background:var(--card);border-radius:var(--r-xl);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
 .mt-photo{margin:12px 0 12px;aspect-ratio:16/10;overflow:hidden;border-radius:var(--r-lg);background:var(--soft)}
-.mt-photo.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed var(--border);color:var(--muted);font-size:13px;font-weight:700}
-.mt-photo.empty svg{width:34px;height:34px}
 .exp-head .res-count{margin:6px 2px 22px}
 .mt-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .mt-name{font-size:21px;font-weight:900;color:var(--brand);letter-spacing:.04em}
@@ -807,8 +805,7 @@ function resultHTML(){
     <div class="res-count">${list.length?`推薦 ${list.length} 個地方給你`:'這個分類的推薦整理中'}</div></div>
     ${list.map(m=>`<div class="mt-card">
       <div class="mt-name">${esc(m.name)}</div>
-      ${m.photo_url?`<div class="mt-photo"><img src="${escAttr(m.photo_url)}" alt="${escAttr(m.name)}" loading="lazy" decoding="async"></div>`
-        :`<div class="mt-photo empty" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l6-9 4 6 2-3 6 6z"/><circle cx="16.5" cy="6.5" r="1.8"/></svg><span>照片準備中</span></div>`}
+      ${m.photo_url?`<div class="mt-photo"><img src="${escAttr(m.photo_url)}" alt="${escAttr(m.name)}" loading="lazy" decoding="async"></div>`:''}
       <div class="tags">${m.region?`<span>${esc(m.region)}</span>`:''}${m.dates.length?`<span class="y">報名中 ${m.dates.length} 梯</span>`:''}</div>
       ${factsHTML(m.facts)}
       ${m.intro?`<p class="mt-intro">${esc(m.intro)}</p>`:'<div style="height:12px"></div>'}
