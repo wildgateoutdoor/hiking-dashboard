@@ -206,7 +206,7 @@ async function list() {
     .eq("active", true).order("sort").order("created_at"));
   const ids = mountains.map((m: any) => m.id);
   const open = (await loadTrips()).filter((t) => tripOpen(t, today)).sort((a, b) => a.date.localeCompare(b.date));
-  const wishes = must(await db.from("wishes").select("mountain_id,custom_name,wish_month,preferred_ranges").gte("wish_month", thisMonth));
+  const wishes = must(await db.from("wishes").select("id,mountain_id,custom_name,wish_month,preferred_ranges,party_size,submission_id").gte("wish_month", thisMonth));
   // 只回傳統計數字；自填的山依名稱（不分大小寫、空白）合併
   const counts: Record<string, Record<string, number>> = {};
   const customName: Record<string, string> = {};
@@ -216,22 +216,40 @@ async function list() {
     else if (!ids.includes(key)) continue;
     const m = (counts[key] ||= {});
     const k = w.wish_month.slice(0, 7);
-    m[k] = (m[k] || 0) + 1;
+    m[k] = (m[k] || 0) + (w.party_size || 1);  // 以人數計算：一筆許願「預計 4 人出發」算 4 人
   }
   const sum = (o: Record<string, number> = {}) => Object.values(o).reduce((a, b) => a + b, 0);
-  // 月曆：每一天有幾個人想去哪裡（只有數字，沒有個資）。一筆許願的每段日期逐日展開
+  // 月曆：每一天有幾個人想去哪裡（只有地點、日期、人數，沒有個資）。
+  // 同一次送出的許願（跨月時拆成好幾筆）先合併，把被月份切開的日期接回完整的區間
   const nameOf: Record<string, string> = Object.fromEntries(mountains.map((m: any) => [m.id, m.name]));
-  const cal: Record<string, Record<string, number>> = {};
+  const subs = new Map<string, { place: string; n: number; ranges: { start: string; end: string }[] }>();
   for (const w of wishes as any[]) {
     const place = w.mountain_id ? nameOf[w.mountain_id] : w.custom_name;
     if (!place || !Array.isArray(w.preferred_ranges)) continue;
-    for (const r of w.preferred_ranges) {
-      for (const day of eachDay(r?.start, r?.end)) {
-        if (day < today) continue;
-        const c = (cal[day] ||= {});
-        c[place] = (c[place] || 0) + 1;
-      }
+    const key = w.submission_id || w.id;
+    const s0 = subs.get(key) || { place, n: w.party_size || 1, ranges: [] as { start: string; end: string }[] };
+    for (const r of w.preferred_ranges) if (r?.start) s0.ranges.push({ start: r.start, end: r.end || r.start });
+    subs.set(key, s0);
+  }
+  const nextDay = (d: string) => { const x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
+  const wishDays: { start: string; end: string; place: string; people: number }[] = [];
+  for (const s0 of subs.values()) {
+    const rs = s0.ranges.sort((a, b) => a.start.localeCompare(b.start));
+    const merged: { start: string; end: string }[] = [];
+    for (const r of rs) {
+      const last = merged[merged.length - 1];
+      if (last && r.start <= nextDay(last.end)) { if (r.end > last.end) last.end = r.end; }
+      else merged.push({ ...r });
     }
+    for (const r of merged) if (r.end >= today) wishDays.push({ start: r.start, end: r.end, place: s0.place, people: s0.n });
+  }
+  wishDays.sort((a, b) => a.start.localeCompare(b.start) || a.place.localeCompare(b.place));
+  // 舊版前台用的每日統計（人數加總）
+  const cal: Record<string, Record<string, number>> = {};
+  for (const w of wishDays) for (const day of eachDay(w.start, w.end)) {
+    if (day < today) continue;
+    const c = (cal[day] ||= {});
+    c[w.place] = (c[w.place] || 0) + w.people;
   }
   const calendar = Object.fromEntries(Object.entries(cal).sort().map(([d, o]) =>
     [d, Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))]));
@@ -239,6 +257,7 @@ async function list() {
     threshold: THRESHOLD,
     today,
     calendar,
+    wishDays,
     mountains: mountains.map(({ aliases, ...m }: any) => ({
       ...m,
       dates: dedupeTrips(open.filter((t) => tripMatches({ name: m.name, aliases }, t))).map(tripDate),
@@ -254,6 +273,14 @@ async function activeMountain(id: string) {
   const { data } = await db.from("wish_mountains").select("id,name,active").eq("id", id).maybeSingle();
   if (!data || !data.active) throw new HttpError(400, "這座山目前沒有開放許願，請重新整理");
   return data;
+}
+
+// 預計幾人出發（1～30，沒填算 1 人）
+function partySize(v: unknown) {
+  if (v == null || v === "") return 1;
+  const n = Number(v);
+  if (!Number.isInteger(n) || n < 1 || n > 30) throw new HttpError(400, "出發人數請填 1～30");
+  return n;
 }
 
 // 想出發的日期區間（選填，最多 5 段）：[{ start, end }]
@@ -293,6 +320,7 @@ async function wish(b: Record<string, any>) {
   const base = {
     mountain_id: m?.id ?? null, custom_name: m ? null : custom,
     name: reqStr(b.name, "姓名", 50), email: email(b.email), phone: phone(b.phone, false), note: strOrNull(b.note),
+    party_size: partySize(b.party_size), submission_id: crypto.randomUUID(),
   };
   const results: { month: string; count: number; dup: boolean }[] = [];
   for (const mo of months.sort()) {
@@ -307,8 +335,9 @@ async function wish(b: Record<string, any>) {
     });
     if (error && error.code !== "23505") throw new HttpError(500, error.message);
     const people = await wishPeople(m?.id ?? null, custom, wishMonth);
-    results.push({ month: mo, count: people.length, dup: !!error });
-    if (!error && people.length >= THRESHOLD) await maybeAlert(m?.id ?? null, m ? null : custom, target, wishMonth, people);
+    const headcount = people.reduce((a: number, p: any) => a + (p.party_size || 1), 0);
+    results.push({ month: mo, count: headcount, dup: !!error });
+    if (!error && headcount >= THRESHOLD) await maybeAlert(m?.id ?? null, m ? null : custom, target, wishMonth, people);
   }
   if (results.every((r) => r.dup)) throw new HttpError(409, `你已經許過這${months.length > 1 ? "些" : "個"}月份的${target}了，我們收到囉！`);
   return { ok: true, results, threshold: THRESHOLD };
@@ -316,7 +345,7 @@ async function wish(b: Record<string, any>) {
 
 // 同一座山（或同名的自填山）同一個月的許願者
 async function wishPeople(mountainId: string | null, custom: string, wishMonth: string) {
-  let q = db.from("wishes").select("name,email,phone,note,preferred_date,preferred_ranges,custom_name,created_at").eq("wish_month", wishMonth).order("created_at");
+  let q = db.from("wishes").select("name,email,phone,note,preferred_date,preferred_ranges,party_size,custom_name,created_at").eq("wish_month", wishMonth).order("created_at");
   q = mountainId ? q.eq("mountain_id", mountainId) : q.is("mountain_id", null);
   const rows: any[] = must(await q);
   return mountainId ? rows : rows.filter((r) => norm(r.custom_name || "") === norm(custom));
@@ -325,7 +354,7 @@ async function wishPeople(mountainId: string | null, custom: string, wishMonth: 
 // 門檻通知：先搶到 wish_alerts 這一列的才寄；寄失敗就把列刪掉，下一位許願時再試
 // 自填的山以正規化後的名稱（去空白、小寫）記錄，寫法不同的同名山只寄一次
 async function maybeAlert(mountainId: string | null, custom: string | null, name: string, wishMonth: string, people: any[]) {
-  const n = people.length;
+  const n = people.reduce((a: number, p: any) => a + (p.party_size || 1), 0);
   const { data, error } = await db.from("wish_alerts")
     .insert({ mountain_id: mountainId, custom_name: custom ? norm(custom) : null, wish_month: wishMonth, wish_count: n }).select("wish_month").maybeSingle();
   if (error || !data) return; // 已經寄過（23505）或其他錯誤
@@ -333,7 +362,7 @@ async function maybeAlert(mountainId: string | null, custom: string | null, name
     `【許願池】${name}｜${fmtMonth(wishMonth)} 已有 ${n} 人許願`,
     [
       ["山", name + (custom ? "（消費者自填）" : "")], ["月份", fmtMonth(wishMonth)], ["許願人數", `${n} 人（門檻 ${THRESHOLD} 人）`],
-      ...people.map((p: any, i: number) => [`#${i + 1}`, [p.name, p.email, p.phone, fmtRanges(p), p.note].filter(Boolean).join("｜")] as [string, unknown]),
+      ...people.map((p: any, i: number) => [`#${i + 1}`, [p.name, `${p.party_size || 1} 人`, p.email, p.phone, fmtRanges(p), p.note].filter(Boolean).join("｜")] as [string, unknown]),
     ],
     `${name} 在 ${fmtMonth(wishMonth)} 的許願人數已達門檻，可以考慮開團了！`,
   );

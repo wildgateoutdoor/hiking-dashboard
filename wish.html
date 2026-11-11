@@ -123,15 +123,19 @@ button{-webkit-tap-highlight-color:transparent}
 .cal-day.empty{background:none}
 .cal-day.past{opacity:.35}
 .cal-day.has{cursor:pointer;color:var(--brand);font-weight:700}
-.cal-day .n{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--gold);color:#fff;font-size:10.5px;font-weight:800;line-height:18px}
-.cal-day.l2 .n{background:var(--blue)}
-.cal-day.l3 .n{background:var(--brand)}
+.cal-day .n{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--brand);color:#fff;font-size:10.5px;font-weight:800;line-height:18px}
+.cal-day.c1 .n{background:var(--sky)}
+.cal-day.c2 .n{background:var(--leaf)}
+.cal-day.c3 .n{background:var(--gold)}
 .cal-day.sel{box-shadow:0 0 0 2px var(--brand) inset;background:#fff}
 .cal-day.today{box-shadow:0 0 0 1.5px var(--gold) inset}
 .cal-detail{margin-top:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--mist);font-size:14px;color:var(--green);line-height:1.8}
 .cal-detail b{color:var(--brand)}
-.cal-detail .row{display:flex;justify-content:space-between;gap:10px}
-.cal-detail .row span{font-family:var(--num);font-weight:700;color:var(--brand)}
+.cal-det-h{margin-bottom:6px}
+.cal-wish{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px dashed #c9d3bd}
+.cal-wish b{display:block;color:var(--brand);font-size:15px}
+.cal-wish small{display:block;font-size:12.5px;color:var(--green);font-family:var(--num)}
+.cal-wish span{flex-shrink:0;font-family:var(--num);font-weight:800;color:#fff;background:var(--brand);border-radius:999px;padding:3px 12px;font-size:13px}
 /* 載入時山形由下往上長出來，之後編號針再淡入 */
 #chart.anim .pk{transform-box:fill-box;transform-origin:50% 100%;animation:grow .9s cubic-bezier(.2,.8,.25,1) both}
 #chart.anim .pin{animation:fade .35s ease both}
@@ -222,6 +226,11 @@ button{-webkit-tap-highlight-color:transparent}
 .range-row .date-pick span{left:12px;font-size:14px}
 .tilde{color:var(--muted);flex-shrink:0}
 .rm-range{flex-shrink:0;width:30px;height:30px;border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer}
+.stepper{display:flex;align-items:center;justify-content:center;gap:14px}
+.stepper button{width:44px;height:44px;border-radius:50%;border:none;background:var(--brand);color:var(--cream);font-size:22px;font-weight:700;cursor:pointer;line-height:1}
+.stepper button:disabled{opacity:.3}
+.stepper b{font-family:var(--num);font-size:30px;font-weight:800;color:var(--brand);min-width:44px;text-align:center}
+.stepper span{font-size:15px;color:var(--ink-2);margin-left:-8px}
 .add-range{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:4px auto 0;border-radius:50%;border:none;background:var(--mist);color:var(--brand);font-size:20px;font-weight:700;line-height:1;cursor:pointer}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .err{color:var(--red);font-size:14px;min-height:20px;margin:6px 0 8px;text-align:center}
@@ -289,7 +298,7 @@ button{-webkit-tap-highlight-color:transparent}
     <div class="intro-logo"><img src="images/logo-wide.png" alt="入野門 Wild Gate" width="194" height="24"></div>
     <div class="intro-text">
       <h1>入野門許願池</h1>
-      <p class="lines">你有想去哪一座山？<br>哪一座湖泊嗎？<br>儘管許願吧！<br>我們會儘可能地協助你達成</p>
+      <p class="lines">你有想去哪一座山？<br>哪一座湖泊嗎？<br>儘管許願吧！<br>我們會協助你達成</p>
       <p class="motto">推門，走向遼闊</p>
       <p class="en">STEP IN , LIVE OUT</p>
     </div>
@@ -399,7 +408,7 @@ function render(){
 // ── 許願月曆：每天有幾個人想去哪裡 ──
 let calYM=null,calSel=null;
 function calMonths(){
-  const first=D.today.slice(0,7),keys=Object.keys(D.calendar||{}).map(d=>d.slice(0,7)).sort();
+  const first=D.today.slice(0,7),keys=calWishes().map(w=>w.end.slice(0,7)).sort();
   const last=keys.length&&keys[keys.length-1]>first?keys[keys.length-1]:first;
   const [y,m]=first.split('-').map(Number),out=[];
   for(let i=0;i<24;i++){const d=new Date(y,m-1+i,1),k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;out.push(k);if(k>=last&&i>=11)break}
@@ -407,21 +416,30 @@ function calMonths(){
 }
 function calStep(n){const ms=calMonths(),i=ms.indexOf(calYM)+n;if(i>=0&&i<ms.length){calYM=ms[i];calSel=null;renderCal()}}
 function calPick(d){calSel=calSel===d?null:d;renderCal()}
+// 每筆許願：{start,end,place,people}；舊版後端只有每日統計時，轉成單日的許願
+function calWishes(){
+  if(Array.isArray(D.wishDays))return D.wishDays;
+  return Object.entries(D.calendar||{}).flatMap(([d,arr])=>arr.map(([p,c])=>({start:d,end:d,place:p,people:c})));
+}
+const fmtMD=d=>`${Number(d.slice(5,7))}/${Number(d.slice(8))}（${DAYS[parseD(d).getDay()]}）`;
 function renderCal(){
   const box=document.getElementById('cal-box');if(!box)return;
-  const C=D.calendar||{},ms=calMonths(),idx=ms.indexOf(calYM);
+  const W=calWishes(),ms=calMonths(),idx=ms.indexOf(calYM);
   const [y,m]=calYM.split('-').map(Number),firstDow=new Date(y,m-1,1).getDay(),days=new Date(y,m,0).getDate();
-  const people=d=>(C[d]||[]).reduce((a,x)=>a+x[1],0);
+  const on=d=>W.filter(w=>w.start<=d&&w.end>=d);
+  const people=d=>on(d).reduce((a,w)=>a+w.people,0);
   let cells=['日','一','二','三','四','五','六'].map(w=>`<div class="cal-dow">${w}</div>`).join('');
   for(let i=0;i<firstDow;i++)cells+='<div class="cal-day empty"></div>';
+  let monthTotal=0;
   for(let dd=1;dd<=days;dd++){
-    const d=`${calYM}-${String(dd).padStart(2,'0')}`,n=people(d),past=d<D.today;
-    const lv=n>=5?'l3':n>=3?'l2':'';
+    const d=`${calYM}-${String(dd).padStart(2,'0')}`,n=people(d),past=d<D.today;monthTotal+=n;
+    const lv=n===1?'c1':n===2?'c2':n===3?'c3':'';
     cells+=`<button type="button" class="cal-day ${n?'has '+lv:''} ${past?'past':''} ${d===D.today?'today':''} ${d===calSel?'sel':''}" ${n?`onclick="calPick('${d}')"`:'disabled'} aria-label="${m}月${dd}日${n?`，${n} 人許願`:''}"><span>${dd}</span>${n?`<span class="n">${n}</span>`:''}</button>`;
   }
-  const monthTotal=Object.keys(C).filter(d=>d.startsWith(calYM)).reduce((a,d)=>a+people(d),0);
-  const det=calSel&&C[calSel]
-    ?`<div class="cal-detail"><b>${Number(calSel.slice(5,7))}/${Number(calSel.slice(8))}（${DAYS[parseD(calSel).getDay()]}）</b> 有 ${people(calSel)} 人想出發<br>${C[calSel].map(([p,c])=>`<div class="row"><b>${esc(p)}</b><span>${c} 人</span></div>`).join('')}</div>`
+  const list=calSel?on(calSel):[];
+  const det=list.length
+    ?`<div class="cal-detail"><div class="cal-det-h"><b>${fmtMD(calSel)}</b> 有 ${people(calSel)} 人許願</div>
+      ${list.map(w=>`<div class="cal-wish"><div><b>${esc(w.place)}</b><small>${w.end&&w.end!==w.start?`${fmtMD(w.start)} – ${fmtMD(w.end)}`:fmtMD(w.start)}</small></div><span>${w.people} 人</span></div>`).join('')}</div>`
     :`<div class="cal-detail">${monthTotal?'點有數字的日期，看看大家想去哪裡':'這個月還沒有人指定日期，搶先許願吧！'}</div>`;
   box.innerHTML=`<div class="cal-h"><button class="cal-nav" onclick="calStep(-1)" ${idx<=0?'disabled':''} aria-label="上個月">‹</button><b>${y} 年 ${m} 月</b><button class="cal-nav" onclick="calStep(1)" ${idx>=ms.length-1?'disabled':''} aria-label="下個月">›</button></div>
     <div class="cal-grid">${cells}</div>${det}`;
@@ -477,8 +495,8 @@ function drawChart(){
 }
 
 // ── 許願流程 ──
-function startFlow(){F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:''};showSheet();renderStep()}
-function startExplore(k){F={stack:['choose','explore','result'],region:'',mid:'',custom:'',months:[],exp:k};showSheet();renderStep()}
+function startFlow(){F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:'',party:1};showSheet();renderStep()}
+function startExplore(k){F={stack:['choose','explore','result'],region:'',mid:'',custom:'',months:[],exp:k,party:1};showSheet();renderStep()}
 function showSheet(){document.getElementById('sheet').classList.add('show');document.body.style.overflow='hidden'}
 function closeSheet(){document.getElementById('sheet').classList.remove('show');document.body.style.overflow='';if(F&&F.dirty){F=null;load()}else F=null}
 function go(step){F.stack.push(step);renderStep()}
@@ -527,11 +545,14 @@ function directHTML(){
       <p class="q-sub" style="margin:-4px 0 12px;font-size:13px">選第一天和最後一天；有好幾個時間可以按 ＋ 再加一段</p>
       <div id="ranges">${rangesOf().map((r,i,a)=>rangeRow(r,i,a.length)).join('')}</div>
       ${rangesOf().length<5?`<button type="button" class="add-range" onclick="addRange()" aria-label="再加一段日期" title="再加一段日期">＋</button>`:''}</div></div>
+    <div class="fcard"><div class="f"><div class="lb"><span class="no">5</span>你們預計有幾人想出發？</div>
+      <div class="stepper"><button type="button" onclick="stepParty(-1)" aria-label="減少一人" ${F.party<=1?'disabled':''}>−</button><b id="party-n">${F.party}</b><span>人</span><button type="button" onclick="stepParty(1)" aria-label="增加一人" ${F.party>=30?'disabled':''}>＋</button></div></div></div>
     <div class="fcard">${contactFields()}</div>
     <div class="err" id="w-err"></div>
     <button class="submit" id="w-sub"><span>丟進許願池</span><span class="arrow" aria-hidden="true">${ARROW}</span></button>
   </form>`;
 }
+function stepParty(n){saveContact();F.party=Math.min(30,Math.max(1,(F.party||1)+n));rerender(true)}
 function rangesOf(){const rs=(F.contact||{}).ranges;return rs&&rs.length?rs:[{start:'',end:''}]}
 function contactFields(){
   const c=F.contact||{};
@@ -581,7 +602,7 @@ async function submitWish(e){
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email.trim())){err.textContent='請填寫正確的 Email';return}
   btn.disabled=true;btn.firstElementChild.textContent='送出中…';
   try{
-    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,name:c.name,email:c.email,phone:c.phone,note:c.note,ranges:ranges.map(x=>({start:x.start,end:x.end||x.start})),website:val('c-web')});
+    const r=await api('wish',{mountain_id:m?m.id:'',custom_name:m?'':custom,party_size:F.party||1,name:c.name,email:c.email,phone:c.phone,note:c.note,ranges:ranges.map(x=>({start:x.start,end:x.end||x.start})),website:val('c-web')});
     F.dirty=true;
     const target=m?m.name:custom;
     F.doneHTML=`<div class="done"><div class="done-photo"><img src="images/photos/starry-night.webp" alt="" decoding="async"></div><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>願望收到了！</h3>
@@ -595,7 +616,7 @@ async function submitWish(e){
     go('done');
   }catch(x){err.textContent=x.message;btn.disabled=false;btn.firstElementChild.textContent='丟進許願池'}
 }
-function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:'',contact:c,dirty:true};renderStep()}
+function againWish(){const c=F.contact;F={stack:['choose'],region:'',mid:'',custom:'',months:[],exp:'',party:1,contact:c,dirty:true};renderStep()}
 
 // 探索
 function exploreHTML(){
