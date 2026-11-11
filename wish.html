@@ -155,6 +155,18 @@ button{-webkit-tap-highlight-color:transparent}
 .cta .arrow,.submit .arrow{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cta .arrow svg,.submit .arrow svg{width:20px;height:20px}
 .cta:active,.submit:active{transform:scale(.98)}
+/* 底部：左邊社群按鈕、右邊「我要許願」（原本的 2/3 長） */
+.cta-in{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.cta-in .cta{width:66.667%;flex-shrink:0}
+.social{position:relative;width:82px;height:50px;flex-shrink:0;margin-bottom:5px}
+.social a{position:absolute;left:0;bottom:0;width:50px;height:50px;border-radius:50%;border:2.5px solid var(--paper);box-shadow:0 6px 14px rgba(0,0,0,.22);overflow:hidden;display:block;transition:transform .35s cubic-bezier(.3,1.3,.5,1)}
+.social a svg{width:100%;height:100%;display:block}
+.social .s-line{z-index:3}
+.social .s-ig{z-index:2;transform:translateX(16px)}
+.social .s-fb{z-index:1;transform:translateX(32px)}
+.social.open .s-line{transform:translateY(-120px)}
+.social.open .s-ig{transform:translateY(-60px)}
+.social.open .s-fb{transform:none}
 .submit:disabled{opacity:.55}
 .submit.ghost{background:none;color:var(--brand);border:1.5px solid var(--brand);box-shadow:none;justify-content:center;padding:8px 20px;margin-top:10px;min-height:54px}
 .submit.plain{justify-content:center;padding:8px 20px}
@@ -317,7 +329,10 @@ button{-webkit-tap-highlight-color:transparent}
 <div class="phone">
   <div id="main"><div class="center"><div class="spin"></div></div></div>
 </div>
-<div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><button class="cta" onclick="startFlow()"><span>我要許願</span><span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div></div>
+<div class="cta-bar" id="cta-bar" hidden><div class="cta-in"><div class="social" id="social" onclick="socialTap(event)">
+<a class="s-line" href="https://lin.ee/NFilTz8" target="_blank" rel="noopener" aria-label="LINE"><svg viewBox="0 0 48 48"><rect width="48" height="48" fill="#06C755"/><path d="M24 11c-8.8 0-16 5.7-16 12.7 0 6.3 5.6 11.5 13.2 12.5.5.1 1.2.3 1.4.8.2.4.1 1 .1 1.4l-.2 1.4c-.1.4-.3 1.6 1.4.9s9.2-5.4 12.5-9.3C38.7 28.9 40 26.4 40 23.7 40 16.7 32.8 11 24 11z" fill="#fff"/><text x="24" y="27.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="9.5" fill="#06C755">LINE</text></svg></a>
+<a class="s-ig" href="https://www.instagram.com/wildgate.outdoor/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 48 48"><defs><radialGradient id="igg" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect width="48" height="48" fill="url(#igg)"/><rect x="13" y="13" width="22" height="22" rx="6.5" fill="none" stroke="#fff" stroke-width="2.6"/><circle cx="24" cy="24" r="5.2" fill="none" stroke="#fff" stroke-width="2.6"/><circle cx="30.3" cy="17.7" r="1.6" fill="#fff"/></svg></a>
+<a class="s-fb" href="https://www.facebook.com/share/1JLiPZmvJX/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 48 48"><rect width="48" height="48" fill="#1877F2"/><path d="M26.2 40V26.3h4.6l.7-5.4h-5.3v-3.4c0-1.6.4-2.6 2.7-2.6h2.8v-4.8c-.5-.1-2.2-.2-4.1-.2-4.1 0-6.9 2.5-6.9 7.1v3.9h-4.6v5.4h4.6V40z" fill="#fff"/></svg></a></div><button class="cta" onclick="startFlow()"><span>我要許願</span><span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div></div>
 
 <div class="sheet" id="sheet"><div class="sheet-in">
   <div class="sh-head"><div class="sh-left"><button class="ic-btn" id="sh-back" onclick="back()" aria-label="上一步"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><img class="sh-logo" src="images/logo-square.png" alt="入野門" width="29" height="30"></div><b id="sh-title">許願</b><button class="home-btn" onclick="closeSheet()">回首頁</button></div>
@@ -341,6 +356,9 @@ function galShow(i,user){
 }
 function galStart(){clearInterval(galTimer);galTimer=setInterval(()=>{if(document.querySelector('.gallery')&&!document.hidden)galShow(galIdx+1)},4000)}
 galStart();
+// 左下角社群按鈕：疊在一起時點一下先展開成直排，展開後每一個都是連結；點其他地方收回
+function socialTap(e){const s=document.getElementById('social');if(!s.classList.contains('open')){e.preventDefault();s.classList.add('open')}}
+document.addEventListener('click',e=>{const s=document.getElementById('social');if(s&&!s.contains(e.target))s.classList.remove('open')});
 const GALLERY=[['forest-hikers','森林裡的笑聲'],['tunnel-friends','穿過隧道的另一頭'],['ridge-clouds','站上稜線看雲海'],['stairs-group','一步一步往上走'],['rail-tunnel','沿著舊鐵道前進'],['starry-night','山上的滿天星斗'],['forest-trail','和夥伴一起出發']];
 function banner(img,title,sub){return`<div class="banner"><img src="images/photos/${img}.webp" alt="" decoding="async"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</div>`}
 const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
