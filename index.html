@@ -746,7 +746,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 /* 分類列 */
 .qt-grp td{padding-top:12px!important;border-bottom:1px solid var(--border-sub)}
 .qt-table tbody tr.qt-subtot td,.qt-table tbody tr.qt-subtot:not(.detail-row) td:last-child,.qt-table tbody tr.qt-subtot:not(.detail-row):hover td:last-child{background:color-mix(in srgb,var(--qc) 16%,transparent);border-bottom:none;padding:11px 14px;color:var(--text-2);font-size:13px;font-weight:600}
-.qt-table tbody tr.qt-subtot td.b{color:var(--text);font-size:15px;font-weight:700}
+.qt-table tbody tr.qt-subtot td.b,.qt-table tbody tr.qt-subtot:not(.detail-row) td.b:last-child{color:var(--text);font-size:15px;font-weight:700}
 .qt-table tbody tr.qt-subtot td:first-child{border-radius:0 0 0 12px}
 .qt-table tbody tr.qt-subtot td:last-child{border-radius:0 0 12px 0}
 .qt-table tbody tr.qt-gap td{height:28px;padding:0;border:none}
@@ -845,6 +845,23 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .qt-tab.on::after{content:'';position:absolute;left:18px;right:18px;bottom:7px;height:2px;border-radius:2px;background:var(--text)}
 .qt-tab.add{color:var(--accent);font-weight:600;margin-left:auto}
 .qt-tab.add svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.qt-tab.mix{color:var(--accent);font-weight:600}
+.qt-tab.mix svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.qt-tab.mix.on{color:var(--text);font-weight:700}
+.qt-mix-origins{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.qt-mix-o{border:1px solid var(--border-sub);border-radius:16px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px;transition:border-color .15s,background .15s}
+.qt-mix-o.main{border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.qt-mix-o-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.qt-mix-o-h b{font-size:16px}
+.qt-mix-o-h span{font-size:12px;color:var(--text-muted)}
+.qt-mix-o .qt-stepper{background:var(--surface)}
+.qt-mix-main{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);cursor:pointer}
+.qt-mix-main input{accent-color:var(--accent);margin:0}
+.qt-stats.qt-stats4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.qt-mix-tbl td.muted .qt-sub{margin-top:1px}
+.qt-mix-tbl tfoot td{padding:14px;font-weight:700;border-top:2px solid var(--border);font-variant-numeric:tabular-nums;background:transparent}
+.qt-mix-tbl tfoot td.b{font-size:16px;color:var(--red)}
+@media(max-width:700px){.qt-stats.qt-stats4{grid-template-columns:1fr 1fr}.qt-stats.qt-stats4 .qt-stat:last-child{grid-column:auto}}
 @media(max-width:1100px){.qt-shell{grid-template-columns:210px minmax(0,1fr)}}
 @media(max-width:860px){
   .qt-shell{grid-template-columns:1fr;gap:12px}
@@ -2997,7 +3014,7 @@ function wishExport(){wishCsv('許願名單.csv',['許願時間','山','月份',
 function wishExportSignups(){wishCsv('報名名單.csv',['報名時間','梯次','出發','回程','姓名','人數','手機','Email','備註'],wishData.signups.map(s=>[new Date(s.created_at).toLocaleString('zh-TW'),s.mountain_name,s.start_date,s.end_date,s.name,s.party_size,s.phone,s.email,s.note]))}
 
 // ── 報價系統：每個團的成本設定（存在 settings.quoteSheets）──
-let quoteSheets=[],quoteSel=null,quoteRoute=null,quoteSearch='',quoteNavSearch='',quotePage=1,_quoteSaveTimer=null;
+let quoteSheets=[],quoteSel=null,quoteRoute=null,quoteMix=false,quoteSearch='',quoteNavSearch='',quotePage=1,_quoteSaveTimer=null;
 try{quoteSel=localStorage.getItem('hk-quote-sel')||null;const r=localStorage.getItem('hk-quote-route');if(r&&r.startsWith('r:'))quoteRoute=r.slice(2)}catch{}
 const QUOTE_TYPES={fixed:'固定數量',pax:'依人數',pct_in:'% 內含',pct:'% 團費'};
 function quoteItem(name,type,unit,qty,extra){return Object.assign({id:genId(),name,type,unit,qty,offset:0,rate:0,note:''},extra||{})}
@@ -3050,8 +3067,8 @@ function quoteRoutes(){
   return[...m.entries()].sort((a,b)=>(a[0]||'￿').localeCompare(b[0]||'￿','zh-Hant')).map(([name,qs])=>({name,qs}));
 }
 function quotePersist(){try{localStorage.setItem('hk-quote-sel',quoteSel||'');localStorage.setItem('hk-quote-route',quoteRoute==null?'':'r:'+quoteRoute)}catch{}}
-function quoteSelect(id){quoteFlush();const q=quoteSheets.find(x=>x.id===id);if(!q)return;quoteSel=id;quoteRoute=quoteRouteKey(q);quotePersist();renderQuote()}
-function quoteShowRoute(name){quoteFlush();quoteRoute=name;const qs=quoteSheets.filter(q=>quoteRouteKey(q)===name);if(!qs.some(q=>q.id===quoteSel))quoteSel=qs[0]?qs[0].id:null;quotePersist();renderQuote();window.scrollTo({top:0})}
+function quoteSelect(id){quoteFlush();const q=quoteSheets.find(x=>x.id===id);if(!q)return;quoteSel=id;quoteMix=false;quoteRoute=quoteRouteKey(q);quotePersist();renderQuote()}
+function quoteShowRoute(name){quoteFlush();quoteRoute=name;quoteMix=false;const qs=quoteSheets.filter(q=>quoteRouteKey(q)===name);if(!qs.some(q=>q.id===quoteSel))quoteSel=qs[0]?qs[0].id:null;quotePersist();renderQuote();window.scrollTo({top:0})}
 function quoteShowAll(){quoteFlush();quoteRoute=null;quotePersist();renderQuote();window.scrollTo({top:0})}
 const QI={
   plus:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
@@ -3059,6 +3076,7 @@ const QI={
   eye:'<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
   trash:'<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>',
+  mix:'<svg viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H14a4 4 0 004-4V8.5"/><path d="M15.5 6H10a4 4 0 00-4 4v5.5"/></svg>',
   grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
   mtn:'<svg viewBox="0 0 24 24"><path d="M3 20l6-11 4 7 2-3 6 7z"/><circle cx="17" cy="6" r="2"/></svg>',
   back:'<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>',
@@ -3110,7 +3128,9 @@ function renderQuote(){
       <section class="qt-body" id="qt-body"></section>
     </div>`;
   const body=document.getElementById('qt-body');
-  if(quoteRoute==null)quoteRenderOverview(body);else quoteRenderDetail(body);
+  if(quoteRoute==null)quoteRenderOverview(body);
+  else if(quoteMix&&quoteMixSheets().length>=2)quoteRenderMix(body);
+  else{quoteMix=false;quoteRenderDetail(body)}
   quoteRenderNavList();
   if(window.scrollY!==keepY)window.scrollTo(0,keepY);
 }
@@ -3233,15 +3253,136 @@ function quoteRefreshCost(){
   quoteRecalc();
   if(window.scrollY!==y)window.scrollTo(0,y);
 }
+// ── 混合試算：同一台車部分人在 A 地上車、部分人在 B 地上車 ──
+// 每個出發地的人數存在該出發地報價的 mixPax；mixMain 標記「車從哪裡出發」的那一個。
+// 計算方式：
+//   依人數項目 → 每個出發地用自己的單價 × 自己的人數；「人數 +N」的 N（嚮導等）只算一次，用主要出發地的單價，記在「共用」
+//   % 項目     → 每個出發地用自己的團費 × 人數 × 比例
+//   固定數量   → 整團共用一份，用主要出發地的金額（例：車資用台北出發的整台車價）
+function quoteColor(c){return/^#[0-9a-f]{6}$/i.test(c&&c.color||'')?c.color:'#C9C9C9'}
+function quoteMixSheets(){return quoteSheets.filter(q=>quoteRouteKey(q)===quoteRoute)}
+function quoteMixMain(sib){return sib.find(q=>q.mixMain)||sib[0]}
+function quoteMixN(q){return Math.max(0,Math.round(qNum(q.mixPax)))}
+function quoteMixCalc(sib){
+  const main=quoteMixMain(sib);
+  const order=[main,...sib.filter(q=>q!==main)];
+  const rows=[],byKey=new Map(),cats=[],catIdx=new Map();
+  order.forEach(q=>{
+    const seen={};
+    q.cats.forEach(c=>c.items.forEach(it=>{
+      const base=(c.name||'')+'\u0001'+(it.name||'');seen[base]=(seen[base]||0)+1;
+      const key=base+'\u0001'+seen[base];
+      let r=byKey.get(key);
+      if(!r){
+        r={key,cat:c.name||'',name:it.name||'',per:{}};byKey.set(key,r);rows.push(r);
+        if(!catIdx.has(r.cat)){catIdx.set(r.cat,cats.length);cats.push({name:r.cat,color:quoteColor(c),rows:[]})}
+        cats[catIdx.get(r.cat)].rows.push(r);
+      }
+      r.per[q.id]=it;
+    }));
+  });
+  let gross=0,pax=0;sib.forEach(q=>{const n=quoteMixN(q);pax+=n;gross+=qNum(q.price)*n});
+  let cost=0;const colTot={},shared={v:0};sib.forEach(q=>colTot[q.id]=0);
+  rows.forEach(r=>{
+    r.by={};r.shared=0;
+    const src=r.per[main.id]||sib.map(q=>r.per[q.id]).find(Boolean);
+    const srcQ=sib.find(q=>r.per[q.id]===src);
+    r.src=src;r.srcQ=srcQ;
+    sib.forEach(q=>{
+      const it=r.per[q.id];if(!it)return;const n=quoteMixN(q);
+      if(it.type==='pax')r.by[q.id]=Math.round(qNum(it.unit)*n);
+      else if(it.type==='pct_in'||it.type==='pct'){const x=qNum(it.rate)/100,f=it.type==='pct_in'?x/(1+x):x;r.by[q.id]=Math.round(qNum(q.price)*n*f)}
+    });
+    if(src.type==='fixed')r.shared=Math.round(qNum(src.unit)*qNum(src.qty));
+    else if(src.type==='pax'&&qNum(src.offset))r.shared=Math.round(qNum(src.unit)*qNum(src.offset));
+    r.total=r.shared+Object.values(r.by).reduce((a,b)=>a+b,0);
+    Object.entries(r.by).forEach(([k,v])=>colTot[k]+=v);shared.v+=r.shared;cost+=r.total;
+  });
+  cats.forEach(c=>{c.total=c.rows.reduce((a,r)=>a+r.total,0)});
+  const profit=gross-cost;
+  return{main,cats,rows,gross,pax,cost,profit,margin:gross?profit/gross:0,colTot,shared:shared.v};
+}
+function quoteTabsHTML(sib,active){
+  return`<div class="qt-tabs">
+      ${sib.map(x=>`<button class="qt-tab${x.id===active?' on':''}" data-qtab="${x.id}" onclick="quoteSelect('${x.id}')">${esc(x.origin||'未填出發地')}</button>`).join('')}
+      ${sib.length>=2?`<button class="qt-tab mix${active==='mix'?' on':''}" onclick="quoteShowMix()">${QI.mix}混合試算</button>`:''}
+      <button class="qt-tab add" onclick="quoteAddOrigin()">${QI.plus}新增出發地</button>
+    </div>`;
+}
+function quoteShowMix(){quoteFlush();quoteMix=true;renderQuote()}
+function quoteRenderMix(el){
+  const sib=quoteMixSheets();const main=quoteMixMain(sib);
+  el.innerHTML=`
+    ${quoteTabsHTML(sib,'mix')}
+    <div class="qt-card">
+      <div class="qt-card-h"><h4>各出發地上車人數</h4><span class="qt-hint" style="margin:0">同一台車分不同地點上車時，填各地人數，下面會合算整團成本</span></div>
+      <div class="qt-mix-origins">
+        ${sib.map(q=>`<div class="qt-mix-o${q===main?' main':''}">
+          <div class="qt-mix-o-h"><b>${esc(q.origin||'未填出發地')}</b><span>團費 $${qFmt(qNum(q.price))}／人</span></div>
+          <div class="qt-stepper"><button onclick="quoteMixStep('${q.id}',-1)" aria-label="減少">−</button><input id="qt-mix-${q.id}" type="number" min="0" step="1" inputmode="numeric" value="${quoteMixN(q)}" oninput="quoteMixSet('${q.id}',this.value)"><button onclick="quoteMixStep('${q.id}',1)" aria-label="增加">+</button></div>
+          <label class="qt-mix-main"><input type="radio" name="qt-mix-main" ${q===main?'checked':''} onchange="quoteMixSetMain('${q.id}')">車從這裡出發（固定費用用這裡的金額）</label>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="qt-stats qt-stats4">
+      <div class="qt-stat"><div class="qt-stat-l">總人數</div><div class="qt-stat-v" data-qm="pax"></div><div class="qt-stat-s" data-qm="paxs"></div></div>
+      <div class="qt-stat"><div class="qt-stat-l">總團費</div><div class="qt-stat-v" data-qm="gross"></div><div class="qt-stat-s">各地團費 × 各地人數</div></div>
+      <div class="qt-stat"><div class="qt-stat-l">總成本</div><div class="qt-stat-v exp" data-qm="cost"></div><div class="qt-stat-s" data-qm="cpp"></div></div>
+      <div class="qt-stat"><div class="qt-stat-l">剩餘團費</div><div class="qt-stat-v" data-qm="profit"></div><div class="qt-stat-s" data-qm="pill"></div></div>
+    </div>
+    <div class="qt-card">
+      <div class="qt-card-h"><h4>成本明細（合算）</h4><div class="qt-sp"></div></div>
+      <div class="qt-tbl-wrap"><table class="qt-table qt-mix-tbl">
+        <thead><tr><th>項目</th><th>計算方式</th>${sib.map(q=>`<th class="r">${esc(q.origin||'未填出發地')}</th>`).join('')}<th class="r">整團共用</th><th class="r">總成本</th></tr></thead>
+        <tbody id="qt-mix-body"></tbody>
+        <tfoot id="qt-mix-foot"></tfoot>
+      </table></div>
+      <div class="qt-hint">「依人數」和「%」的項目依各出發地的單價與人數分開算；「固定數量」的項目（車資、嚮導費…）整團只算一次，用「車從這裡出發」那個出發地的金額。要改單價請到各出發地的分頁修改。</div>
+    </div>`;
+  quoteMixRecalc();
+}
+function quoteMixRecalc(){
+  const tb=document.getElementById('qt-mix-body');if(!tb)return;
+  const sib=quoteMixSheets();const r=quoteMixCalc(sib);
+  const cols=sib.length+4,money=v=>(v<0?'-':'')+'$'+qFmt(Math.abs(v)),num=v=>v==null?'<span class="muted">—</span>':qFmt(v);
+  const calcLabel=row=>{const s=row.src;
+    if(s.type==='pax')return`依人數 $${qFmt(qNum(s.unit))}／人${qNum(s.offset)?`<span class="qt-sub">共用 +${qNum(s.offset)} 人</span>`:''}`;
+    if(s.type==='pct_in'||s.type==='pct')return`${qNum(s.rate)}%${s.type==='pct_in'?' 內含':' 團費'}`;
+    return`固定 $${qFmt(qNum(s.unit))} × ${qNum(s.qty)}<span class="qt-sub">用${esc(row.srcQ.origin||'未填出發地')}的金額</span>`;
+  };
+  tb.innerHTML=r.cats.map(c=>`
+    <tr class="qt-grp"><td colspan="${cols}"><span class="qt-grp-tag" style="--qc:${c.color}"><i></i><b style="padding:0 10px 0 2px">${esc(c.name||'未命名')}</b></span><span class="qt-grp-cnt">${c.rows.length} 項</span></td></tr>
+    ${c.rows.map(row=>`<tr class="qt-item">
+      <td>${esc(row.name)||'<span class="muted">（未命名）</span>'}</td>
+      <td class="muted">${calcLabel(row)}</td>
+      ${sib.map(q=>`<td class="r">${num(row.by[q.id])}</td>`).join('')}
+      <td class="r">${row.shared?qFmt(row.shared):'<span class="muted">—</span>'}</td>
+      <td class="r b">${qFmt(row.total)}</td></tr>`).join('')}
+    <tr class="qt-subtot" style="--qc:${c.color}"><td colspan="${cols-1}" class="r">${esc(c.name||'未命名')} 小計</td><td class="r b">${qFmt(c.total)}</td></tr>`).join('<tr class="qt-gap"><td colspan="'+cols+'"></td></tr>');
+  document.getElementById('qt-mix-foot').innerHTML=`<tr class="qt-mix-tot"><td colspan="2">合計</td>${sib.map(q=>`<td class="r">${qFmt(r.colTot[q.id])}</td>`).join('')}<td class="r">${qFmt(r.shared)}</td><td class="r b">${qFmt(r.cost)}</td></tr>`;
+  const el=document.getElementById('quote-body');
+  const set=(k,t,html)=>el.querySelectorAll(`[data-qm="${k}"]`).forEach(n=>{if(html)n.innerHTML=t;else n.textContent=t});
+  set('pax',r.pax+' 人');
+  set('paxs',sib.map(q=>`${q.origin||'未填'} ${quoteMixN(q)}`).join('・'));
+  set('gross','$'+qFmt(r.gross));
+  set('cost','$'+qFmt(r.cost));
+  set('cpp',r.pax?`每人成本 $${qFmt(r.cost/r.pax)}`:'');
+  set('profit',money(r.profit));
+  el.querySelectorAll('[data-qm="profit"]').forEach(n=>{n.classList.toggle('inc',r.profit>=0);n.classList.toggle('exp',r.profit<0)});
+  set('pill',quotePill(r),true);
+}
+function quoteMixSet(id,v){const q=quoteSheets.find(x=>x.id===id);if(!q)return;q.mixPax=Math.max(0,Math.round(qNum(v)));quoteSave();quoteMixRecalc()}
+function quoteMixStep(id,d){const q=quoteSheets.find(x=>x.id===id);if(!q)return;const v=Math.max(0,quoteMixN(q)+d);const inp=document.getElementById('qt-mix-'+id);if(inp)inp.value=v;quoteMixSet(id,v)}
+function quoteMixSetMain(id){
+  quoteMixSheets().forEach(q=>{if(q.id===id)q.mixMain=true;else delete q.mixMain});
+  quoteSave();document.querySelectorAll('.qt-mix-o').forEach(n=>n.classList.toggle('main',n.querySelector('input[type=radio]').checked));quoteMixRecalc();
+}
 function quoteRenderDetail(el){
   const q=quoteCur();if(!q){el.innerHTML='';return}
   const sib=quoteSheets.filter(x=>quoteRouteKey(x)===quoteRoute);
   const rowsH=quoteCostRowsHTML(q);
   el.innerHTML=`
-    <div class="qt-tabs">
-      ${sib.map(x=>`<button class="qt-tab${x.id===q.id?' on':''}" data-qtab="${x.id}" onclick="quoteSelect('${x.id}')">${esc(x.origin||'未填出發地')}</button>`).join('')}
-      <button class="qt-tab add" onclick="quoteAddOrigin()">${QI.plus}新增出發地</button>
-    </div>
+    ${quoteTabsHTML(sib,q.id)}
     <div class="qt-card">
       <div class="qt-head-grid">
         <div class="qt-field"><label>山名（同一座山的所有出發地一起改）</label><input class="qt-input big" value="${escAttr(q.route)}" placeholder="例：眠月線" oninput="quoteRenameRoute(this.value)"></div>
