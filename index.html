@@ -170,6 +170,7 @@ th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;colo
 .mk-btn.out{background:#fff;color:#E8772E}
 .mk-btn.out:hover{background:#FFF1E6}
 .mk-btn:disabled{opacity:.5;cursor:not-allowed}
+.mk-btn[hidden],.mk-out[hidden]{display:none}
 .mk-cancel{background:none;border:none;color:var(--text-muted);font:600 13px var(--font);cursor:pointer;padding:4px 6px}
 .mk-cancel:hover{color:var(--text)}
 th.mk-col,td.mk-col{width:36px;min-width:36px;text-align:center;padding-left:10px!important;padding-right:4px!important}
@@ -1105,7 +1106,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <div class="mk-warn" id="mk-warn"></div>
       <div class="mk-msg" id="mk-msg"></div>
       <div class="mk-acts">
-        <button type="button" class="mk-btn" onclick="mkCopy()">複製文字</button>
+        <button type="button" class="mk-btn" id="mk-copy-btn" onclick="mkCopy()">複製文字</button>
+        <button type="button" class="mk-btn" id="mk-dl-btn" onclick="mkDownload()" hidden>下載檔案</button>
         <button type="button" class="btn btn-s" onclick="mkClose()">關閉</button>
       </div>
     </div>
@@ -4128,7 +4130,7 @@ let mkSelecting=false;const mkSel=new Set();let mkText='';
 function renderMkBar(list){
   const bar=document.getElementById('mk-bar');if(!bar)return;
   const tbl=document.getElementById('tbody').closest('table');if(tbl)tbl.classList.toggle('mk-on',mkSelecting);
-  if(!mkSelecting){bar.innerHTML='<button type="button" class="mk-btn" onclick="mkStart()">選擇行程輸出行銷文字</button>';return}
+  if(!mkSelecting){bar.innerHTML='<button type="button" class="mk-btn out" onclick="mkExportAll()">輸出所有行程宣傳文字</button><button type="button" class="mk-btn" onclick="mkStart()">選擇行程輸出行銷文字</button>';return}
   const n=[...mkSel].filter(id=>trips.some(t=>t.id===id)).length;
   bar.innerHTML=`<span class="mk-hint">已選 ${n} 個行程</span><button type="button" class="mk-cancel" onclick="mkCancel()">取消</button><button type="button" class="mk-btn out" onclick="mkGenerate()"${n?'':' disabled'}>輸出行銷文字</button>`;
 }
@@ -4226,17 +4228,13 @@ function mkShortRange(s,e){
   return ds.getMonth()===de.getMonth()?`${ds.getMonth()+1}/${ds.getDate()}-${de.getDate()}`:`${ds.getMonth()+1}/${ds.getDate()}-${de.getMonth()+1}/${de.getDate()}`;
 }
 const mkDateBlock=t=>`📅日期｜${mkDateText(t.date,t.dateEnd)}\n❗截止時間：${t.deadline?mkDateText(t.deadline):'（未設定）'}`;
-async function mkGenerate(){
-  const list=trips.filter(t=>mkSel.has(t.id));
-  if(!list.length){toast('請先勾選行程');return}
-  document.getElementById('mk-title').textContent='文字生成中…';
-  document.getElementById('mk-result').hidden=true;
-  mkProgress(0);document.getElementById('mk-ov').classList.add('show');
+// 產生宣傳文字；p0~p1 為進度條範圍
+async function mkBuild(list,p0,p1){
   // 需要時讀取許願池的報名表單連結
   if(list.some(t=>!t.formLink)&&!wishData&&typeof adminPw==='function'&&adminPw()){
     try{wishData=await wishApi('admin:list')}catch(e){}
   }
-  mkProgress(.1);
+  mkProgress(p0+(p1-p0)*.1);
   // 同一地點（同一份報名表單）合併成一段
   const groups=new Map();
   list.forEach(t=>{const link=mkFormLink(t);const key=link||('n:'+(t.name||'').replace(/\s/g,''));if(!groups.has(key))groups.set(key,{link,trips:[]});groups.get(key).trips.push(t)});
@@ -4248,7 +4246,7 @@ async function mkGenerate(){
     const years=new Set();gs.filter(g=>g.trips.length>=3).forEach(g=>g.trips.forEach(t=>{years.add(parseD(t.date).getFullYear());years.add(parseD(t.dateEnd||t.date).getFullYear())}));
     for(const y of years)await mkLoadOffDays(y);
   }
-  mkProgress(.25);
+  const q0=p0+(p1-p0)*.25;mkProgress(q0);
   const blocks=[];const noLink=[],noDead=[];
   for(let i=0;i<gs.length;i++){
     const g=gs[i];const ts=g.trips;
@@ -4265,18 +4263,64 @@ async function mkGenerate(){
       parts.push(lines.join('\n'));
     }
     blocks.push(parts.join('\n\n')+`\n👉🏻 報名：${g.link||'（未設定報名連結）'}`);
-    await mkSleep(Math.min(400,1200/gs.length));
-    mkProgress(.25+.75*(i+1)/gs.length);
+    await mkSleep(Math.min(300,1200/gs.length));
+    mkProgress(q0+(p1-q0)*(i+1)/gs.length);
   }
-  mkText='📌 大家，這邊整理接下來即將截止的活動呦🤩～！\n\n'+blocks.join('\n\n');
-  await mkSleep(150);
-  document.getElementById('mk-title').textContent='文字生成完成 🎉';
-  document.getElementById('mk-out').value=mkText;
+  const text='📌 大家，這邊整理接下來即將截止的活動呦🤩～！\n\n'+blocks.join('\n\n');
   const warn=[];if(noLink.length)warn.push('找不到報名表單：'+noLink.join('、'));if(noDead.length)warn.push('沒有報名截止日：'+noDead.join('、'));
+  return{text,warn};
+}
+function mkOpen(){
+  document.getElementById('mk-title').textContent='文字生成中…';
+  document.getElementById('mk-result').hidden=true;
+  mkProgress(0);document.getElementById('mk-ov').classList.add('show');
+}
+function mkShowResult(title,warn,word){
+  document.getElementById('mk-title').textContent=title;
+  document.getElementById('mk-out').hidden=word;
+  document.getElementById('mk-copy-btn').hidden=word;
+  document.getElementById('mk-dl-btn').hidden=!word;
   document.getElementById('mk-warn').innerHTML=warn.map(esc).join('<br>');
   document.getElementById('mk-msg').textContent='';
   document.getElementById('mk-result').hidden=false;
+}
+async function mkGenerate(){
+  const list=trips.filter(t=>mkSel.has(t.id));
+  if(!list.length){toast('請先勾選行程');return}
+  mkOpen();
+  const r=await mkBuild(list,0,1);mkText=r.text;
+  await mkSleep(150);
+  document.getElementById('mk-out').value=mkText;
+  mkShowResult('文字生成完成 🎉',r.warn,false);
   mkCopy(true);
+}
+// ── 輸出所有行程宣傳文字（Word）──
+// 對象：還在報名中的行程（未結束、非包團、出團日與報名截止日都還沒過）
+let mkDocBlob=null,mkDocName='';
+async function mkExportAll(){
+  if(typeof docx==='undefined'){toast('Word 匯出元件載入中，請稍後再試');return}
+  const td=dateStr(today());
+  const list=trips.filter(t=>!['done','collapsed','notFormed','private'].includes(t.status)&&t.date>=td&&(!t.deadline||t.deadline>=td));
+  if(!list.length){toast('目前沒有報名中的行程');return}
+  mkOpen();
+  const r=await mkBuild(list,0,.85);
+  const {Document,Packer,Paragraph,TextRun}=docx;
+  const paras=r.text.split('\n').map(line=>new Paragraph({spacing:{after:60},children:[new TextRun({text:line,size:24,font:'Microsoft JhengHei'})]}));
+  try{
+    mkDocBlob=await Packer.toBlob(new Document({sections:[{children:paras}]}));
+  }catch(err){console.error(err);mkClose();toast('Word 產生失敗：'+err.message);return}
+  mkProgress(1);
+  mkDocName=`入野門行程宣傳文字-${td.replace(/-/g,'')}.docx`;
+  await mkSleep(150);
+  mkShowResult(`Word 檔生成完成 🎉（共 ${list.length} 個梯次）`,r.warn,true);
+  mkDownload(true);
+}
+function mkDownload(auto){
+  if(!mkDocBlob)return;
+  if(typeof saveAs!=='undefined'){saveAs(mkDocBlob,mkDocName)}
+  else{const a=document.createElement('a');a.href=URL.createObjectURL(mkDocBlob);a.download=mkDocName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+  const msg=document.getElementById('mk-msg');msg.style.color='var(--accent)';
+  msg.textContent=auto?'已自動下載；沒看到檔案的話請按「下載檔案」':'已下載 ✅';
 }
 async function mkCopy(auto){
   const msg=document.getElementById('mk-msg');let ok=false;
