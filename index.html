@@ -4145,37 +4145,37 @@ function mkDateText(s,e){
   let dow='';for(let i=0;i<=n&&i<7;i++){const d=new Date(ds);d.setDate(ds.getDate()+i);dow+=DAYS[d.getDay()]}
   return`${num}（${n>=7?DAYS[ds.getDay()]+'~'+DAYS[de.getDay()]:dow}）`;
 }
-// 報名表單（Google 表單公開報名網址）。表單名稱有 ❌、🔺 的是停用表單，不放進來。
+// 報名表單（Google 表單 forms.gle 縮短作答者連結）。表單名稱有 ❌、🔺 的是停用表單，不放進來。
 // 包團表單綁定出發日期，只配同一天出發的那團；一般團同一座山共用一份。
-const MK_FORM_BASE='https://docs.google.com/forms/d/e/';
+const MK_FORM_BASE='https://forms.gle/';
 const MK_FORMS_PRIVATE=[
-  {date:'2026-11-23',name:'眠月線',id:'1FAIpQLSfbkSCP7hyn9YH-P6kBOx8qDMdtNLDqnOn3kShfoxZbBVm3ng'},
-  {date:'2026-11-27',name:'玉山',id:'1FAIpQLScbQfudemMIxjE4t3YUdOtCZfq3S6Yh9XhdaMJ3ohh2xiGhkA'},
-  {date:'2026-11-28',name:'玉山',id:'1FAIpQLScbQfudemMIxjE4t3YUdOtCZfq3S6Yh9XhdaMJ3ohh2xiGhkA'},
-  {date:'2026-12-12',name:'眠月線',id:'1FAIpQLSdCY5pBpbmmrkhqEwTr4H3Lqa42Is0rRwCyI-fH4zKBA74CEw'},
-  {date:'2026-12-12',name:'玉山主峰/雪山',id:'1FAIpQLSe03TX4OWkl6zYDNun7w91rUVcDJkiyFvlxDZu7255Yi9ae7g'},
-  {date:'2026-12-19',name:'玉山',id:'1FAIpQLSdBpL2J6q98yZBzhEOZpfy6DL-QGpXmGrvK8IzRGVaJ73CuxQ'},
+  {date:'2026-11-23',name:'眠月線',id:'84vvdj2YuQXYQRjd9'},
+  {date:'2026-11-27',name:'玉山',id:'vPaiHp4beLqQefJ99'},
+  {date:'2026-11-28',name:'玉山',id:'vPaiHp4beLqQefJ99'},
+  {date:'2026-12-12',name:'眠月線',id:'bN4uasfybobrR18JA'},
+  {date:'2026-12-12',name:'玉山主峰/雪山',id:'TZCRrXvvrHKCyapf6'},
+  {date:'2026-12-19',name:'玉山',id:'Ands3LB4d9vKiKq99'},
 ];
 const MK_FORMS=[
-  {names:['嘉明湖'],id:'1FAIpQLSd0AQiDfjsIOfoa_ib-mdtVyb4fPWyKCpMAK5JbKS-7C2da1A'},
-  {names:['合歡群峰','合歡'],id:'1FAIpQLSdp2U65D9mGxTJkU6OYjy2xou0Crm_-BYt1-v0ksEtUYtHllw'},
-  {names:['玉山'],id:'1FAIpQLSdWtzGbkie5Wv4h1QRBZePGvlhaPsoX7Z7X69uXHf7f0hOaoA'},
-  {names:['大小霸'],id:'1FAIpQLSeqixQRfZ_QuZ8W_Z3FFMCzUyrF3RKf5NdGP8BIHT2-WW9omQ'},
-  {names:['水漾森林'],id:'1FAIpQLSfQT5fk7FcLtVnEumjlIekwk7Ok8G0NLDcRyFLm-t2jOK8bfA'},
-  {names:['奇萊南華'],id:'1FAIpQLSfzJGM96zJk30zm3kT__Jlt09IyNU9En1YA2DyqrBU74uun3w'},
-  {names:['眠月線','眠月'],id:'1FAIpQLSdNckew6vhGFO10b4QpUzrJtJkV3Cf0cE4VSf9WS5Q1BNgakA'},
-  {names:['郡大山'],id:'1FAIpQLScyO9-LtykH7K7yB5IW33djaKIQCoXCRt55EEZp1cwk7tquRg'},
-  {names:['高島縱走','高島'],id:'1FAIpQLSeMBv6dBjax88skXSVPhzVemuH0EF1IaKHD__ziIZ87vnk4Vw'},
-  {names:['雪山'],id:'1FAIpQLSdwiFDvUi5L9qhp2eK_ZXgbvoDuDGio4ow5TzYeGx0oqcpT2g'},
-  {names:['加里山'],id:'1FAIpQLSdf36F_xSGEzW-qIGtPjt5o-tlPwZH4A2-4faw9gwJxQoMv5g'},
+  {names:['嘉明湖'],id:'YGTt3HCoSY9gK9N8A'},
+  {names:['合歡群峰','合歡'],id:'jDUApZZrbwfZzLAi6'},
+  {names:['玉山'],id:'y8gjXvh33dezokwR7'},
+  {names:['大小霸'],id:'NPX6sazj3dJRBcjS9'},
+  {names:['水漾森林'],id:'GKTjbL1vEQhfG4WU6'},
+  {names:['奇萊南華'],id:'AoDA4sd45eDtNXKJ8'},
+  {names:['眠月線','眠月'],id:'pasVoqxDDexMiU998'},
+  {names:['郡大山'],id:'QVzMzr6yckg7mbgQ6'},
+  {names:['高島縱走','高島'],id:'76pFyTm7V4qe4oxU8'},
+  {names:['雪山'],id:'u7b3SJo4YEvCCcye7'},
+  {names:['加里山'],id:'f5p8t2vP5ZndsCQ76'},
 ];
 function mkFormLink(t){
   if(t.formLink)return t.formLink;
   const name=(t.name||'').replace(/\s/g,'');
   const pv=MK_FORMS_PRIVATE.find(f=>f.date===t.date&&name.includes(f.name));
-  if(pv)return MK_FORM_BASE+pv.id+'/viewform';
+  if(pv)return MK_FORM_BASE+pv.id;
   const f=MK_FORMS.find(f=>f.names.some(n=>name.includes(n)));
-  if(f)return MK_FORM_BASE+f.id+'/viewform';
+  if(f)return MK_FORM_BASE+f.id;
   const ms=(wishData&&wishData.mountains)||[];
   const m=ms.filter(m=>m.form_url).find(m=>[m.name,...(m.aliases||[])].some(a=>a&&name.includes(String(a).replace(/\s/g,''))));
   return m?m.form_url:'';
