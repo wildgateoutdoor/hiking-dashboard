@@ -1155,7 +1155,6 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <option value="done">已結束</option>
         </select></div>
         <div class="f-row"><label for="f-folder-link">團務資料夾連結（選填）</label><input id="f-folder-link" type="url" placeholder="https://..."></div>
-        <div class="f-row"><label for="f-form-link">報名表單連結（選填，輸出行銷文字用）</label><input id="f-form-link" type="url" placeholder="https://forms.gle/..."></div>
         <div class="f-pair">
           <div class="f-row"><label for="f-apply-status">申請狀態</label><select id="f-apply-status">
             <option value="notApplied">未申請</option>
@@ -4146,17 +4145,38 @@ function mkDateText(s,e){
   let dow='';for(let i=0;i<=n&&i<7;i++){const d=new Date(ds);d.setDate(ds.getDate()+i);dow+=DAYS[d.getDay()]}
   return`${num}（${n>=7?DAYS[ds.getDay()]+'~'+DAYS[de.getDay()]:dow}）`;
 }
-// 眠月線 → 眠月線2天1夜（名稱已含天數就不重複加）
-function mkTitle(t){
-  const name=(t.name||'').trim();
-  if(/[天日夜]|單攻/.test(name)||!t.dateEnd||t.dateEnd===t.date)return name;
-  const n=Math.round((parseD(t.dateEnd)-parseD(t.date))/864e5)+1;
-  return`${name}${n}天${n-1}夜`;
-}
-// 報名連結：活動自己的「報名表單連結」優先，沒填就找許願池同名山的 Google 表單
+// 報名表單（Google 表單公開報名網址）。表單名稱有 ❌、🔺 的是停用表單，不放進來。
+// 包團表單綁定出發日期，只配同一天出發的那團；一般團同一座山共用一份。
+const MK_FORM_BASE='https://docs.google.com/forms/d/e/';
+const MK_FORMS_PRIVATE=[
+  {date:'2026-11-23',name:'眠月線',id:'1FAIpQLSfbkSCP7hyn9YH-P6kBOx8qDMdtNLDqnOn3kShfoxZbBVm3ng'},
+  {date:'2026-11-27',name:'玉山',id:'1FAIpQLScbQfudemMIxjE4t3YUdOtCZfq3S6Yh9XhdaMJ3ohh2xiGhkA'},
+  {date:'2026-11-28',name:'玉山',id:'1FAIpQLScbQfudemMIxjE4t3YUdOtCZfq3S6Yh9XhdaMJ3ohh2xiGhkA'},
+  {date:'2026-12-12',name:'眠月線',id:'1FAIpQLSdCY5pBpbmmrkhqEwTr4H3Lqa42Is0rRwCyI-fH4zKBA74CEw'},
+  {date:'2026-12-12',name:'玉山主峰/雪山',id:'1FAIpQLSe03TX4OWkl6zYDNun7w91rUVcDJkiyFvlxDZu7255Yi9ae7g'},
+  {date:'2026-12-19',name:'玉山',id:'1FAIpQLSdBpL2J6q98yZBzhEOZpfy6DL-QGpXmGrvK8IzRGVaJ73CuxQ'},
+];
+const MK_FORMS=[
+  {names:['嘉明湖'],id:'1FAIpQLSd0AQiDfjsIOfoa_ib-mdtVyb4fPWyKCpMAK5JbKS-7C2da1A'},
+  {names:['合歡群峰','合歡'],id:'1FAIpQLSdp2U65D9mGxTJkU6OYjy2xou0Crm_-BYt1-v0ksEtUYtHllw'},
+  {names:['玉山'],id:'1FAIpQLSdWtzGbkie5Wv4h1QRBZePGvlhaPsoX7Z7X69uXHf7f0hOaoA'},
+  {names:['大小霸'],id:'1FAIpQLSeqixQRfZ_QuZ8W_Z3FFMCzUyrF3RKf5NdGP8BIHT2-WW9omQ'},
+  {names:['水漾森林'],id:'1FAIpQLSfQT5fk7FcLtVnEumjlIekwk7Ok8G0NLDcRyFLm-t2jOK8bfA'},
+  {names:['奇萊南華'],id:'1FAIpQLSfzJGM96zJk30zm3kT__Jlt09IyNU9En1YA2DyqrBU74uun3w'},
+  {names:['眠月線','眠月'],id:'1FAIpQLSdNckew6vhGFO10b4QpUzrJtJkV3Cf0cE4VSf9WS5Q1BNgakA'},
+  {names:['郡大山'],id:'1FAIpQLScyO9-LtykH7K7yB5IW33djaKIQCoXCRt55EEZp1cwk7tquRg'},
+  {names:['高島縱走','高島'],id:'1FAIpQLSeMBv6dBjax88skXSVPhzVemuH0EF1IaKHD__ziIZ87vnk4Vw'},
+  {names:['雪山'],id:'1FAIpQLSdwiFDvUi5L9qhp2eK_ZXgbvoDuDGio4ow5TzYeGx0oqcpT2g'},
+  {names:['加里山'],id:'1FAIpQLSdf36F_xSGEzW-qIGtPjt5o-tlPwZH4A2-4faw9gwJxQoMv5g'},
+];
 function mkFormLink(t){
   if(t.formLink)return t.formLink;
-  const ms=(wishData&&wishData.mountains)||[];const name=(t.name||'').replace(/\s/g,'');
+  const name=(t.name||'').replace(/\s/g,'');
+  const pv=MK_FORMS_PRIVATE.find(f=>f.date===t.date&&name.includes(f.name));
+  if(pv)return MK_FORM_BASE+pv.id+'/viewform';
+  const f=MK_FORMS.find(f=>f.names.some(n=>name.includes(n)));
+  if(f)return MK_FORM_BASE+f.id+'/viewform';
+  const ms=(wishData&&wishData.mountains)||[];
   const m=ms.filter(m=>m.form_url).find(m=>[m.name,...(m.aliases||[])].some(a=>a&&name.includes(String(a).replace(/\s/g,''))));
   return m?m.form_url:'';
 }
@@ -4175,7 +4195,7 @@ async function mkGenerate(){
   for(let i=0;i<list.length;i++){
     const t=list[i];const link=mkFormLink(t);
     if(!link)noLink.push(t.name);if(!t.deadline)noDead.push(t.name);
-    blocks.push(`⛰️ ${mkTitle(t)}\n📅日期｜${mkDateText(t.date,t.dateEnd)}\n❗截止時間：${t.deadline?mkDateText(t.deadline):'（未設定）'}\n👉🏻 報名：${link||'（未設定報名連結）'}`);
+    blocks.push(`⛰️ ${(t.name||'').trim()}\n📅日期｜${mkDateText(t.date,t.dateEnd)}\n❗截止時間：${t.deadline?mkDateText(t.deadline):'（未設定）'}\n👉🏻 報名：${link||'（未設定報名連結）'}`);
     await mkSleep(Math.min(400,1200/list.length));
     mkProgress(.15+.85*(i+1)/list.length);
   }
@@ -4183,7 +4203,7 @@ async function mkGenerate(){
   await mkSleep(150);
   document.getElementById('mk-title').textContent='文字生成完成 🎉';
   document.getElementById('mk-out').value=mkText;
-  const warn=[];if(noLink.length)warn.push('沒有報名連結：'+noLink.join('、')+'（可在編輯活動的「報名表單連結」填寫）');if(noDead.length)warn.push('沒有報名截止日：'+noDead.join('、'));
+  const warn=[];if(noLink.length)warn.push('找不到報名表單：'+noLink.join('、'));if(noDead.length)warn.push('沒有報名截止日：'+noDead.join('、'));
   document.getElementById('mk-warn').innerHTML=warn.map(esc).join('<br>');
   document.getElementById('mk-msg').textContent='';
   document.getElementById('mk-result').hidden=false;
@@ -4206,7 +4226,7 @@ function toggleExpandAll(){
   render();
 }
 
-async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-form-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0)}
+async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0)}
 async function openEdit(id){
   if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
@@ -4221,7 +4241,6 @@ async function openEdit(id){
   document.getElementById('f-guide').value=t.guide||'';document.getElementById('f-excel').value=t.excelLink||'';
   document.getElementById('f-status').value=t.status||'reg';
   document.getElementById('f-folder-link').value=t.folderLink||'';
-  document.getElementById('f-form-link').value=t.formLink||'';
   const dep=t.departure||{};document.getElementById('f-dep-location').value=dep.location||'';document.getElementById('f-dep-time').value=dep.time||'';document.getElementById('f-dep-notes').value=dep.notes||'';
   const cd2=t.charterDetail||{};document.getElementById('f-charter-qty').value=cd2.qty||'';
   document.getElementById('f-guide-fee').value=t.guideFee||'';
@@ -4242,7 +4261,7 @@ function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
   const _notesEl=document.getElementById('f-notes');const _notesHtml=_notesEl.innerHTML.trim();const _notesTxt=_notesEl.textContent.trim();
-  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:_notesTxt,notesHtml:_notesTxt?_notesHtml:'',lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim(),formLink:document.getElementById('f-form-link').value.trim()};
+  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:_notesTxt,notesHtml:_notesTxt?_notesHtml:'',lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim()};
   data.departure={location:document.getElementById('f-dep-location').value.trim(),time:document.getElementById('f-dep-time').value.trim(),notes:document.getElementById('f-dep-notes').value.trim()};
   data.charterDetail={contacts:collectCharterContacts(),qty:document.getElementById('f-charter-qty').value.trim()};
   data.tripFees=collectTripFees();
