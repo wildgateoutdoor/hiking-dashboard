@@ -3840,7 +3840,9 @@ function sorted(list){
     else if(sortKey==='_cap'){va=a.capacity?a.registered/a.capacity:0;vb=b.capacity?b.registered/b.capacity:0}
     else if(sortKey==='_deadline'){va=a.deadline||'';vb=b.deadline||''}
     else{va=a.date;vb=b.date}
-    return va<vb?-1*m:va>vb?1*m:0;
+    if(va<vb)return -1*m;if(va>vb)return 1*m;
+    if(sortKey==='name'){return(a.date||'')<(b.date||'')?-1:(a.date||'')>(b.date||'')?1:0}
+    return 0;
   });
 }
 
