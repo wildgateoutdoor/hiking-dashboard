@@ -4313,14 +4313,13 @@ async function mkExportAll(){
   mkDocName=`入野門行程宣傳文字-${td.replace(/-/g,'')}.docx`;
   await mkSleep(150);
   mkShowResult(`Word 檔生成完成 🎉（共 ${list.length} 個梯次）`,r.warn,true);
-  mkDownload(true);
 }
-function mkDownload(auto){
+function mkDownload(){
   if(!mkDocBlob)return;
   if(typeof saveAs!=='undefined'){saveAs(mkDocBlob,mkDocName)}
   else{const a=document.createElement('a');a.href=URL.createObjectURL(mkDocBlob);a.download=mkDocName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
   const msg=document.getElementById('mk-msg');msg.style.color='var(--accent)';
-  msg.textContent=auto?'已自動下載；沒看到檔案的話請按「下載檔案」':'已下載 ✅';
+  msg.textContent='已下載 ✅';
 }
 async function mkCopy(auto){
   const msg=document.getElementById('mk-msg');let ok=false;
