@@ -4034,7 +4034,8 @@ function dayDiff(a,b){return Math.round((parseD(b)-parseD(a))/864e5)}
 // ── 報名表自動同步（supabase/functions/trip-sync）──
 function dietSummaryH(t){
   const d=t.diet;if(!d)return'';
-  let h=`<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:12px">報名表餐食需求</div><div style="font-size:12px;color:var(--text-2)">葷 ${d.meat||0}・素 ${d.veg||0}${d.other?`・其他 ${d.other}`:''}</div>`;
+  let h=`<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:12px">報名表餐食需求</div>`+(d.noDietCol?'':`<div style="font-size:12px;color:var(--text-2)">葷 ${d.meat||0}・素 ${d.veg||0}${d.other?`・其他 ${d.other}`:''}</div>`);
+  if(d.noDietCol&&!(d.notes||[]).length)return'';
   (d.notes||[]).forEach(n=>{
     const parts=[n.diet,n.avoid&&('不吃：'+n.avoid),n.allergy&&('過敏：'+n.allergy)].filter(Boolean);
     h+=`<div style="font-size:12px;color:var(--text-2)">${esc(n.name)}｜${esc(parts.join('；'))}</div>`;

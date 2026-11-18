@@ -22,7 +22,7 @@ const db = createClient(
   { auth: { persistSession: false } },
 );
 
-type Row = { name?: string; equip?: string; porter?: string; diet?: string; avoid?: string; allergy?: string };
+type Row = { name?: string; equip?: string; porter?: string; diet?: string | null; avoid?: string; allergy?: string };
 type Tab = { tab: string; rows: Row[] };
 type Trip = Record<string, any> & { id: string; name: string; date: string; dateEnd?: string };
 
@@ -36,23 +36,27 @@ const meaningful = (v: unknown) => { const s = clean(v); return s && !NONE.test(
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const ymd = (d: Date) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+const todayTW = () => ymd(new Date(Date.now() + 8 * 3600000));
 const daysBetween = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
 
-// 分頁名稱「12/12-13」「1/9-10」「12/31-1/1」→ 出發的月/日
-function tabMonthDay(tab: string): string | null {
-  const m = clean(tab).match(/^(\d{1,2})\s*[\/.]\s*(\d{1,2})/);
+// 分頁名稱裡的出發日：「12/12-13」「戒茂斯10/24-26」「2027/01/22-24」「9/12-13公關團」
+function tabDate(tab: string): { year: number | null; md: string } | null {
+  const m = clean(tab).match(/(?:(\d{4})\s*[\/.\-]\s*)?(\d{1,2})\s*[\/.]\s*(\d{1,2})/);
   if (!m) return null;
-  const mo = +m[1], d = +m[2];
+  const mo = +m[2], d = +m[3];
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
-  return `${pad(mo)}-${pad(d)}`;
+  return { year: m[1] ? +m[1] : null, md: `${pad(mo)}-${pad(d)}` };
 }
 
-// 同一條路線、同月日的梯次可能跨年，挑離今天最近的那一梯
-function pickTrip(trips: Trip[], md: string): Trip | null {
-  const today = ymd(new Date());
-  const cands = trips.filter((t) => typeof t.date === "string" && t.date.slice(5) === md);
-  if (!cands.length) return null;
-  return cands.sort((a, b) => Math.abs(daysBetween(today, a.date)) - Math.abs(daysBetween(today, b.date)))[0];
+// 同月日（有寫年份就同年）、還沒結束的梯次裡，挑離今天最近的那一梯
+function pickTrip(trips: Trip[], when: { year: number | null; md: string }) {
+  const today = todayTW();
+  const same = trips.filter((t) => typeof t.date === "string" && t.date.slice(5) === when.md &&
+    (!when.year || t.date.startsWith(String(when.year))));
+  if (!same.length) return { trip: null, ended: false };
+  const open = same.filter((t) => (t.dateEnd || t.date) >= today);
+  if (!open.length) return { trip: null, ended: true };
+  return { trip: open.sort((a, b) => daysBetween(today, a.date) - daysBetween(today, b.date))[0], ended: false };
 }
 
 // 「登山杖一對 150元 Trekking Poles, 頭燈 150元 (含電池) Headlamp」→ [{item:'登山杖',qty:1},{item:'頭燈',qty:1}]
@@ -65,7 +69,9 @@ function parseEquip(text: string, priceItems: string[]) {
   const items = [...priceItems].sort((a, b) => b.length - a.length);
   for (const part of s.split(/[,，、;；\n]+/).map(clean).filter(Boolean)) {
     if (NONE.test(part)) continue;
-    const item = items.find((it) => part.includes(it));
+    // 「睡袋 350元」對「羽絨睡袋」、「蛋殼睡墊」對「睡墊」：名稱互相包含就算
+    const word = part.match(/^[^\s\d(（]+/)?.[0] || part;
+    const item = items.find((it) => part.includes(it)) || items.find((it) => word.length >= 2 && it.includes(word));
     if (!item) { unknown.push(part); continue; }
     const q = part.match(/(?:[x×*]\s*(\d+)|(\d+)\s*(?:個|組|支|件|份))/i);
     const qty = q ? +(q[1] || q[2]) : 1;
@@ -75,12 +81,14 @@ function parseEquip(text: string, priceItems: string[]) {
   return { rentals, unknown };
 }
 
-// 「3公斤」「2.5 kg」→ 3 / 2.5；沒寫數字但不是「無」→ 無法辨識
-function parsePorterKg(text: string): number | null | "unknown" {
-  const s = meaningful(text);
+// 「代背4公斤*2天 2000元」→ {kg:4, days:2}；「3公斤」→ {kg:3}；沒寫公斤數但不是「無」→ 無法辨識
+function parsePorter(text: string): { kg: number; days: number | null } | null | "unknown" {
+  const s = clean(text).split(/[,，、]/).map(clean).filter((x) => x && !NONE.test(x)).join(" ");
   if (!s) return null;
   const m = s.match(/(\d+(?:\.\d+)?)\s*(公斤|kg|ＫＧ|KG|Kg|k)/i);
-  return m ? +m[1] : "unknown";
+  if (!m) return "unknown";
+  const d = s.match(/(\d+)\s*天/);
+  return { kg: +m[1], days: d ? +d[1] : null };
 }
 
 function dietKind(text: string): "veg" | "meat" | "" {
@@ -121,9 +129,9 @@ function buildPatch(trip: Trip, rows: Row[], source: string, tab: string,
   const keepBuyers = (trip.porterBuyers || []).filter((b: any) => b.src !== "sheet" && !names.has(clean(b.name)));
   const sheetBuyers: any[] = [];
   for (const p of people) {
-    const kg = parsePorterKg(p.porter || "");
-    if (kg === "unknown") { warnings.push(`${p.name} 的代揹「${clean(p.porter)}」看不出公斤數`); continue; }
-    if (kg) sheetBuyers.push({ name: p.name, weight: kg, days: tripDays, src: "sheet" });
+    const pt = parsePorter(p.porter || "");
+    if (pt === "unknown") { warnings.push(`${p.name} 的代揹「${clean(p.porter)}」看不出公斤數`); continue; }
+    if (pt) sheetBuyers.push({ name: p.name, weight: pt.kg, days: pt.days || tripDays, src: "sheet" });
   }
   const porterBuyers = [...keepBuyers, ...sheetBuyers].map((b: any) => ({
     ...b, cost: Math.round(b.weight * porterPrice(b.weight, porterPricing) * (b.days || 1)),
@@ -133,13 +141,15 @@ function buildPatch(trip: Trip, rows: Row[], source: string, tab: string,
     totalCost: porterBuyers.reduce((s, b) => s + (b.cost || 0), 0),
   };
 
-  // 餐食需求
-  const diet = { meat: 0, veg: 0, other: 0, notes: [] as { name: string; diet: string; avoid: string; allergy: string }[] };
+  // 餐食需求（一日行程的報名表沒有葷素欄：diet 為 null，不統計葷素）
+  const hasDiet = people.some((p) => p.diet != null);
+  const diet = { meat: 0, veg: 0, other: 0, noDietCol: !hasDiet, notes: [] as { name: string; diet: string; avoid: string; allergy: string }[] };
   for (const p of people) {
     const k = dietKind(p.diet || "");
-    if (k) diet[k]++; else diet.other++;
+    if (hasDiet) { if (k) diet[k]++; else diet.other++; }
     const avoid = meaningful(p.avoid), allergy = meaningful(p.allergy);
-    const vegLabel = k === "veg" ? clean(p.diet).replace(/\s*veg\w*/i, "") : (k ? "" : clean(p.diet));
+    // 「鍋邊素 Flexitarian」→「鍋邊素」；葷食不另外標
+    const vegLabel = !hasDiet || k === "meat" ? "" : clean(p.diet).replace(/\s*[A-Za-z].*$/, "");
     if (avoid || allergy || vegLabel) diet.notes.push({ name: p.name, diet: vegLabel, avoid, allergy });
   }
 
@@ -175,10 +185,11 @@ Deno.serve(async (req) => {
 
   const results: any[] = [];
   for (const t of body.tabs) {
-    const md = tabMonthDay(t.tab);
-    if (!md) { results.push({ tab: t.tab, skipped: "分頁名稱不是日期" }); continue; }
-    const trip = pickTrip(trips, md);
-    if (!trip) { results.push({ tab: t.tab, skipped: `後台找不到「${route}」${md} 出發的梯次` }); continue; }
+    const when = tabDate(t.tab);
+    if (!when) { results.push({ tab: t.tab, skipped: "分頁名稱裡沒有日期" }); continue; }
+    const { trip, ended } = pickTrip(trips, when);
+    if (ended) { results.push({ tab: t.tab, skipped: "這梯已經結束，不更新" }); continue; }
+    if (!trip) { results.push({ tab: t.tab, skipped: `後台找不到「${route}」${when.year ? when.year + "-" : ""}${when.md} 出發的梯次` }); continue; }
     const { patch, warnings } = buildPatch(trip, t.rows || [], source, t.tab, equipPricing, porterPricing);
     const before = trip.registered || 0;
     if (!body.dryRun) {

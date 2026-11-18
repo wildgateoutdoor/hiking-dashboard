@@ -3,7 +3,8 @@
  *
  * 放在「每條路線的報名回覆試算表」裡（擴充功能 → Apps Script），設定步驟見 TRIP_SYNC_SETUP.md。
  *
- * 會讀取名稱是日期的分頁（例：11/21-22、12/12-13），第一個「表單回覆」分頁不會讀。
+ * 會讀取名稱裡有日期的分頁（例：11/21-22、戒茂斯10/24-26、2027/01/22-24），第一個「表單回覆」分頁不會讀。
+ * 已經結束的梯次不會更新。
  * 每個分頁的報名資料會更新後台同一路線、同一出發日的梯次：
  *   報名人數、裝備租借、代揹服務（加購）、餐食需求（葷素、不吃、過敏）。
  * 只送出姓名和上述欄位；身分證、電話、地址等個資不會送出。
@@ -30,22 +31,26 @@ function syncTrips(dryRun) {
   const tabs = [];
   ss.getSheets().forEach(function (sh) {
     const tab = sh.getName().trim();
-    if (!/^\d{1,2}\s*[\/.]\s*\d{1,2}/.test(tab)) return;   // 只讀日期分頁
+    if (/表單回覆|回覆/.test(tab) || !/\d{1,2}\s*[\/.]\s*\d{1,2}/.test(tab)) return;   // 只讀日期分頁
     const values = sh.getDataRange().getDisplayValues();
-    if (!values.length) { tabs.push({ tab: tab, rows: [] }); return; }
-    const header = values[0];
+    // 表頭不一定在第一列：前 5 列裡找有「姓名」的那列
+    let h = values.slice(0, 5).findIndex(function (r) {
+      return r.some(function (c) { return String(c).indexOf('姓名') >= 0; });
+    });
+    if (h < 0) { if (values.filter(function (r) { return r.join('').trim(); }).length <= 1) tabs.push({ tab: tab, rows: [] }); return; }
+    const header = values[h];
     const col = {};
     Object.keys(COLUMNS).forEach(function (k) {
-      col[k] = header.findIndex(function (h) {
-        return COLUMNS[k].some(function (kw) { return String(h).indexOf(kw) >= 0; });
+      col[k] = header.findIndex(function (cell) {
+        return COLUMNS[k].some(function (kw) { return String(cell).indexOf(kw) >= 0; });
       });
     });
     if (col.name < 0) return;   // 沒有姓名欄，不是報名名單
-    const rows = values.slice(1)
+    const rows = values.slice(h + 1)
       .filter(function (r) { return String(r[col.name]).trim(); })
       .map(function (r) {
         const o = {};
-        Object.keys(col).forEach(function (k) { o[k] = col[k] >= 0 ? String(r[col[k]]) : ''; });
+        Object.keys(col).forEach(function (k) { o[k] = col[k] >= 0 ? String(r[col[k]]) : (k === 'diet' ? null : ''); });
         return o;
       });
     tabs.push({ tab: tab, rows: rows });
