@@ -4183,8 +4183,51 @@ function mkFormLink(t){
   const m=ms.filter(m=>m.form_url).find(m=>[m.name,...(m.aliases||[])].some(a=>a&&name.includes(String(a).replace(/\s/g,''))));
   return m?m.form_url:'';
 }
+// ── 台灣放假日（行政院人事行政總處行事曆）──
+// 優先讀取 TaiwanCalendar 公開資料；讀不到時用下面的備用清單（非週末的放假日，含補假）
+const MK_HOLIDAY_FALLBACK={
+  2026:['0101','0216','0217','0218','0219','0220','0227','0403','0406','0501','0619','0925','0928','1009','1026','1225'],
+  2027:['0101','0204','0205','0208','0209','0210','0301','0405','0430','0609','0915','0928','1011','1025','1224','1231'],
+};
+const mkOffCache={};
+async function mkLoadOffDays(year){
+  if(mkOffCache[year])return mkOffCache[year];
+  let set=null;
+  try{
+    const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),4000);
+    const r=await fetch(`https://cdn.jsdelivr.net/gh/ruyut/TaiwanCalendar/data/${year}.json`,{signal:ctl.signal});clearTimeout(tm);
+    if(r.ok){const j=await r.json();if(Array.isArray(j)&&j.length>300)set=new Set(j.filter(x=>x.isHoliday).map(x=>x.date))}
+  }catch(e){}
+  if(!set){
+    set=new Set((MK_HOLIDAY_FALLBACK[year]||[]).map(md=>year+md));
+    for(let d=new Date(year,0,1);d.getFullYear()===year;d.setDate(d.getDate()+1))if(d.getDay()===0||d.getDay()===6)set.add(dateStr(d).replace(/-/g,''));
+  }
+  return mkOffCache[year]=set;
+}
+const mkKey=d=>dateStr(d).replace(/-/g,'');
+const mkIsOff=d=>{const s=mkOffCache[d.getFullYear()];return s?s.has(mkKey(d)):(d.getDay()===0||d.getDay()===6)};
+// 連假：行程任一天落在連續 3 天以上的放假區間；週末：碰到六日；其餘為平日
+function mkSessionType(t){
+  const ds=parseD(t.date),de=parseD(t.dateEnd||t.date);let weekend=false;
+  for(let d=new Date(ds);d<=de;d.setDate(d.getDate()+1)){
+    if(d.getDay()===0||d.getDay()===6)weekend=true;
+    if(!mkIsOff(d))continue;
+    let run=1;
+    for(let x=new Date(d);;){x.setDate(x.getDate()-1);if(!mkIsOff(x))break;run++}
+    for(let x=new Date(d);;){x.setDate(x.getDate()+1);if(!mkIsOff(x))break;run++}
+    if(run>=3)return'holiday';
+  }
+  return weekend?'weekend':'weekday';
+}
+// 2/18-19、2/27-3/1、2/10
+function mkShortRange(s,e){
+  const ds=parseD(s);if(!e||e===s)return`${ds.getMonth()+1}/${ds.getDate()}`;
+  const de=parseD(e);
+  return ds.getMonth()===de.getMonth()?`${ds.getMonth()+1}/${ds.getDate()}-${de.getDate()}`:`${ds.getMonth()+1}/${ds.getDate()}-${de.getMonth()+1}/${de.getDate()}`;
+}
+const mkDateBlock=t=>`📅日期｜${mkDateText(t.date,t.dateEnd)}\n❗截止時間：${t.deadline?mkDateText(t.deadline):'（未設定）'}`;
 async function mkGenerate(){
-  const list=trips.filter(t=>mkSel.has(t.id)).sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||a.date.localeCompare(b.date));
+  const list=trips.filter(t=>mkSel.has(t.id));
   if(!list.length){toast('請先勾選行程');return}
   document.getElementById('mk-title').textContent='文字生成中…';
   document.getElementById('mk-result').hidden=true;
@@ -4193,14 +4236,37 @@ async function mkGenerate(){
   if(list.some(t=>!t.formLink)&&!wishData&&typeof adminPw==='function'&&adminPw()){
     try{wishData=await wishApi('admin:list')}catch(e){}
   }
-  mkProgress(.15);
+  mkProgress(.1);
+  // 同一地點（同一份報名表單）合併成一段
+  const groups=new Map();
+  list.forEach(t=>{const link=mkFormLink(t);const key=link||('n:'+(t.name||'').replace(/\s/g,''));if(!groups.has(key))groups.set(key,{link,trips:[]});groups.get(key).trips.push(t)});
+  const gs=[...groups.values()];
+  gs.forEach(g=>{g.trips.sort((a,b)=>a.date.localeCompare(b.date));g.dead=g.trips.reduce((m,t)=>t.deadline&&t.deadline<m?t.deadline:m,'9999')});
+  gs.sort((a,b)=>a.dead.localeCompare(b.dead)||a.trips[0].date.localeCompare(b.trips[0].date));
+  // 3 個以上日期的地點需要放假日資料
+  if(gs.some(g=>g.trips.length>=3)){
+    const years=new Set();gs.filter(g=>g.trips.length>=3).forEach(g=>g.trips.forEach(t=>{years.add(parseD(t.date).getFullYear());years.add(parseD(t.dateEnd||t.date).getFullYear())}));
+    for(const y of years)await mkLoadOffDays(y);
+  }
+  mkProgress(.25);
   const blocks=[];const noLink=[],noDead=[];
-  for(let i=0;i<list.length;i++){
-    const t=list[i];const link=mkFormLink(t);
-    if(!link)noLink.push(t.name);if(!t.deadline)noDead.push(t.name);
-    blocks.push(`⛰️ ${(t.name||'').trim()}\n📅日期｜${mkDateText(t.date,t.dateEnd)}\n❗截止時間：${t.deadline?mkDateText(t.deadline):'（未設定）'}\n👉🏻 報名：${link||'（未設定報名連結）'}`);
-    await mkSleep(Math.min(400,1200/list.length));
-    mkProgress(.15+.85*(i+1)/list.length);
+  for(let i=0;i<gs.length;i++){
+    const g=gs[i];const ts=g.trips;
+    if(!g.link)noLink.push(ts[0].name);ts.forEach(t=>{if(!t.deadline)noDead.push(t.name+' '+fmtShort(t.date))});
+    const parts=[`⛰️ ${(ts[0].name||'').trim()}\n`+mkDateBlock(ts[0])];
+    if(ts[1])parts.push(mkDateBlock(ts[1]));
+    if(ts.length>=3){
+      const cat={weekday:[],weekend:[],holiday:[]};
+      ts.slice(2).forEach(t=>cat[mkSessionType(t)].push(mkShortRange(t.date,t.dateEnd)));
+      const lines=[];
+      if(cat.weekday.length)lines.push('平日場次｜'+cat.weekday.join('、'));
+      if(cat.weekend.length)lines.push('週末場次｜'+cat.weekend.join('、'));
+      if(cat.holiday.length)lines.push('連假場次｜'+cat.holiday.join('、'));
+      parts.push(lines.join('\n'));
+    }
+    blocks.push(parts.join('\n\n')+`\n👉🏻 報名：${g.link||'（未設定報名連結）'}`);
+    await mkSleep(Math.min(400,1200/gs.length));
+    mkProgress(.25+.75*(i+1)/gs.length);
   }
   mkText='📌 大家，這邊整理接下來即將截止的活動呦🤩～！\n\n'+blocks.join('\n\n');
   await mkSleep(150);
