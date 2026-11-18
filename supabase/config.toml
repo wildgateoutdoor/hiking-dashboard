@@ -5,3 +5,7 @@ verify_jwt = false
 # wish-api 前台公開、後台自己驗證密碼
 [functions.wish-api]
 verify_jwt = false
+
+# trip-sync 由報名試算表的 Apps Script 呼叫，用 x-sync-key 驗證
+[functions.trip-sync]
+verify_jwt = false

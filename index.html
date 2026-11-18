@@ -3968,13 +3968,16 @@ function render(){
       const netCls=net>=0?'fin-profit':'fin-loss';
       const netSign=net>=0?'+':'-';
 
+      const dietH=dietSummaryH(t);
+      const syncH=sheetSyncH(t);
       const insSumH=t.insuranceCost?`<span class="sum-exp">SUM（${t.insuranceCost.toLocaleString()}）</span>`:'';
       const insCompanyH=t.insuranceNotes?`<div style="font-size:13px;font-weight:700;margin-bottom:4px">${esc(t.insuranceNotes)}</div>`:'';
 
       detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}">`
+        +syncH
         +`<div class="detail-grid-top">`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b>${applyNotesH}</div></div><div class="dcol-half"><div class="detail-item lm-item"><b>住宿 ${lodgeSumH}</b>${lm.lodge}</div></div></div></div>`
-        +`<div class="dcol"><div class="detail-item lm-item"><b style="margin-bottom:12px">餐食 ${mealSumH}</b>${mealDetailsH||'<div style="font-size:12px;color:var(--text-muted)">未設定</div>'}</div></div>`
+        +`<div class="dcol"><div class="detail-item lm-item"><b style="margin-bottom:12px">餐食 ${mealSumH}</b>${mealDetailsH||'<div style="font-size:12px;color:var(--text-muted)">未設定</div>'}${dietH}</div></div>`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>訂包車 ${charterSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div>${charterInfoH}</div></div><div class="dcol-half"><div class="detail-item"><b>當地接駁 ${shuttleSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dShB.cls}" onclick="cycleShuttleBook('${t.id}')">${_dShB.label}</button><button class="stbtn ${_dShP.cls}" onclick="cycleShuttlePay('${t.id}')">${_dShP.label}</button></div>${shuttleInfoH}</div></div></div></div>`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>保險 ${insSumH}</b>${insCompanyH}<div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div></div><div class="dcol-half"><div class="detail-item"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div></div></div>`
         +`</div>`
@@ -4028,6 +4031,23 @@ function toggleCheckAll(checked){const list=sorted(filtered());if(checked)list.f
 
 // 住宿／餐食狀態
 function dayDiff(a,b){return Math.round((parseD(b)-parseD(a))/864e5)}
+// ── 報名表自動同步（supabase/functions/trip-sync）──
+function dietSummaryH(t){
+  const d=t.diet;if(!d)return'';
+  let h=`<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:12px">報名表餐食需求</div><div style="font-size:12px;color:var(--text-2)">葷 ${d.meat||0}・素 ${d.veg||0}${d.other?`・其他 ${d.other}`:''}</div>`;
+  (d.notes||[]).forEach(n=>{
+    const parts=[n.diet,n.avoid&&('不吃：'+n.avoid),n.allergy&&('過敏：'+n.allergy)].filter(Boolean);
+    h+=`<div style="font-size:12px;color:var(--text-2)">${esc(n.name)}｜${esc(parts.join('；'))}</div>`;
+  });
+  return h;
+}
+function sheetSyncH(t){
+  const s=t.sheetSync;if(!s||!s.at)return'';
+  const d=new Date(s.at);const when=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const w=(s.warnings||[]);
+  return`<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">📋 已從報名表「${esc(s.tab||'')}」分頁同步（${when}）：報名人數、裝備租借、代揹、餐食需求`
+    +(w.length?`<div style="color:var(--amber);margin-top:4px">⚠️ 需要手動確認：${w.map(esc).join('；')}</div>`:'')+`</div>`;
+}
 function nightsOf(t){if(!t.dateEnd||t.dateEnd===t.date)return 0;return Math.max(0,dayDiff(t.date,t.dateEnd))}
 function resizeLodging(existing,nights){const L=[];for(let i=0;i<nights;i++){const e=existing&&existing[i];L.push({book:e&&e.book?e.book:'no',pay:e&&e.pay?e.pay:'no',cost:e&&e.cost?e.cost:0,hutName:e&&e.hutName||'',beds:e&&e.beds||'',lodgeDate:e&&e.lodgeDate||''})}return L}
 function nextBook(s){return s==='no'?'yes':s==='yes'?'na':'no'}
@@ -4227,7 +4247,7 @@ function renderEquipRenters(t){
   renters.forEach(r=>el.appendChild(buildRenterRowEl(r)));
 }
 function buildRenterRowEl(r){
-  const div=document.createElement('div');div.className='f-dyn-row renter-block';div.style.gridTemplateColumns='1fr';
+  const div=document.createElement('div');div.className='f-dyn-row renter-block';div.style.gridTemplateColumns='1fr';if(r&&r.src)div.dataset.src=r.src;
   const rentals=(r&&r.rentals)||[];
   const eqOpts=equipPricing.map(p=>`<option value="${esc(p.item)}">${esc(p.item)} ($${p.price})</option>`).join('');
   let itemsH='';
@@ -4280,7 +4300,7 @@ function collectEquipRenters(){
       const qty=parseInt(ri.querySelector('.ri-qty').value)||0;
       if(item&&qty>0)rentals.push({item,qty});
     });
-    if(name)rows.push({name,rentals});
+    if(name)rows.push(div.dataset.src?{name,rentals,src:div.dataset.src}:{name,rentals});
   });
   return rows;
 }
@@ -4290,7 +4310,7 @@ function renderPorterBuyers(t){
   buyers.forEach(b=>el.appendChild(buildBuyerRowEl(b)));
 }
 function buildBuyerRowEl(b){
-  const div=document.createElement('div');div.className='f-dyn-row';div.style.gridTemplateColumns='1fr 80px 80px';
+  const div=document.createElement('div');div.className='f-dyn-row';div.style.gridTemplateColumns='1fr 80px 80px';if(b&&b.src)div.dataset.src=b.src;
   div.innerHTML=`<button type="button" class="f-dyn-del" onclick="this.parentElement.remove()">&times;</button><div class="f-row"><label>購買者</label><input type="text" value="${esc((b&&b.name)||'')}" class="buyer-name" placeholder="例：王小明"></div><div class="f-row"><label>公斤</label><input type="number" step="0.1" min="0" value="${(b&&b.weight)||0}" class="buyer-weight"></div><div class="f-row"><label>天數</label><input type="number" min="1" value="${(b&&b.days)||1}" class="buyer-days"></div>`;
   return div;
 }
@@ -4323,7 +4343,7 @@ function collectPorterBuyers(){
     const name=div.querySelector('.buyer-name').value.trim();
     const weight=parseFloat(div.querySelector('.buyer-weight').value)||0;
     const days=parseInt(div.querySelector('.buyer-days').value)||1;
-    if(name)rows.push({name,weight,days});
+    if(name)rows.push(div.dataset.src?{name,weight,days,src:div.dataset.src}:{name,weight,days});
   });
   return rows;
 }
