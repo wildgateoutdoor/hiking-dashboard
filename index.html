@@ -162,6 +162,32 @@ th.sortable{cursor:pointer}th.sortable:hover{color:rgba(255,255,255,.75)}
 th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;color:#fff}
 .expand-all-btn{margin-left:8px;padding:2px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font:600 11px var(--font);cursor:pointer;text-transform:none;letter-spacing:0;vertical-align:middle}
 .expand-all-btn:hover{background:rgba(255,255,255,.28)}
+/* 輸出行銷文字 */
+.mk-bar{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+.mk-bar .mk-hint{font-size:12px;color:var(--text-muted)}
+.mk-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--r);font:600 14px var(--font);cursor:pointer;border:2px solid #E8772E;background:#E8772E;color:#fff;transition:all .15s}
+.mk-btn:hover{background:#D4671F;border-color:#D4671F}
+.mk-btn.out{background:#fff;color:#E8772E}
+.mk-btn.out:hover{background:#FFF1E6}
+.mk-btn:disabled{opacity:.5;cursor:not-allowed}
+.mk-cancel{background:none;border:none;color:var(--text-muted);font:600 13px var(--font);cursor:pointer;padding:4px 6px}
+.mk-cancel:hover{color:var(--text)}
+th.mk-col,td.mk-col{width:36px;min-width:36px;text-align:center;padding-left:10px!important;padding-right:4px!important}
+table.mk-on thead th:nth-child(4),table.mk-on tbody tr:not(.detail-row) td:nth-child(4){min-width:120px}
+table.mk-on thead th:nth-child(5),table.mk-on tbody tr:not(.detail-row) td:nth-child(5){min-width:100px}
+table.mk-on thead th:nth-child(6),table.mk-on tbody tr:not(.detail-row) td:nth-child(6){white-space:nowrap;min-width:80px;font-weight:700}
+.mk-col input{width:18px;height:18px;accent-color:#E8772E;cursor:pointer;vertical-align:middle}
+.mk-ov{position:fixed;inset:0;background:rgba(37,61,51,.45);z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
+.mk-ov.show{display:flex}
+.mk-box{background:var(--surface);color:var(--text);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:100%;max-width:420px;padding:22px;text-align:center}
+.mk-box h3{font-size:17px;font-weight:700;margin-bottom:14px}
+.mk-prog{height:10px;border-radius:999px;background:var(--surface-alt);overflow:hidden}
+.mk-prog-fill{height:100%;width:0;background:#E8772E;border-radius:999px;transition:width .2s}
+.mk-pct{font-size:12px;color:var(--text-muted);margin-top:6px}
+.mk-out{width:100%;min-height:180px;max-height:40vh;margin-top:14px;padding:10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font:13px/1.6 var(--font);resize:vertical}
+.mk-warn{font-size:12px;color:var(--red);margin-top:8px;text-align:left}
+.mk-acts{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.mk-msg{font-size:13px;color:var(--accent);margin-top:8px;min-height:1.2em}
 td{padding:10px 10px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:13px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:120px}
@@ -1013,6 +1039,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <input type="date" id="df-to" onchange="setDateFilter()">
       <button type="button" onclick="clearDateFilter()">清除</button>
     </div>
+    <div class="mk-bar" id="mk-bar"></div>
     <div class="tbl-wrap">
       <table>
         <thead><tr id="thead-row"></tr></thead>
@@ -1067,6 +1094,24 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 
 <div class="cal-popup" id="cal-popup" style="display:none"></div>
 
+<!-- 輸出行銷文字 -->
+<div class="mk-ov" id="mk-ov">
+  <div class="mk-box">
+    <h3 id="mk-title">文字生成中…</h3>
+    <div class="mk-prog"><div class="mk-prog-fill" id="mk-prog-fill"></div></div>
+    <div class="mk-pct" id="mk-pct">0%</div>
+    <div id="mk-result" hidden>
+      <textarea class="mk-out" id="mk-out" readonly></textarea>
+      <div class="mk-warn" id="mk-warn"></div>
+      <div class="mk-msg" id="mk-msg"></div>
+      <div class="mk-acts">
+        <button type="button" class="mk-btn" onclick="mkCopy()">複製文字</button>
+        <button type="button" class="btn btn-s" onclick="mkClose()">關閉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Trip modal -->
 <div class="overlay" id="ov-trip">
   <div class="modal">
@@ -1110,6 +1155,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <option value="done">已結束</option>
         </select></div>
         <div class="f-row"><label for="f-folder-link">團務資料夾連結（選填）</label><input id="f-folder-link" type="url" placeholder="https://..."></div>
+        <div class="f-row"><label for="f-form-link">報名表單連結（選填，輸出行銷文字用）</label><input id="f-form-link" type="url" placeholder="https://forms.gle/..."></div>
         <div class="f-pair">
           <div class="f-row"><label for="f-apply-status">申請狀態</label><select id="f-apply-status">
             <option value="notApplied">未申請</option>
@@ -3818,7 +3864,9 @@ function render(){
   const list=sorted(filtered());const tb=document.getElementById('tbody');const emp=document.getElementById('empty');
   const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
 
-  document.getElementById('thead-row').innerHTML=COLS.map(c=>{
+  renderMkBar(list);
+  const mkTh=mkSelecting?`<th class="mk-col"><input type="checkbox" title="全選" onclick="event.stopPropagation()" onchange="mkToggleAll(this.checked)"${list.length&&list.every(t=>mkSel.has(t.id))?' checked':''}></th>`:'';
+  document.getElementById('thead-row').innerHTML=mkTh+COLS.map(c=>{
     const expandBtn=c.key==='_acts'?`<button class="expand-all-btn" onclick="event.stopPropagation();toggleExpandAll()">${allOpen?'全部收合':'全部展開'}</button>`:'';
     if(!c.sort)return`<th>${c.label}${expandBtn}</th>`;
     const active=sortKey===c.key;const arr=active?(sortDir==='asc'?'▲':'▼'):'▲';
@@ -3872,7 +3920,8 @@ function render(){
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
     const depInfoH=t.folderLink?`<a href="${escAttr(t.folderLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:12px">開啟 ↗</a>`:'<span style="color:var(--text-muted);font-size:12px">—</span>';
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="出團名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mkTd=mkSelecting?`<td class="mk-col"><input type="checkbox" onclick="event.stopPropagation()" onchange="mkToggle('${t.id}',this.checked)"${mkSel.has(t.id)?' checked':''}></td>`:'';
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}">${mkTd}<td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="出團名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -3971,7 +4020,7 @@ function render(){
       const insSumH=t.insuranceCost?`<span class="sum-exp">SUM（${t.insuranceCost.toLocaleString()}）</span>`:'';
       const insCompanyH=t.insuranceNotes?`<div style="font-size:13px;font-weight:700;margin-bottom:4px">${esc(t.insuranceNotes)}</div>`:'';
 
-      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}">`
+      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1+(mkSelecting?1:0)}">`
         +`<div class="detail-grid-top">`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b>${applyNotesH}</div></div><div class="dcol-half"><div class="detail-item lm-item"><b>住宿 ${lodgeSumH}</b>${lm.lodge}</div></div></div></div>`
         +`<div class="dcol"><div class="detail-item lm-item"><b style="margin-bottom:12px">餐食 ${mealSumH}</b>${mealDetailsH||'<div style="font-size:12px;color:var(--text-muted)">未設定</div>'}</div></div>`
@@ -4073,6 +4122,82 @@ function lodgeMealH(t){
   }else lodge=`<div class="lm-row"><span style="color:var(--text-muted);font-size:12px">單日行程</span></div>`;
   return{lodge};
 }
+// ── 輸出行銷文字 ──
+let mkSelecting=false;const mkSel=new Set();let mkText='';
+function renderMkBar(list){
+  const bar=document.getElementById('mk-bar');if(!bar)return;
+  const tbl=document.getElementById('tbody').closest('table');if(tbl)tbl.classList.toggle('mk-on',mkSelecting);
+  if(!mkSelecting){bar.innerHTML='<button type="button" class="mk-btn" onclick="mkStart()">選擇行程輸出行銷文字</button>';return}
+  const n=[...mkSel].filter(id=>trips.some(t=>t.id===id)).length;
+  bar.innerHTML=`<span class="mk-hint">已選 ${n} 個行程</span><button type="button" class="mk-cancel" onclick="mkCancel()">取消</button><button type="button" class="mk-btn out" onclick="mkGenerate()"${n?'':' disabled'}>輸出行銷文字</button>`;
+}
+function mkStart(){mkSelecting=true;mkSel.clear();render()}
+function mkCancel(){mkSelecting=false;mkSel.clear();render()}
+function mkToggle(id,on){on?mkSel.add(id):mkSel.delete(id);renderMkBar();const all=document.querySelector('#thead-row th.mk-col input');if(all){const ids=sorted(filtered()).map(t=>t.id);all.checked=ids.length>0&&ids.every(i=>mkSel.has(i))}}
+function mkToggleAll(on){sorted(filtered()).forEach(t=>on?mkSel.add(t.id):mkSel.delete(t.id));render()}
+const mkSleep=ms=>new Promise(r=>setTimeout(r,ms));
+function mkProgress(p){const v=Math.round(Math.max(0,Math.min(1,p))*100);document.getElementById('mk-prog-fill').style.width=v+'%';document.getElementById('mk-pct').textContent=v+'%'}
+// 11/28~29（六日）；跨月 11/30~12/1（日一）
+function mkDateText(s,e){
+  const ds=parseD(s);
+  if(!e||e===s)return`${ds.getMonth()+1}/${ds.getDate()}（${DAYS[ds.getDay()]}）`;
+  const de=parseD(e);const n=Math.round((de-ds)/864e5);
+  const num=ds.getMonth()===de.getMonth()?`${ds.getMonth()+1}/${ds.getDate()}~${de.getDate()}`:`${ds.getMonth()+1}/${ds.getDate()}~${de.getMonth()+1}/${de.getDate()}`;
+  let dow='';for(let i=0;i<=n&&i<7;i++){const d=new Date(ds);d.setDate(ds.getDate()+i);dow+=DAYS[d.getDay()]}
+  return`${num}（${n>=7?DAYS[ds.getDay()]+'~'+DAYS[de.getDay()]:dow}）`;
+}
+// 眠月線 → 眠月線2天1夜（名稱已含天數就不重複加）
+function mkTitle(t){
+  const name=(t.name||'').trim();
+  if(/[天日夜]|單攻/.test(name)||!t.dateEnd||t.dateEnd===t.date)return name;
+  const n=Math.round((parseD(t.dateEnd)-parseD(t.date))/864e5)+1;
+  return`${name}${n}天${n-1}夜`;
+}
+// 報名連結：活動自己的「報名表單連結」優先，沒填就找許願池同名山的 Google 表單
+function mkFormLink(t){
+  if(t.formLink)return t.formLink;
+  const ms=(wishData&&wishData.mountains)||[];const name=(t.name||'').replace(/\s/g,'');
+  const m=ms.filter(m=>m.form_url).find(m=>[m.name,...(m.aliases||[])].some(a=>a&&name.includes(String(a).replace(/\s/g,''))));
+  return m?m.form_url:'';
+}
+async function mkGenerate(){
+  const list=trips.filter(t=>mkSel.has(t.id)).sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||a.date.localeCompare(b.date));
+  if(!list.length){toast('請先勾選行程');return}
+  document.getElementById('mk-title').textContent='文字生成中…';
+  document.getElementById('mk-result').hidden=true;
+  mkProgress(0);document.getElementById('mk-ov').classList.add('show');
+  // 需要時讀取許願池的報名表單連結
+  if(list.some(t=>!t.formLink)&&!wishData&&typeof adminPw==='function'&&adminPw()){
+    try{wishData=await wishApi('admin:list')}catch(e){}
+  }
+  mkProgress(.15);
+  const blocks=[];const noLink=[],noDead=[];
+  for(let i=0;i<list.length;i++){
+    const t=list[i];const link=mkFormLink(t);
+    if(!link)noLink.push(t.name);if(!t.deadline)noDead.push(t.name);
+    blocks.push(`⛰️ ${mkTitle(t)}\n📅日期｜${mkDateText(t.date,t.dateEnd)}\n❗截止時間：${t.deadline?mkDateText(t.deadline):'（未設定）'}\n👉🏻 報名：${link||'（未設定報名連結）'}`);
+    await mkSleep(Math.min(400,1200/list.length));
+    mkProgress(.15+.85*(i+1)/list.length);
+  }
+  mkText='📌 大家，這邊整理接下來即將截止的活動呦🤩～！\n\n'+blocks.join('\n\n');
+  await mkSleep(150);
+  document.getElementById('mk-title').textContent='文字生成完成 🎉';
+  document.getElementById('mk-out').value=mkText;
+  const warn=[];if(noLink.length)warn.push('沒有報名連結：'+noLink.join('、')+'（可在編輯活動的「報名表單連結」填寫）');if(noDead.length)warn.push('沒有報名截止日：'+noDead.join('、'));
+  document.getElementById('mk-warn').innerHTML=warn.map(esc).join('<br>');
+  document.getElementById('mk-msg').textContent='';
+  document.getElementById('mk-result').hidden=false;
+  mkCopy(true);
+}
+async function mkCopy(auto){
+  const msg=document.getElementById('mk-msg');let ok=false;
+  try{await navigator.clipboard.writeText(mkText);ok=true}catch(e){
+    const ta=document.getElementById('mk-out');ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e2){}
+  }
+  msg.style.color=ok?'var(--accent)':'var(--red)';
+  msg.textContent=ok?(auto?'已自動複製，可以直接貼上 ✅':'已複製 ✅'):'自動複製失敗，請按「複製文字」';
+}
+function mkClose(){document.getElementById('mk-ov').classList.remove('show');mkSelecting=false;mkSel.clear();render()}
 function toggleExpandAll(){
   const list=sorted(filtered());
   const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
@@ -4081,7 +4206,7 @@ function toggleExpandAll(){
   render();
 }
 
-async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0)}
+async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-form-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0)}
 async function openEdit(id){
   if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
@@ -4096,6 +4221,7 @@ async function openEdit(id){
   document.getElementById('f-guide').value=t.guide||'';document.getElementById('f-excel').value=t.excelLink||'';
   document.getElementById('f-status').value=t.status||'reg';
   document.getElementById('f-folder-link').value=t.folderLink||'';
+  document.getElementById('f-form-link').value=t.formLink||'';
   const dep=t.departure||{};document.getElementById('f-dep-location').value=dep.location||'';document.getElementById('f-dep-time').value=dep.time||'';document.getElementById('f-dep-notes').value=dep.notes||'';
   const cd2=t.charterDetail||{};document.getElementById('f-charter-qty').value=cd2.qty||'';
   document.getElementById('f-guide-fee').value=t.guideFee||'';
@@ -4116,7 +4242,7 @@ function closeTrip(){hideOv('ov-trip')}
 function saveTrip(e){
   e.preventDefault();
   const _notesEl=document.getElementById('f-notes');const _notesHtml=_notesEl.innerHTML.trim();const _notesTxt=_notesEl.textContent.trim();
-  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:_notesTxt,notesHtml:_notesTxt?_notesHtml:'',lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim()};
+  const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:_notesTxt,notesHtml:_notesTxt?_notesHtml:'',lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim(),formLink:document.getElementById('f-form-link').value.trim()};
   data.departure={location:document.getElementById('f-dep-location').value.trim(),time:document.getElementById('f-dep-time').value.trim(),notes:document.getElementById('f-dep-notes').value.trim()};
   data.charterDetail={contacts:collectCharterContacts(),qty:document.getElementById('f-charter-qty').value.trim()};
   data.tripFees=collectTripFees();
