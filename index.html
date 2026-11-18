@@ -4142,8 +4142,9 @@ function mkDateText(s,e){
   if(!e||e===s)return`${ds.getMonth()+1}/${ds.getDate()}（${DAYS[ds.getDay()]}）`;
   const de=parseD(e);const n=Math.round((de-ds)/864e5);
   const num=ds.getMonth()===de.getMonth()?`${ds.getMonth()+1}/${ds.getDate()}~${de.getDate()}`:`${ds.getMonth()+1}/${ds.getDate()}~${de.getMonth()+1}/${de.getDate()}`;
-  let dow='';for(let i=0;i<=n&&i<7;i++){const d=new Date(ds);d.setDate(ds.getDate()+i);dow+=DAYS[d.getDay()]}
-  return`${num}（${n>=7?DAYS[ds.getDay()]+'~'+DAYS[de.getDay()]:dow}）`;
+  // 兩天寫「六日」，三天以上寫「三～五」
+  const dow=n===1?DAYS[ds.getDay()]+DAYS[de.getDay()]:DAYS[ds.getDay()]+'～'+DAYS[de.getDay()];
+  return`${num}（${dow}）`;
 }
 // 報名表單（Google 表單 forms.gle 縮短作答者連結）。表單名稱有 ❌、🔺 的是停用表單，不放進來。
 // 包團表單綁定出發日期，只配同一天出發的那團；一般團同一座山共用一份。
