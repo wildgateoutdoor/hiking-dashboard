@@ -162,6 +162,33 @@ th.sortable{cursor:pointer}th.sortable:hover{color:rgba(255,255,255,.75)}
 th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;color:#fff}
 .expand-all-btn{margin-left:8px;padding:2px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font:600 11px var(--font);cursor:pointer;text-transform:none;letter-spacing:0;vertical-align:middle}
 .expand-all-btn:hover{background:rgba(255,255,255,.28)}
+/* 輸出行銷文字 */
+.mk-bar{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+.mk-bar .mk-hint{font-size:12px;color:var(--text-muted)}
+.mk-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--r);font:600 14px var(--font);cursor:pointer;border:2px solid #E8772E;background:#E8772E;color:#fff;transition:all .15s}
+.mk-btn:hover{background:#D4671F;border-color:#D4671F}
+.mk-btn.out{background:#fff;color:#E8772E}
+.mk-btn.out:hover{background:#FFF1E6}
+.mk-btn:disabled{opacity:.5;cursor:not-allowed}
+.mk-btn[hidden],.mk-out[hidden],.btn[hidden]{display:none}
+.mk-cancel{background:none;border:none;color:var(--text-muted);font:600 13px var(--font);cursor:pointer;padding:4px 6px}
+.mk-cancel:hover{color:var(--text)}
+th.mk-col,td.mk-col{width:36px;min-width:36px;text-align:center;padding-left:10px!important;padding-right:4px!important}
+table.mk-on thead th:nth-child(4),table.mk-on tbody tr:not(.detail-row) td:nth-child(4){min-width:120px}
+table.mk-on thead th:nth-child(5),table.mk-on tbody tr:not(.detail-row) td:nth-child(5){min-width:100px}
+table.mk-on thead th:nth-child(6),table.mk-on tbody tr:not(.detail-row) td:nth-child(6){white-space:nowrap;min-width:80px;font-weight:700}
+.mk-col input{width:18px;height:18px;accent-color:#E8772E;cursor:pointer;vertical-align:middle}
+.mk-ov{position:fixed;inset:0;background:rgba(37,61,51,.45);z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
+.mk-ov.show{display:flex}
+.mk-box{background:var(--surface);color:var(--text);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:100%;max-width:420px;padding:22px;text-align:center}
+.mk-box h3{font-size:17px;font-weight:700;margin-bottom:14px}
+.mk-prog{height:10px;border-radius:999px;background:var(--surface-alt);overflow:hidden}
+.mk-prog-fill{height:100%;width:0;background:#E8772E;border-radius:999px;transition:width .2s}
+.mk-pct{font-size:12px;color:var(--text-muted);margin-top:6px}
+.mk-out{width:100%;min-height:180px;max-height:40vh;margin-top:14px;padding:10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font:13px/1.6 var(--font);resize:vertical}
+.mk-warn{font-size:12px;color:var(--red);margin-top:8px;text-align:left}
+.mk-acts{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.mk-msg{font-size:13px;color:var(--accent);margin-top:8px;min-height:1.2em}
 td{padding:10px 10px;border-bottom:1px solid var(--border-sub);vertical-align:middle;font-size:13px}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--surface-hover)}tr.past td{opacity:.45}
 thead th:nth-child(3),tbody tr:not(.detail-row) td:nth-child(3){min-width:120px}
@@ -1013,6 +1040,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <input type="date" id="df-to" onchange="setDateFilter()">
       <button type="button" onclick="clearDateFilter()">清除</button>
     </div>
+    <div class="mk-bar" id="mk-bar"></div>
     <div class="tbl-wrap">
       <table>
         <thead><tr id="thead-row"></tr></thead>
@@ -1066,6 +1094,26 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 </div>
 
 <div class="cal-popup" id="cal-popup" style="display:none"></div>
+
+<!-- 輸出行銷文字 -->
+<div class="mk-ov" id="mk-ov">
+  <div class="mk-box">
+    <h3 id="mk-title">文字生成中…</h3>
+    <div class="mk-prog"><div class="mk-prog-fill" id="mk-prog-fill"></div></div>
+    <div class="mk-pct" id="mk-pct">0%</div>
+    <div id="mk-result" hidden>
+      <textarea class="mk-out" id="mk-out" readonly></textarea>
+      <div class="mk-warn" id="mk-warn"></div>
+      <div class="mk-msg" id="mk-msg"></div>
+      <div class="mk-acts">
+        <button type="button" class="mk-btn" id="mk-copy-btn" onclick="mkCopy()">複製文字</button>
+        <button type="button" class="mk-btn" id="mk-dl-btn" onclick="mkDownload('docx')" hidden>下載 Word 檔</button>
+        <button type="button" class="mk-btn" id="mk-txt-btn" onclick="mkDownload('txt')" hidden>下載 txt 檔</button>
+        <button type="button" class="btn btn-s" onclick="mkClose()">關閉</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Trip modal -->
 <div class="overlay" id="ov-trip">
@@ -3795,7 +3843,9 @@ function sorted(list){
     else if(sortKey==='_cap'){va=a.capacity?a.registered/a.capacity:0;vb=b.capacity?b.registered/b.capacity:0}
     else if(sortKey==='_deadline'){va=a.deadline||'';vb=b.deadline||''}
     else{va=a.date;vb=b.date}
-    return va<vb?-1*m:va>vb?1*m:0;
+    if(va<vb)return -1*m;if(va>vb)return 1*m;
+    if(sortKey==='name'){return(a.date||'')<(b.date||'')?-1:(a.date||'')>(b.date||'')?1:0}
+    return 0;
   });
 }
 
@@ -3818,7 +3868,9 @@ function render(){
   const list=sorted(filtered());const tb=document.getElementById('tbody');const emp=document.getElementById('empty');
   const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
 
-  document.getElementById('thead-row').innerHTML=COLS.map(c=>{
+  renderMkBar(list);
+  const mkTh=mkSelecting?`<th class="mk-col"><input type="checkbox" title="全選" onclick="event.stopPropagation()" onchange="mkToggleAll(this.checked)"${list.length&&list.every(t=>mkSel.has(t.id))?' checked':''}></th>`:'';
+  document.getElementById('thead-row').innerHTML=mkTh+COLS.map(c=>{
     const expandBtn=c.key==='_acts'?`<button class="expand-all-btn" onclick="event.stopPropagation();toggleExpandAll()">${allOpen?'全部收合':'全部展開'}</button>`:'';
     if(!c.sort)return`<th>${c.label}${expandBtn}</th>`;
     const active=sortKey===c.key;const arr=active?(sortDir==='asc'?'▲':'▼'):'▲';
@@ -3872,7 +3924,8 @@ function render(){
     const editDelH=`<button class="act-btn" onclick="openEdit('${t.id}')" title="編輯"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="act-btn del" onclick="delTrip('${t.id}')" title="刪除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>`;
     const depInfoH=t.folderLink?`<a href="${escAttr(t.folderLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:12px">開啟 ↗</a>`:'<span style="color:var(--text-muted);font-size:12px">—</span>';
 
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}"><td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="出團名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mkTd=mkSelecting?`<td class="mk-col"><input type="checkbox" onclick="event.stopPropagation()" onchange="mkToggle('${t.id}',this.checked)"${mkSel.has(t.id)?' checked':''}></td>`:'';
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}">${mkTd}<td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="出團名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
@@ -3973,7 +4026,7 @@ function render(){
       const insSumH=t.insuranceCost?`<span class="sum-exp">SUM（${t.insuranceCost.toLocaleString()}）</span>`:'';
       const insCompanyH=t.insuranceNotes?`<div style="font-size:13px;font-weight:700;margin-bottom:4px">${esc(t.insuranceNotes)}</div>`:'';
 
-      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1}">`
+      detailRow=`<tr class="detail-row"><td class="dr-line"></td><td class="dr-body" colspan="${COLS.length-1+(mkSelecting?1:0)}">`
         +syncH
         +`<div class="detail-grid-top">`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b>${applyNotesH}</div></div><div class="dcol-half"><div class="detail-item lm-item"><b>住宿 ${lodgeSumH}</b>${lm.lodge}</div></div></div></div>`
@@ -4094,6 +4147,219 @@ function lodgeMealH(t){
   }else lodge=`<div class="lm-row"><span style="color:var(--text-muted);font-size:12px">單日行程</span></div>`;
   return{lodge};
 }
+// ── 輸出行銷文字 ──
+let mkSelecting=false;const mkSel=new Set();let mkText='';
+function renderMkBar(list){
+  const bar=document.getElementById('mk-bar');if(!bar)return;
+  const tbl=document.getElementById('tbody').closest('table');if(tbl)tbl.classList.toggle('mk-on',mkSelecting);
+  if(!mkSelecting){bar.innerHTML='<button type="button" class="mk-btn out" onclick="mkExportAll()">輸出所有行程宣傳文字</button><button type="button" class="mk-btn" onclick="mkStart()">選擇行程輸出行銷文字</button>';return}
+  const n=[...mkSel].filter(id=>trips.some(t=>t.id===id)).length;
+  bar.innerHTML=`<span class="mk-hint">已選 ${n} 個行程</span><button type="button" class="mk-cancel" onclick="mkCancel()">取消</button><button type="button" class="mk-btn out" onclick="mkGenerate()"${n?'':' disabled'}>輸出行銷文字</button>`;
+}
+function mkStart(){mkSelecting=true;mkSel.clear();render()}
+function mkCancel(){mkSelecting=false;mkSel.clear();render()}
+function mkToggle(id,on){on?mkSel.add(id):mkSel.delete(id);renderMkBar();const all=document.querySelector('#thead-row th.mk-col input');if(all){const ids=sorted(filtered()).map(t=>t.id);all.checked=ids.length>0&&ids.every(i=>mkSel.has(i))}}
+function mkToggleAll(on){sorted(filtered()).forEach(t=>on?mkSel.add(t.id):mkSel.delete(t.id));render()}
+const mkSleep=ms=>new Promise(r=>setTimeout(r,ms));
+function mkProgress(p){const v=Math.round(Math.max(0,Math.min(1,p))*100);document.getElementById('mk-prog-fill').style.width=v+'%';document.getElementById('mk-pct').textContent=v+'%'}
+// 11/28~29（六日）；跨月 11/30~12/1（日一）
+function mkDateText(s,e){
+  const ds=parseD(s);
+  if(!e||e===s)return`${ds.getMonth()+1}/${ds.getDate()}（${DAYS[ds.getDay()]}）`;
+  const de=parseD(e);const n=Math.round((de-ds)/864e5);
+  const num=ds.getMonth()===de.getMonth()?`${ds.getMonth()+1}/${ds.getDate()}~${de.getDate()}`:`${ds.getMonth()+1}/${ds.getDate()}~${de.getMonth()+1}/${de.getDate()}`;
+  // 兩天寫「六日」，三天以上寫「三～五」
+  const dow=n===1?DAYS[ds.getDay()]+DAYS[de.getDay()]:DAYS[ds.getDay()]+'～'+DAYS[de.getDay()];
+  return`${num}（${dow}）`;
+}
+// 報名表單（Google 表單 forms.gle 縮短作答者連結）。表單名稱有 ❌、🔺 的是停用表單，不放進來。
+// 包團表單綁定出發日期，只配同一天出發的那團；一般團同一座山共用一份。
+const MK_FORM_BASE='https://forms.gle/';
+const MK_FORMS_PRIVATE=[
+  {date:'2026-11-23',name:'眠月線',id:'84vvdj2YuQXYQRjd9'},
+  {date:'2026-11-27',name:'玉山',id:'vPaiHp4beLqQefJ99'},
+  {date:'2026-11-28',name:'玉山',id:'vPaiHp4beLqQefJ99'},
+  {date:'2026-12-12',name:'眠月線',id:'bN4uasfybobrR18JA'},
+  {date:'2026-12-12',name:'玉山主峰/雪山',id:'TZCRrXvvrHKCyapf6'},
+  {date:'2026-12-19',name:'玉山',id:'Ands3LB4d9vKiKq99'},
+];
+const MK_FORMS=[
+  {names:['嘉明湖'],id:'YGTt3HCoSY9gK9N8A'},
+  {names:['合歡群峰','合歡'],id:'jDUApZZrbwfZzLAi6'},
+  {names:['玉山'],id:'y8gjXvh33dezokwR7'},
+  {names:['大小霸'],id:'NPX6sazj3dJRBcjS9'},
+  {names:['水漾森林'],id:'GKTjbL1vEQhfG4WU6'},
+  {names:['奇萊南華'],id:'AoDA4sd45eDtNXKJ8'},
+  {names:['眠月線','眠月'],id:'pasVoqxDDexMiU998'},
+  {names:['郡大山'],id:'QVzMzr6yckg7mbgQ6'},
+  {names:['高島縱走','高島'],id:'76pFyTm7V4qe4oxU8'},
+  {names:['雪山'],id:'u7b3SJo4YEvCCcye7'},
+  {names:['加里山'],id:'f5p8t2vP5ZndsCQ76'},
+  {names:['司馬庫斯'],id:'vStVvKfFwqJGJrQm8'},
+];
+function mkFormLink(t){
+  if(t.formLink)return t.formLink;
+  const name=(t.name||'').replace(/\s/g,'');
+  const pv=MK_FORMS_PRIVATE.find(f=>f.date===t.date&&name.includes(f.name));
+  if(pv)return MK_FORM_BASE+pv.id;
+  const f=MK_FORMS.find(f=>f.names.some(n=>name.includes(n)));
+  if(f)return MK_FORM_BASE+f.id;
+  const ms=(wishData&&wishData.mountains)||[];
+  const m=ms.filter(m=>m.form_url).find(m=>[m.name,...(m.aliases||[])].some(a=>a&&name.includes(String(a).replace(/\s/g,''))));
+  return m?m.form_url:'';
+}
+// ── 台灣放假日（行政院人事行政總處行事曆）──
+// 優先讀取 TaiwanCalendar 公開資料；讀不到時用下面的備用清單（非週末的放假日，含補假）
+const MK_HOLIDAY_FALLBACK={
+  2026:['0101','0216','0217','0218','0219','0220','0227','0403','0406','0501','0619','0925','0928','1009','1026','1225'],
+  2027:['0101','0204','0205','0208','0209','0210','0301','0405','0430','0609','0915','0928','1011','1025','1224','1231'],
+};
+const mkOffCache={};
+async function mkLoadOffDays(year){
+  if(mkOffCache[year])return mkOffCache[year];
+  let set=null;
+  try{
+    const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),4000);
+    const r=await fetch(`https://cdn.jsdelivr.net/gh/ruyut/TaiwanCalendar/data/${year}.json`,{signal:ctl.signal});clearTimeout(tm);
+    if(r.ok){const j=await r.json();if(Array.isArray(j)&&j.length>300)set=new Set(j.filter(x=>x.isHoliday).map(x=>x.date))}
+  }catch(e){}
+  if(!set){
+    set=new Set((MK_HOLIDAY_FALLBACK[year]||[]).map(md=>year+md));
+    for(let d=new Date(year,0,1);d.getFullYear()===year;d.setDate(d.getDate()+1))if(d.getDay()===0||d.getDay()===6)set.add(dateStr(d).replace(/-/g,''));
+  }
+  return mkOffCache[year]=set;
+}
+const mkKey=d=>dateStr(d).replace(/-/g,'');
+const mkIsOff=d=>{const s=mkOffCache[d.getFullYear()];return s?s.has(mkKey(d)):(d.getDay()===0||d.getDay()===6)};
+// 連假：行程任一天落在連續 3 天以上的放假區間；週末：碰到六日；其餘為平日
+function mkSessionType(t){
+  const ds=parseD(t.date),de=parseD(t.dateEnd||t.date);let weekend=false;
+  for(let d=new Date(ds);d<=de;d.setDate(d.getDate()+1)){
+    if(d.getDay()===0||d.getDay()===6)weekend=true;
+    if(!mkIsOff(d))continue;
+    let run=1;
+    for(let x=new Date(d);;){x.setDate(x.getDate()-1);if(!mkIsOff(x))break;run++}
+    for(let x=new Date(d);;){x.setDate(x.getDate()+1);if(!mkIsOff(x))break;run++}
+    if(run>=3)return'holiday';
+  }
+  return weekend?'weekend':'weekday';
+}
+// 2/18-19、2/27-3/1、2/10
+function mkShortRange(s,e){
+  const ds=parseD(s);if(!e||e===s)return`${ds.getMonth()+1}/${ds.getDate()}`;
+  const de=parseD(e);
+  return ds.getMonth()===de.getMonth()?`${ds.getMonth()+1}/${ds.getDate()}-${de.getDate()}`:`${ds.getMonth()+1}/${ds.getDate()}-${de.getMonth()+1}/${de.getDate()}`;
+}
+const mkDateBlock=t=>`📅日期｜${mkDateText(t.date,t.dateEnd)}\n❗截止時間：${t.deadline?mkDateText(t.deadline):'（未設定）'}`;
+// 產生宣傳文字；p0~p1 為進度條範圍
+async function mkBuild(list,p0,p1){
+  // 需要時讀取許願池的報名表單連結
+  if(list.some(t=>!t.formLink)&&!wishData&&typeof adminPw==='function'&&adminPw()){
+    try{wishData=await wishApi('admin:list')}catch(e){}
+  }
+  mkProgress(p0+(p1-p0)*.1);
+  // 同一地點（同一份報名表單）合併成一段
+  const groups=new Map();
+  list.forEach(t=>{const link=mkFormLink(t);const key=link||('n:'+(t.name||'').replace(/\s/g,''));if(!groups.has(key))groups.set(key,{link,trips:[]});groups.get(key).trips.push(t)});
+  const gs=[...groups.values()];
+  gs.forEach(g=>{g.trips.sort((a,b)=>a.date.localeCompare(b.date));g.dead=g.trips.reduce((m,t)=>t.deadline&&t.deadline<m?t.deadline:m,'9999')});
+  gs.sort((a,b)=>a.dead.localeCompare(b.dead)||a.trips[0].date.localeCompare(b.trips[0].date));
+  // 3 個以上日期的地點需要放假日資料
+  if(gs.some(g=>g.trips.length>=3)){
+    const years=new Set();gs.filter(g=>g.trips.length>=3).forEach(g=>g.trips.forEach(t=>{years.add(parseD(t.date).getFullYear());years.add(parseD(t.dateEnd||t.date).getFullYear())}));
+    for(const y of years)await mkLoadOffDays(y);
+  }
+  const q0=p0+(p1-p0)*.25;mkProgress(q0);
+  const blocks=[];const noLink=[],noDead=[];
+  for(let i=0;i<gs.length;i++){
+    const g=gs[i];const ts=g.trips;
+    if(!g.link)noLink.push(ts[0].name);ts.forEach(t=>{if(!t.deadline)noDead.push(t.name+' '+fmtShort(t.date))});
+    const parts=[`⛰️ ${(ts[0].name||'').trim()}\n`+mkDateBlock(ts[0])];
+    if(ts[1])parts.push(mkDateBlock(ts[1]));
+    if(ts.length>=3){
+      const cat={weekday:[],weekend:[],holiday:[]};
+      ts.slice(2).forEach(t=>cat[mkSessionType(t)].push(mkShortRange(t.date,t.dateEnd)));
+      const lines=[];
+      if(cat.weekday.length)lines.push('平日場次｜'+cat.weekday.join('、'));
+      if(cat.weekend.length)lines.push('週末場次｜'+cat.weekend.join('、'));
+      if(cat.holiday.length)lines.push('連假場次｜'+cat.holiday.join('、'));
+      parts.push(lines.join('\n'));
+    }
+    blocks.push(parts.join('\n\n')+`\n👉🏻 報名：${g.link||'（未設定報名連結）'}`);
+    await mkSleep(Math.min(300,1200/gs.length));
+    mkProgress(q0+(p1-q0)*(i+1)/gs.length);
+  }
+  const text='📌 大家，這邊整理接下來即將截止的活動呦🤩～！\n\n'+blocks.join('\n\n');
+  const warn=[];if(noLink.length)warn.push('找不到報名表單：'+noLink.join('、'));if(noDead.length)warn.push('沒有報名截止日：'+noDead.join('、'));
+  return{text,warn};
+}
+function mkOpen(){
+  document.getElementById('mk-title').textContent='文字生成中…';
+  document.getElementById('mk-result').hidden=true;
+  mkProgress(0);document.getElementById('mk-ov').classList.add('show');
+}
+function mkShowResult(title,warn,word){
+  document.getElementById('mk-title').textContent=title;
+  document.getElementById('mk-out').hidden=word;
+  document.getElementById('mk-copy-btn').hidden=word;
+  document.getElementById('mk-dl-btn').hidden=!word;
+  document.getElementById('mk-txt-btn').hidden=!word;
+  document.getElementById('mk-warn').innerHTML=warn.map(esc).join('<br>');
+  document.getElementById('mk-msg').textContent='';
+  document.getElementById('mk-result').hidden=false;
+}
+async function mkGenerate(){
+  const list=trips.filter(t=>mkSel.has(t.id));
+  if(!list.length){toast('請先勾選行程');return}
+  mkOpen();
+  const r=await mkBuild(list,0,1);mkText=r.text;
+  await mkSleep(150);
+  document.getElementById('mk-out').value=mkText;
+  mkShowResult('文字生成完成 🎉',r.warn,false);
+  mkCopy(true);
+}
+// ── 輸出所有行程宣傳文字（Word / txt，按了才下載）──
+// 對象：還在報名中的行程（未結束、非包團、出團日與報名截止日都還沒過）
+let mkDocBlob=null,mkAllText='',mkFileBase='';
+async function mkExportAll(){
+  const td=dateStr(today());
+  const list=trips.filter(t=>!['done','collapsed','notFormed','private'].includes(t.status)&&t.date>=td&&(!t.deadline||t.deadline>=td));
+  if(!list.length){toast('目前沒有報名中的行程');return}
+  mkOpen();
+  const r=await mkBuild(list,0,.85);
+  mkAllText=r.text;mkFileBase=`入野門行程宣傳文字-${td.replace(/-/g,'')}`;mkDocBlob=null;
+  const warn=[...r.warn];
+  if(typeof docx!=='undefined'){
+    try{
+      const {Document,Packer,Paragraph,TextRun}=docx;
+      const paras=r.text.split('\n').map(line=>new Paragraph({spacing:{after:60},children:[new TextRun({text:line,size:24,font:'Microsoft JhengHei'})]}));
+      mkDocBlob=await Packer.toBlob(new Document({sections:[{children:paras}]}));
+    }catch(err){console.error(err);warn.unshift('Word 檔產生失敗，可以先下載 txt 檔')}
+  }else warn.unshift('Word 元件還沒載入，可以先下載 txt 檔');
+  mkProgress(1);await mkSleep(150);
+  mkShowResult(`文字生成完成 🎉（共 ${list.length} 個梯次）`,warn,true);
+  if(!mkDocBlob)document.getElementById('mk-dl-btn').hidden=true;
+}
+function mkSaveBlob(blob,fn){
+  if(typeof saveAs!=='undefined'){saveAs(blob,fn);return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function mkDownload(kind){
+  if(kind==='txt'){
+    // 加 BOM，Windows 記事本開啟才不會亂碼
+    mkSaveBlob(new Blob(['﻿'+mkAllText.replace(/\n/g,'\r\n')],{type:'text/plain;charset=utf-8'}),mkFileBase+'.txt');
+  }else{if(!mkDocBlob)return;mkSaveBlob(mkDocBlob,mkFileBase+'.docx')}
+  const msg=document.getElementById('mk-msg');msg.style.color='var(--accent)';msg.textContent=(kind==='txt'?'txt':'Word')+' 檔已下載 ✅';
+}
+async function mkCopy(auto){
+  const msg=document.getElementById('mk-msg');let ok=false;
+  try{await navigator.clipboard.writeText(mkText);ok=true}catch(e){
+    const ta=document.getElementById('mk-out');ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e2){}
+  }
+  msg.style.color=ok?'var(--accent)':'var(--red)';
+  msg.textContent=ok?(auto?'已自動複製，可以直接貼上 ✅':'已複製 ✅'):'自動複製失敗，請按「複製文字」';
+}
+function mkClose(){document.getElementById('mk-ov').classList.remove('show');mkSelecting=false;mkSel.clear();render()}
 function toggleExpandAll(){
   const list=sorted(filtered());
   const allOpen=list.length>0&&list.every(t=>expandedIds.has(t.id));
