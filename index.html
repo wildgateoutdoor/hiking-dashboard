@@ -170,7 +170,9 @@ th .arr{font-size:10px;margin-left:3px;opacity:.55}th.sorted .arr{opacity:1;colo
 .mk-btn.out{background:#fff;color:#E8772E}
 .mk-btn.out:hover{background:#FFF1E6}
 .mk-btn:disabled{opacity:.5;cursor:not-allowed}
-.mk-btn[hidden],.mk-out[hidden]{display:none}
+.mk-btn[hidden],.mk-out[hidden],.btn[hidden]{display:none}
+.mk-doclink{font-size:12px;color:#E8772E;font-weight:600;text-decoration:none}
+.mk-doclink:hover{text-decoration:underline}
 .mk-cancel{background:none;border:none;color:var(--text-muted);font:600 13px var(--font);cursor:pointer;padding:4px 6px}
 .mk-cancel:hover{color:var(--text)}
 th.mk-col,td.mk-col{width:36px;min-width:36px;text-align:center;padding-left:10px!important;padding-right:4px!important}
@@ -1107,7 +1109,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       <div class="mk-msg" id="mk-msg"></div>
       <div class="mk-acts">
         <button type="button" class="mk-btn" id="mk-copy-btn" onclick="mkCopy()">複製文字</button>
-        <button type="button" class="mk-btn" id="mk-dl-btn" onclick="mkDownload()" hidden>下載檔案</button>
+        <button type="button" class="mk-btn" id="mk-open-btn" onclick="mkOpenDoc()" hidden>打開雲端文件</button>
+        <button type="button" class="btn btn-s" id="mk-dl-btn" onclick="mkDownload()" hidden>下載 Word 檔</button>
         <button type="button" class="btn btn-s" onclick="mkClose()">關閉</button>
       </div>
     </div>
@@ -1608,7 +1611,7 @@ const DEF_MINGROUP=[
 const DEF_LODGE=[];
 const DEF_MEMBER_TIERS=['一般會員','銀卡會員','金卡會員'];
 const DEF_MEAL=[];
-const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing','hk-member-tiers':'memberTiers','hk-quotes':'quoteSheets'};
+const LS_TO_SETTINGS={'hk-rules':'deadlineRules','hk-apply':'applyRules','hk-lodge':'lodgeRules','hk-meal':'mealRules','hk-mktg':'mktgRules','hk-mingroup':'minGroupRules','hk-mktgevents':'mktgEvents','hk-task-reminders':'taskReminders','hk-equip-pricing':'equipPricing','hk-porter-pricing':'porterPricing','hk-member-tiers':'memberTiers','hk-quotes':'quoteSheets','hk-mktg-doc':'mktgDoc'};
 function localGet(key,def){try{const s=localStorage.getItem(key);if(s)return JSON.parse(s)}catch{}return JSON.parse(JSON.stringify(def))}
 function saveToLS(key,data){
   try{localStorage.setItem(key,JSON.stringify(data))}catch{}
@@ -1634,6 +1637,7 @@ async function loadAllRules(){
   porterPricing=m.porterPricing||localGet('hk-porter-pricing',[]);
   memberTiers=m.memberTiers||localGet('hk-member-tiers',DEF_MEMBER_TIERS);
   quoteSheets=m.quoteSheets||localGet('hk-quotes',null)||[quoteDefault('眠月線','台北出發',true)];
+  mktgDoc=m.mktgDoc||localGet('hk-mktg-doc',null);
   if(sb){
     if(!m.deadlineRules)saveToLS('hk-rules',deadlineRules);
     if(!m.applyRules)saveToLS('hk-apply',applyRules);
@@ -4130,7 +4134,8 @@ let mkSelecting=false;const mkSel=new Set();let mkText='';
 function renderMkBar(list){
   const bar=document.getElementById('mk-bar');if(!bar)return;
   const tbl=document.getElementById('tbody').closest('table');if(tbl)tbl.classList.toggle('mk-on',mkSelecting);
-  if(!mkSelecting){bar.innerHTML='<button type="button" class="mk-btn out" onclick="mkExportAll()">輸出所有行程宣傳文字</button><button type="button" class="mk-btn" onclick="mkStart()">選擇行程輸出行銷文字</button>';return}
+  mkLoadGis();
+  if(!mkSelecting){bar.innerHTML=(mktgDoc&&mktgDoc.url?`<a class="mk-doclink" href="${escAttr(mktgDoc.url)}" target="_blank" rel="noopener">開啟宣傳文字文件 ↗</a>`:'')+'<button type="button" class="mk-btn out" onclick="mkExportAll()">輸出所有行程宣傳文字</button><button type="button" class="mk-btn" onclick="mkStart()">選擇行程輸出行銷文字</button>';return}
   const n=[...mkSel].filter(id=>trips.some(t=>t.id===id)).length;
   bar.innerHTML=`<span class="mk-hint">已選 ${n} 個行程</span><button type="button" class="mk-cancel" onclick="mkCancel()">取消</button><button type="button" class="mk-btn out" onclick="mkGenerate()"${n?'':' disabled'}>輸出行銷文字</button>`;
 }
@@ -4280,6 +4285,7 @@ function mkShowResult(title,warn,word){
   document.getElementById('mk-out').hidden=word;
   document.getElementById('mk-copy-btn').hidden=word;
   document.getElementById('mk-dl-btn').hidden=!word;
+  document.getElementById('mk-open-btn').hidden=!(word&&mktgDoc&&mktgDoc.url);
   document.getElementById('mk-warn').innerHTML=warn.map(esc).join('<br>');
   document.getElementById('mk-msg').textContent='';
   document.getElementById('mk-result').hidden=false;
@@ -4294,32 +4300,83 @@ async function mkGenerate(){
   mkShowResult('文字生成完成 🎉',r.warn,false);
   mkCopy(true);
 }
-// ── 輸出所有行程宣傳文字（Word）──
+// ── 輸出所有行程宣傳文字（寫入固定的一份 Google 文件）──
+// GOOGLE_CLIENT_ID：Google Cloud「OAuth 用戶端 ID」（網頁應用程式）。空白時只產生 Word 檔供下載。
+const GOOGLE_CLIENT_ID='';
+const MK_DOC_NAME='入野門行程宣傳文字';
+var mktgDoc=null;let mkDocBlob=null,mkDocName='',mkGTok=null,mkGTokExp=0,mkGisLoading=false;
+function mkLoadGis(){
+  if(!GOOGLE_CLIENT_ID||mkGisLoading||(window.google&&google.accounts&&google.accounts.oauth2))return;
+  mkGisLoading=true;const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.async=true;document.head.appendChild(sc);
+}
+// 必須在按鈕點擊當下呼叫（Google 授權視窗才不會被擋）
+function mkGetToken(){
+  return new Promise((res,rej)=>{
+    if(mkGTok&&Date.now()<mkGTokExp)return res(mkGTok);
+    if(!(window.google&&google.accounts&&google.accounts.oauth2))return rej(new Error('Google 登入元件還在載入，請幾秒後再按一次'));
+    const c=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:'https://www.googleapis.com/auth/drive.file',
+      callback:r=>{if(r.error)return rej(new Error('Google 授權失敗：'+r.error));mkGTok=r.access_token;mkGTokExp=Date.now()+((r.expires_in||3600)-120)*1000;res(mkGTok)},
+      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'已取消 Google 授權':'Google 授權視窗被擋住了，請允許彈出視窗後再試'))});
+    c.requestAccessToken({prompt:''});
+  });
+}
+function mkDocHtml(text){
+  const ps=text.split('\n').map(l=>`<p style="margin:0 0 4pt">${l?esc(l):'&nbsp;'}</p>`).join('');
+  return`<html><head><meta charset="utf-8"></head><body style="font-family:'Microsoft JhengHei',sans-serif;font-size:12pt">${ps}</body></html>`;
+}
+async function mkSaveToDrive(token,html){
+  const H={Authorization:'Bearer '+token};
+  // 先覆蓋既有文件
+  if(mktgDoc&&mktgDoc.id){
+    const r=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(mktgDoc.id)}?uploadType=media&fields=id,webViewLink,trashed`,{method:'PATCH',headers:{...H,'Content-Type':'text/html; charset=UTF-8'},body:html});
+    if(r.ok){const j=await r.json();if(!j.trashed)return{id:j.id,url:j.webViewLink||mktgDoc.url}}
+    else if(r.status!==404&&r.status!==403)throw new Error('更新雲端文件失敗（'+r.status+'）');
+  }
+  // 沒有文件（或被刪除、不是這個帳號建立的）→ 新建一份
+  const bd='mk'+Math.random().toString(36).slice(2);
+  const body=`--${bd}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({name:MK_DOC_NAME,mimeType:'application/vnd.google-apps.document'})}\r\n--${bd}\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n${html}\r\n--${bd}--`;
+  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{...H,'Content-Type':'multipart/related; boundary='+bd},body});
+  if(!r.ok)throw new Error('建立雲端文件失敗（'+r.status+'）');
+  const j=await r.json();return{id:j.id,url:j.webViewLink||`https://docs.google.com/document/d/${j.id}/edit`};
+}
 // 對象：還在報名中的行程（未結束、非包團、出團日與報名截止日都還沒過）
-let mkDocBlob=null,mkDocName='';
 async function mkExportAll(){
-  if(typeof docx==='undefined'){toast('Word 匯出元件載入中，請稍後再試');return}
   const td=dateStr(today());
   const list=trips.filter(t=>!['done','collapsed','notFormed','private'].includes(t.status)&&t.date>=td&&(!t.deadline||t.deadline>=td));
   if(!list.length){toast('目前沒有報名中的行程');return}
+  let tokP=null;
+  if(GOOGLE_CLIENT_ID){tokP=mkGetToken();tokP.catch(()=>{})}
+  else if(typeof docx==='undefined'){toast('Word 匯出元件載入中，請稍後再試');return}
   mkOpen();
-  const r=await mkBuild(list,0,.85);
-  const {Document,Packer,Paragraph,TextRun}=docx;
-  const paras=r.text.split('\n').map(line=>new Paragraph({spacing:{after:60},children:[new TextRun({text:line,size:24,font:'Microsoft JhengHei'})]}));
-  try{
-    mkDocBlob=await Packer.toBlob(new Document({sections:[{children:paras}]}));
-  }catch(err){console.error(err);mkClose();toast('Word 產生失敗：'+err.message);return}
-  mkProgress(1);
-  mkDocName=`入野門行程宣傳文字-${td.replace(/-/g,'')}.docx`;
-  await mkSleep(150);
-  mkShowResult(`Word 檔生成完成 🎉（共 ${list.length} 個梯次）`,r.warn,true);
+  const r=await mkBuild(list,0,.8);
+  mkDocBlob=null;mkDocName=`入野門行程宣傳文字-${td.replace(/-/g,'')}.docx`;
+  if(typeof docx!=='undefined'){
+    try{
+      const {Document,Packer,Paragraph,TextRun}=docx;
+      const paras=r.text.split('\n').map(line=>new Paragraph({spacing:{after:60},children:[new TextRun({text:line,size:24,font:'Microsoft JhengHei'})]}));
+      mkDocBlob=await Packer.toBlob(new Document({sections:[{children:paras}]}));
+    }catch(err){console.error(err)}
+  }
+  let title=`Word 檔生成完成 🎉（共 ${list.length} 個梯次）`;const warn=[...r.warn];
+  if(tokP){
+    document.getElementById('mk-title').textContent='寫入雲端文件中…';
+    try{
+      const tok=await tokP;mkProgress(.9);
+      const saved=await mkSaveToDrive(tok,mkDocHtml(r.text));
+      mktgDoc={...saved,updatedAt:new Date().toISOString()};saveToLS('hk-mktg-doc',mktgDoc);
+      title=`雲端文件已更新 🎉（共 ${list.length} 個梯次）`;
+    }catch(err){console.error(err);warn.unshift('沒有寫進雲端文件：'+err.message+'（可以先下載 Word 檔）')}
+  }
+  mkProgress(1);await mkSleep(150);
+  mkShowResult(title,warn,true);
+  if(!mkDocBlob)document.getElementById('mk-dl-btn').hidden=true;
 }
+function mkOpenDoc(){if(mktgDoc&&mktgDoc.url)window.open(mktgDoc.url,'_blank','noopener')}
 function mkDownload(){
   if(!mkDocBlob)return;
   if(typeof saveAs!=='undefined'){saveAs(mkDocBlob,mkDocName)}
   else{const a=document.createElement('a');a.href=URL.createObjectURL(mkDocBlob);a.download=mkDocName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-  const msg=document.getElementById('mk-msg');msg.style.color='var(--accent)';
-  msg.textContent='已下載 ✅';
+  const msg=document.getElementById('mk-msg');msg.style.color='var(--accent)';msg.textContent='已下載 ✅';
 }
 async function mkCopy(auto){
   const msg=document.getElementById('mk-msg');let ok=false;
