@@ -1499,7 +1499,7 @@ const COLS=[
   {key:'_guide',label:'嚮導',sort:false},
   {key:'_acts',label:'',sort:false},
 ];
-const FILTERS=[{key:'all',label:'全部'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'},{key:'done',label:'已結束'}];
+const FILTERS=[{key:'all',label:'尚未出發'},{key:'soon',label:'即將截止'},{key:'almost',label:'即將額滿'},{key:'done',label:'已結束'}];
 const STATUS_OPTS=[
   {key:'reg',label:'報名中',cls:'pill-open'},
   {key:'apply',label:'申請中',cls:'pill-apply'},
@@ -3812,12 +3812,13 @@ function logout(){try{localStorage.removeItem('hk-auth');localStorage.removeItem
 // ── Render ──
 function filtered(){
   let list=[...trips];
-  const ended=s=>s==='done'||s==='collapsed'||s==='notFormed';
-  if(filter==='done')list=list.filter(t=>ended(t.status));
-  else if(filter==='promo')list=list.filter(t=>t.promoted>0&&!ended(t.status));
-  else if(filter==='soon')list=list.filter(t=>{const d=daysUntil(t.deadline);return d>=0&&d<=7&&!ended(t.status)});
-  else if(filter==='almost')list=list.filter(t=>t.capacity>0&&t.registered/t.capacity>=0.8&&!ended(t.status));
-  else list=list.filter(t=>!ended(t.status));
+  // 已結束：狀態是已結束／倒團／未成團，或回程日已過（不用手動改狀態，過了就自動歸到「已結束」）
+  const ended=t=>t.status==='done'||t.status==='collapsed'||t.status==='notFormed'||daysUntil(t.dateEnd||t.date)<0;
+  if(filter==='done')list=list.filter(t=>ended(t));
+  else if(filter==='promo')list=list.filter(t=>t.promoted>0&&!ended(t));
+  else if(filter==='soon')list=list.filter(t=>{const d=daysUntil(t.deadline);return d>=0&&d<=7&&!ended(t)});
+  else if(filter==='almost')list=list.filter(t=>t.capacity>0&&t.registered/t.capacity>=0.8&&!ended(t));
+  else list=list.filter(t=>!ended(t));
   if(dateFrom)list=list.filter(t=>t.date>=dateFrom);
   if(dateTo)list=list.filter(t=>t.date<=dateTo);
   return list;
