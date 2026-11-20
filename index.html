@@ -1173,6 +1173,8 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
             <div class="f-row"><label for="f-dep-time">出發時間</label><input id="f-dep-time" type="text" placeholder="例：06:00"></div>
           </div>
           <div class="f-row"><label for="f-dep-notes">出發備註</label><input id="f-dep-notes" type="text" placeholder="例：集合地點備註"></div>
+          <div class="f-row"><label for="f-rem-trip">出團備註（Word 出團表「提醒備註」）</label><textarea id="f-rem-trip" rows="2" placeholder="請填寫嚮導需要特別注意之事項，如需代繳的費用等"></textarea></div>
+          <div class="f-row"><label for="f-rem-member">成員備註（Word 出團表「提醒備註」）</label><textarea id="f-rem-member" rows="2" placeholder="請手動更新成員報名時的重點備註"></textarea></div>
           <div id="f-startpoints"></div>
         </details>
         <details class="f-section" open>
@@ -4396,6 +4398,7 @@ async function openEdit(id){
   document.getElementById('f-guide').value=t.guide||'';document.getElementById('f-excel').value=t.excelLink||'';
   document.getElementById('f-status').value=t.status||'reg';
   document.getElementById('f-folder-link').value=t.folderLink||'';
+  document.getElementById('f-rem-trip').value=t.remindTrip||'';document.getElementById('f-rem-member').value=t.remindMember||'';
   const dep=t.departure||{};document.getElementById('f-dep-location').value=dep.location||'';document.getElementById('f-dep-time').value=dep.time||'';document.getElementById('f-dep-notes').value=dep.notes||'';renderStartPoints(t);
   const cd2=t.charterDetail||{};document.getElementById('f-charter-qty').value=cd2.qty||'';
   document.getElementById('f-guide-fee').value=t.guideFee||'';
@@ -4417,6 +4420,8 @@ function saveTrip(e){
   e.preventDefault();
   const _notesEl=document.getElementById('f-notes');const _notesHtml=_notesEl.innerHTML.trim();const _notesTxt=_notesEl.textContent.trim();
   const data={name:document.getElementById('f-name').value.trim(),date:document.getElementById('f-date').value,dateEnd:document.getElementById('f-date-end').value,deadline:document.getElementById('f-dead').value,registered:parseInt(document.getElementById('f-reg').value)||0,capacity:parseInt(document.getElementById('f-cap').value)||1,notes:_notesTxt,notesHtml:_notesTxt?_notesHtml:'',lodgeNotes:document.getElementById('f-lodge-notes').value.trim(),mealNotes:document.getElementById('f-meal-notes').value.trim(),insuranceNotes:document.getElementById('f-insurance-notes').value.trim(),applyStatus:document.getElementById('f-apply-status').value,applyStatusNotes:document.getElementById('f-apply-status-notes').value.trim(),guide:document.getElementById('f-guide').value.trim(),excelLink:document.getElementById('f-excel').value.trim(),status:document.getElementById('f-status').value,folderLink:document.getElementById('f-folder-link').value.trim()};
+  data.remindTrip=document.getElementById('f-rem-trip').value.trim();
+  data.remindMember=document.getElementById('f-rem-member').value.trim();
   data.departure={location:document.getElementById('f-dep-location').value.trim(),time:document.getElementById('f-dep-time').value.trim(),notes:document.getElementById('f-dep-notes').value.trim()};
   data.charterDetail={contacts:collectCharterContacts(),qty:document.getElementById('f-charter-qty').value.trim()};
   data.tripFees=collectTripFees();
@@ -4887,6 +4892,13 @@ async function exportCheckedToWord(){
     depRows.push(new TableRow({children:[txtCell(dateRange),txtCell(dep.location||''),txtCell(dep.time||'')]}));
     children.push(new Table({rows:depRows,width:{size:100,type:WidthType.PERCENTAGE}}));
     if(dep.notes)children.push(new Paragraph({children:[new TextRun({text:`備註：${dep.notes}`,size:18,font:'Microsoft JhengHei',italics:true})],spacing:{before:40}}));
+    // 提醒備註：出團備註、成員備註（沒填就印提示文字）
+    children.push(new Paragraph({children:[new TextRun({text:'提醒備註',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
+    const remCell=(text)=>new TableCell({children:String(text).split('\n').map(line=>new Paragraph({children:[new TextRun({text:line,size:20,font:'Microsoft JhengHei'})]})),borders:bAll});
+    children.push(new Table({rows:[
+      new TableRow({children:[hdrCell('出團備註'),remCell(t.remindTrip||'請填寫嚮導需要特別注意之事項，如需代繳的費用等')]}),
+      new TableRow({children:[hdrCell('成員備註'),remCell(t.remindMember||'請手動更新成員報名時的重點備註')]}),
+    ],columnWidths:[1800,7200],width:{size:100,type:WidthType.PERCENTAGE}}));
     const sps=t.startPoints||[];
     if(sps.length){
       children.push(new Paragraph({children:[new TextRun({text:`各地出發人數（共 ${sps.reduce((s,p)=>s+p.count,0)} 人）`,bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
