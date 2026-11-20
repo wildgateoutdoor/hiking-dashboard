@@ -4931,7 +4931,15 @@ async function exportCheckedToWord(){
       const eqSummary=Object.entries(eqTotals).map(([k,v])=>k+'×'+v).join('、');
       if(eqSummary)children.push(new Paragraph({children:[new TextRun({text:'裝備總數統計：'+eqSummary,bold:true,size:20,font:'Microsoft JhengHei'})],spacing:{after:80}}));
       const eRows=[new TableRow({children:[hdrCell('租借人'),hdrCell('租借項目'),hdrCell('數量')]})];
-      for(const r of eqRenters){for(const ri of(r.rentals||[])){eRows.push(new TableRow({children:[txtCell(r.name||''),txtCell(ri.item||''),txtCell(String(ri.qty||0))]}))}}
+      // 同一個人租多項：姓名只寫一次，往下合併儲存格
+      for(const r of eqRenters){
+        const items=(r.rentals||[]).filter(ri=>ri.item);
+        items.forEach((ri,k)=>{
+          const cells=[txtCell(ri.item||''),txtCell(String(ri.qty||0))];
+          if(k===0)cells.unshift(new TableCell({children:[new Paragraph({children:[new TextRun({text:r.name||'',size:20,font:'Microsoft JhengHei'})],alignment:AlignmentType.CENTER})],borders:bAll,rowSpan:items.length,verticalAlign:docx.VerticalAlign.CENTER}));
+          eRows.push(new TableRow({children:cells}));
+        });
+      }
       children.push(new Table({rows:eRows,width:{size:100,type:WidthType.PERCENTAGE}}));
     }
     const ptBuyers=t.porterBuyers||[];const ptTotal=(t.porter||{}).weight||ptBuyers.reduce((s,b)=>s+b.weight,0);
