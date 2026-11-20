@@ -1493,7 +1493,7 @@ const COLS=[
   {key:'_cd',label:'申請倒數',sort:true},
   {key:'_cap',label:'報名人數',sort:true},
   {key:'_applyStat',label:'出團人數',sort:false},
-  {key:'_excel',label:'出團名單',sort:false},
+  {key:'_excel',label:'報名名單',sort:false},
   {key:'_depInfo',label:'出團資訊',sort:false},
   {key:'_word',label:'匯出',sort:false},
   {key:'_guide',label:'嚮導',sort:false},
@@ -3926,7 +3926,7 @@ function render(){
     const depInfoH=t.folderLink?`<a href="${escAttr(t.folderLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:12px">開啟 ↗</a>`:'<span style="color:var(--text-muted);font-size:12px">—</span>';
 
     const mkTd=mkSelecting?`<td class="mk-col"><input type="checkbox" onclick="event.stopPropagation()" onchange="mkToggle('${t.id}',this.checked)"${mkSel.has(t.id)?' checked':''}></td>`:'';
-    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}">${mkTd}<td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="出團名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
+    const mainRow=`<tr class="${isPast?'past':''}${isOpen?' expanded-main':''}">${mkTd}<td data-label="狀態">${statusH}</td><td class="td-name" style="font-weight:600">${esc(t.name)}</td><td data-label="出團日期">${dateCol}</td><td data-label="報名截止">${deadlineH}</td><td data-label="申請日期">${applyDeadH}</td><td data-label="申請倒數"><span class="cd ${applyCdC}">${applyCdH}</span></td><td data-label="報名人數">${regCapH}</td><td data-label="出團人數">${applyStatH}</td><td data-label="報名名單">${excelMainH}</td><td data-label="出團資訊">${depInfoH}</td><td data-label="匯出"><button class="btn btn-s" onclick="event.stopPropagation();exportSingleToWord('${t.id}')" style="font-size:11px;padding:3px 8px;white-space:nowrap">Word</button></td><td data-label="嚮導">${guideH}</td><td class="td-acts"><div class="acts">${expandBtn}${editDelH}</div></td></tr>`;
 
     let detailRow='';
     if(isOpen){
