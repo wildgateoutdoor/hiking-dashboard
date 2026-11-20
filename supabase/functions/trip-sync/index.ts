@@ -11,6 +11,7 @@
 //   - 同步紀錄 sheetSync（時間、來源、無法辨識的內容）
 //
 // 只送姓名與上面這些欄位，身分證、電話、地址等個資不會傳過來。
+// 梯次日期：有填「出團日期」（客服換梯後改的）就以它為準，沒有才看「行程日期」（客人報名時選的）。
 // 被槓掉的列視為取消，不算人數；同一梯同名只算一人（取最後一筆）。
 // 後台手動新增的租借者／代揹購買者（不在報名表裡的人）會保留。已結束的梯次不更新。
 //
@@ -26,7 +27,7 @@ const db = createClient(
 );
 
 type Row = { name?: string; equip?: string; porter?: string; diet?: string | null; avoid?: string; allergy?: string;
-  date?: string; ts?: string; struck?: boolean; start?: string };
+  date?: string; tripDate?: string; ts?: string; struck?: boolean; start?: string };
 type Trip = Record<string, any> & { id: string; name: string; date: string; dateEnd?: string };
 
 const json = (body: unknown, status = 200) =>
@@ -34,7 +35,7 @@ const json = (body: unknown, status = 200) =>
 
 const clean = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 // 「無」「不挑食」「沒有」之類視為空白
-const NONE_WORD = /^(無|无|沒有|没有|不挑食|都可以?|都行|都吃|全吃|什麼都吃|皆可|略|無特殊需求|無特別需求|none|no|n\/?a|x|-|—)$/i;
+const NONE_WORD = /^(無|无|沒有|没有|都有|自備|不需要|不用|不挑食|都可以?|都行|都吃|全吃|什麼都吃|皆可|略|無特殊需求|無特別需求|none|no|n\/?a|x|-|—)$/i;
 // 整段都是「無」「都吃」「都可以 不挑食」這類字眼
 const isNone = (v: string) => v.split(/[\s,，、;；]+/).map((w) => w.replace(/[～~!！。.]+$/, "")).filter(Boolean).every((w) => NONE_WORD.test(w));
 const NONE = { test: (v: string) => isNone(clean(v)) };
@@ -236,24 +237,40 @@ Deno.serve(async (req) => {
 
   // 每列分到對應梯次
   const today = todayTW();
-  const groups = new Map<string, { trip: Trip; rows: Row[] }>();
+  const groups = new Map<string, { trip: Trip; rows: Row[]; notes: string[] }>();
   const unmatched: string[] = [];
   for (const r of body.rows) {
     if (!clean(r.name)) continue;
     const text = clean(r.date);
     const prefix = text.includes("｜") || text.includes("|") ? text.split(/[｜|]/)[0] : "";
     const name = resolveRoute(names, prefix, route);
-    const date = rowDate(text.slice(prefix ? prefix.length : 0), r.ts || "");
-    const trip = name && date ? findTrip(all.filter((t) => clean(t.name) === name), date) : null;
+    // 出團日期優先；空白或看不出日期（例：0、2027???）才用行程日期。
+    // 出團日期對不到梯次（多半是打錯，例：2027/12/31 應為 2026）→ 退回行程日期，並列進「需要確認」
+    const routeTrips = name ? all.filter((t) => clean(t.name) === name) : [];
+    const d1 = rowDate(clean(r.tripDate), r.ts || ""), d2 = rowDate(text.slice(prefix ? prefix.length : 0), r.ts || "");
+    let trip = d1 ? findTrip(routeTrips, d1) : null;
+    if (d1 && !trip && d1 < today) continue;   // 出團日期已經過了＝已出團，不用處理
+    const fellBack = !!(d1 && !trip && !r.struck);
+    if (!trip && d2) trip = findTrip(routeTrips, d2);
+    if (fellBack) unmatched.push(`${clean(r.name)} 的出團日期「${clean(r.tripDate)}」對不到梯次，改用行程日期`);
+    const date = d1 || d2;
     if (!trip) { if (!r.struck && date && date >= today) unmatched.push(`${text || "（沒填日期）"}`); continue; }
     if ((trip.dateEnd || trip.date) < today) continue;   // 已結束的梯次不更新
-    if (!groups.has(trip.id)) groups.set(trip.id, { trip, rows: [] });
+    if (!groups.has(trip.id)) groups.set(trip.id, { trip, rows: [], notes: [] });
     groups.get(trip.id)!.rows.push(r);
+    if (fellBack) groups.get(trip.id)!.notes.push(`${clean(r.name)} 的出團日期「${clean(r.tripDate)}」對不到梯次，先用行程日期，請確認`);
+  }
+
+  // 之前從這份報名表同步過、這次沒人選的梯次（例：全部換梯或被槓掉）→ 歸零
+  for (const t of all) {
+    if (groups.has(t.id) || (t.dateEnd || t.date) < today) continue;
+    if (source && clean(t.sheetSync?.source) === source) groups.set(t.id, { trip: t, rows: [], notes: [] });
   }
 
   const results: any[] = [];
-  for (const { trip, rows } of groups.values()) {
+  for (const { trip, rows, notes } of groups.values()) {
     const { patch, warnings } = buildPatch(trip, rows, source, "表單回覆", equipPricing, porterPricing);
+    warnings.unshift(...notes);
     const url = clean(body.url);
     if (url && /^https:\/\/docs\.google\.com\//.test(url) && !clean(trip.excelLink)) (patch as any).excelLink = url;
     const before = trip.registered || 0;
