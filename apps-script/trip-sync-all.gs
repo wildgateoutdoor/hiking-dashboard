@@ -7,8 +7,8 @@
  *   1. 找出報名資料夾裡所有「(回覆)」試算表（沒有回覆試算表的表單＝還沒有人報名，略過）
  *   2. 讀每份試算表的第一頁「表單回覆」，每一列依他選的「行程日期」分到後台對應的梯次
  *   3. 整列（或姓名）被刪除線槓掉的人＝取消，從該梯移除
- *   4. 更新後台：報名人數、裝備租借、代揹服務、餐食需求（已結束的梯次不更新）
- * 只送出填表時間、行程日期、姓名、租借、代揹、葷素、不吃、過敏；身分證、電話、地址等個資不會送出。
+ *   4. 更新後台：報名人數、裝備租借、代揹服務、餐食需求、出發地點；報名名單連結空白時補上（已結束的梯次不更新）
+ * 只送出填表時間、行程日期、姓名、出發地點、租借、代揹、葷素、不吃、過敏；身分證、電話、地址等個資不會送出。
  */
 
 const SYNC_KEY = '貼上同步金鑰';  // 和 Supabase secret TRIP_SYNC_KEY 相同
@@ -31,6 +31,7 @@ const COLUMNS = {
   diet:    ['葷/素', '葷素'],
   avoid:   ['不能吃'],
   allergy: ['過敏'],
+  start:   ['行程費用', '出發地點', '上車地點'],
 };
 
 /** 讀第一頁「表單回覆」 */
@@ -51,6 +52,9 @@ function readResponses(ss) {
     });
   });
   if (col.name < 0) return [];
+  // 行程日期可能有好幾欄（例：富士山 2天／3天／5天各一欄），取第一個有填的
+  const dateCols = [];
+  values[h].forEach(function (cell, j) { if (String(cell).indexOf('行程日期') >= 0) dateCols.push(j); });
   const rows = [];
   for (let i = h + 1; i < values.length; i++) {
     const r = values[i];
@@ -60,6 +64,8 @@ function readResponses(ss) {
     r.forEach(function (c, j) { if (String(c).trim()) { filled++; if (lines[i][j] === 'line-through') struck++; } });
     const o = { struck: lines[i][col.name] === 'line-through' || (filled > 0 && struck * 2 >= filled) };
     Object.keys(col).forEach(function (k) { o[k] = col[k] >= 0 ? String(r[col[k]]) : (k === 'diet' ? null : ''); });
+    const dc = dateCols.find(function (j) { return String(r[j]).trim(); });
+    if (dc !== undefined) o.date = String(r[dc]);
     rows.push(o);
   }
   return rows;
@@ -89,7 +95,7 @@ function syncAll(dryRun) {
         method: 'post',
         contentType: 'application/json',
         headers: { 'x-sync-key': SYNC_KEY },
-        payload: JSON.stringify({ source: ss.getName(), rows: readResponses(ss), dryRun: !!dryRun }),
+        payload: JSON.stringify({ source: ss.getName(), url: ss.getUrl(), rows: readResponses(ss), dryRun: !!dryRun }),
         muteHttpExceptions: true,
       });
       Logger.log('【' + ss.getName() + '】' + res.getResponseCode() + ' ' + res.getContentText());

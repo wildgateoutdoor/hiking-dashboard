@@ -1173,6 +1173,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
             <div class="f-row"><label for="f-dep-time">出發時間</label><input id="f-dep-time" type="text" placeholder="例：06:00"></div>
           </div>
           <div class="f-row"><label for="f-dep-notes">出發備註</label><input id="f-dep-notes" type="text" placeholder="例：集合地點備註"></div>
+          <div id="f-startpoints"></div>
         </details>
         <details class="f-section" open>
           <summary>住宿明細</summary>
@@ -4086,6 +4087,15 @@ function toggleCheckAll(checked){const list=sorted(filtered());if(checked)list.f
 // 住宿／餐食狀態
 function dayDiff(a,b){return Math.round((parseD(b)-parseD(a))/864e5)}
 // ── 報名表自動同步（supabase/functions/trip-sync）──
+// 編輯活動裡唯讀顯示：報名表「行程費用」那題選的出發地點，各地人數與名單
+function renderStartPoints(t){
+  const el=document.getElementById('f-startpoints');if(!el)return;
+  const sp=t.startPoints||[];
+  if(!sp.length){el.innerHTML='';return}
+  el.innerHTML=`<div style="margin-top:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border-sub);border-radius:var(--r);font-size:12px;color:var(--text-2)">`
+    +`<div style="font-weight:600;color:var(--text-muted);margin-bottom:6px">報名表出發地點（自動同步，共 ${sp.reduce((s,p)=>s+p.count,0)} 人）</div>`
+    +sp.map(p=>`<div style="margin-top:4px"><b>${esc(p.place)}｜${p.count} 人</b><div>${esc(p.names.join('、'))}</div></div>`).join('')+`</div>`;
+}
 function dietSummaryH(t){
   const d=t.diet;if(!d)return'';
   let h=`<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:12px">報名表餐食需求</div>`+(d.noDietCol?'':`<div style="font-size:12px;color:var(--text-2)">葷 ${d.meat||0}・素 ${d.veg||0}${d.other?`・其他 ${d.other}`:''}</div>`);
@@ -4371,7 +4381,7 @@ function toggleExpandAll(){
   render();
 }
 
-async function openAdd(){if(!await ensureEditor())return;editId=null;document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0)}
+async function openAdd(){if(!await ensureEditor())return;editId=null;renderStartPoints({});document.getElementById('m-title').textContent='新增活動';document.getElementById('trip-form').reset();document.getElementById('f-reg').value='0';document.getElementById('f-status').value='reg';document.getElementById('deadline-hint').classList.remove('show');document.getElementById('apply-hint').classList.remove('show');document.getElementById('f-folder-link').value='';document.getElementById('f-dep-location').value='';document.getElementById('f-dep-time').value='';document.getElementById('f-dep-notes').value='';document.getElementById('f-charter-qty').value='';document.getElementById('f-guide-fee').value='';document.getElementById('f-trip-fees').innerHTML='';document.getElementById('f-meal-cost').value='';document.getElementById('f-charter-cost').value='';document.getElementById('f-ins-cost').value='';document.getElementById('f-shuttle-cost').value='';document.getElementById('f-shuttle-qty').value='';document.getElementById('f-lodge-details').innerHTML='';document.getElementById('f-meal-details').innerHTML='';document.getElementById('f-charter-contacts').innerHTML='';document.getElementById('f-shuttle-contacts').innerHTML='';document.getElementById('f-equip-renters').innerHTML='';document.getElementById('f-porter-buyers').innerHTML='';document.getElementById('f-notes').innerHTML='';showOv('ov-trip');setTimeout(()=>{const mb=document.querySelector('#ov-trip .modal-body');if(mb)mb.scrollTop=0},0)}
 async function openEdit(id){
   if(!await ensureEditor())return;
   const t=trips.find(x=>x.id===id);if(!t)return;editId=id;
@@ -4386,7 +4396,7 @@ async function openEdit(id){
   document.getElementById('f-guide').value=t.guide||'';document.getElementById('f-excel').value=t.excelLink||'';
   document.getElementById('f-status').value=t.status||'reg';
   document.getElementById('f-folder-link').value=t.folderLink||'';
-  const dep=t.departure||{};document.getElementById('f-dep-location').value=dep.location||'';document.getElementById('f-dep-time').value=dep.time||'';document.getElementById('f-dep-notes').value=dep.notes||'';
+  const dep=t.departure||{};document.getElementById('f-dep-location').value=dep.location||'';document.getElementById('f-dep-time').value=dep.time||'';document.getElementById('f-dep-notes').value=dep.notes||'';renderStartPoints(t);
   const cd2=t.charterDetail||{};document.getElementById('f-charter-qty').value=cd2.qty||'';
   document.getElementById('f-guide-fee').value=t.guideFee||'';
   document.getElementById('f-meal-cost').value=t.mealCost||'';
@@ -4877,6 +4887,13 @@ async function exportCheckedToWord(){
     depRows.push(new TableRow({children:[txtCell(dateRange),txtCell(dep.location||''),txtCell(dep.time||'')]}));
     children.push(new Table({rows:depRows,width:{size:100,type:WidthType.PERCENTAGE}}));
     if(dep.notes)children.push(new Paragraph({children:[new TextRun({text:`備註：${dep.notes}`,size:18,font:'Microsoft JhengHei',italics:true})],spacing:{before:40}}));
+    const sps=t.startPoints||[];
+    if(sps.length){
+      children.push(new Paragraph({children:[new TextRun({text:`各地出發人數（共 ${sps.reduce((s,p)=>s+p.count,0)} 人）`,bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));
+      const spRows=[new TableRow({children:[hdrCell('出發地點'),hdrCell('人數'),hdrCell('名單')]})];
+      for(const p of sps)spRows.push(new TableRow({children:[txtCell(p.place),txtCell(String(p.count)),txtCell(p.names.join('、'))]}));
+      children.push(new Table({rows:spRows,width:{size:100,type:WidthType.PERCENTAGE}}));
+    }
     const L=t.lodging||[];const nights=nightsOf(t);
     if(nights>0){
       children.push(new Paragraph({children:[new TextRun({text:'住宿',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:200,after:60}}));

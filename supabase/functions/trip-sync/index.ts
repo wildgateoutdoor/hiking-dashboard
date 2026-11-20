@@ -6,6 +6,8 @@
 //   - 裝備租借 equipRenters / equipment（依後台「裝備費用」設定比對品項與單價）
 //   - 代揹服務 porterBuyers / porter（依後台「代揹費用」設定計價）
 //   - 餐食需求 diet（葷素人數、不吃的東西、過敏）
+//   - 出發地點 startPoints（「行程費用」那題選的上車地點：各地人數與名單）
+//   - 報名名單連結 excelLink（空白時補上這份回覆試算表的網址）
 //   - 同步紀錄 sheetSync（時間、來源、無法辨識的內容）
 //
 // 只送姓名與上面這些欄位，身分證、電話、地址等個資不會傳過來。
@@ -24,7 +26,7 @@ const db = createClient(
 );
 
 type Row = { name?: string; equip?: string; porter?: string; diet?: string | null; avoid?: string; allergy?: string;
-  date?: string; ts?: string; struck?: boolean };
+  date?: string; ts?: string; struck?: boolean; start?: string };
 type Trip = Record<string, any> & { id: string; name: string; date: string; dateEnd?: string };
 
 const json = (body: unknown, status = 200) =>
@@ -189,10 +191,21 @@ function buildPatch(trip: Trip, rows: Row[], source: string, tab: string,
     if (avoid || allergy || vegLabel) diet.notes.push({ name: p.name, diet: vegLabel, avoid, allergy });
   }
 
+  // 出發地點：「台北出發」「台中高鐵站出發，回程台北」…，照報名表原文分組
+  const spMap = new Map<string, string[]>();
+  for (const p of people) {
+    const place = clean(p.start) || "未填";
+    if (!spMap.has(place)) spMap.set(place, []);
+    spMap.get(place)!.push(p.name);
+  }
+  // 報名表沒有出發地點這題（例：富士山）就不記錄
+  const startPoints = spMap.size === 1 && spMap.has("未填") ? [] : [...spMap.entries()]
+    .map(([place, names]) => ({ place, count: names.length, names })).sort((a, b) => b.count - a.count);
+
   return {
     patch: {
       registered: people.length,
-      equipRenters, equipment, porterBuyers, porter, diet,
+      equipRenters, equipment, porterBuyers, porter, diet, startPoints,
       sheetSync: { at: new Date().toISOString(), source, tab, count: people.length, removed: rows.filter((r) => r.struck).length, warnings },
     },
     warnings,
@@ -204,7 +217,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("TRIP_SYNC_KEY");
   if (!key || req.headers.get("x-sync-key") !== key) return json({ error: "unauthorized" }, 401);
 
-  let body: { route?: string; source?: string; rows?: Row[]; tabs?: unknown; dryRun?: boolean };
+  let body: { route?: string; source?: string; url?: string; rows?: Row[]; tabs?: unknown; dryRun?: boolean };
   try { body = await req.json(); } catch { return json({ error: "bad json" }, 400); }
   // 舊版（讀日期分頁）的試算表程式：停用，避免和第一頁的資料互相覆蓋
   if (body.tabs) return json({ error: "舊版同步程式已停用，請改用集中版 apps-script/trip-sync-all.gs，並刪除這份試算表 Apps Script 的觸發條件" }, 410);
@@ -241,6 +254,8 @@ Deno.serve(async (req) => {
   const results: any[] = [];
   for (const { trip, rows } of groups.values()) {
     const { patch, warnings } = buildPatch(trip, rows, source, "表單回覆", equipPricing, porterPricing);
+    const url = clean(body.url);
+    if (url && /^https:\/\/docs\.google\.com\//.test(url) && !clean(trip.excelLink)) (patch as any).excelLink = url;
     const before = trip.registered || 0;
     if (!body.dryRun) {
       const { error: upErr } = await db.from("trips")
