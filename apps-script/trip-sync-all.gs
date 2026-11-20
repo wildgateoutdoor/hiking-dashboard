@@ -17,7 +17,7 @@ const SYNC_KEY = '貼上同步金鑰';  // 和 Supabase secret TRIP_SYNC_KEY 相
 const FOLDER_IDS = ['1179tJGVgcX-lPaF5aXE6Am6sjIerW8Hr'];
 
 // 暫時不同步的試算表（標題包含這些字就略過）；要開始同步就把它從清單刪掉
-const SKIP = ['玉山'];
+const SKIP = [];
 
 const SYNC_URL = 'https://dygxochowbhmdftstgoz.supabase.co/functions/v1/trip-sync';
 
