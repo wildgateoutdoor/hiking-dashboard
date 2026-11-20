@@ -4882,7 +4882,7 @@ async function exportCheckedToWord(){
     if(t.guide)children.push(new Paragraph({children:[new TextRun({text:`嚮導　${t.guide}`,size:20,font:'Microsoft JhengHei'})],spacing:{after:40}}));
     children.push(new Paragraph({children:[new TextRun({text:`活動名稱：${t.name}`,bold:true,size:24,font:'Microsoft JhengHei'})],spacing:{before:100,after:100}}));
     children.push(new Paragraph({children:[new TextRun({text:'出發資訊',bold:true,size:22,font:'Microsoft JhengHei'})],spacing:{before:100,after:60}}));
-    const depRows=[new TableRow({children:[hdrCell('出團日期'),hdrCell('出發地點'),hdrCell('出發時間')]})];
+    const depRows=[new TableRow({children:[hdrCell('出團日期'),hdrCell('嚮導出發地點'),hdrCell('出發時間')]})];
     const dateRange=t.dateEnd&&t.dateEnd!==t.date?`${t.date} ~ ${t.dateEnd}`:t.date;
     depRows.push(new TableRow({children:[txtCell(dateRange),txtCell(dep.location||''),txtCell(dep.time||'')]}));
     children.push(new Table({rows:depRows,width:{size:100,type:WidthType.PERCENTAGE}}));
