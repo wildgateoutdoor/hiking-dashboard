@@ -9,3 +9,7 @@ verify_jwt = false
 # trip-sync 由報名試算表的 Apps Script 呼叫，用 x-sync-key 驗證
 [functions.trip-sync]
 verify_jwt = false
+
+# line-remind 由 pg_cron（x-cron-key）、LINE webhook（x-line-signature）、後台（x-admin-pw）呼叫，自己驗證
+[functions.line-remind]
+verify_jwt = false

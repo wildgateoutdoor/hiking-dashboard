@@ -1266,6 +1266,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <button class="stab" data-tab="lodge" onclick="switchTab('lodge')">住宿預訂</button>
           <button class="stab" data-tab="meal" onclick="switchTab('meal')">餐食預定</button>
           <button class="stab" data-tab="taskrem" onclick="switchTab('taskrem')">團務提醒</button>
+          <button class="stab" data-tab="line" onclick="switchTab('line')">LINE 提醒</button>
         </div>
         <div class="stab-group inactive" data-group="mktg">
           <button class="stab" data-tab="mktg" onclick="switchTab('mktg')">行銷宣傳</button>
@@ -1339,6 +1340,11 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
           <div class="f-row"><label>活動日前幾天提醒</label><input id="tr-days" type="text" placeholder="例：14 或 7,3,1" style="font-variant-numeric:tabular-nums"></div>
         </div>
         <div class="f-actions"><button type="button" class="btn btn-p" onclick="addTaskReminder()">新增</button></div>
+      </div>
+
+      <div class="stab-panel" id="tab-line">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">每天 09:00 把「7天內／14天內待辦事項」中還沒完成的項目傳到綁定的 LINE 群組；沒有待辦的日子不傳。在群組裡打「待辦」可隨時查詢。設定方式見 LINE_REMIND_SETUP.md。</p>
+        <div id="line-panel"><div class="rule-empty">讀取中…</div></div>
       </div>
 
       <div class="stab-panel" id="tab-mingroup">
@@ -3540,11 +3546,54 @@ function openSettings(){renderAllRuleLists();switchTab('deadline');showOv('ov-se
 function closeSettings(){hideOv('ov-settings')}
 function switchTab(tab){
   document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  ['deadline','apply','lodge','meal','taskrem','mingroup','mktg','equip','porter'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  ['deadline','apply','lodge','meal','taskrem','line','mingroup','mktg','equip','porter'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
   const activeBtn=document.querySelector(`.stab[data-tab="${tab}"]`);
   if(activeBtn){const ag=activeBtn.closest('.stab-group');document.querySelectorAll('.stab-group').forEach(g=>{g.classList.toggle('active',g===ag);g.classList.toggle('inactive',g!==ag)})}
   if(tab==='taskrem')renderTaskReminderList();
+  if(tab==='line')loadLinePanel();
 }
+
+// ── LINE 群組提醒（supabase/functions/line-remind） ──
+const LINE_API=SB_URL+'/functions/v1/line-remind';
+async function lineApi(action,body={}){
+  const res=await fetch(LINE_API,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'x-admin-pw':adminPw()},body:JSON.stringify({action,...body})});
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(j.error||'連線失敗（'+res.status+'）');
+  return j;
+}
+async function loadLinePanel(){
+  const el=document.getElementById('line-panel');
+  let st;
+  try{st=await lineApi('admin:status')}
+  catch(e){el.innerHTML=`<div class="rule-empty">讀取失敗：${esc(e.message)}</div>`;return}
+  const KIND={group:'群組',room:'聊天室',user:'個人'};
+  let h='';
+  if(!st.configured)h+=`<div class="rule-empty" style="margin-bottom:12px">⚠️ 還沒設定 LINE 金鑰（LINE_CHANNEL_ACCESS_TOKEN／LINE_CHANNEL_SECRET）</div>`;
+  h+=`<h3 style="font-size:14px;font-weight:600;margin-bottom:8px">接收提醒的群組</h3><div class="tr-list">`;
+  if(!st.targets.length)h+=`<div class="rule-empty">尚未綁定群組：把 LINE 官方帳號加進群組就會自動綁定</div>`;
+  for(const t of st.targets){
+    h+=`<div class="tr-item"><div class="tr-item-info"><div class="tr-item-name">${esc(t.name||'（未命名）')}</div><div class="tr-item-days">${KIND[t.kind]||t.kind}｜${t.enabled?'✅ 每日提醒中':'⏸ 已暫停'}</div></div><div class="rule-acts"><button class="btn btn-g" onclick="lineToggle('${escAttr(t.id)}',${!t.enabled})">${t.enabled?'暫停':'開啟'}</button><button class="act-btn del" onclick="lineRemove('${escAttr(t.id)}')" title="移除">${delSvg}</button></div></div>`;
+  }
+  h+=`</div>`;
+  const lr=st.lastRun;
+  if(lr){
+    const at=new Date(lr.at).toLocaleString('zh-TW',{hour12:false});
+    const fail=(lr.targets||[]).filter(x=>!x.ok);
+    h+=`<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">上次執行：${esc(at)}｜${lr.sent?`已傳送 ${(lr.targets||[]).length-fail.length} 個群組`:'沒有待辦，未傳送'}${fail.length?`｜❌ 失敗：${esc(fail.map(x=>(x.name||x.id)+' '+x.error).join('；'))}`:''}</p>`;
+  }
+  h+=`<h3 style="font-size:14px;font-weight:600;margin-bottom:8px">今天的提醒內容預覽</h3>`;
+  h+=`<pre style="white-space:pre-wrap;font:13px/1.6 var(--font);background:var(--bg);border:1px solid var(--border-sub);border-radius:var(--r);padding:12px;max-height:320px;overflow:auto">${esc(st.preview||'目前 14 天內沒有待辦事項，今天不會傳送')}</pre>`;
+  h+=`<div class="f-actions"><button type="button" class="btn btn-p" onclick="lineSendNow()"${st.configured&&st.preview?'':' disabled'}>立即傳送到群組</button></div>`;
+  el.innerHTML=h;
+}
+async function lineSendNow(){
+  if(!confirm('現在把待辦事項傳到所有開啟提醒的群組？'))return;
+  try{const r=await lineApi('admin:send');const fail=(r.targets||[]).filter(x=>!x.ok);toast(fail.length?`有 ${fail.length} 個群組傳送失敗`:`已傳送到 ${(r.targets||[]).length} 個群組`)}
+  catch(e){toast('傳送失敗：'+e.message)}
+  loadLinePanel();
+}
+async function lineToggle(id,enabled){try{await lineApi('admin:toggle',{id,enabled});toast(enabled?'已開啟':'已暫停')}catch(e){toast(e.message)}loadLinePanel()}
+async function lineRemove(id){if(!confirm('移除這個群組？（機器人還在群組裡的話，打「綁定提醒」可重新加入）'))return;try{await lineApi('admin:remove',{id});toast('已移除')}catch(e){toast(e.message)}loadLinePanel()}
 
 const delSvg='<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
 const editSvg='<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';

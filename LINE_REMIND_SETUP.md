@@ -1,0 +1,60 @@
+# 團務未完成事項 → LINE 群組自動提醒 設定步驟
+
+**每天 09:00（台灣時間）**自動檢查後台所有梯次，把還沒完成的事項整理成一則訊息傳到 LINE 群組：
+
+- 內容和後台「時程提醒」的 **7天內待辦事項**、**14天內待辦事項** 相同：入園申請、住宿／餐食預訂與付款、
+  訂包車／包車付款、保險／保險付款、天氣提醒、行前手冊發放、未成團處理（「規則設定 → 團務提醒」新增的項目也會一起提醒）。
+- 在後台打勾完成（例如保險已辦理＋已付款）後，隔天就不會再提醒。
+- 已結束、倒團、未成團的梯次不提醒；沒有待辦的日子不傳。
+- 和後台畫面的小差異：沒有設定住宿／餐食規則的路線，後台會一直顯示「住宿尚未預訂」；LINE 只在期限（入園申請截止日或出發日）進入 14 天內才提醒，避免幾個月後的行程每天洗版。
+
+群組裡可以直接打字：
+
+| 打字 | 作用 |
+| --- | --- |
+| 待辦 | 馬上回覆目前的待辦清單 |
+| 綁定提醒 | 開啟這個群組的每日提醒 |
+| 解除提醒 | 停止每日提醒 |
+| 說明 | 列出指令 |
+
+後台：「規則設定 → LINE 提醒」可以看綁定了哪些群組、預覽今天的訊息、按「立即傳送到群組」。
+
+後台程式：`supabase/functions/line-remind`。排程：`supabase/migrations/20261120000000_line_remind.sql`（pg_cron）。
+
+## 1. 建立 LINE 官方帳號與 Messaging API（只要做一次）
+
+> LINE Notify 已在 2025 年停止服務，所以改用 LINE 官方帳號（機器人）傳訊息到群組。
+
+1. 到 https://manager.line.biz 用入野門的 LINE 帳號登入，建立一個新的官方帳號（建議取名「入野門團務小幫手」，跟對外的官方帳號分開）
+2. 進入這個帳號 → 右上「設定」→「Messaging API」→「啟用 Messaging API」（第一次會要你建立 Provider，取名入野門即可）
+3. 同一頁複製 **Channel secret**
+4. 「設定 → 帳號設定」→「聊天的功能」：**允許加入群組或多人聊天室** 打開
+5. 「設定 → 回應設定」：**Webhook 打開**、**自動回應訊息關閉**（不然群組會收到官方帳號的預設回覆）
+6. 到 https://developers.line.biz/console/ → 選剛剛的 Provider → 這個 channel → 「Messaging API」分頁：
+   - 最下面 **Channel access token (long-lived)** 按「Issue」，複製
+   - **Webhook URL** 填 `https://dygxochowbhmdftstgoz.supabase.co/functions/v1/line-remind` → Update → 打開 **Use webhook**
+
+## 2. 把金鑰存到 Supabase（只要做一次）
+
+Supabase → Edge Functions → Secrets，新增兩個：
+
+| 名稱 | 值 |
+| --- | --- |
+| `LINE_CHANNEL_ACCESS_TOKEN` | 第 1 步的 Channel access token |
+| `LINE_CHANNEL_SECRET` | 第 1 步的 Channel secret |
+
+存好後回到 LINE Developers 的 Webhook URL 按「Verify」，顯示 Success 就成功了。
+
+## 3. 把官方帳號加進團務 LINE 群組
+
+1. 手機 LINE 搜尋官方帳號 ID（在 LINE Official Account Manager 首頁看得到，@ 開頭）→ 加好友
+2. 到團務群組 →「邀請」→ 邀請這個官方帳號
+3. 群組會收到「✅ 已開啟團務提醒」，表示綁定完成（之前就加過的話，在群組打「綁定提醒」）
+4. 群組打「待辦」測試，或到後台「規則設定 → LINE 提醒」按「立即傳送到群組」
+
+## 注意
+
+- **免費方案每月 200 則推播**，傳到群組是「群組人數 × 1 則」。例如群組 5 個人、每天傳 1 次 ≈ 150 則／月。
+  沒有待辦的日子不傳；在群組打「待辦」是「回覆訊息」，不算在 200 則裡。群組人數多的話，可考慮升級方案或只放負責團務的人。
+- 要改提醒時間：到 Supabase → Integrations → Cron → `line-remind-daily`，排程是 UTC 時間（09:00 台灣 = `0 1 * * *`）。
+- 執行結果：後台「LINE 提醒」頁面會顯示上次執行時間與失敗原因。
