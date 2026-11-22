@@ -22,8 +22,9 @@ const db = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   { auth: { persistSession: false } },
 );
-const LINE_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") || "";
-const LINE_SECRET = Deno.env.get("LINE_CHANNEL_SECRET") || "";
+// 貼金鑰時常多帶空白或換行，一律去掉
+const LINE_TOKEN = (Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") || "").replace(/\s+/g, "");
+const LINE_SECRET = (Deno.env.get("LINE_CHANNEL_SECRET") || "").replace(/\s+/g, "");
 const DASHBOARD_URL = "https://admin.wildgateoutdoor.com";
 // 與 wish-api 相同的後台密碼
 const DEFAULT_ADMIN_PW_HASH = "3f7cfd02d51d09c322fc3c27bdce98e87aabb9847683262e67be13710dfb90b7";
