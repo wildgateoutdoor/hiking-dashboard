@@ -12,7 +12,7 @@
 //        - 已開啟的群組打「待辦」→ 立刻回覆目前的待辦清單（回覆訊息不計入每月推播則數）；打「解除提醒」→ 停止
 //   3. 後台（index.html → 規則設定 → LINE 提醒）：{ action:'admin:*' } + header x-admin-pw
 //
-// Secrets：LINE_CHANNEL_ACCESS_TOKEN、LINE_CHANNEL_SECRET（LINE Developers → Messaging API channel）
+// LINE 金鑰：Secrets LINE_CHANNEL_ACCESS_TOKEN、LINE_CHANNEL_SECRET，或存在 line_remind_config.line_token／line_secret（優先）
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 由 Supabase 自動提供。
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -22,9 +22,16 @@ const db = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   { auth: { persistSession: false } },
 );
+// LINE 金鑰：line_remind_config.line_token／line_secret 有值就用資料庫的，否則用 Edge Function secrets
 // 貼金鑰時常多帶空白或換行，一律去掉
-const LINE_TOKEN = (Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") || "").replace(/\s+/g, "");
-const LINE_SECRET = (Deno.env.get("LINE_CHANNEL_SECRET") || "").replace(/\s+/g, "");
+const strip = (v: unknown) => String(v ?? "").replace(/\s+/g, "");
+let LINE_TOKEN = strip(Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN"));
+let LINE_SECRET = strip(Deno.env.get("LINE_CHANNEL_SECRET"));
+async function loadCreds() {
+  const { data } = await db.from("line_remind_config").select("line_token,line_secret").eq("id", 1).maybeSingle();
+  if (data?.line_token) LINE_TOKEN = strip(data.line_token);
+  if (data?.line_secret) LINE_SECRET = strip(data.line_secret);
+}
 const DASHBOARD_URL = "https://admin.wildgateoutdoor.com";
 // 與 wish-api 相同的後台密碼
 const DEFAULT_ADMIN_PW_HASH = "3f7cfd02d51d09c322fc3c27bdce98e87aabb9847683262e67be13710dfb90b7";
@@ -298,6 +305,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
   const raw = await req.text();
   try {
+    await loadCreds();
     // LINE webhook
     const sig = req.headers.get("x-line-signature");
     if (sig !== null) {

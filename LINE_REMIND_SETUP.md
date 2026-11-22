@@ -48,6 +48,9 @@ Supabase → Edge Functions → Secrets，新增兩個：
 
 存好後回到 LINE Developers 的 Webhook URL 按「Verify」，顯示 Success 就成功了。
 
+> Supabase Secrets 無法設定時：金鑰也可以存在資料庫 `line_remind_config` 的 `line_token`、`line_secret` 欄位（SQL Editor 執行 `update public.line_remind_config set line_token='…', line_secret='…' where id=1;`）。
+> 有值時優先於 Secrets。這張表只有後台程式讀得到，網站前端讀不到。**不要把金鑰寫進程式碼或 migration 檔。**
+
 ## 3. 把官方帳號加進團務 LINE 群組
 
 1. 手機 LINE 搜尋官方帳號 ID（在 LINE Official Account Manager 首頁看得到，@ 開頭）→ 加好友
