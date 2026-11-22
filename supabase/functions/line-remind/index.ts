@@ -7,9 +7,9 @@
 // 三種呼叫方式：
 //   1. pg_cron：{ action:'cron' } + header x-cron-key（= line_remind_config.cron_key，migration 自動產生）
 //   2. LINE webhook：header x-line-signature（用 LINE_CHANNEL_SECRET 驗證）
-//        - 機器人被加進群組 → 自動綁定這個群組
-//        - 群組裡打「待辦」→ 立刻回覆目前的待辦清單（回覆訊息不計入每月推播則數）
-//        - 打「綁定提醒」「解除提醒」→ 開啟／關閉這個群組的每日提醒
+//        - 只處理群組；客人私訊、加好友不理會
+//        - 機器人被加進群組 → 記下來但預設不提醒，要在後台開啟
+//        - 已開啟的群組打「待辦」→ 立刻回覆目前的待辦清單（回覆訊息不計入每月推播則數）；打「解除提醒」→ 停止
 //   3. 後台（index.html → 規則設定 → LINE 提醒）：{ action:'admin:*' } + header x-admin-pw
 //
 // Secrets：LINE_CHANNEL_ACCESS_TOKEN、LINE_CHANNEL_SECRET（LINE Developers → Messaging API channel）
@@ -216,17 +216,10 @@ const reply = (token: string, text: string) => lineApi("/v2/bot/message/reply", 
 async function targetName(src: any): Promise<string> {
   try {
     if (src.type === "group") return (await lineApi(`/v2/bot/group/${src.groupId}/summary`)).groupName || "";
-    if (src.type === "user") return (await lineApi(`/v2/bot/profile/${src.userId}`)).displayName || "";
   } catch (e) { console.error(e); }
   return "";
 }
-const srcId = (src: any): string => src.groupId || src.roomId || src.userId;
 
-async function bind(src: any) {
-  const id = srcId(src);
-  const { error } = await db.from("line_targets").upsert({ id, kind: src.type, name: await targetName(src), enabled: true, updated_at: new Date().toISOString() });
-  if (error) throw new Error(error.message);
-}
 async function setEnabled(id: string, enabled: boolean) {
   const { error } = await db.from("line_targets").update({ enabled, updated_at: new Date().toISOString() }).eq("id", id);
   if (error) throw new Error(error.message);
@@ -234,7 +227,7 @@ async function setEnabled(id: string, enabled: boolean) {
 
 async function sendAll() {
   const { text, count } = await currentMessage();
-  const { data: targets, error } = await db.from("line_targets").select("id,name").eq("enabled", true);
+  const { data: targets, error } = await db.from("line_targets").select("id,name").eq("enabled", true).eq("kind", "group");
   if (error) throw new Error(error.message);
   const results: { id: string; name: string; ok: boolean; error?: string }[] = [];
   if (text) {
@@ -266,27 +259,36 @@ async function lineSignatureOk(body: string, sig: string) {
 }
 
 // ───────── LINE webhook ─────────
-const HELP = "可用指令：\n・待辦：列出目前的待辦事項\n・綁定提醒：每天 09:00 在這裡提醒\n・解除提醒：停止每日提醒";
+// 這個官方帳號也對客人開放，所以：
+//   - 只處理「群組」；客人的一對一私訊、加好友一律不理會，也不綁定
+//   - 機器人被拉進任何群組只會記下來、預設「不提醒」，要在後台「LINE 提醒」按開啟（避免客人把機器人拉進自己的群組就收到團務資料）
+//   - 「待辦」「解除提醒」只在已開啟的群組有作用
+const HELP = "可用指令：\n・待辦：列出目前的待辦事項\n・解除提醒：停止每日提醒（要再開啟請到後台「規則設定 → LINE 提醒」）";
 async function onLineEvent(ev: any) {
   const src = ev.source || {};
-  if (ev.type === "join" || ev.type === "follow") {
-    await bind(src);
-    if (ev.replyToken) await reply(ev.replyToken, `✅ 已開啟團務提醒：每天 09:00 會把還沒完成的事項傳到這裡。\n\n${HELP}`);
+  if (src.type !== "group" || !src.groupId) return;
+  const id = src.groupId;
+  if (ev.type === "join") {
+    const { data: row } = await db.from("line_targets").select("id").eq("id", id).maybeSingle();
+    if (!row) {
+      const { error } = await db.from("line_targets").insert({ id, kind: "group", name: await targetName(src), enabled: false });
+      if (error) throw new Error(error.message);
+    }
     return;
   }
-  if (ev.type === "leave" || ev.type === "unfollow") { await setEnabled(srcId(src), false); return; }
+  if (ev.type === "leave") { await setEnabled(id, false); return; }
   if (ev.type !== "message" || ev.message?.type !== "text") return;
+  const { data: row } = await db.from("line_targets").select("id,name,enabled").eq("id", id).maybeSingle();
+  if (!row?.enabled) return;
+  if (!row.name) { const name = await targetName(src); if (name) await db.from("line_targets").update({ name }).eq("id", id); }
   const msg = String(ev.message.text || "").trim();
-  if (/^(待辦|待办|提醒|團務|todo)$/i.test(msg)) {
+  if (/^(待辦|待办)$/.test(msg)) {
     const { text } = await currentMessage("📋 目前待辦事項");
     await reply(ev.replyToken, text || "🎉 目前 14 天內沒有待辦事項");
-  } else if (/^(綁定|绑定|開啟|开启)提醒$/.test(msg)) {
-    await bind(src);
-    await reply(ev.replyToken, "✅ 已開啟每日 09:00 團務提醒");
   } else if (/^(解除|關閉|关闭|停止)提醒$/.test(msg)) {
-    await setEnabled(srcId(src), false);
-    await reply(ev.replyToken, "已停止每日提醒。之後打「綁定提醒」可以再開啟。");
-  } else if (/^(說明|help|指令)$/i.test(msg)) {
+    await setEnabled(id, false);
+    await reply(ev.replyToken, "已停止每日提醒。要再開啟請到後台「規則設定 → LINE 提醒」。");
+  } else if (/^(團務說明|團務指令)$/.test(msg)) {
     await reply(ev.replyToken, HELP);
   }
 }

@@ -1343,7 +1343,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       </div>
 
       <div class="stab-panel" id="tab-line">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">每天 09:00 把「7天內／14天內待辦事項」中還沒完成的項目傳到綁定的 LINE 群組；沒有待辦的日子不傳。在群組裡打「待辦」可隨時查詢。設定方式見 LINE_REMIND_SETUP.md。</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">每天 09:00 把「7天內／14天內待辦事項」中還沒完成的項目傳到綁定的 LINE 群組；沒有待辦的日子不傳。在群組裡打「待辦」可隨時查詢。為了避免客人把官方帳號拉進自己的群組，新加入的群組預設不提醒，確認是團務群組後再按「開啟」；客人的一對一私訊不會收到任何團務資料。設定方式見 LINE_REMIND_SETUP.md。</p>
         <div id="line-panel"><div class="rule-empty">讀取中…</div></div>
       </div>
 
@@ -3570,7 +3570,7 @@ async function loadLinePanel(){
   let h='';
   if(!st.configured)h+=`<div class="rule-empty" style="margin-bottom:12px">⚠️ 還沒設定 LINE 金鑰（LINE_CHANNEL_ACCESS_TOKEN／LINE_CHANNEL_SECRET）</div>`;
   h+=`<h3 style="font-size:14px;font-weight:600;margin-bottom:8px">接收提醒的群組</h3><div class="tr-list">`;
-  if(!st.targets.length)h+=`<div class="rule-empty">尚未綁定群組：把 LINE 官方帳號加進群組就會自動綁定</div>`;
+  if(!st.targets.length)h+=`<div class="rule-empty">尚未有群組：把 LINE 官方帳號邀進團務群組後，重新整理這頁，再按「開啟」</div>`;
   for(const t of st.targets){
     h+=`<div class="tr-item"><div class="tr-item-info"><div class="tr-item-name">${esc(t.name||'（未命名）')}</div><div class="tr-item-days">${KIND[t.kind]||t.kind}｜${t.enabled?'✅ 每日提醒中':'⏸ 已暫停'}</div></div><div class="rule-acts"><button class="btn btn-g" onclick="lineToggle('${escAttr(t.id)}',${!t.enabled})">${t.enabled?'暫停':'開啟'}</button><button class="act-btn del" onclick="lineRemove('${escAttr(t.id)}')" title="移除">${delSvg}</button></div></div>`;
   }
