@@ -266,6 +266,53 @@ function formatDaily(r: Rem, header = "⛰ 入野門團務提醒"): string | nul
   return text;
 }
 
+// 每日提醒的 LINE Flex 卡片：「已逾期」紅字粗體、「今天要做」「明天要做」粗體（一般文字訊息不能上色／加粗）
+const RED = "#D93025", INK = "#1F2937", SUB = "#4B5563", MUTED = "#9CA3AF";
+function flexDaily(r: Rem, header = "⛰ 入野門團務提醒"): any | null {
+  if (!r.overdue.length && !r.dueToday.length && !r.dueTomorrow.length) return null;
+  const txt = (text: string, o: Record<string, unknown> = {}) => ({ type: "text", text, wrap: true, size: "sm", color: SUB, ...o });
+  const tripBox = (c: { t: Trip; reasons: Reason[] }) => {
+    const t = c.t;
+    const range = t.dateEnd && t.dateEnd !== t.date ? `${fmtShort(t.date)}~${fmtShort(t.dateEnd)}` : fmtShort(t.date);
+    return {
+      type: "box", layout: "vertical", spacing: "xs", margin: "md",
+      contents: [txt(`▍${t.name} ${range} 出發`, { color: INK, weight: "bold" }), ...c.reasons.map((x) => txt(`${x.icon} ${x.text}`, { margin: "none", offsetStart: "12px" }))],
+    };
+  };
+  const section = (title: string, cards: { t: Trip; reasons: Reason[] }[], color: string) => ({
+    type: "box", layout: "vertical", margin: "xl",
+    contents: [{ type: "text", text: title, weight: "bold", size: "md", color }, ...cards.map(tripBox)],
+  });
+  const body: any[] = [
+    { type: "text", text: `${header}｜${fmtDate(r.today)}`, weight: "bold", size: "md", color: INK, wrap: true },
+    { type: "separator", margin: "md" },
+  ];
+  if (r.overdue.length) body.push(section("⚠️ 已逾期", r.overdue, RED));
+  if (r.dueToday.length) body.push(section("今天要做", r.dueToday, INK));
+  if (r.dueTomorrow.length) body.push(section(`明天要做 ${fmtDate(r.tomorrow)}`, r.dueTomorrow, INK));
+  body.push({ type: "text", text: "完成後請到後台打勾", size: "xs", color: MUTED, margin: "xl" });
+  const n = (cs: { reasons: Reason[] }[]) => cs.reduce((a, c) => a + c.reasons.length, 0);
+  const alt = [r.overdue.length && `已逾期 ${n(r.overdue)} 件`, r.dueToday.length && `今天 ${n(r.dueToday)} 件`, r.dueTomorrow.length && `明天 ${n(r.dueTomorrow)} 件`].filter(Boolean).join("、");
+  const msg = {
+    type: "flex",
+    altText: `${header}｜${alt}`.slice(0, 400),
+    contents: {
+      type: "bubble", size: "giga",
+      body: { type: "box", layout: "vertical", contents: body },
+      footer: { type: "box", layout: "vertical", contents: [{ type: "button", style: "primary", color: "#2E3C26", height: "sm", action: { type: "uri", label: "開啟後台", uri: DASHBOARD_URL } }] },
+    },
+  };
+  // Flex 單則上限約 30KB；太長就退回一般文字
+  return JSON.stringify(msg).length > 28000 ? null : msg;
+}
+// 每日提醒訊息：優先用 Flex 卡片，太長或沒有內容時用文字
+function dailyMessages(r: Rem, header?: string): any[] | null {
+  const f = flexDaily(r, header);
+  if (f) return [f];
+  const text = formatDaily(r, header);
+  return text ? [{ type: "text", text }] : null;
+}
+
 async function loadReminders(): Promise<Rem> {
   const [{ data: tripRows, error: e1 }, { data: setRows, error: e2 }] = await Promise.all([
     db.from("trips").select("id,data"),
@@ -296,8 +343,9 @@ async function lineApi(path: string, body?: unknown) {
   if (!res.ok) throw new Error(`LINE ${res.status}: ${txt.slice(0, 300)}`);
   return txt ? JSON.parse(txt) : {};
 }
-const push = (to: string, text: string) => lineApi("/v2/bot/message/push", { to, messages: [{ type: "text", text }] });
-const reply = (token: string, text: string) => lineApi("/v2/bot/message/reply", { replyToken: token, messages: [{ type: "text", text }] });
+const asMsgs = (m: string | any[]) => typeof m === "string" ? [{ type: "text", text: m }] : m;
+const push = (to: string, m: string | any[]) => lineApi("/v2/bot/message/push", { to, messages: asMsgs(m) });
+const reply = (token: string, m: string | any[]) => lineApi("/v2/bot/message/reply", { replyToken: token, messages: asMsgs(m) });
 
 async function targetName(src: any): Promise<string> {
   try {
@@ -312,17 +360,19 @@ async function setEnabled(id: string, enabled: boolean) {
 }
 
 async function sendAll() {
-  const { text, count } = await currentMessage();
+  const rem = await loadReminders();
+  const msgs = dailyMessages(rem);
+  const count = rem.overdue.length + rem.dueToday.length + rem.dueTomorrow.length;
   const { data: targets, error } = await db.from("line_targets").select("id,name").eq("enabled", true).eq("kind", "group");
   if (error) throw new Error(error.message);
   const results: { id: string; name: string; ok: boolean; error?: string }[] = [];
-  if (text) {
+  if (msgs) {
     for (const t of targets || []) {
-      try { await push(t.id, text); results.push({ id: t.id, name: t.name, ok: true }); }
+      try { await push(t.id, msgs); results.push({ id: t.id, name: t.name, ok: true }); }
       catch (e) { results.push({ id: t.id, name: t.name, ok: false, error: String((e as Error).message || e) }); }
     }
   }
-  const result = { at: new Date().toISOString(), trips: count, sent: !!text, targets: results };
+  const result = { at: new Date().toISOString(), trips: count, sent: !!msgs, targets: results };
   await db.from("line_remind_config").update({ last_run: result }).eq("id", 1);
   return result;
 }
@@ -369,8 +419,8 @@ async function onLineEvent(ev: any) {
   if (!row.name) { const name = await targetName(src); if (name) await db.from("line_targets").update({ name }).eq("id", id); }
   const msg = String(ev.message.text || "").trim();
   if (/^(待辦|待办)$/.test(msg)) {
-    const { text } = await currentMessage("daily", "📋 目前待辦");
-    await reply(ev.replyToken, text || "🎉 沒有逾期、今天或明天到期的待辦事項\n（打「全部待辦」看 14 天內的清單）");
+    const msgs = dailyMessages(await loadReminders(), "📋 目前待辦");
+    await reply(ev.replyToken, msgs || "🎉 沒有逾期、今天或明天到期的待辦事項\n（打「全部待辦」看 14 天內的清單）");
   } else if (/^(全部待辦|全部待办)$/.test(msg)) {
     const { text } = await currentMessage("all", "📋 14 天內待辦事項");
     await reply(ev.replyToken, text || "🎉 目前 14 天內沒有待辦事項");
