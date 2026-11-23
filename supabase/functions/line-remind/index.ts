@@ -1,15 +1,15 @@
 // 團務未完成事項 → LINE 群組自動提醒（Supabase Edge Function）
 //
 // 每天 09:00（台灣時間）由 pg_cron 呼叫一次，讀取後台 trips 與 settings，
-// 算出跟後台「時程提醒」一樣的「7天內待辦事項」「14天內待辦事項」，整理成一則訊息推播到已綁定的 LINE 群組。
-// 沒有待辦事項的日子不傳。
+// 只列「今天」「明天」到期、還沒完成的事（入園申請、住宿／餐食、團務提醒項目、未成團處理），推播到已開啟的 LINE 群組。
+// 沒有到期事項的日子不傳。群組打「全部待辦」可看跟後台「時程提醒」一樣的 7天內／14天內清單。
 //
 // 三種呼叫方式：
 //   1. pg_cron：{ action:'cron' } + header x-cron-key（= line_remind_config.cron_key，migration 自動產生）
 //   2. LINE webhook：header x-line-signature（用 LINE_CHANNEL_SECRET 驗證）
 //        - 只處理群組；客人私訊、加好友不理會
 //        - 機器人被加進群組 → 記下來但預設不提醒，要在後台開啟
-//        - 已開啟的群組打「待辦」→ 立刻回覆目前的待辦清單（回覆訊息不計入每月推播則數）；打「解除提醒」→ 停止
+//        - 已開啟的群組打「待辦」→ 今明兩天的待辦；「全部待辦」→ 14 天內清單（回覆訊息不計入每月推播則數）；打「解除提醒」→ 停止
 //   3. 後台（index.html → 規則設定 → LINE 提醒）：{ action:'admin:*' } + header x-admin-pw
 //
 // LINE 金鑰：Secrets LINE_CHANNEL_ACCESS_TOKEN、LINE_CHANNEL_SECRET，或存在 line_remind_config.line_token／line_secret（優先）
@@ -160,6 +160,42 @@ function buildReminders(trips: Trip[], s: Record<string, any>) {
     return [{ icon: "⚠️", text: `未達最低 ${mg} 人成團，處理未成團後續事項` }];
   }
 
+  // 每項待辦的到期日（給每日 LINE 提醒用：只列今天、明天到期的）
+  type Due = { icon: string; text: string; dates: string[] };
+  function dueItems(t: Trip): Due[] {
+    const ai = ruleInfo(applyRules, t);
+    const mg = getMinGroup(t), reg = t.registered || 0;
+    if (mg && reg < mg) {
+      if (reg === 0) return [];
+      // 未達最低成團：入園申請截止日（沒有的話出發前 7 天）起要處理未成團後續
+      const d = ai.state === "dated" ? ai.ds : dateStr(addDays(parseD(t.date), -7));
+      return [{ icon: "⚠️", text: `未達最低 ${mg} 人成團，處理未成團後續事項`, dates: [d] }];
+    }
+    const out: Due[] = [];
+    if (ai.state === "dated" && t.applyStatus !== "applied" && t.applyStatus !== "waitlist") out.push({ icon: "📋", text: "入園申請截止", dates: [ai.ds] });
+    // 住宿／餐食期限：自己的規則 → 入園申請截止日 → 出發日
+    const dueOf = (info: ReturnType<typeof ruleInfo>) => info.state === "dated" ? info.ds : ai.state === "dated" ? ai.ds : t.date;
+    const li = ruleInfo(lodgeRules, t), mi = ruleInfo(mealRules, t);
+    if (lodgeUnbooked(t)) out.push({ icon: "🏨", text: "住宿預訂", dates: [dueOf(li)] });
+    if (lodgeUnpaid(t)) out.push({ icon: "🏨", text: "住宿付款", dates: [dueOf(li)] });
+    if (meal(t).book === "no") out.push({ icon: "🍽", text: "餐食預訂", dates: [dueOf(mi)] });
+    if (meal(t).book === "yes" && meal(t).pay !== "yes") out.push({ icon: "🍽", text: "餐食付款", dates: [dueOf(mi)] });
+    const ch = t.charter || {}, ins = t.insurance || {};
+    for (const tr of taskReminders) {
+      if (!tr.daysBefore?.length) continue;
+      const isDone = (tr.name === "訂包車時間" && ch.book === "yes" && ch.pay === "yes") ||
+        (tr.name === "保險處理" && ins.done === "yes" && ins.pay === "yes") ||
+        (tr.name === "天氣提醒" && t.weatherDone === "yes") ||
+        (tr.name === "行前手冊發放" && t.preNoticeDone === "yes");
+      if (isDone) continue;
+      let label = tr.name === "訂包車時間" ? "訂包車" : tr.name;
+      if (tr.name === "保險處理" && ins.done === "yes" && ins.pay !== "yes") label = "保險付款";
+      if (tr.name === "訂包車時間" && ch.book === "yes" && ch.pay !== "yes") label = "包車付款";
+      out.push({ icon: "⚡", text: label, dates: tr.daysBefore.map((db) => dateStr(addDays(parseD(t.date), -db))) });
+    }
+    return out;
+  }
+
   // 已結束／倒團／未成團的梯次不提醒
   const future = trips.filter((t) => t.date && daysUntil(t.date) >= 0 && !["done", "collapsed", "notFormed"].includes(t.status));
   const win7 = addDays(now, 6), win14 = addDays(now, 13);
@@ -173,7 +209,20 @@ function buildReminders(trips: Trip[], s: Record<string, any>) {
     }
     return cards.sort((a, b) => a.days - b.days);
   }
-  return { today: todayStr(), week: section(win7, null), fortnight: section(win14, win7) };
+  function daily(day: string) {
+    const cards: { t: Trip; reasons: Reason[]; days: number }[] = [];
+    for (const t of future) {
+      const reasons = dueItems(t).filter((x) => x.dates.includes(day)).map((x) => ({ icon: x.icon, text: x.text }));
+      if (reasons.length) cards.push({ t, reasons, days: daysUntil(t.date) });
+    }
+    return cards.sort((a, b) => a.days - b.days);
+  }
+  const today = todayStr(), tomorrow = dateStr(addDays(now, 1));
+  return {
+    today, tomorrow,
+    week: section(win7, null), fortnight: section(win14, win7),
+    dueToday: daily(today), dueTomorrow: daily(tomorrow),
+  };
 }
 
 function formatMessage(r: ReturnType<typeof buildReminders>, header = "⛰ 入野門團務提醒"): string | null {
@@ -193,7 +242,25 @@ function formatMessage(r: ReturnType<typeof buildReminders>, header = "⛰ 入�
   return text;
 }
 
-async function currentMessage(header?: string) {
+type Rem = ReturnType<typeof buildReminders>;
+// 每日提醒：只列「今天」「明天」到期的事
+function formatDaily(r: Rem, header = "⛰ 入野門團務提醒"): string | null {
+  if (!r.dueToday.length && !r.dueTomorrow.length) return null;
+  const card = (c: { t: Trip; reasons: Reason[]; days: number }) => {
+    const t = c.t;
+    const range = t.dateEnd && t.dateEnd !== t.date ? `${fmtShort(t.date)}~${fmtShort(t.dateEnd)}` : fmtShort(t.date);
+    return `▍${t.name} ${range} 出發\n` + c.reasons.map((x) => `　${x.icon} ${x.text}`).join("\n");
+  };
+  const parts = [`${header}｜${fmtDate(r.today)}`];
+  if (r.dueToday.length) parts.push(`【今天要做】\n` + r.dueToday.map(card).join("\n\n"));
+  if (r.dueTomorrow.length) parts.push(`【明天要做】${fmtDate(r.tomorrow)}\n` + r.dueTomorrow.map(card).join("\n\n"));
+  parts.push(`完成後請到後台打勾 👉 ${DASHBOARD_URL}`);
+  let text = parts.join("\n\n");
+  if (text.length > 4900) text = text.slice(0, 4850) + `\n…（太長了，其餘請看後台）\n${DASHBOARD_URL}`;
+  return text;
+}
+
+async function loadReminders(): Promise<Rem> {
   const [{ data: tripRows, error: e1 }, { data: setRows, error: e2 }] = await Promise.all([
     db.from("trips").select("id,data"),
     db.from("settings").select("key,data"),
@@ -202,8 +269,14 @@ async function currentMessage(header?: string) {
   const trips = (tripRows || []).map((r: any) => ({ id: r.id, ...r.data })) as Trip[];
   const s: Record<string, any> = {};
   for (const r of setRows || []) s[(r as any).key] = (r as any).data;
-  const rem = buildReminders(trips, s);
-  return { text: formatMessage(rem, header), count: rem.week.length + rem.fortnight.length };
+  return buildReminders(trips, s);
+}
+// mode daily：今天＋明天（每日推播、群組打「待辦」）；all：7天內／14天內（群組打「全部待辦」）
+async function currentMessage(mode: "daily" | "all" = "daily", header?: string) {
+  const rem = await loadReminders();
+  return mode === "daily"
+    ? { text: formatDaily(rem, header), count: rem.dueToday.length + rem.dueTomorrow.length }
+    : { text: formatMessage(rem, header), count: rem.week.length + rem.fortnight.length };
 }
 
 // ───────── LINE API ─────────
@@ -270,7 +343,7 @@ async function lineSignatureOk(body: string, sig: string) {
 //   - 只處理「群組」；客人的一對一私訊、加好友一律不理會，也不綁定
 //   - 機器人被拉進任何群組只會記下來、預設「不提醒」，要在後台「LINE 提醒」按開啟（避免客人把機器人拉進自己的群組就收到團務資料）
 //   - 「待辦」「解除提醒」只在已開啟的群組有作用
-const HELP = "可用指令：\n・待辦：列出目前的待辦事項\n・解除提醒：停止每日提醒（要再開啟請到後台「規則設定 → LINE 提醒」）";
+const HELP = "可用指令：\n・待辦：今天、明天要做的事\n・全部待辦：14 天內的待辦清單\n・解除提醒：停止每日提醒（要再開啟請到後台「規則設定 → LINE 提醒」）";
 async function onLineEvent(ev: any) {
   const src = ev.source || {};
   if (src.type !== "group" || !src.groupId) return;
@@ -290,7 +363,10 @@ async function onLineEvent(ev: any) {
   if (!row.name) { const name = await targetName(src); if (name) await db.from("line_targets").update({ name }).eq("id", id); }
   const msg = String(ev.message.text || "").trim();
   if (/^(待辦|待办)$/.test(msg)) {
-    const { text } = await currentMessage("📋 目前待辦事項");
+    const { text } = await currentMessage("daily", "📋 今明兩天待辦");
+    await reply(ev.replyToken, text || "🎉 今天和明天沒有到期的待辦事項\n（打「全部待辦」看 14 天內的清單）");
+  } else if (/^(全部待辦|全部待办)$/.test(msg)) {
+    const { text } = await currentMessage("all", "📋 14 天內待辦事項");
     await reply(ev.replyToken, text || "🎉 目前 14 天內沒有待辦事項");
   } else if (/^(解除|關閉|关闭|停止)提醒$/.test(msg)) {
     await setEnabled(id, false);
