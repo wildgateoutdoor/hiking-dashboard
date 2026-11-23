@@ -1343,7 +1343,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
       </div>
 
       <div class="stab-panel" id="tab-line">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">每天 09:00 把「今天」「明天」到期、還沒完成的事傳到開啟的 LINE 群組；沒有到期事項的日子不傳。在群組裡打「待辦」查今明兩天、打「全部待辦」看 14 天內清單。為了避免客人把官方帳號拉進自己的群組，新加入的群組預設不提醒，確認是團務群組後再按「開啟」；客人的一對一私訊不會收到任何團務資料。設定方式見 LINE_REMIND_SETUP.md。</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">每天 07:00 把還沒完成的事（已逾期、今天、明天）傳到開啟的 LINE 群組；都沒有的日子不傳。在群組裡打「待辦」隨時查詢、打「全部待辦」看 14 天內清單。為了避免客人把官方帳號拉進自己的群組，新加入的群組預設不提醒，確認是團務群組後再按「開啟」；客人的一對一私訊不會收到任何團務資料。設定方式見 LINE_REMIND_SETUP.md。</p>
         <div id="line-panel"><div class="rule-empty">讀取中…</div></div>
       </div>
 
@@ -3582,7 +3582,7 @@ async function loadLinePanel(){
     h+=`<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">上次執行：${esc(at)}｜${lr.sent?`已傳送 ${(lr.targets||[]).length-fail.length} 個群組`:'沒有待辦，未傳送'}${fail.length?`｜❌ 失敗：${esc(fail.map(x=>(x.name||x.id)+' '+x.error).join('；'))}`:''}</p>`;
   }
   h+=`<h3 style="font-size:14px;font-weight:600;margin-bottom:8px">今天的提醒內容預覽</h3>`;
-  h+=`<pre style="white-space:pre-wrap;font:13px/1.6 var(--font);background:var(--bg);border:1px solid var(--border-sub);border-radius:var(--r);padding:12px;max-height:320px;overflow:auto">${esc(st.preview||'今天和明天沒有到期的事項，今天不會傳送')}</pre>`;
+  h+=`<pre style="white-space:pre-wrap;font:13px/1.6 var(--font);background:var(--bg);border:1px solid var(--border-sub);border-radius:var(--r);padding:12px;max-height:320px;overflow:auto">${esc(st.preview||'沒有逾期、今天或明天到期的事項，今天不會傳送')}</pre>`;
   h+=`<div class="f-actions"><button type="button" class="btn btn-p" onclick="lineSendNow()"${st.configured&&st.preview?'':' disabled'}>立即傳送到群組</button></div>`;
   el.innerHTML=h;
 }
