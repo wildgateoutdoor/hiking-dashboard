@@ -319,6 +319,7 @@ tr.detail-row td.dr-body{padding:14px 18px 16px;border-top:1px solid var(--borde
 .st-nob{background:var(--amber-bg);color:var(--amber)}
 .st-nop{background:var(--red-bg);color:var(--red)}
 .st-warn{background:var(--purple-bg);color:var(--purple)}
+.st-guide{background:#e0f0ff;color:#2b6cb0}
 .st-na{background:var(--surface-alt);color:var(--text-muted)}
 
 .empty{padding:60px 20px;text-align:center;color:var(--text-muted)}
@@ -1798,7 +1799,7 @@ function lodgeSummary(t){
   for(let i=0;i<nights;i++){const e=L[i];if(e&&e.book==='yes')booked++;else if(e&&e.book==='na')na++}
   if(na===nights)return'N/A';if(booked+na===nights)return'已訂';if(booked===0&&na===0)return'未訂';return'部分已訂';
 }
-function mealSummary(t){const m=t.meal||{book:'no',pay:'no'};return m.book==='yes'?'已訂':m.book==='na'?'N/A':'未訂'}
+function mealSummary(t){const m=t.meal||{book:'no',pay:'no'};return m.book==='yes'?'已訂':m.book==='guide'?'嚮導代買':m.book==='na'?'N/A':'未訂'}
 
 function loadTaskReminders(){
   try{const s=localStorage.getItem('hk-task-reminders');if(s){taskReminders=JSON.parse(s);return}}catch{}
@@ -4119,13 +4120,14 @@ function sheetSyncH(t){
 function nightsOf(t){if(!t.dateEnd||t.dateEnd===t.date)return 0;return Math.max(0,dayDiff(t.date,t.dateEnd))}
 function resizeLodging(existing,nights){const L=[];for(let i=0;i<nights;i++){const e=existing&&existing[i];L.push({book:e&&e.book?e.book:'no',pay:e&&e.pay?e.pay:'no',cost:e&&e.cost?e.cost:0,hutName:e&&e.hutName||'',beds:e&&e.beds||'',lodgeDate:e&&e.lodgeDate||''})}return L}
 function nextBook(s){return s==='no'?'yes':s==='yes'?'na':'no'}
-function bookInfo(s){return s==='yes'?{label:'已訂',cls:'st-yes'}:s==='na'?{label:'N/A',cls:'st-na'}:{label:'未訂',cls:'st-nob'}}
+function nextMealBook(s){return s==='no'?'yes':s==='yes'?'guide':s==='guide'?'na':'no'}
+function bookInfo(s){return s==='yes'?{label:'已訂',cls:'st-yes'}:s==='guide'?{label:'嚮導代買',cls:'st-guide'}:s==='na'?{label:'N/A',cls:'st-na'}:{label:'未訂',cls:'st-nob'}}
 function payInfo(s){return s==='yes'?{label:'已付款',cls:'st-yes'}:s==='na'?{label:'N/A',cls:'st-na'}:{label:'未付款',cls:'st-nop'}}
 async function cycleLodgeBook(id,i){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const L=(t.lodging||[]).slice();while(L.length<=i)L.push({book:'no',pay:'no'});L[i]={...L[i],book:nextBook(L[i].book)};store.upd(id,{lodging:L})}
 async function cycleLodgePay(id,i){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const L=(t.lodging||[]).slice();while(L.length<=i)L.push({book:'no',pay:'no'});L[i]={...L[i],pay:nextBook(L[i].pay)};store.upd(id,{lodging:L})}
-async function cycleMealBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.book=nextBook(m.book);if(m.book==='na')m.pay='na';store.upd(id,{meal:m})}
+async function cycleMealBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.book=nextMealBook(m.book);if(m.book==='na'||m.book==='guide')m.pay='na';store.upd(id,{meal:m})}
 async function cycleMealPay(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const m={...(t.meal||{book:'no',pay:'no'})};m.pay=nextBook(m.pay);store.upd(id,{meal:m})}
-async function cycleMealDetailBook(id,idx){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const md=[...(t.mealDetails||[])];if(!md[idx])return;const nb=nextBook(md[idx].book||'no');md[idx]={...md[idx],book:nb};if(nb==='na')md[idx].pay='na';store.upd(id,{mealDetails:md})}
+async function cycleMealDetailBook(id,idx){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const md=[...(t.mealDetails||[])];if(!md[idx])return;const nb=nextMealBook(md[idx].book||'no');md[idx]={...md[idx],book:nb};if(nb==='na'||nb==='guide')md[idx].pay='na';store.upd(id,{mealDetails:md})}
 async function cycleMealDetailPay(id,idx){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const md=[...(t.mealDetails||[])];if(!md[idx])return;md[idx]={...md[idx],pay:nextBook(md[idx].pay||'no')};store.upd(id,{mealDetails:md})}
 async function cycleCharterBook(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const c={...(t.charter||{book:'no',pay:'no'})};c.book=nextBookNa(c.book);if(c.book==='na')c.pay='na';store.upd(id,{charter:c})}
 async function cycleCharterPay(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const c={...(t.charter||{book:'no',pay:'no'})};c.pay=nextBookNa(c.pay);store.upd(id,{charter:c})}
