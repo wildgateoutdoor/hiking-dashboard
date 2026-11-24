@@ -191,8 +191,8 @@ function buildReminders(trips: Trip[], s: Record<string, any>) {
     return out;
   }
 
-  // 已結束／倒團／未成團的梯次不提醒
-  const future = trips.filter((t) => t.date && daysUntil(t.date) >= 0 && !["done", "collapsed", "notFormed"].includes(t.status));
+  // 已結束／倒團／未成團／申請中的梯次不提醒
+  const future = trips.filter((t) => t.date && daysUntil(t.date) >= 0 && !["done", "collapsed", "notFormed", "apply"].includes(t.status));
   const win7 = addDays(now, 6), win14 = addDays(now, 13);
   function section(end: Date, prev: Date | null) {
     const cards: { t: Trip; reasons: Reason[]; days: number }[] = [];
