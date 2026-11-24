@@ -221,6 +221,7 @@ tbody tr:not(.detail-row):hover td:last-child{background:var(--surface-hover)}
 .pill-none{background:var(--accent-bg);color:var(--accent)}.pill-apply{background:var(--amber-bg);color:var(--amber)}
 .pill-waiting{background:var(--purple-bg);color:var(--purple)}
 .pill-private{background:#e0f0ff;color:#2b6cb0}
+.pill-standby{background:#fde8d0;color:#c05621}
 .pill-collapsed{background:#e8e8e8;color:#555}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
@@ -236,6 +237,7 @@ select.pill.pill-apply{background:var(--amber-bg);color:var(--amber)}
 select.pill.pill-full{background:var(--red-bg);color:var(--red)}
 select.pill.pill-waiting{background:var(--purple-bg);color:var(--purple)}
 select.pill.pill-private{background:#e0f0ff;color:#2b6cb0}
+select.pill.pill-standby{background:#fde8d0;color:#c05621}
 select.pill.pill-collapsed{background:#e8e8e8;color:#555}
 select.pill.pill-done{background:var(--surface-alt);color:var(--text-muted)}
 
@@ -1508,6 +1510,7 @@ const STATUS_OPTS=[
   {key:'apply',label:'申請中',cls:'pill-apply'},
   {key:'private',label:'包團',cls:'pill-private'},
   {key:'notFormed',label:'未成團',cls:'pill-full'},
+  {key:'standby',label:'候補中',cls:'pill-standby'},
   {key:'waiting',label:'等待出團',cls:'pill-waiting'},
   {key:'collapsed',label:'倒團',cls:'pill-collapsed'},
   {key:'done',label:'已結束',cls:'pill-done'},
