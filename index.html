@@ -3969,6 +3969,7 @@ function render(){
       const mealTotalCost=t.mealCost||mealCalcTotal;
       const mealSumH=mealTotalCost?`<span class="sum-exp">SUM（${mealTotalCost.toLocaleString()}）</span>`:'';
 
+      const _dMl=t.meal||{book:'no',pay:'no'};const _dMlB=bookInfo(_dMl.book),_dMlP=payInfo(_dMl.pay);
       const charterSumH=t.charterCost?`<span class="sum-exp">SUM（${t.charterCost.toLocaleString()}）</span>`:'';
       const charterContacts=(t.charterDetail&&t.charterDetail.contacts)||[];
       let charterInfoH='';
@@ -4034,7 +4035,7 @@ function render(){
         +syncH
         +`<div class="detail-grid-top">`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>申請狀態</b><div class="lm-row">${_dApBtnH}</div></div><div class="detail-item"><b>申請備註</b>${applyNotesH}</div></div><div class="dcol-half"><div class="detail-item lm-item"><b>住宿 ${lodgeSumH}</b>${lm.lodge}</div></div></div></div>`
-        +`<div class="dcol"><div class="detail-item lm-item"><b style="margin-bottom:12px">餐食 ${mealSumH}</b>${mealDetailsH||'<div style="font-size:12px;color:var(--text-muted)">未設定</div>'}${dietH}</div></div>`
+        +`<div class="dcol"><div class="detail-item lm-item"><b style="margin-bottom:8px">餐食 ${mealSumH}</b><div class="lm-row" style="margin-bottom:8px"><button class="stbtn ${_dMlB.cls}" onclick="cycleMealBook('${t.id}')">${_dMlB.label}</button><button class="stbtn ${_dMlP.cls}" onclick="cycleMealPay('${t.id}')">${_dMlP.label}</button></div>${mealDetailsH||'<div style="font-size:12px;color:var(--text-muted)">未設定</div>'}${dietH}</div></div>`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>訂包車 ${charterSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dChB.cls}" onclick="cycleCharterBook('${t.id}')">${_dChB.label}</button><button class="stbtn ${_dChP.cls}" onclick="cycleCharterPay('${t.id}')">${_dChP.label}</button></div>${charterInfoH}</div></div><div class="dcol-half"><div class="detail-item"><b>當地接駁 ${shuttleSumH}</b><div class="lm-row" style="margin-bottom:0"><button class="stbtn ${_dShB.cls}" onclick="cycleShuttleBook('${t.id}')">${_dShB.label}</button><button class="stbtn ${_dShP.cls}" onclick="cycleShuttlePay('${t.id}')">${_dShP.label}</button></div>${shuttleInfoH}</div></div></div></div>`
         +`<div class="dcol"><div class="dcol-split"><div class="dcol-half"><div class="detail-item"><b>保險 ${insSumH}</b>${insCompanyH}<div class="lm-row"><button class="stbtn ${_dInsD.cls}" onclick="cycleInsBook('${t.id}')">${_dInsD.label}</button><button class="stbtn ${_dInsP.cls}" onclick="cycleInsPay('${t.id}')">${_dInsP.label}</button></div></div></div><div class="dcol-half"><div class="detail-item"><b>行前通知發放</b><div class="lm-row"><button class="stbtn ${_dPnD.cls}" onclick="cyclePreNotice('${t.id}')">${_dPnD.label}</button></div></div></div></div></div>`
         +`</div>`
@@ -4134,7 +4135,7 @@ async function cycleInsBook(id){if(!await ensureEditor())return;const t=trips.fi
 async function cycleInsPay(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;const c={...(t.insurance||{done:'no',pay:'no'})};c.pay=nextBookNa(c.pay);store.upd(id,{insurance:c})}
 async function cycleWeather(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{weatherDone:t.weatherDone==='yes'?'no':'yes'})}
 async function cyclePreNotice(id){if(!await ensureEditor())return;const t=trips.find(x=>x.id===id);if(!t)return;store.upd(id,{preNoticeDone:t.preNoticeDone==='yes'?'no':'yes'})}
-function nextBookNa(s){return s==='no'?'yes':s==='yes'?'no':'no'}
+function nextBookNa(s){return s==='no'?'yes':s==='yes'?'na':'no'}
 function nextDone(s){return s==='yes'?'no':'yes'}
 function doneInfo(s){return s==='yes'?{label:'已處理',cls:'rc-st-done'}:{label:'未處理',cls:'rc-st-notdone'}}
 function paidInfo(s){return s==='yes'?{label:'已付款',cls:'rc-st-paid'}:{label:'未付款',cls:'rc-st-unpaid'}}
