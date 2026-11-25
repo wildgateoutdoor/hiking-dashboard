@@ -7,7 +7,9 @@ description: 入野門報名表 → 後台團務同步。使用者說「更新�
 
 ## 資料來源
 
-- 報名表單資料夾（多日付費活動（山））：`1179tJGVgcX-lPaF5aXE6Am6sjIerW8Hr`
+- 報名表單資料夾（兩個都要讀）：
+  - 多日付費活動（山）：`1179tJGVgcX-lPaF5aXE6Am6sjIerW8Hr`
+  - 單日付費：`1qtllDwJNPkks-QKxQ1i60MHmRznKqkih`
   - 讀資料夾裡所有標題含「回覆」的試算表；標題有 ❌ 的停用表單不讀。
   - **只有表單、沒有回覆試算表＝還沒有人報名**，略過。
 - 每份試算表只讀**第一頁「表單回覆」**（不是日期分頁）。表頭在前 5 列裡有「姓名」的那列。
@@ -38,7 +40,7 @@ description: 入野門報名表 → 後台團務同步。使用者說「更新�
 
 ## 手動更新步驟
 
-1. **列出試算表**：Google Drive `search_files`，`parentId = '1179tJGVgcX-lPaF5aXE6Am6sjIerW8Hr'`，挑出標題含「回覆」、沒有 ❌ 的試算表。
+1. **列出試算表**：Google Drive `search_files`，兩個資料夾各查一次（`parentId = '<資料夾 id>'`），挑出標題含「回覆」、沒有 ❌ 的試算表。
 2. **下載**：每份用 `download_file_content`，`exportMimeType` = `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`（要 xlsx 才讀得到刪除線）。工具會回報存檔路徑。
 3. **寫 manifest**（scratchpad）：`[{"title": "試算表標題", "id": "檔案 id", "file": "下載的 xlsx 路徑"}, …]`
 4. **解析**：`python3 -I .claude/skills/trip-sync/scripts/readxl.py manifest.json > sheets.json`
@@ -55,7 +57,10 @@ description: 入野門報名表 → 後台團務同步。使用者說「更新�
 6. **計算**：`node --experimental-strip-types .claude/skills/trip-sync/scripts/compute.ts sheets.json trips.json settings.json update.sql`
    - 用的是 `supabase/functions/trip-sync/index.ts` 本身，規則和自動同步完全一致。
    - 會印出每梯「人數 舊 → 新」、租借、代揹、警告、對不到的列。
-7. **檢查再寫入**：人數變化大的（例如差很多、整梯歸零）先跟使用者確認；有測試資料、打錯的日期要提出來。沒問題就用 `execute_sql` 執行 `update.sql`（只寫有變的梯次即可），再查一次人數確認。
+7. **檢查再寫入**（使用者在線時）：人數變化大的（例如差很多、整梯歸零）先跟使用者確認；有測試資料、打錯的日期要提出來。沒問題就用 `execute_sql` 執行 `update.sql`（只寫有變的梯次即可），再查一次人數確認。
+   **排程自動執行時（每天 07:50、18:00，沒人在線）**：直接寫入，但遇到下面情況那一梯先**不寫**，留到回報裡請使用者確認：
+   - 人數比後台少一半以上，而且後台原本 ≥ 3 人（可能讀錯或大量取消）。
+   - 整份試算表讀不到任何列，或對不到梯次的列很多（表單格式可能變了）。
 8. **回報**：列出有變動的梯次（舊 → 新）、被槓掉移除的人數、需要手動確認的項目。
 
 ## 改規則時
