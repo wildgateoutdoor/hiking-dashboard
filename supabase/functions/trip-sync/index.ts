@@ -35,7 +35,7 @@ const json = (body: unknown, status = 200) =>
 
 const clean = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 // 「無」「不挑食」「沒有」之類視為空白
-const NONE_WORD = /^(無|无|沒有|没有|都有|自備|不需要|不用|不挑食|都可以?|都行|都吃|全吃|什麼都吃|皆可|略|無特殊需求|無特別需求|none|no|n\/?a|x|-|—)$/i;
+const NONE_WORD = /^(無|无|沒有|没有|都有|自備|不需要|不需|不必|不用|不挑食|都可以?|都行|都吃|全吃|什麼都吃|皆可|略|無特殊需求|無特別需求|none|no|n\/?a|x|-|—)$/i;
 // 整段都是「無」「都吃」「都可以 不挑食」這類字眼
 const isNone = (v: string) => v.split(/[\s,，、;；]+/).map((w) => w.replace(/[～~!！。.]+$/, "")).filter(Boolean).every((w) => NONE_WORD.test(w));
 const NONE = { test: (v: string) => isNone(clean(v)) };
