@@ -8,7 +8,7 @@
 //   2. LINE webhook：header x-line-signature（用 LINE_CHANNEL_SECRET 驗證）
 //        - 只處理群組；客人私訊、加好友不理會
 //        - 機器人被加進群組 → 記下來但預設不提醒，要在後台開啟
-//        - 已開啟的群組打「待辦」→ 已逾期＋今明兩天的待辦；「全部待辦」→ 14 天內清單（回覆訊息不計入每月推播則數）；打「解除提醒」→ 停止
+//        - 已開啟的群組打「報名」→ 各團報名人數；「待辦」→ 已逾期＋今明兩天的待辦；「全部待辦」→ 14 天內清單（回覆訊息不計入每月推播則數）；打「解除提醒」→ 停止
 //   3. 後台（index.html → 規則設定 → LINE 提醒）：{ action:'admin:*' } + header x-admin-pw
 //
 // LINE 金鑰：Secrets LINE_CHANNEL_ACCESS_TOKEN、LINE_CHANNEL_SECRET，或存在 line_remind_config.line_token／line_secret（優先）
@@ -332,6 +332,32 @@ async function currentMessage(mode: "daily" | "all" = "daily", header?: string) 
     : { text: formatMessage(rem, header), count: rem.week.length + rem.fortnight.length };
 }
 
+// 群組打「報名」：還沒結束、有人報名的梯次人數（倒團／未成團／已結束不列）
+async function signupMessage(): Promise<string> {
+  const { data, error } = await db.from("trips").select("id,data");
+  if (error) throw new Error(error.message);
+  const today = todayStr();
+  const list = (data || []).map((r: any) => ({ id: r.id, ...r.data }) as Trip)
+    .filter((t) => t.date && (t.dateEnd || t.date) >= today && (Number(t.registered) || 0) > 0 &&
+      !["done", "collapsed", "notFormed"].includes(t.status))
+    .sort((a, b) => a.date.localeCompare(b.date) || String(a.name).localeCompare(String(b.name)));
+  if (!list.length) return "目前沒有已報名的團";
+  const range = (t: Trip) => {
+    const s = parseD(t.date);
+    if (!t.dateEnd || t.dateEnd === t.date) return `${s.getUTCMonth() + 1}/${s.getUTCDate()}`;
+    const e = parseD(t.dateEnd);
+    return e.getUTCMonth() === s.getUTCMonth()
+      ? `${s.getUTCMonth() + 1}/${s.getUTCDate()}-${e.getUTCDate()}`
+      : `${s.getUTCMonth() + 1}/${s.getUTCDate()}-${e.getUTCMonth() + 1}/${e.getUTCDate()}`;
+  };
+  const lines = list.map((t) => {
+    const name = t.status === "private" && !String(t.name).includes("包團") ? `${t.name}包團` : t.name;
+    return `${range(t)} ${name} ${Number(t.registered)}位`;
+  });
+  const total = list.reduce((a, t) => a + (Number(t.registered) || 0), 0);
+  return `📝 報名人數｜${fmtDate(today)}\n\n${lines.join("\n")}\n\n共 ${list.length} 團、${total} 位`;
+}
+
 // ───────── LINE API ─────────
 async function lineApi(path: string, body?: unknown) {
   const res = await fetch(`https://api.line.me${path}`, {
@@ -399,7 +425,7 @@ async function lineSignatureOk(body: string, sig: string) {
 //   - 只處理「群組」；客人的一對一私訊、加好友一律不理會，也不綁定
 //   - 機器人被拉進任何群組只會記下來、預設「不提醒」，要在後台「LINE 提醒」按開啟（避免客人把機器人拉進自己的群組就收到團務資料）
 //   - 「待辦」「解除提醒」只在已開啟的群組有作用
-const HELP = "可用指令：\n・待辦：已逾期、今天、明天要做的事\n・全部待辦：14 天內的待辦清單\n・解除提醒：停止每日提醒（要再開啟請到後台「規則設定 → LINE 提醒」）";
+const HELP = "可用指令：\n・待辦：已逾期、今天、明天要做的事\n・全部待辦：14 天內的待辦清單\n・報名：各團目前報名人數\n・解除提醒：停止每日提醒（要再開啟請到後台「規則設定 → LINE 提醒」）";
 async function onLineEvent(ev: any) {
   const src = ev.source || {};
   if (src.type !== "group" || !src.groupId) return;
@@ -421,6 +447,8 @@ async function onLineEvent(ev: any) {
   if (/^(待辦|待办)$/.test(msg)) {
     const msgs = dailyMessages(await loadReminders(), "📋 目前待辦");
     await reply(ev.replyToken, msgs || "🎉 沒有逾期、今天或明天到期的待辦事項\n（打「全部待辦」看 14 天內的清單）");
+  } else if (/^(報名|报名|報名人數|报名人数)$/.test(msg)) {
+    await reply(ev.replyToken, await signupMessage());
   } else if (/^(全部待辦|全部待办)$/.test(msg)) {
     const { text } = await currentMessage("all", "📋 14 天內待辦事項");
     await reply(ev.replyToken, text || "🎉 目前 14 天內沒有待辦事項");
